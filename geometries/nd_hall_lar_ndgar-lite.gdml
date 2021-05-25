@@ -751,11 +751,11 @@
       <fraction ref="copper63" n="0.6917"/>
       <fraction ref="copper65" n="0.3083"/>
     </element>
-    <isotope name="zinc64" Z="30" N="64">
+    <isotope name="zinc_local64" Z="30" N="64">
       <atom type="A" value="63.93"/>
     </isotope>
-    <element name="zinc">
-      <fraction ref="zinc64" n="1.0"/>
+    <element name="zinc_local">
+      <fraction ref="zinc_local64" n="1.0"/>
     </element>
     <element name="bromine" Z="35" formula="Br">
       <atom value="79.904"/>
@@ -1100,7 +1100,7 @@
       <fraction ref="aluminum" n="0.0207"/>
       <fraction ref="sodium" n="0.0449"/>
       <fraction ref="potassium" n="0.0821"/>
-      <fraction ref="zinc" n="0.0882"/>
+      <fraction ref="zinc_local" n="0.0882"/>
       <fraction ref="titanium" n="0.0292"/>
       <fraction ref="oxygen" n="0.444"/>
     </material>
