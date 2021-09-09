@@ -650,7 +650,7 @@
     <position unit="cm" name="rockBoxUpstreamPosition" x="0.0" y="0.0" z="-1577.5"/>
     <position unit="cm" name="rockBoxSubtPosition" x="0.0" y="1027.0" z="960.0"/>
     <position unit="cm" name="rockTubPosition" x="-2179.5" y="139.5" z="-517.5"/>
-    <position unit="cm" name="volDetEnclosure_pos" x="289.5" y="-320.0" z="-517.5"/>
+    <position unit="cm" name="volDetEnclosure_pos" x="289.5" y="-320.0" z="11982.5"/>
     <rotation unit="degree" name="volDetEnclosure_rot" x="0" y="0" z="0"/>
     <rotation unit="degree" name="noRotate" x="0" y="0" z="0"/>
     <rotation unit="degree" name="r90aboutX" x="90" y="0" z="0"/>
@@ -666,7 +666,7 @@
     <rotation unit="degree" name="r90aboutYminusZ" x="0" y="-90" z="90"/>
     <rotation unit="degree" name="r90aboutX90aboutY" x="90" y="90" z="0"/>
     <rotation unit="degree" name="r90aboutX180aboutY" x="90" y="180" z="0"/>
-    <position unit="cm" name="rockBox_lv_pos" x="-2137.9" y="420.52700000000004" z="1477.5"/>
+    <position unit="cm" name="rockBox_lv_pos" x="-2137.9" y="420.52700000000004" z="-11022.5"/>
     <rotation unit="degree" name="rockBox_lv_rot" x="0" y="0" z="0"/>
     <position name="center"/>
     <rotation name="identity"/>
@@ -1763,8 +1763,8 @@
       <positionref ref="NDHallAirVolSpace7Position"/>
       <rotationref ref="identity"/>
     </union>
-    <box name="RockBoxMain" lunit="cm" x="6517.0" y="3164.0" z="3055.0"/>
-    <!--box name="RockBoxUpstream" lunit="cm" x="16917.0" y="13563.999999999998" z="0.0"/-->
+    <box name="RockBoxMain" lunit="cm" x="6517.0" y="3164.0" z="27955.0"/>
+    <box name="RockBoxUpstream" lunit="cm" x="16917.0" y="13563.999999999998" z="0.0"/>
     <box name="RockBoxSubt" lunit="cm" x="6517.001" y="1110.01" z="1035.001"/>
     <tube name="rockTub" lunit="cm" aunit="radian" rmin="0.0" rmax="579.0" z="3443.0" startphi="0.0" deltaphi="6.283185307179586"/>
     <subtraction name="rockBoxTemp2">
@@ -5909,7 +5909,7 @@
     </volume>
     <volume name="rockBox_lv">
       <materialref ref="Rock"/>
-      <solidref ref="rockBox"/>
+      <solidref ref="RockBoxMain"/>
       <physvol>
         <volumeref ref="volDetEnclosure"/>
         <positionref ref="volDetEnclosure_pos"/>

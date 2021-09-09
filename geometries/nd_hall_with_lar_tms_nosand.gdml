@@ -5,45 +5,45 @@
     <position unit="cm" name="rtposTMS" x="-264.35" y="0.0" z="0.0"/>
     <position unit="cm" name="ctrposTMS" x="0.0" y="0.0" z="0.0"/>
     <position unit="cm" name="a" x="0.0" y="0.0" z="0.0"/>
-    <position unit="cm" name="thinlayerposition0" x="0.0" y="0.0" z="-346.45"/>
-    <position unit="cm" name="thinlayerposition1" x="0.0" y="0.0" z="-340.95"/>
-    <position unit="cm" name="thinlayerposition2" x="0.0" y="0.0" z="-335.45000000000005"/>
-    <position unit="cm" name="thinlayerposition3" x="0.0" y="0.0" z="-329.95"/>
-    <position unit="cm" name="thinlayerposition4" x="0.0" y="0.0" z="-324.45"/>
-    <position unit="cm" name="thinlayerposition5" x="0.0" y="0.0" z="-318.95000000000005"/>
-    <position unit="cm" name="thinlayerposition6" x="0.0" y="0.0" z="-313.45"/>
-    <position unit="cm" name="thinlayerposition7" x="0.0" y="0.0" z="-307.95000000000005"/>
-    <position unit="cm" name="thinlayerposition8" x="0.0" y="0.0" z="-302.45000000000005"/>
-    <position unit="cm" name="thinlayerposition9" x="0.0" y="0.0" z="-296.95"/>
-    <position unit="cm" name="thinlayerposition10" x="0.0" y="0.0" z="-291.45000000000005"/>
-    <position unit="cm" name="thinlayerposition11" x="0.0" y="0.0" z="-285.95"/>
-    <position unit="cm" name="thinlayerposition12" x="0.0" y="0.0" z="-280.45"/>
-    <position unit="cm" name="thinlayerposition13" x="0.0" y="0.0" z="-274.95000000000005"/>
-    <position unit="cm" name="thinlayerposition14" x="0.0" y="0.0" z="-269.45"/>
-    <position unit="cm" name="thinlayerposition15" x="0.0" y="0.0" z="-263.95"/>
-    <position unit="cm" name="thinlayerposition16" x="0.0" y="0.0" z="-258.45000000000005"/>
-    <position unit="cm" name="thinlayerposition17" x="0.0" y="0.0" z="-252.95000000000002"/>
-    <position unit="cm" name="thinlayerposition18" x="0.0" y="0.0" z="-247.45"/>
-    <position unit="cm" name="thinlayerposition19" x="0.0" y="0.0" z="-241.95000000000002"/>
-    <position unit="cm" name="thinlayerposition20" x="0.0" y="0.0" z="-236.45000000000002"/>
-    <position unit="cm" name="thinlayerposition21" x="0.0" y="0.0" z="-230.95"/>
-    <position unit="cm" name="thinlayerposition22" x="0.0" y="0.0" z="-225.45000000000002"/>
-    <position unit="cm" name="thinlayerposition23" x="0.0" y="0.0" z="-219.95000000000005"/>
-    <position unit="cm" name="thinlayerposition24" x="0.0" y="0.0" z="-214.45"/>
-    <position unit="cm" name="thinlayerposition25" x="0.0" y="0.0" z="-208.95000000000002"/>
-    <position unit="cm" name="thinlayerposition26" x="0.0" y="0.0" z="-203.45000000000005"/>
-    <position unit="cm" name="thinlayerposition27" x="0.0" y="0.0" z="-197.95000000000002"/>
-    <position unit="cm" name="thinlayerposition28" x="0.0" y="0.0" z="-192.45000000000002"/>
-    <position unit="cm" name="thinlayerposition29" x="0.0" y="0.0" z="-186.95000000000002"/>
-    <position unit="cm" name="thinlayerposition30" x="0.0" y="0.0" z="-181.45000000000002"/>
-    <position unit="cm" name="thinlayerposition31" x="0.0" y="0.0" z="-175.95000000000002"/>
-    <position unit="cm" name="thinlayerposition32" x="0.0" y="0.0" z="-170.45000000000002"/>
-    <position unit="cm" name="thinlayerposition33" x="0.0" y="0.0" z="-164.95000000000002"/>
-    <position unit="cm" name="thinlayerposition34" x="0.0" y="0.0" z="-159.45"/>
-    <position unit="cm" name="thinlayerposition35" x="0.0" y="0.0" z="-153.95000000000002"/>
-    <position unit="cm" name="thinlayerposition36" x="0.0" y="0.0" z="-148.45000000000002"/>
-    <position unit="cm" name="thinlayerposition37" x="0.0" y="0.0" z="-142.95"/>
-    <position unit="cm" name="thinlayerposition38" x="0.0" y="0.0" z="-137.45000000000002"/>
+    <position unit="cm" name="thinlayerposition0" x="0.0" y="85.0" z="-346.45"/>
+    <position unit="cm" name="thinlayerposition1" x="0.0" y="85.0" z="-340.95"/>
+    <position unit="cm" name="thinlayerposition2" x="0.0" y="85.0" z="-335.45000000000005"/>
+    <position unit="cm" name="thinlayerposition3" x="0.0" y="85.0" z="-329.95"/>
+    <position unit="cm" name="thinlayerposition4" x="0.0" y="85.0" z="-324.45"/>
+    <position unit="cm" name="thinlayerposition5" x="0.0" y="85.0" z="-318.95000000000005"/>
+    <position unit="cm" name="thinlayerposition6" x="0.0" y="85.0" z="-313.45"/>
+    <position unit="cm" name="thinlayerposition7" x="0.0" y="85.0" z="-307.95000000000005"/>
+    <position unit="cm" name="thinlayerposition8" x="0.0" y="85.0" z="-302.45000000000005"/>
+    <position unit="cm" name="thinlayerposition9" x="0.0" y="85.0" z="-296.95"/>
+    <position unit="cm" name="thinlayerposition10" x="0.0" y="85.0" z="-291.45000000000005"/>
+    <position unit="cm" name="thinlayerposition11" x="0.0" y="85.0" z="-285.95"/>
+    <position unit="cm" name="thinlayerposition12" x="0.0" y="85.0" z="-280.45"/>
+    <position unit="cm" name="thinlayerposition13" x="0.0" y="85.0" z="-274.95000000000005"/>
+    <position unit="cm" name="thinlayerposition14" x="0.0" y="85.0" z="-269.45"/>
+    <position unit="cm" name="thinlayerposition15" x="0.0" y="85.0" z="-263.95"/>
+    <position unit="cm" name="thinlayerposition16" x="0.0" y="85.0" z="-258.45000000000005"/>
+    <position unit="cm" name="thinlayerposition17" x="0.0" y="85.0" z="-252.95000000000002"/>
+    <position unit="cm" name="thinlayerposition18" x="0.0" y="85.0" z="-247.45"/>
+    <position unit="cm" name="thinlayerposition19" x="0.0" y="85.0" z="-241.95000000000002"/>
+    <position unit="cm" name="thinlayerposition20" x="0.0" y="85.0" z="-236.45000000000002"/>
+    <position unit="cm" name="thinlayerposition21" x="0.0" y="85.0" z="-230.95"/>
+    <position unit="cm" name="thinlayerposition22" x="0.0" y="85.0" z="-225.45000000000002"/>
+    <position unit="cm" name="thinlayerposition23" x="0.0" y="85.0" z="-219.95000000000005"/>
+    <position unit="cm" name="thinlayerposition24" x="0.0" y="85.0" z="-214.45"/>
+    <position unit="cm" name="thinlayerposition25" x="0.0" y="85.0" z="-208.95000000000002"/>
+    <position unit="cm" name="thinlayerposition26" x="0.0" y="85.0" z="-203.45000000000005"/>
+    <position unit="cm" name="thinlayerposition27" x="0.0" y="85.0" z="-197.95000000000002"/>
+    <position unit="cm" name="thinlayerposition28" x="0.0" y="85.0" z="-192.45000000000002"/>
+    <position unit="cm" name="thinlayerposition29" x="0.0" y="85.0" z="-186.95000000000002"/>
+    <position unit="cm" name="thinlayerposition30" x="0.0" y="85.0" z="-181.45000000000002"/>
+    <position unit="cm" name="thinlayerposition31" x="0.0" y="85.0" z="-175.95000000000002"/>
+    <position unit="cm" name="thinlayerposition32" x="0.0" y="85.0" z="-170.45000000000002"/>
+    <position unit="cm" name="thinlayerposition33" x="0.0" y="85.0" z="-164.95000000000002"/>
+    <position unit="cm" name="thinlayerposition34" x="0.0" y="85.0" z="-159.45"/>
+    <position unit="cm" name="thinlayerposition35" x="0.0" y="85.0" z="-153.95000000000002"/>
+    <position unit="cm" name="thinlayerposition36" x="0.0" y="85.0" z="-148.45000000000002"/>
+    <position unit="cm" name="thinlayerposition37" x="0.0" y="85.0" z="-142.95"/>
+    <position unit="cm" name="thinlayerposition38" x="0.0" y="85.0" z="-137.45000000000002"/>
     <position unit="cm" name="c" x="0.0" y="0.0" z="0.0"/>
     <position unit="cm" name="thicklayerposition0" x="0.0" y="85.0" z="-130.7"/>
     <position unit="cm" name="thicklayerposition1" x="0.0" y="85.0" z="-122.69999999999999"/>
@@ -618,7 +618,7 @@
     <position unit="cm" name="rockBoxUpstreamPosition" x="0.0" y="0.0" z="-1577.5"/>
     <position unit="cm" name="rockBoxSubtPosition" x="0.0" y="1027.0" z="960.0"/>
     <position unit="cm" name="rockTubPosition" x="-2179.5" y="139.5" z="-517.5"/>
-    <position unit="cm" name="volDetEnclosure_pos" x="289.5" y="-320.0" z="-517.5"/>
+    <position unit="cm" name="volDetEnclosure_pos" x="289.5" y="-320.0" z="11982.5"/>
     <rotation unit="degree" name="volDetEnclosure_rot" x="0" y="0" z="0"/>
     <rotation unit="degree" name="noRotate" x="0" y="0" z="0"/>
     <rotation unit="degree" name="r90aboutX" x="90" y="0" z="0"/>
@@ -634,7 +634,7 @@
     <rotation unit="degree" name="r90aboutYminusZ" x="0" y="-90" z="90"/>
     <rotation unit="degree" name="r90aboutX90aboutY" x="90" y="90" z="0"/>
     <rotation unit="degree" name="r90aboutX180aboutY" x="90" y="180" z="0"/>
-    <position unit="cm" name="rockBox_lv_pos" x="-2137.9" y="420.52700000000004" z="1477.5"/>
+    <position unit="cm" name="rockBox_lv_pos" x="-2137.9" y="420.52700000000004" z="-11022.5"/>
     <rotation unit="degree" name="rockBox_lv_rot" x="0" y="0" z="0"/>
     <position name="center"/>
     <rotation name="identity"/>
@@ -1444,8 +1444,8 @@
       <positionref ref="NDHallAirVolSpace7Position"/>
       <rotationref ref="identity"/>
     </union>
-    <box name="RockBoxMain" lunit="cm" x="6517.0" y="3164.0" z="3055.0"/>
-    <!--box name="RockBoxUpstream" lunit="cm" x="16917.0" y="13563.999999999998" z="0.0"/-->
+    <box name="RockBoxMain" lunit="cm" x="6517.0" y="3164.0" z="27955.0"/>
+    <box name="RockBoxUpstream" lunit="cm" x="16917.0" y="13563.999999999998" z="0.0"/>
     <box name="RockBoxSubt" lunit="cm" x="6517.001" y="1110.01" z="1035.001"/>
     <tube name="rockTub" lunit="cm" aunit="radian" rmin="0.0" rmax="579.0" z="3443.0" startphi="0.0" deltaphi="6.283185307179586"/>
     <subtraction name="rockBoxTemp2">
@@ -4565,7 +4565,7 @@
     </volume>
     <volume name="rockBox_lv">
       <materialref ref="Rock"/>
-      <solidref ref="rockBox"/>
+      <solidref ref="RockBoxMain"/>
       <physvol>
         <volumeref ref="volDetEnclosure"/>
         <positionref ref="volDetEnclosure_pos"/>
