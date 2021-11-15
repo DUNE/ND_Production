@@ -57,7 +57,8 @@ generate_sam_json() {
   "application": [
     "${13}", "${14}", "${15}"
   ],
-  "DUNE.campaign": "${16}"
+  "DUNE.campaign": "${16}",
+  "DUNE.requestid": "${17}"
 }
 EOF
 
