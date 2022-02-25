@@ -14,6 +14,7 @@ def run_gen( sh, args ):
         fluxopt = "--dk2nu"
         maxmb = 300
     print >> sh, "${ND_PRODUCTION_DIR}/bin/copy_dune_flux --top %s --flavor %s --maxmb=100 %s" % (args.fluxdir, mode, fluxopt)
+    print >> sh, "ls flux_files/ -alh"
 
     # Modify GNuMIFlux.xml to the specified off-axis position
     print >> sh, "sed \"s/<beampos> ( 0.0, 0.05387, 6.66 )/<beampos> ( %1.2f, 0.05387, 6.66 )/g\" ${ND_PRODUCTION_CONFIG}/GNuMIFlux.xml > GNuMIFlux.xml" % args.oa
@@ -25,11 +26,15 @@ def run_gen( sh, args ):
     flux = "dk2nu" if args.use_dk2nu else "gsimple"
     print >> sh, "gevgen_fnal \\"
     print >> sh, "    -f flux_files/%s*,DUNEND \\" % flux
-    if args.anti_fiducial:
-        print "USING ANTI FIDUCIAL:anti_fiducial_%s.gdml" % args.geometry
-        print >> sh, "    -g ${ND_PRODUCTION_GDML}/anti_fiducial_%s.gdml \\" % args.geometry
+    if args.manual_geometry_override != None:
+        print "Using manual geometry override"
+        print >> sh, "    -g %s \\" % args.manual_geometry_override
     else:
-        print >> sh, "    -g ${ND_PRODUCTION_GDML}/%s.gdml \\" % args.geometry
+        if args.anti_fiducial:
+            print "USING ANTI FIDUCIAL:anti_fiducial_%s.gdml" % args.geometry
+            print >> sh, "    -g ${ND_PRODUCTION_GDML}/anti_fiducial_%s.gdml \\" % args.geometry
+        else:
+            print >> sh, "    -g ${ND_PRODUCTION_GDML}/%s.gdml \\" % args.geometry
     print >> sh, "    -t %s \\" % args.topvol
     print >> sh, "    -L cm -D g_cm3 \\"
     print >> sh, "    -e %g \\" % args.pot
@@ -100,7 +105,11 @@ def run_g4( sh, args ):
 
     #Run it
     print >> sh, "edep-sim -C \\"
-    print >> sh, "  -g ${ND_PRODUCTION_GDML}/%s.gdml \\" % args.geometry
+    if args.manual_geometry_override != None:
+        print "Using manual geometry override"
+        print >> sh, "  -g %s \\" % args.manual_geometry_override
+    else:
+        print >> sh, "  -g ${ND_PRODUCTION_GDML}/%s.gdml \\" % args.geometry
     print >> sh, "  -o ${EDEP_OUTPUT_FILE} \\"
     print >> sh, "  -e ${NSPILL} \\"
     print >> sh, "  dune-nd.mac"
@@ -173,6 +182,7 @@ if __name__ == "__main__":
     parser.add_option('--sam_input', help='Use a sam dataset with this name', default=None)
 
     parser.add_option('--anti_fiducial', help='anti fiducial using : anti_fiducial_geometry.gdml', default=False, action="store_true")
+    parser.add_option('--manual_geometry_override', help='Advanced feature: Point to a specific geometry file (like in the tar input file). Useful if you want to remove rotation for example', default=None)
 
     (args, dummy) = parser.parse_args()
 
