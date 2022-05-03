@@ -21,6 +21,18 @@ def run_gen( sh, args ):
   
     print >> sh, "export GXMLPATH=${PWD}:${GXMLPATH}"
     print >> sh, "export GNUMIXML=\"GNuMIFlux.xml\""
+    
+    if args.b_field_location != None:
+        assert args.b_field_filename != None, "Expected a b_field_filename in conjunction with b_field_location"
+        print >> sh, "cp %s %s" % (args.b_field_location, args.b_field_filename)
+        
+        
+    if "v3" in args.genie_tune:
+        if args.use_big_genie_file:
+            print >> sh, "GENIEXSECFILETOUSE=`dirname $GENIEXSECFILE`/gxspl-FNALbig.xml.gz"
+        else:
+            print >> sh, "GENIEXSECFILETOUSE=$GENIEXSECFILE"
+        
   
     # Run GENIE
     flux = "dk2nu" if args.use_dk2nu else "gsimple"
@@ -42,9 +54,13 @@ def run_gen( sh, args ):
     print >> sh, "    -r ${RUN} \\"
     print >> sh, "    -o %s \\" % mode
     print >> sh, "    --message-thresholds ${ND_PRODUCTION_CONFIG}/Messenger_production.xml \\"
-    print >> sh, "    --cross-sections ${GENIEXSECPATH}/gxspl-FNALsmall.xml \\"
     print >> sh, "    --event-record-print-level 0 \\"
-    print >> sh, "    --event-generator-list Default+CCMEC"
+    # Needed for genie3
+    if "v3" in args.genie_tune:
+        print >> sh, "    --cross-sections $GENIEXSECFILETOUSE --tune $GENIE_XSEC_TUNE "
+    else:
+        print >> sh, "    --cross-sections ${GENIEXSECPATH}/gxspl-FNALsmall.xml \\"
+        print >> sh, "    --event-generator-list Default+CCMEC"
 
     # Copy the output
     
@@ -57,6 +73,10 @@ def run_tms( sh, args ):
     #print >> sh, "ifdh cp " + args.tms_reco_tar + " dune-tms.tar.gz"
     #print >> sh, "tar -xzvf dune-tms.tar.gz"
     print >> sh, "cd dune-tms; . setup.sh; cd .."
+    if "v3" in args.genie_tune:
+      print >> sh, "setup edepsim v3_2_0 -q e20:prof"
+    else:
+      print >> sh, "setup edepsim v3_0_1b -q e17:prof"
     if not any(x in stages for x in ["gen", "genie", "generator"]):
       print >> sh, "filename=${allfiles[${PROCESS}]}"
       print >> sh, "ifdh cp ${filename} input_file.edep.root"
@@ -82,11 +102,13 @@ def run_g4( sh, args ):
         # We need to get the input file
         print >> sh, "ifdh cp %s/genie/%s/%02.0fm/${RDIR}/%s.${RUN}.ghep.root input_file.ghep.root" % (args.indir, args.horn, args.oa, mode)
 
+    # Needed for genie3, rootracker file changed between versions.
+    if "v3" in args.genie_tune and False:
+        print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
+        print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
+        print >> sh, "setup genie_phyopt v2_12_10   -q dkcharmtau"
     # convert to rootracker to run edep-sim
     print >> sh, "gntpc -i input_file.ghep.root -f rootracker --event-record-print-level 0 --message-thresholds ${ND_PRODUCTION_CONFIG}/Messenger_production.xml"
-
-    # Get edep-sim
-    print >> sh, "setup edepsim v3_0_1b -q e17:prof"
 
     # Get the number of events in the genie file
     # if we're doing overlay, then we want to get the poisson mean and then the number of spills, and be careful not to overshoot
@@ -100,8 +122,20 @@ def run_g4( sh, args ):
     else:
         print >> sh, "NSPILL=$(echo \"std::cout << gtree->GetEntries() << std::endl;\" | genie -l -b input_file.ghep.root 2>/dev/null  | tail -1)"
         print >> sh, "cat ${ND_PRODUCTION_CONFIG}/dune-nd.mac > dune-nd.mac"
+
+    # Get edep-sim
+    # Needed for genie3, rootracker file changed between versions.
+    if "v3" in args.genie_tune:
+        print >> sh, "setup edepsim v3_2_0 -q e20:prof"
+    else:
+        print >> sh, "setup edepsim v3_0_1b -q e17:prof"
         
     print >> sh, "EDEP_OUTPUT_FILE=%s.${RUN}.edep.root" % mode
+    
+    
+    if args.b_field_location != None:
+        assert args.b_field_filename != None, "Expected a b_field_filename in conjunction with b_field_location"
+        print >> sh, "cp %s %s" % (args.b_field_location, args.b_field_filename)
 
     #Run it
     print >> sh, "edep-sim -C \\"
@@ -183,6 +217,12 @@ if __name__ == "__main__":
 
     parser.add_option('--anti_fiducial', help='anti fiducial using : anti_fiducial_geometry.gdml', default=False, action="store_true")
     parser.add_option('--manual_geometry_override', help='Advanced feature: Point to a specific geometry file (like in the tar input file). Useful if you want to remove rotation for example', default=None)
+    parser.add_option('--b_field_location', help='Advanced feature: Point to a specific b field file (like in the tar input file).', default=None)
+    parser.add_option('--b_field_filename', help='Advanced feature: Required in conjunction with b_field_location. Dictates the final name', default=None)
+    parser.add_option('--genie_tune', help='Genie version', default="v3_00_04a")
+    parser.add_option('--genie_options', help='Genie version', default="G1810a0211a:e1000:k250")
+    parser.add_option('--genie_phyopt_options', help='Additional args for genie_phyopt', default="dkcharmtau")
+    parser.add_option('--use_big_genie_file', help='whether to use gxspl-FNALbig.xml.gz', default=False, action="store_true")
 
     (args, dummy) = parser.parse_args()
 
@@ -204,9 +244,16 @@ if __name__ == "__main__":
     # Software setup -- eventually we may want options for this
     print >> sh, "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh"
     print >> sh, "setup ifdhc"
-    print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
-    print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
-    print >> sh, "setup genie_phyopt v2_12_10   -q dkcharmtau"
+    if "v3" in args.genie_tune:
+        print >> sh, "setup genie %s -q e17:prof" % args.genie_tune
+        print >> sh, "setup genie_xsec    %s   -q %s" % (args.genie_tune, args.genie_options)
+        # TODO This assumes v3_00_04a -> v3_00_04, but I can't imagine that's always the case
+        phyopt_options = args.genie_tune[:8]
+        print >> sh, "setup genie_phyopt %s -q %s" % (phyopt_options, args.genie_phyopt_options)
+    else:
+        print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
+        print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
+        print >> sh, "setup genie_phyopt v2_12_10   -q dkcharmtau"
     print >> sh, "setup geant4 v4_10_3_p03e -q e17:prof"
     print >> sh, "setup ND_Production v01_05_00 -q e17:prof"
     print >> sh, "setup jobsub_client"
