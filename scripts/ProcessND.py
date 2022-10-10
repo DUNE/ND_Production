@@ -15,7 +15,9 @@ def run_gen( sh, args ):
         maxmb = 300
     print >> sh, "${ND_PRODUCTION_DIR}/bin/copy_dune_flux --top %s --flavor %s --maxmb=100 %s" % (args.fluxdir, mode, fluxopt)
     print >> sh, "ls flux_files/ -alh"
-
+    print >> sh,  "ifdh cp /pnfs/dune/scratch/users/pkroy/GNuMIFlux.xml GNuMIFlux.xml"
+    print >> sh,  "ls -lrt"
+    print >> sh,  "more GNuMIFlux.xml"
     # Modify GNuMIFlux.xml to the specified off-axis position
     print >> sh, "sed \"s/<beampos> ( 0.0, 0.05387, 6.66 )/<beampos> ( %1.2f, 0.05387, 6.66 )/g\" ${ND_PRODUCTION_CONFIG}/GNuMIFlux.xml > GNuMIFlux.xml" % args.oa
   
@@ -53,6 +55,9 @@ def run_gen( sh, args ):
     print >> sh, "    --seed ${SEED} \\"
     print >> sh, "    -r ${RUN} \\"
     print >> sh, "    -o %s \\" % mode
+    if args.rockbox:
+        print >> sh, "    -F", args.rockbox_settings, "\\"
+        print >> sh, "    -z", args.rockbox_z, "\\"
     print >> sh, "    --message-thresholds ${ND_PRODUCTION_CONFIG}/Messenger_production.xml \\"
     print >> sh, "    --event-record-print-level 0 \\"
     # Needed for genie3
@@ -223,7 +228,9 @@ if __name__ == "__main__":
     parser.add_option('--genie_options', help='Genie version', default="G1810a0211a:e1000:k250")
     parser.add_option('--genie_phyopt_options', help='Additional args for genie_phyopt', default="dkcharmtau")
     parser.add_option('--use_big_genie_file', help='whether to use gxspl-FNALbig.xml.gz', default=False, action="store_true")
-
+    parser.add_option('--rockbox', help='whether to run with rock box', default=False, action="store_true")
+    parser.add_option('--rockbox_settings', help='The exact settings of the rockbox (make sure to add backslashes to the quotation marks)', default='"rockbox:(-6211,-6625,0)(6211,4025,1900),1,500,0.00425,1.05,1"')
+    parser.add_option('--rockbox_z', help='Flag to start the rays far enough upstream', type = "int", default=-500)
     (args, dummy) = parser.parse_args()
 
     mode = "neutrino" if args.horn == "FHC" else "antineutrino"
@@ -405,4 +412,3 @@ if __name__ == "__main__":
         else:
             print "Script processnd.sh created. Submit example:\n"
             print "jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=2000MB file://processnd.sh" % N_TO_SHOW
-
