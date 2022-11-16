@@ -122,6 +122,33 @@ def run_g4( sh, args ):
     else:
         print >> sh, "NSPILL=$(echo \"std::cout << gtree->GetEntries() << std::endl;\" | genie -l -b input_file.ghep.root 2>/dev/null  | tail -1)"
         print >> sh, "cat ${ND_PRODUCTION_CONFIG}/dune-nd.mac > dune-nd.mac"
+        if args.event_multiplicity > 1:
+            print >> sh, "sed -i \"s/count\/fixed\/number 1/count\/fixed\/number %s/g\" dune-nd.mac" % args.event_multiplicity
+            
+    
+    should_simulate_spill_time = False
+    if args.timing == "spill": should_simulate_spill_time = True
+    elif args.timing == "fixed": should_simulate_spill_time = False
+    elif args.timing == "default":
+        # By default we only want a random time more than one event per spill
+        if args.overlay: should_simulate_spill_time = True
+        elif args.event_multiplicity > 1: should_simulate_spill_time = True
+        else: should_simulate_spill_time = False
+    else: raise ValueError("Don't understand timing option '%s'" % args.timing)
+    if should_simulate_spill_time:
+        # Change the macro to use a random time using a batch structure
+        # /generator/time/set fixed -> time\/set spil
+        # r'' option requires fewer \" but within sed's option we still need \/ to differentiate inside quotes sed -i 's/old-text/new-text/g' input.txt
+        # https://github.com/ClarkMcGrew/edep-sim/blob/eaf8b1f8fc083c0a0e1a4d7f1efd413378e6d3df/src/kinem/EDepSimSpillTimeFactory.cc
+        print >> sh, r'sed -i "s/\/generator\/time\/set fixed//g" dune-nd.mac'
+        print >> sh, r'sed -i "s/\/generator\/add//g" dune-nd.mac'
+        print >> sh, "echo /generator/time/spill/start 0 ns >> dune-nd.mac"
+        print >> sh, "echo /generator/time/spill/bunchSep 10 ns >> dune-nd.mac"
+        print >> sh, "echo /generator/time/spill/bunchLength 5 ns >> dune-nd.mac"
+        print >> sh, "echo /generator/time/spill/bunchCount 1000 >> dune-nd.mac"
+        print >> sh, "echo /generator/time/set spill >> dune-nd.mac"
+        print >> sh, "echo /generator/add >> dune-nd.mac" # Makes sure to update the generator based on parameters
+        # TODO make batch structure changable with parameters
 
     # Get edep-sim
     # Needed for genie3, rootracker file changed between versions.
@@ -196,6 +223,8 @@ if __name__ == "__main__":
     parser.add_option('--oa', help='Off-axis position in meters', default=0, type = "float")
     parser.add_option('--test', help='Use test mode (interactive job)', default=False, action="store_true")
     parser.add_option('--overlay', help='Simulate full spills (default is single events)', default=False, action="store_true")
+    parser.add_option('--timing', help='Simulate a random time in spill. default/fixed/spill (default is 1ns for single events and a random spill time for overlay or event_multiplicity > 1). ', default = "default")
+    parser.add_option('--event_multiplicity', help='The fixed number of events. Overwritten with overlay option. Useful if you want say a fixed 5 events per spill', default=1, type = "int")
     parser.add_option('--stages', help='Production stages (gen+g4+larcv+ana+tmsreco)', default="gen+g4+larcv+ana+tmsreco")
     parser.add_option('--persist', help='Production stages to save to disk(gen+g4+larcv+ana+tmsreco)', default="all")
     parser.add_option('--indir', help='Input file top-directory (if not running gen)', default="/pnfs/dune/persistent/users/%s/nd_production"%user)
@@ -223,6 +252,8 @@ if __name__ == "__main__":
     parser.add_option('--genie_options', help='Genie version', default="G1810a0211a:e1000:k250")
     parser.add_option('--genie_phyopt_options', help='Additional args for genie_phyopt', default="dkcharmtau")
     parser.add_option('--use_big_genie_file', help='whether to use gxspl-FNALbig.xml.gz', default=False, action="store_true")
+    
+    
 
     (args, dummy) = parser.parse_args()
 
