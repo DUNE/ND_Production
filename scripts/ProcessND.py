@@ -15,9 +15,6 @@ def run_gen( sh, args ):
         maxmb = 300
     print >> sh, "${ND_PRODUCTION_DIR}/bin/copy_dune_flux --top %s --flavor %s --maxmb=100 %s" % (args.fluxdir, mode, fluxopt)
     print >> sh, "ls flux_files/ -alh"
-    print >> sh,  "ifdh cp /pnfs/dune/scratch/users/pkroy/GNuMIFlux.xml GNuMIFlux.xml"
-    print >> sh,  "ls -lrt"
-    print >> sh,  "more GNuMIFlux.xml"
     # Modify GNuMIFlux.xml to the specified off-axis position
     print >> sh, "sed \"s/<beampos> ( 0.0, 0.05387, 6.66 )/<beampos> ( %1.2f, 0.05387, 6.66 )/g\" ${ND_PRODUCTION_CONFIG}/GNuMIFlux.xml > GNuMIFlux.xml" % args.oa
   

@@ -105,10 +105,7 @@ fi
 TIMESTAMP=`date +%s`
 ${ND_PRODUCTION_DIR}/bin/copy_dune_flux --top /cvmfs/dune.osgstorage.org/pnfs/fnal.gov/usr/dune/persistent/stash/Flux/g4lbne/v3r5p4/QGSP_BERT/OptimizedEngineeredNov2017 --flavor neutrino --maxmb=100 --dk2nu
 ls flux_files/ -alh
-ifdh cp /pnfs/dune/scratch/users/pkroy/GNuMIFlux.xml GNuMIFlux.xml
-ls -lrt
-more GNuMIFlux.xml
-#sed "s/<beampos> ( 0.0, 0.05387, 6.66 )/<beampos> ( 0.00, 0.05387, 6.66 )/g" ${ND_PRODUCTION_CONFIG}/GNuMIFlux.xml > GNuMIFlux.xml
+sed "s/<beampos> ( 0.0, 0.05387, 6.66 )/<beampos> ( 0.00, 0.05387, 6.66 )/g" ${ND_PRODUCTION_CONFIG}/GNuMIFlux.xml > GNuMIFlux.xml
 export GXMLPATH=${PWD}:${GXMLPATH}
 export GNUMIXML="GNuMIFlux.xml"
 gevgen_fnal \
@@ -141,11 +138,11 @@ GHEP_FILE=neutrino.${RUN}_${TIMESTAMP}.ghep.root
 mv neutrino.${RUN}.ghep.root ${GHEP_FILE}
 generate_sam_json ${GHEP_FILE} ${RUN} ${NSPILL} "generated" dune_nd_miniproduction_2021_v1 0.00 volWorld nd_hall_with_lar_tms_nosand 300.0 1 physics root neardet nd_production,genie,edep-sim v01_04_00,v2_12_10,v3_0_1b dune_nd_miniproduction_2021_v1 RITM1254894
 ifdh cp ${GHEP_FILE}.json /pnfs/dune/scratch/dunepro/dropbox/neardet/${GHEP_FILE}.json
-ifdh_mkdir_p /pnfs/dune/scratch/users/pkroy/test3/genie/FHC/00m/${RDIR}
-ifdh cp ${GHEP_FILE} /pnfs/dune/scratch/users/pkroy/test3/genie/FHC/00m/${RDIR}/${GHEP_FILE}
+ifdh_mkdir_p /pnfs/dune/scratch/users/pkroy/test4/genie/FHC/00m/${RDIR}
+ifdh cp ${GHEP_FILE} /pnfs/dune/scratch/users/pkroy/test4/genie/FHC/00m/${RDIR}/${GHEP_FILE}
 EDEP_FILE=neutrino.${RUN}_${TIMESTAMP}.edep.root
 mv ${EDEP_OUTPUT_FILE} ${EDEP_FILE}
 generate_sam_json ${EDEP_FILE} ${RUN} ${NSPILL} "simulated" dune_nd_miniproduction_2021_v1 0.00 volWorld nd_hall_with_lar_tms_nosand 300.0 1 physics root neardet nd_production,genie,edep-sim v01_04_00,v2_12_10,v3_0_1b dune_nd_miniproduction_2021_v1 RITM1254894
 ifdh cp ${EDEP_FILE}.json /pnfs/dune/scratch/dunepro/dropbox/neardet/${EDEP_FILE}.json
-ifdh_mkdir_p /pnfs/dune/scratch/users/pkroy/test3/edep/FHC/00m/${RDIR}
-ifdh cp ${EDEP_FILE} /pnfs/dune/scratch/users/pkroy/test3/edep/FHC/00m/${RDIR}/${EDEP_FILE}
+ifdh_mkdir_p /pnfs/dune/scratch/users/pkroy/test4/edep/FHC/00m/${RDIR}
+ifdh cp ${EDEP_FILE} /pnfs/dune/scratch/users/pkroy/test4/edep/FHC/00m/${RDIR}/${EDEP_FILE}
