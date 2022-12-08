@@ -142,10 +142,10 @@ def run_g4( sh, args ):
         # https://github.com/ClarkMcGrew/edep-sim/blob/eaf8b1f8fc083c0a0e1a4d7f1efd413378e6d3df/src/kinem/EDepSimSpillTimeFactory.cc
         print >> sh, r'sed -i "s/\/generator\/time\/set fixed//g" dune-nd.mac'
         print >> sh, r'sed -i "s/\/generator\/add//g" dune-nd.mac'
-        print >> sh, "echo /generator/time/spill/start 0 ns >> dune-nd.mac"
-        print >> sh, "echo /generator/time/spill/bunchSep 10 ns >> dune-nd.mac"
-        print >> sh, "echo /generator/time/spill/bunchLength 5 ns >> dune-nd.mac"
-        print >> sh, "echo /generator/time/spill/bunchCount 1000 >> dune-nd.mac"
+        print >> sh, "echo /generator/time/spill/start %s ns >> dune-nd.mac" % args.spill_start
+        print >> sh, "echo /generator/time/spill/bunchSep %s ns >> dune-nd.mac" % args.bunch_separation
+        print >> sh, "echo /generator/time/spill/bunchLength %s ns >> dune-nd.mac" % args.bunch_length
+        print >> sh, "echo /generator/time/spill/bunchCount %s >> dune-nd.mac" % args.bunch_count
         print >> sh, "echo /generator/time/set spill >> dune-nd.mac"
         print >> sh, "echo /generator/add >> dune-nd.mac" # Makes sure to update the generator based on parameters
         # TODO make batch structure changable with parameters
@@ -252,6 +252,10 @@ if __name__ == "__main__":
     parser.add_option('--genie_options', help='Genie version', default="G1810a0211a:e1000:k250")
     parser.add_option('--genie_phyopt_options', help='Additional args for genie_phyopt', default="dkcharmtau")
     parser.add_option('--use_big_genie_file', help='whether to use gxspl-FNALbig.xml.gz', default=False, action="store_true")
+    parser.add_option('--spill_start', help='Spill start time in ns', type="float", default=0)
+    parser.add_option('--bunch_separation', help='Separation of each bunch in a spill in ns', type="float", default=19.23077)
+    parser.add_option('--bunch_length', help='Length of each bunch in a spill in ns', type="float", default=0)
+    parser.add_option('--bunch_count', help='Number of bunches in a spill', type="int", default=520)
     
     
 
