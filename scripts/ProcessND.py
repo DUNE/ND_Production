@@ -2,6 +2,7 @@
 from optparse import OptionParser
 import os
 import sys
+import SANDRecoTools
 
 N_TO_SHOW = 1000
 
@@ -65,7 +66,18 @@ def run_gen( sh, args ):
     # Copy the output
     
     
-
+def run_sand( sh, args):
+    cmds = SANDRecoTools.get_env_setup_string()
+    if args.sand_reco_tool == "sand-reco":
+      cmds += SANDRecoTools.get_sandreco_install_commands_string()
+      cmds += "SANDRECO_DIGITIZATION_OUTPUT=${EDEP_OUTPUT_FILE/.root/.sand.digit.root}\n"
+      cmds += "SANDRECO_RECONSTRUCTION_OUTPUT=${EDEP_OUTPUT_FILE/.root/.sand.reco.root}\n"
+      cmds += "Digitize ${EDEP_OUTPUT_FILE} ${SANDRECO_DIGITIZATION_OUTPUT}\n"
+      cmds += "Reconstruct ${EDEP_OUTPUT_FILE} ${SANDRECO_DIGITIZATION_OUTPUT} ${SANDRECO_RECONSTRUCTION_OUTPUT}\n"
+    else:
+      cmds += SANDRecoTools.get_fastreco_install_commands_string()
+      cmds += "sandSmearGo cc 0 ${EDEP_OUTPUT_FILE} ${EDEP_OUTPUT_FILE/.root/.sand.fastreco.root}\n"
+    sh.write(cmds)
 
 def run_tms( sh, args ):
     global N_TO_SHOW
@@ -253,7 +265,7 @@ if __name__ == "__main__":
     parser.add_option('--genie_phyopt_options', help='Additional args for genie_phyopt', default="dkcharmtau")
     parser.add_option('--use_big_genie_file', help='whether to use gxspl-FNALbig.xml.gz', default=False, action="store_true")
     
-    
+    parser.add_option('--sand_reco_tool', help='sand-reco or FastReco', default='sand-reco', choices=['sand-reco', 'FastReco'])
 
     (args, dummy) = parser.parse_args()
 
@@ -424,7 +436,14 @@ if __name__ == "__main__":
             copylines.append( "ifdh cp ${TMS_FILE} %s/tmsreco/%s/%02.0fm/${RDIR}/${TMS_FILE}\n" % (args.outdir, args.horn, args.oa) )
             copylines.append( 'if test -f "$TMS_PDF_FINAL_FILE"; then ifdh cp ${TMS_PDF_FINAL_FILE} %s/tmsreco/%s/%02.0fm/${RDIR}/${TMS_PDF_FINAL_FILE}; fi\n' % (args.outdir, args.horn, args.oa) )
             
-            
+    if any(x in stages for x in ["sandreco"]):
+        run_sand( sh, args)
+        if args.persist == "all" or any(x in args.persist for x in ["sandreco"]):
+            copylines.append( "setup ifdhc")
+            copylines.append( "ifdh_mkdir_p %s/sandreco/digit/%s/%02.0fm/${RDIR}\n" % (args.outdir, args.horn, args.oa) )
+            copylines.append( "ifdh_mkdir_p %s/sandreco/reco/%s/%02.0fm/${RDIR}\n" % (args.outdir, args.horn, args.oa) )
+            copylines.append( "ifdh cp ${SANDRECO_DIGITIZATION_OUTPUT} %s/sandreco/digit/%s/%02.0fm/${RDIR}/%s.${RUN}.sandreco.digit.root\n" % (args.outdir, args.horn, args.oa, mode) )
+            copylines.append( "ifdh cp ${SANDRECO_RECONSTRUCTION_OUTPUT} %s/sandreco/reco/%s/%02.0fm/${RDIR}/%s.${RUN}.sandreco.reco.root\n" % (args.outdir, args.horn, args.oa, mode) )
 
     sh.writelines(copylines)
 
