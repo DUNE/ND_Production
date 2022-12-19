@@ -58,7 +58,6 @@ def get_sandreco_install_commands_string():
   cmds += "make install\n"
   cmds += "cd ../..\n"
   cmds += "source sand-reco/setup.sh\n"
-  #cmds += "Digitize -h\n"
   return cmds
 
 #def get_fastreco_install_commands_string() -> str: ## not compatible with python2
@@ -92,7 +91,7 @@ def get_fastreco_install_commands_string():
   cmds += "source sand-reco/setup.sh\n"
   cmds += "export PATH=${PATH}:${PWD}/FastReco/bin\n"
   cmds += "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${PWD}/FastReco/lib\n"
-  #cmds += "sandSmearGo -h\n"
+  cmds += "ln -s FastReco/data data\n"
   return cmds
 
 #def get_dune_env_setup_string() -> str: ## not compatible with python2
@@ -122,8 +121,8 @@ def get_edepsim_setup_string():
 
 #def get_env_setup_string() -> str: ## not compatible with python2
 def get_env_setup_string():
-  cmds = get_git_setup_string()
-  cmds += get_dune_env_setup_string()
+  cmds = get_dune_env_setup_string()
+  cmds += get_git_setup_string()
   cmds += get_cmake_setup_string()
   cmds += get_root_setup_string()
   cmds += get_edepsim_setup_string()
@@ -136,12 +135,11 @@ def compile_sandreco():
   script_name = "compile_sandreco.sh"
   cmds = get_env_setup_string()
   cmds += get_sandreco_install_commands_string()
-  outfile = open(script_name, 'w', encoding = 'utf-8')
+  outfile = open(script_name, 'w')
   outfile.write(cmds)
   outfile.close()
   st = os.stat(script_name)
   os.chmod(script_name, st.st_mode | stat.S_IEXEC)
-  #subprocess.call(f"./{script_name}", shell=True)   ## not compatible with python2
   subprocess.call("./{}".format(script_name), shell=True)
 
 def compile_fastreco():
@@ -152,12 +150,11 @@ def compile_fastreco():
   cmds = get_env_setup_string()
   cmds += get_sandreco_install_commands_string()
   cmds += get_fastreco_install_commands_string()
-  outfile = open(script_name, 'w', encoding = 'utf-8')
+  outfile = open(script_name, 'w')
   outfile.write(cmds)
   outfile.close()
   st = os.stat(script_name)
   os.chmod(script_name, st.st_mode | stat.S_IEXEC)
-  #subprocess.call(f"./{script_name}", shell=True)   ## not compatible with python2
   subprocess.call("./{}".format(script_name), shell=True)
 
 if __name__ == "__main__":

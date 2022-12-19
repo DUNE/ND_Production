@@ -75,8 +75,10 @@ def run_sand( sh, args):
       cmds += "Digitize ${EDEP_OUTPUT_FILE} ${SANDRECO_DIGITIZATION_OUTPUT}\n"
       cmds += "Reconstruct ${EDEP_OUTPUT_FILE} ${SANDRECO_DIGITIZATION_OUTPUT} ${SANDRECO_RECONSTRUCTION_OUTPUT}\n"
     else:
+      cmds += SANDRecoTools.get_sandreco_install_commands_string()
       cmds += SANDRecoTools.get_fastreco_install_commands_string()
-      cmds += "sandSmearGo cc 0 ${EDEP_OUTPUT_FILE} ${EDEP_OUTPUT_FILE/.root/.sand.fastreco.root}\n"
+      cmds += "FASTRECO_OUTPUT=${EDEP_OUTPUT_FILE/.root/.fastreco.root}\n"
+      cmds += "sandSmearGo cc 0 ${EDEP_OUTPUT_FILE} ${FASTRECO_OUTPUT}\n"
     sh.write(cmds)
 
 def run_tms( sh, args ):
@@ -439,11 +441,16 @@ if __name__ == "__main__":
     if any(x in stages for x in ["sandreco"]):
         run_sand( sh, args)
         if args.persist == "all" or any(x in args.persist for x in ["sandreco"]):
-            copylines.append( "setup ifdhc")
-            copylines.append( "ifdh_mkdir_p %s/sandreco/digit/%s/%02.0fm/${RDIR}\n" % (args.outdir, args.horn, args.oa) )
-            copylines.append( "ifdh_mkdir_p %s/sandreco/reco/%s/%02.0fm/${RDIR}\n" % (args.outdir, args.horn, args.oa) )
-            copylines.append( "ifdh cp ${SANDRECO_DIGITIZATION_OUTPUT} %s/sandreco/digit/%s/%02.0fm/${RDIR}/%s.${RUN}.sandreco.digit.root\n" % (args.outdir, args.horn, args.oa, mode) )
-            copylines.append( "ifdh cp ${SANDRECO_RECONSTRUCTION_OUTPUT} %s/sandreco/reco/%s/%02.0fm/${RDIR}/%s.${RUN}.sandreco.reco.root\n" % (args.outdir, args.horn, args.oa, mode) )
+            if args.sand_reco_tool == "sand-reco":
+                copylines.append( "setup ifdhc")
+                copylines.append( "ifdh_mkdir_p %s/sandreco/digit/%s/%02.0fm/${RDIR}\n" % (args.outdir, args.horn, args.oa) )
+                copylines.append( "ifdh_mkdir_p %s/sandreco/reco/%s/%02.0fm/${RDIR}\n" % (args.outdir, args.horn, args.oa) )
+                copylines.append( "ifdh cp ${SANDRECO_DIGITIZATION_OUTPUT} %s/sandreco/digit/%s/%02.0fm/${RDIR}/%s.${RUN}.sandreco.digit.root\n" % (args.outdir, args.horn, args.oa, mode) )
+                copylines.append( "ifdh cp ${SANDRECO_RECONSTRUCTION_OUTPUT} %s/sandreco/reco/%s/%02.0fm/${RDIR}/%s.${RUN}.sandreco.reco.root\n" % (args.outdir, args.horn, args.oa, mode) )
+            else:
+                copylines.append( "setup ifdhc")
+                copylines.append( "ifdh_mkdir_p %s/fastreco/%s/%02.0fm/${RDIR}\n" % (args.outdir, args.horn, args.oa) )
+                copylines.append( "ifdh cp ${FASTRECO_OUTPUT} %s/fastreco/%s/%02.0fm/${RDIR}/%s.${RUN}.fastreco.root\n" % (args.outdir, args.horn, args.oa, mode) )
 
     sh.writelines(copylines)
 
