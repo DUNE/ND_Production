@@ -28,10 +28,13 @@ def run_gen( sh, args ):
         
         
     if "v3" in args.genie_tune:
-        if args.use_big_genie_file:
-            print >> sh, "GENIEXSECFILETOUSE=`dirname $GENIEXSECFILE`/gxspl-FNALbig.xml.gz"
+        if args.manual_genie_xsec_file != None:
+            print >> sh, "GENIEXSECFILETOUSE=%s" % args.manual_genie_xsec_file
         else:
-            print >> sh, "GENIEXSECFILETOUSE=$GENIEXSECFILE"
+            if args.use_big_genie_file:
+                print >> sh, "GENIEXSECFILETOUSE=`dirname $GENIEXSECFILE`/gxspl-FNALbig.xml.gz"
+            else:
+                print >> sh, "GENIEXSECFILETOUSE=$GENIEXSECFILE"
         
   
     # Run GENIE
@@ -252,6 +255,7 @@ if __name__ == "__main__":
     parser.add_option('--genie_options', help='Genie version', default="G1810a0211a:e1000:k250")
     parser.add_option('--genie_phyopt_options', help='Additional args for genie_phyopt', default="dkcharmtau")
     parser.add_option('--use_big_genie_file', help='whether to use gxspl-FNALbig.xml.gz', default=False, action="store_true")
+    parser.add_option('--manual_genie_xsec_file', help='use this specific genie xsec file', default = None)
     parser.add_option('--spill_start', help='Spill start time in ns', type="float", default=0)
     parser.add_option('--bunch_separation', help='Separation of each bunch in a spill in ns', type="float", default=19.23077)
     parser.add_option('--bunch_length', help='Length of each bunch in a spill in ns', type="float", default=0)
