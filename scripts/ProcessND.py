@@ -311,12 +311,13 @@ if __name__ == "__main__":
     
     stages = (args.stages).lower()
     
-    
+    allfiles_mode = False
     if not any(x in stages for x in ["gen", "genie", "generator"]):
       # This doesn't work because we don't know the exact name bc of timestamps
       #print >> sh, "ifdh cp %s/genie/%s/%02.0fm/${RDIR}/%s.${RUN}.ghep.root input_file.ghep.root" % (args.indir, args.horn, args.oa, mode)
       import glob, os, fnmatch
       #all_files = glob.glob(os.path.join(args.indir, "*.edep.root"))
+      allfiles_mode = True
       if args.sam_input != None and args.sam_input != "":
           import subprocess
           
@@ -338,7 +339,7 @@ if __name__ == "__main__":
 
     # if test mode, run it in a new directory so we don't tarbomb
     # Run number and random seed must be set in the script because the $PROCRESS variable is different for each job
-    if any(x in stages for x in ["g4", "geant4", "edepsim", "edep-sim"]):
+    if not allfiles_mode:
         if args.test:
             print >> sh, "mkdir test;cd test"
             print >> sh, "RUN=%d" % args.first_run
@@ -399,8 +400,8 @@ if __name__ == "__main__":
         if args.persist == "all" or any(x in args.persist for x in ["g4", "geant4", "edepsim", "edep-sim"]):
             copylines.append( "ifdh_mkdir_p %s/edep/%s/%02.0fm/${RDIR}\n" % (args.outdir, args.horn, args.oa) )
             copylines.append( "ifdh cp ${EDEP_FILE} %s/edep/%s/%02.0fm/${RDIR}/${EDEP_FILE}\n" % (args.outdir, args.horn, args.oa) )
-    else:
-        copylines.append("EDEP_FILE=${allfiles[${PROCESS}]}\n")
+    #else:
+    #    copylines.append("EDEP_FILE=${allfiles[${PROCESS}]}\n")
 
     # LarCV stage
     if any(x in stages for x in ["larcv"]):
