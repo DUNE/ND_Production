@@ -6,7 +6,8 @@ import sys
 N_TO_SHOW = 1000
 
 def run_gen( sh, args ):
-
+    print >> sh, "\n\n\necho running genie"
+    print >> sh, "echo Local files right now:\nls -alh"
     mode = "neutrino" if args.horn == "FHC" else "antineutrino"
     fluxopt = ""
     maxmb = 100
@@ -71,11 +72,13 @@ def run_gen( sh, args ):
 
 
 def run_tms( sh, args ):
+    print >> sh, "\n\n\necho running TMS"
+    print >> sh, "echo Local files right now:\nls -alh"
     global N_TO_SHOW
     #print >> sh, "ifdh cp /cvmfs/dune.osgstorage.org/pnfs/fnal.gov/usr/dune/persistent/stash/ND_simulation/production_v01/dune-tms.tar.gz dune-tms.tar.gz"
     #print >> sh, "ifdh cp " + args.tms_reco_tar + " dune-tms.tar.gz"
     #print >> sh, "tar -xzvf dune-tms.tar.gz"
-    print >> sh, "cd dune-tms; . setup.sh; cd .."
+    print >> sh, "cd $INPUT_TAR_DIR_LOCAL/dune-tms; . setup.sh; cd -"
     if "v3" in args.genie_tune:
       print >> sh, "setup edepsim v3_2_0 -q e20:prof"
     else:
@@ -85,7 +88,7 @@ def run_tms( sh, args ):
       print >> sh, "ifdh cp ${filename} input_file.edep.root"
       print >> sh, "EDEP_OUTPUT_FILE=input_file.edep.root"
     
-    print >> sh, "dune-tms/bin/ConvertToTMSTree.exe ${EDEP_OUTPUT_FILE}"
+    print >> sh, "$INPUT_TAR_DIR_LOCAL/dune-tms/bin/ConvertToTMSTree.exe ${EDEP_OUTPUT_FILE}"
     # Finds the name regardless of which algs were turned on.
     # Names like neutrino.0.edep_LineCandidates_AStar_Cluster1.root
     print >> sh, "TMS_OUTPUT_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_*.root}`"
@@ -95,6 +98,8 @@ def run_tms( sh, args ):
     
 
 def run_g4( sh, args ):
+    print >> sh, "\n\n\necho running edep sim"
+    print >> sh, "echo Local files right now:\nls -alh"
     mode = "neutrino" if args.horn == "FHC" else "antineutrino"
 
     # Get the input file
@@ -248,10 +253,11 @@ if __name__ == "__main__":
     parser.add_option('--sam_input', help='Use a sam dataset with this name', default=None)
 
     parser.add_option('--anti_fiducial', help='anti fiducial using : anti_fiducial_geometry.gdml', default=False, action="store_true")
-    parser.add_option('--manual_geometry_override', help='Advanced feature: Point to a specific geometry file (like in the tar input file). Useful if you want to remove rotation for example', default=None)
+    parser.add_option('--manual_geometry_override', help='Advanced feature: Point to a specific geometry file (like in the tar input file). Useful if you want to remove rotation for example', default="nd_hall_with_lar_tms_sand_TDR_Production_geometry_v_1.0.2.gdml")
+    parser.add_option("--geometry_location", help='Advanced feature: Point to a specific geometry file and it will be copied over. Use in conjunction with manual_geometry_override to point to the local copy after being copied over.', default="/pnfs/dune/persistent/physicsgroups/dunendsim/geometries/nd_hall_with_lar_tms_sand_TDR_Production_geometry_v_1.0.2.gdml")
     parser.add_option('--b_field_location', help='Advanced feature: Point to a specific b field file (like in the tar input file).', default=None)
     parser.add_option('--b_field_filename', help='Advanced feature: Required in conjunction with b_field_location. Dictates the final name', default=None)
-    parser.add_option('--genie_tune', help='Genie version', default="v3_00_04a")
+    parser.add_option('--genie_tune', help='Genie version', default="v3_02_00")
     parser.add_option('--genie_options', help='Genie version', default="G1810a0211a:e1000:k250")
     parser.add_option('--genie_phyopt_options', help='Additional args for genie_phyopt', default="dkcharmtau")
     parser.add_option('--use_big_genie_file', help='whether to use gxspl-FNALbig.xml.gz', default=False, action="store_true")
@@ -284,7 +290,7 @@ if __name__ == "__main__":
     print >> sh, "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh"
     print >> sh, "setup ifdhc"
     if "v3" in args.genie_tune:
-        print >> sh, "setup genie %s -q e17:prof" % args.genie_tune
+        print >> sh, "setup genie %s -q e20:prof" % args.genie_tune
         print >> sh, "setup genie_xsec    %s   -q %s" % (args.genie_tune, args.genie_options)
         # TODO This assumes v3_00_04a -> v3_00_04, but I can't imagine that's always the case
         phyopt_options = args.genie_tune[:8]
@@ -293,7 +299,8 @@ if __name__ == "__main__":
         print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
         print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
         print >> sh, "setup genie_phyopt v2_12_10   -q dkcharmtau"
-    print >> sh, "setup geant4 v4_10_3_p03e -q e17:prof"
+    #print >> sh, "setup geant4 v4_10_3_p03e -q e17:prof"
+    print >> sh, "setup geant4 v4_11_0_p01c -q e20:prof"
     print >> sh, "setup ND_Production v01_05_00 -q e17:prof"
     print >> sh, "setup jobsub_client"
     print >> sh, "setup cigetcert"
@@ -365,6 +372,11 @@ if __name__ == "__main__":
 
     # put the timestamp for unique file names
     print >> sh, "TIMESTAMP=`date +%s`"
+    
+    if args.geometry_location != None:
+        print("Copying geometry files from %s" % args.geometry_location)
+        print >> sh, "echo Copying geometry files from %s" % args.geometry_location
+        print >> sh, "ifdh cp %s ." % args.geometry_location
 
     # Generator/GENIE stage
     if any(x in stages for x in ["gen", "genie", "generator"]):
@@ -434,6 +446,8 @@ if __name__ == "__main__":
             copylines.append( 'if test -f "$TMS_PDF_FINAL_FILE"; then ifdh cp ${TMS_PDF_FINAL_FILE} %s/tmsreco/%s/%02.0fm/${RDIR}/${TMS_PDF_FINAL_FILE}; fi\n' % (args.outdir, args.horn, args.oa) )
             
             
+    print >> sh, "\n\necho Done running stages."
+    print >> sh, "echo Local files right now:\nls -alh"
 
     sh.writelines(copylines)
 
