@@ -237,7 +237,7 @@ if __name__ == "__main__":
     parser.add_option('--persist', help='Production stages to save to disk(gen+g4+larcv+ana+tmsreco)', default="all")
     parser.add_option('--indir', help='Input file top-directory (if not running gen)', default="/pnfs/dune/persistent/users/%s/nd_production"%user)
     parser.add_option('--fluxdir', help='Specify the top-level flux file directory', default="/cvmfs/dune.osgstorage.org/pnfs/fnal.gov/usr/dune/persistent/stash/Flux/g4lbne/v3r5p4/QGSP_BERT/OptimizedEngineeredNov2017")
-    parser.add_option('--outdir', help='Top-level output directory', default="/pnfs/dune/persistent/users/%s/nd_production"%user)
+    parser.add_option('--outdir', help='Top-level output directory', default="/pnfs/dune/scratch/users/%s/nd_production"%user)
     parser.add_option('--use_dk2nu', help='Use full dk2nu flux input (default is gsimple)', action="store_true", default=False)
     parser.add_option('--sam_name', help='Make a sam dataset with this name', default="dune_nd_miniproduction_2021_v1")
     parser.add_option('--dropbox_dir', help='dropbox directory', default="/pnfs/dune/scratch/dunepro/dropbox/neardet")
@@ -285,6 +285,9 @@ if __name__ == "__main__":
         print "WARNING: specified flux file directory:"
         print args.fluxdir
         print "is not in cvmfs. The flux setup probably will not work unless you really know what you are doing"
+    if "persistent" in args.outdir:
+        print "FATAL: Cannot use persistent in outdir. Please use scratch and then copy over."
+        exit()
 
     # Software setup -- eventually we may want options for this
     print >> sh, "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh"
@@ -455,8 +458,8 @@ if __name__ == "__main__":
         if "tmsreco" in args.stages or "all" in args.stages:
             TMS_TAR_FILE = args.tms_reco_tar
             print "Script processnd.sh created. Submit example:\n"
-            print "jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=2000MB --use-cvmfs-dropbox --tar_file_name=dropbox://%s file://processnd.sh" % (N_TO_SHOW, TMS_TAR_FILE)
+            print "jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=4000MB --use-cvmfs-dropbox --tar_file_name=dropbox://%s file://processnd.sh" % (N_TO_SHOW, TMS_TAR_FILE)
         else:
             print "Script processnd.sh created. Submit example:\n"
-            print "jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=2000MB file://processnd.sh" % N_TO_SHOW
+            print "jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=4000MB file://processnd.sh" % N_TO_SHOW
 
