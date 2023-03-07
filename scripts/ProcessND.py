@@ -257,8 +257,10 @@ if __name__ == "__main__":
     parser.add_option("--geometry_location", help='Advanced feature: Point to a specific geometry file and it will be copied over. Use in conjunction with manual_geometry_override to point to the local copy after being copied over.', default="/pnfs/dune/persistent/physicsgroups/dunendsim/geometries/nd_hall_with_lar_tms_sand_TDR_Production_geometry_v_1.0.2.gdml")
     parser.add_option('--b_field_location', help='Advanced feature: Point to a specific b field file (like in the tar input file).', default=None)
     parser.add_option('--b_field_filename', help='Advanced feature: Required in conjunction with b_field_location. Dictates the final name', default=None)
-    parser.add_option('--genie_tune', help='Genie version', default="v3_02_00")
+    parser.add_option('--genie_tune', help='Genie version', default="v3_02_02_p01")
+    parser.add_option('--genie_xsec_version', help='genie_xsec version', default="v3_02_00")
     parser.add_option('--genie_options', help='Genie version', default="G1810a0211a:e1000:k250")
+    parser.add_option('--genie_phyopt_version', help='Version of genie_phyopt', default="v3_02_00")
     parser.add_option('--genie_phyopt_options', help='Additional args for genie_phyopt', default="dkcharmtau")
     parser.add_option('--use_big_genie_file', help='whether to use gxspl-FNALbig.xml.gz', default=False, action="store_true")
     parser.add_option('--manual_genie_xsec_file', help='use this specific genie xsec file', default = None)
@@ -294,10 +296,8 @@ if __name__ == "__main__":
     print >> sh, "setup ifdhc"
     if "v3" in args.genie_tune:
         print >> sh, "setup genie %s -q e20:prof" % args.genie_tune
-        print >> sh, "setup genie_xsec    %s   -q %s" % (args.genie_tune, args.genie_options)
-        # TODO This assumes v3_00_04a -> v3_00_04, but I can't imagine that's always the case
-        phyopt_options = args.genie_tune[:8]
-        print >> sh, "setup genie_phyopt %s -q %s" % (phyopt_options, args.genie_phyopt_options)
+        print >> sh, "setup genie_xsec    %s   -q %s" % (args.genie_xsec_version, args.genie_options)
+        print >> sh, "setup genie_phyopt %s -q %s" % (args.genie_phyopt_version, args.genie_phyopt_options)
     else:
         print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
         print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
