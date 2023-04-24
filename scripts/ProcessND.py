@@ -254,7 +254,7 @@ if __name__ == "__main__":
 
     parser.add_option('--anti_fiducial', help='anti fiducial using : anti_fiducial_geometry.gdml', default=False, action="store_true")
     parser.add_option('--manual_geometry_override', help='Advanced feature: Point to a specific geometry file (like in the tar input file). Useful if you want to remove rotation for example', default="nd_hall_with_lar_tms_sand_TDR_Production_geometry_v_1.0.2.gdml")
-    parser.add_option("--geometry_location", help='Advanced feature: Point to a specific geometry file and it will be copied over. Use in conjunction with manual_geometry_override to point to the local copy after being copied over.', default="/pnfs/dune/persistent/physicsgroups/dunendsim/geometries/nd_hall_with_lar_tms_sand_TDR_Production_geometry_v_1.0.2.gdml")
+    parser.add_option("--geometry_location", help='Advanced feature: Point to a specific geometry file and it will be copied over. Use in conjunction with manual_geometry_override to point to the local copy after being copied over.', default="/pnfs/dune/persistent/physicsgroups/dunendsim/geometries/TDR_Production_geometry_v_1.0.3/nd_hall_with_lar_tms_sand_TDR_Production_geometry_v_1.0.3.gdml")
     parser.add_option('--b_field_location', help='Advanced feature: Point to a specific b field file (like in the tar input file).', default=None)
     parser.add_option('--b_field_filename', help='Advanced feature: Required in conjunction with b_field_location. Dictates the final name', default=None)
     parser.add_option('--genie_tune', help='Genie version', default="v3_02_02_p01")
