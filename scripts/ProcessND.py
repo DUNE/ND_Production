@@ -291,22 +291,35 @@ if __name__ == "__main__":
         print "FATAL: Cannot use persistent in outdir. Please use scratch and then copy over."
         exit()
 
+
     # Software setup -- eventually we may want options for this
     print >> sh, "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh"
     print >> sh, "setup ifdhc"
-    if "v3" in args.genie_tune:
+
+
+    if "v3" in args.genie_tune and not args.use_dk2nu:
         print >> sh, "setup genie %s -q e20:prof" % args.genie_tune
-        print >> sh, "setup genie_xsec    %s   -q %s" % (args.genie_xsec_version, args.genie_options)
+        print >> sh, "setup genie_xsec %s -q %s" % (args.genie_xsec_version, args.genie_options)
         print >> sh, "setup genie_phyopt %s -q %s" % (args.genie_phyopt_version, args.genie_phyopt_options)
+
+    elif "v3" in args.genie_tune and args.use_dk2nu:
+        print >> sh, "setup dk2nugenie v01_10_01c -q e20:prof"
+        print >> sh, "setup genie v3_02_02_p01 -q e20:prof"
+        print >> sh, "setup genie_xsec v3_02_00 -q G1810a0211a:e1000:k250"
+        print >> sh, "setup genie_phyopt v3_02_00 -q dkcharmta"
+
     else:
-        print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
-        print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
-        print >> sh, "setup genie_phyopt v2_12_10   -q dkcharmtau"
-    #print >> sh, "setup geant4 v4_10_3_p03e -q e17:prof"
+        print >> sh, "setup dk2nugenie v01_06_01f -q e17:prof"
+        print >> sh, "setup genie_xsec v2_12_10 -q DefaultPlusValenciaMEC"
+        print >> sh, "setup genie_phyopt v2_12_10 -q dkcharmtau"
+
     print >> sh, "setup geant4 v4_11_0_p01c -q e20:prof"
     print >> sh, "setup ND_Production v01_05_00 -q e17:prof"
     print >> sh, "setup jobsub_client"
     print >> sh, "setup cigetcert"
+
+
+
 
 
     # If we are going to do a sam metadata, set it up
