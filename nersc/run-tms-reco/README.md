@@ -8,4 +8,8 @@ Installation and building can be done with a single command.
 shifter --image=fermilab/fnal-wn-sl7:latest --module=cvmfs /bin/bash -- ${PWD}/install_tms_reco.sh
 ```
 
-The command must be executed from the same directory as this README (`ND_Production/nersc/run-tms-reco`). It will launch the container and run `install_tms_reco.sh`. This script clones the dune-tms repository, sets up the necessary environment via cvmfs and calls `make`. It will then exit the container. 
+The command must be executed from the same directory as this README (`ND_Production/nersc/run-tms-reco`). It will launch the container and run `install_tms_reco.sh`. This script clones the dune-tms repository, checksout a particular tag of that repository, sets up the necessary environment via cvmfs and calls `make`. It will then exit the container. 
+
+
+# Running TMS Software
+`ND_Production/nersc/run-tms-reco/run_tms_reco.sh` is the grid script for NERSC. It currently assumes a base directory structure consistent with receiving `edep-sim` files made using the `2x2_sim` style workflow. As in that workflow, `run_tms_reco.sh` jobs will be managed using fireworks. Details to come soon.
