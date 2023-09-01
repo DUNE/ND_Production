@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 
+###################################################################################
 ## Define some useful functions.
+
 # Recording job metics using time.
 run() {
     echo RUNNING "$@"
@@ -19,6 +21,8 @@ setup() {
   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${TMS_DIR}/lib
   export PATH=${PATH}:${TMS_DIR}/bin
 }
+
+###################################################################################
 
 
 # Reload Shifter if necessary.
@@ -55,4 +59,8 @@ timeFile=$outDir/TIMING/$outName.time
 mkdir -p "$(dirname "$timeFile")"
 timeProg=/usr/bin/time
 
+
 run ConvertToTMSTree.exe $inFile
+
+# TODO: some management of outfile naming here probably. Pending testing.
+
