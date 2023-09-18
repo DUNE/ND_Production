@@ -13,3 +13,5 @@ The command must be executed from the same directory as this README (`ND_Product
 
 # Running TMS Software
 `ND_Production/nersc/run-tms-reco/run_tms_reco.sh` is the grid script for NERSC. It currently assumes a base directory structure consistent with receiving `edep-sim` files made using the `2x2_sim` style workflow. As in that workflow, `run_tms_reco.sh` jobs will be managed using fireworks. Details to come soon.
+
+For ease during productions and consistency with other tiers of output files, the output file name for a particular call of `run_tms_reco.sh` is set using the environment variable `ND_PRODUCTION_TMS_OUTFILE`. 
