@@ -49,10 +49,12 @@ inFile=$PWD/../../../2x2_sim/run-spill-build/output/${ND_PRODUCTION_SPILL_NAME}/
 [ ! -z "${ND_PRODUCTION_OUTDIR_BASE}" ] && inFile=$ND_PRODUCTION_OUTDIR_BASE/run-spill-build/output/${ND_PRODUCTION_SPILL_NAME}/EDEPSIM_SPILLS/${inName}.EDEPSIM_SPILLS.root
 echo "inFile is ${inFile}"
 
+# TMS_TreeWriter is looking for ND_PRODUCTION_TMS_OUTFILE being
+# set.
 outName=$ND_PRODUCTION_OUT_NAME.$(printf "%05d" "$globalIdx")
-outFile=$tmsRecoOutDir/${outName}.TMSRECO.root
-rm -f "$outFile"
-echo "outFile is ${outFile}"
+export ND_PRODUCTION_TMS_OUTFILE=$tmsRecoOutDir/${outName}.TMSRECO.root
+rm -f "$ND_PRODUCTION_TMS_OUTFILE"
+echo "outFile is ${ND_PRODUCTION_TMS_OUTFILE}"
 
 
 timeFile=$outDir/TIMING/$outName.time
@@ -61,6 +63,4 @@ timeProg=/usr/bin/time
 
 
 run ConvertToTMSTree.exe $inFile
-
-# TODO: some management of outfile naming here probably. Pending testing.
 
