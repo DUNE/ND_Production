@@ -298,7 +298,7 @@ if __name__ == "__main__":
     print >> sh, "start_process_nd_run_time=`date +%s`"
     print >> sh, "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh"
     print >> sh, "setup ifdhc"
-        if "v3" in args.genie_tune and not args.use_dk2nu:
+    if "v3" in args.genie_tune and not args.use_dk2nu:
         print >> sh, "setup genie %s -q e20:prof" % args.genie_tune
         print >> sh, "setup genie_xsec %s -q %s" % (args.genie_xsec_version, args.genie_options)
         print >> sh, "setup genie_phyopt %s -q %s" % (args.genie_phyopt_version, args.genie_phyopt_options)
