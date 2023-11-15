@@ -85,13 +85,16 @@ def run_tms( sh, args ):
       print >> sh, "setup edepsim v3_0_1b -q e17:prof"
     if not any(x in stages for x in ["gen", "genie", "generator"]):
       print >> sh, "filename=${allfiles[${PROCESS}]}"
-      print >> sh, "ifdh cp ${filename} input_file.edep.root"
-      print >> sh, "EDEP_OUTPUT_FILE=input_file.edep.root"
+      print >> sh, "basefilename=`basename $filename`"
+      print >> sh, "ifdh cp ${filename} ${basefilename}"
+      print >> sh, "EDEP_OUTPUT_FILE=${basefilename}"
+      print >> sh, "EDEP_FILE=${EDEP_OUTPUT_FILE}"
     
     print >> sh, "$INPUT_TAR_DIR_LOCAL/dune-tms/bin/ConvertToTMSTree.exe ${EDEP_OUTPUT_FILE}"
     # Finds the name regardless of which algs were turned on.
     # Names like neutrino.0.edep_LineCandidates_AStar_Cluster1.root
-    print >> sh, "TMS_OUTPUT_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_*.root}`"
+    print >> sh, "TMS_OUTPUT_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_TMS_RecoCandidates_*.root}`"
+    print >> sh, "TMS_READOUT_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_TMS_Readout.root}`"
     # Example name: neutrino.0.edep_TMS_EventViewer_AStar_Cluster1.pdf
     print >> sh, "TMS_PDF_FILE=" # First make it blank
     print >> sh, "TMS_PDF_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_*.pdf}`" # Now try to get the pdf file
@@ -291,13 +294,11 @@ if __name__ == "__main__":
         print "FATAL: Cannot use persistent in outdir. Please use scratch and then copy over."
         exit()
 
-
     # Software setup -- eventually we may want options for this
+    print >> sh, "start_process_nd_run_time=`date +%s`"
     print >> sh, "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh"
     print >> sh, "setup ifdhc"
-
-
-    if "v3" in args.genie_tune and not args.use_dk2nu:
+        if "v3" in args.genie_tune and not args.use_dk2nu:
         print >> sh, "setup genie %s -q e20:prof" % args.genie_tune
         print >> sh, "setup genie_xsec %s -q %s" % (args.genie_xsec_version, args.genie_options)
         print >> sh, "setup genie_phyopt %s -q %s" % (args.genie_phyopt_version, args.genie_phyopt_options)
@@ -307,19 +308,15 @@ if __name__ == "__main__":
         print >> sh, "setup genie v3_02_02_p01 -q e20:prof"
         print >> sh, "setup genie_xsec v3_02_00 -q G1810a0211a:e1000:k250"
         print >> sh, "setup genie_phyopt v3_02_00 -q dkcharmta"
-
     else:
-        print >> sh, "setup dk2nugenie v01_06_01f -q e17:prof"
-        print >> sh, "setup genie_xsec v2_12_10 -q DefaultPlusValenciaMEC"
-        print >> sh, "setup genie_phyopt v2_12_10 -q dkcharmtau"
-
+        print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
+        print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
+        print >> sh, "setup genie_phyopt v2_12_10   -q dkcharmtau"
+    
     print >> sh, "setup geant4 v4_11_0_p01c -q e20:prof"
     print >> sh, "setup ND_Production v01_05_00 -q e17:prof"
     print >> sh, "setup jobsub_client"
     print >> sh, "setup cigetcert"
-
-
-
 
 
     # If we are going to do a sam metadata, set it up
@@ -376,7 +373,9 @@ if __name__ == "__main__":
             print >> sh, "mkdir test;cd test"
             print >> sh, "SEED=%d" % (1E6*args.oa + args.first_run)
         print >> sh, "filename=`basename ${allfiles[${PROCESS}]}`"
+        print >> sh, 'echo "Found filename=${filename}"'
         print >> sh, 'RUN=`echo $filename | grep -Po "(?<=\.)\d+(?=_)"`'
+        print >> sh, 'echo "Found RUN=${RUN}"'
 
     # Set the run dir in the script, as it can be different for different jobs within one submission if N is large
     print >> sh, "RDIR=$((${RUN} / 1000))"
@@ -459,11 +458,17 @@ if __name__ == "__main__":
         if args.persist == "all" or any(x in args.persist for x in ["tmsreco"]):
             copylines.append( "ifdh_mkdir_p %s/tmsreco/%s/%02.0fm/${RDIR}\n" % (args.outdir, args.horn, args.oa) )
             copylines.append( "ifdh cp ${TMS_FILE} %s/tmsreco/%s/%02.0fm/${RDIR}/${TMS_FILE}\n" % (args.outdir, args.horn, args.oa) )
+            copylines.append( "ifdh cp ${TMS_READOUT_FILE} %s/tmsreadout/%s/%02.0fm/${RDIR}/${TMS_READOUT_FILE}\n"  % (args.outdir, args.horn, args.oa) )
             copylines.append( 'if test -f "$TMS_PDF_FINAL_FILE"; then ifdh cp ${TMS_PDF_FINAL_FILE} %s/tmsreco/%s/%02.0fm/${RDIR}/${TMS_PDF_FINAL_FILE}; fi\n' % (args.outdir, args.horn, args.oa) )
             
             
     print >> sh, "\n\necho Done running stages."
+    print >> sh, "end_process_nd_run_time=`date +%s`"
+    print >> sh, "runtime=$((end_process_nd_run_time-start_process_nd_run_time))"
+    print >> sh, 'echo "Runtime (s): "${runtime}'
     print >> sh, "echo Local files right now:\nls -alh"
+    
+
 
     sh.writelines(copylines)
 
@@ -475,4 +480,3 @@ if __name__ == "__main__":
         else:
             print "Script processnd.sh created. Submit example:\n"
             print "jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=4000MB file://processnd.sh" % N_TO_SHOW
-
