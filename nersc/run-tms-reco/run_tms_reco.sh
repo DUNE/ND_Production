@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 
 
-###################################################################################
-## Define some useful functions.
-
-# Recording job metics using time.
-run() {
-    echo RUNNING "$@"
-    time "$timeProg" --append -f "$1 %P %M %E" -o "$timeFile" "$@"
-}
+source ../util/reload_in_container.inc.sh
 
 # Setup environment.
 setup() {
@@ -24,43 +17,35 @@ setup() {
 
 ###################################################################################
 
-
-# Reload Shifter if necessary.
-if [[ "$SHIFTER_IMAGEREQUEST" != "$ND_PRODUCTION_CONTAINER" ]]; then
-  shifter --image=$ND_PRODUCTION_CONTAINER --module=cvmfs -- "$0" "$@"
-  exit
-fi
-
-
 setup
 
-
-globalIdx=$ND_PRODUCTION_INDEX
-echo "globalIdx is $globalIdx"
-
-
-outDir=$PWD/output/$ND_PRODUCTION_OUT_NAME
-[ ! -z "${ND_PRODUCTION_OUTDIR_BASE}" ] && outDir=$ND_PRODUCTION_OUTDIR_BASE/run-tms-reco/output/$ND_PRODUCTION_OUT_NAME
-tmsRecoOutDir=$outDir/TMSRECO
-mkdir -p $tmsRecoOutDir
-
-inName=$ND_PRODUCTION_SPILL_NAME.$(printf "%05d" "$globalIdx")
-inFile=$PWD/../../../2x2_sim/run-spill-build/output/${ND_PRODUCTION_SPILL_NAME}/EDEPSIM_SPILLS/${inName}.EDEPSIM_SPILLS.root
-[ ! -z "${ND_PRODUCTION_OUTDIR_BASE}" ] && inFile=$ND_PRODUCTION_OUTDIR_BASE/run-spill-build/output/${ND_PRODUCTION_SPILL_NAME}/EDEPSIM_SPILLS/${inName}.EDEPSIM_SPILLS.root
-echo "inFile is ${inFile}"
-
-# TMS_TreeWriter is looking for ND_PRODUCTION_TMS_OUTFILE being
-# set.
-outName=$ND_PRODUCTION_OUT_NAME.$(printf "%05d" "$globalIdx")
-export ND_PRODUCTION_TMS_OUTFILE=$tmsRecoOutDir/${outName}.TMSRECO.root
-rm -f "$ND_PRODUCTION_TMS_OUTFILE"
-echo "outFile is ${ND_PRODUCTION_TMS_OUTFILE}"
+# Must go after setup.
+source ../util/init.inc.sh
 
 
-timeFile=$outDir/TIMING/$outName.time
-mkdir -p "$(dirname "$timeFile")"
-timeProg=/usr/bin/time
+inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-spill-build/$ND_PRODUCTION_SPILL_NAME
+inName=$ND_PRODUCTION_SPILL_NAME.$globalIdx
+inFile=$(realpath $inDir/EDEPSIM_SPILLS/$subDir/${inName}.EDEPSIM_SPILLS.root)
+
+# TMS_TreeWriter is looking for ND_PRODUCTION_TMSRECO_OUTFILE being
+# set. TMS_ReadoutTreeWriter is looking for ND_PRODUCTION_TMSRECOREADOUT_OUTFILE
+# being set.
+outFileReco=$tmpOutDir/${outName}.TMSRECO.root
+outFileRecoReadout=$tmpOutDir/${outName}.TMSRECOREADOUT.root
+export ND_PRODUCTION_TMSRECO_OUTFILE="$outFileReco"
+export ND_PRODUCTION_TMSRECOREADOUT_OUTFILE="$outFileRecoReadout"
+rm -f $ND_PRODUCTION_TMSRECO_OUTFILE $ND_PRODUCTION_TMSRECOREADOUT_OUTFILE
+echo "outFiles are:"
+echo "  ${ND_PRODUCTION_TMSRECO_OUTFILE}"
+echo "and"
+echo "  ${ND_PRODUCTION_TMSRECOREADOUT_OUTFILE}"
 
 
-run ConvertToTMSTree.exe $inFile
+run ConvertToTMSTree.exe "$inFile"
 
+
+tmsRecoOutDir=$outDir/TMSRECO/$subDir
+tmsRecoReadoutOutDir=$outDir/TMSRECOREADOUT/$subDir
+mkdir -p "$tmsRecoOutDir" "$tmsRecoReadoutOutDir"
+mv "$ND_PRODUCTION_TMSRECO_OUTFILE" "$tmsRecoOutDir"
+mv "$ND_PRODUCTION_TMSRECOREADOUT_OUTFILE" "$tmsRecoReadoutOutDir"
