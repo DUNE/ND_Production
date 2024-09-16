@@ -307,7 +307,7 @@ if __name__ == "__main__":
         print >> sh, "setup dk2nugenie v01_10_01c -q e20:prof"
         print >> sh, "setup genie v3_02_02_p01 -q e20:prof"
         print >> sh, "setup genie_xsec v3_02_00 -q G1810a0211a:e1000:k250"
-        print >> sh, "setup genie_phyopt v3_02_00 -q dkcharmta"
+        print >> sh, "setup genie_phyopt v3_02_00 -q dkcharmtau"
     else:
         print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
         print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
