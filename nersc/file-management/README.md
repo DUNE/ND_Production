@@ -9,20 +9,17 @@ setup_fnal_security
 scp /tmp/x509up_u50363 abooth@dtn01.nersc.gov:/tmp/x509up_u99810
 ```
 
-You'll also need to set up a python virtual environment to use the `gfal-*` tools. On the data transfer nodes this can be done as follows:
+The transfer script uses `gfal-*` tools, they are available as standard on the data transfer nodes. `python` however is not available in the usual way. The NERSC service desk advised that it can be access via global common:
 
 ```
-module load python
-conda create -n gfal
-source activate gfal
-conda install -c conda-forge gfal2-util
+/global/common/software/nersc/pe/conda-envs/24.1.0/python-3.11/nersc-python/bin/python
 ```
 
 An example of how to use the `transfer_to_fnal.py` script is as follows:
 
 ```
-transfer_to_fnal.py --ignore-jsons --destination-base root://fndca1.fnal.gov:1094//pnfs/fnal.gov/usr/dune/persistent/users/abooth/Production/MiniProdN1p1-v1r1 --source-base /global/cfs/cdirs/dune/users/abooth/MiniProdN1p1-v1r1/run-convert2h5/output/MiniProdN1p1_NDLAr_1E19_RHC.convert2h5/EDEPSIM_H5/ --maintain-structure-below /global/cfs/cdirs/dune/users/abooth/MiniProdN1p1-v1r1
+/global/common/software/nersc/pe/conda-envs/24.1.0/python-3.11/nersc-python/bin/python transfer_to_fnal.py --ignore-jsons --destination-base root://fndca1.fnal.gov:1094//pnfs/fnal.gov/usr/dune/persistent/users/abooth/Production/MiniProdN1p1-v1r1 --source-base /global/cfs/cdirs/dune/users/abooth/MiniProdN1p1-v1r1/run-convert2h5/output/MiniProdN1p1_NDLAr_1E19_RHC.convert2h5/EDEPSIM_H5/ --maintain-structure-below /global/cfs/cdirs/dune/users/abooth/MiniProdN1p1-v1r1
 ```
 
-If in-place metadata `jsons` have been made for the files you want to transfer and you want to transfer those too, exclude the `--ignore-jsons` argument.
+If in-place metadata `jsons` have been made for the files you want to transfer and you want to transfer those too, exclude the `--ignore-jsons` argument. There are also useful arguments for either including or excluding files with certain extensions from the transfer.
 

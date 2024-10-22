@@ -15,6 +15,7 @@ parser.add_argument("--ignore-jsons", required=False, action='store_true', help=
 parser.add_argument("--destination-base", default="root://fndca1.fnal.gov/pnfs/fnal.gov/usr/dune/scratch/dunepro/dropbox/neardet", help="Base directory that files will be sent to.")
 parser.add_argument("--dry-run", required=False, action='store_true', help="Utilise --dry-run in gfal-copy commands - dont make directories.")
 parser.add_argument("--extensions", required=False, type=str, nargs='*', help="Specify file extensions that should be copied. Not specifying will copy everything.")
+parser.add_argument("--extensions-ignore", required=False, type=str, nargs='*', help="Specify file extensions that should be ignored. Not specifying will copy everything.")
 parser.add_argument("--maintain-structure-below", required=False, help="Directories of destination-base that will not appear in destionation directory structure.")
 parser.add_argument("--print-only", required=False, action='store_true', help="Only print the gfal-cp command, dont execute.")
 parser.add_argument("--source-base", required=True, help="Base directory below which all files will be sent to destination-base.")
@@ -40,6 +41,7 @@ for base, _, files in os.walk(args.source_base):
 
     for file in files:
         if args.extensions and not any([extension in file for extension in args.extensions]): continue
+        if args.extensions_ignore and any([extension in file for extension in args.extensions_ignore]): continue
         if ".json" in file: continue
 
         index_candidates = [ splt for splt in file.split(".") if splt.isdigit() ]
