@@ -350,7 +350,7 @@ if __name__ == "__main__":
       else:
           all_files=[]
           for root, dirnames, filenames in os.walk(args.indir):
-            for filename in fnmatch.filter(map(lambda x: x.lower(), filenames), '*.edep*.root'):
+            for filename in fnmatch.filter(map(lambda x: x, filenames), '*.root'):
               fullfilename = os.path.join(root, filename)
               all_files.append(fullfilename)
           N_TO_SHOW = len(all_files)
