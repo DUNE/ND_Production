@@ -472,6 +472,9 @@ if __name__ == "__main__":
 
     sh.writelines(copylines)
 
+    print >> sh, 'echo "Reached end of processnd.sh, exiting with exit code zero"'
+    print >> sh, "exit 0"
+
     if not args.test:
         if "tmsreco" in args.stages or "all" in args.stages:
             TMS_TAR_FILE = args.tms_reco_tar
