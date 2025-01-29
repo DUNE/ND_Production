@@ -8,6 +8,8 @@
 #export ARCUBE_OUT_NAME=Tutorial.pandora
 #export ARCUBE_INDEX=0
 
+export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-fermilab/fnal-wn-sl7:latest}
+
 # Container
 source $ARCUBE_DIR/util/reload_in_container.inc.sh
 

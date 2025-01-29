@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-deeplearnphysics/larcv2:ub20.04-cuda11.6-pytorch1.13-larndsim}
+
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 

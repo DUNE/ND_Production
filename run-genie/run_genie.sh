@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:genie_edep.3_04_00.20230912}
+
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
