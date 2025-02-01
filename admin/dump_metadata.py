@@ -251,9 +251,10 @@ def main():
     if args.one:
         dump_metadata(args.one, args)
     else:
-        ext = file_format(args.all)
-        paths = args.all.glob(f'*.{ext}')
+        a_file_ext = next((file.suffix[1:] for file in args.all.iterdir() if file.is_file()), None)
+        paths = args.all.glob(f'*.{a_file_ext}')
         pool = Pool(args.nproc)
+        print('Here are the args received: ', args)
         pool.starmap(dump_metadata,
                     [(p, args) for p in paths])
 
