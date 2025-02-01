@@ -16,8 +16,12 @@ import h5py
 import numpy as np
 import ROOT as R
 
-g4evtdir = os.getenv('LIBTG4EVENT_DIR', 'libTG4Event')
-R.gSystem.Load(f'{g4evtdir}/libTG4Event.so')
+# For AL9 running, source dune-tms/setup_FNAL.sh script first.
+
+# Currently, have an issue with GEANT. Omitting works for now.
+# though we should silence the warnings.....?
+#g4evtdir = os.getenv('LIBTG4EVENT_DIR', 'libTG4Event')
+#R.gSystem.Load(f'{g4evtdir}/libTG4Event.so')
 
 
 def get_event_stats_edep(datapath: Path):
@@ -103,7 +107,7 @@ def get_data_tier(args: argparse.Namespace):
         return 'detector-simulated'
     elif args.app == 'run-ndlar-flow':
         return 'hit-reconstructed'
-    elif args.app == 'run-tms-reco':  # TODO: This is to be decided.
+    elif args.app == 'run-tms-reco':
         return 'root-tuple'
 
 
