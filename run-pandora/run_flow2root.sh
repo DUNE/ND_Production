@@ -22,12 +22,12 @@ inName=${ARCUBE_IN_NAME}.${globalIdx}
 inFile=${ARCUBE_OUTDIR_BASE}/run-ndlar-flow/${ARCUBE_IN_NAME}/FLOW/${subDir}/${inName}.FLOW.hdf5
 
 # Is this data or MC?
-isMC=1
-[ "${ARCUBE_PANDORA_INPUT_FORMAT}" ==  "SP" ] && isMC=0
+isData=1
+[ "${ARCUBE_PANDORA_INPUT_FORMAT}" ==  "SPMC" ] && isData=0
 
 # Convert input HDF5 file to ROOT
 source $ARCUBE_PANDORA_INSTALL/pandora.venv/bin/activate
-python3 $ARCUBE_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile $isMC $tmpOutDir
+run python3 $ARCUBE_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile $isData $tmpOutDir
 deactivate
 
 # Move ROOT file from tmpOutDir to output directory
