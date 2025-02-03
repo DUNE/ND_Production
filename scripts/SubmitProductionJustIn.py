@@ -33,13 +33,14 @@ def _HelpMenu() :
     parser.add_option("--metadata", dest="metadata", default=False, action="store_true", help="create json file with metadata")
     parser.add_option("--data", dest="data", default=False, action="store_true", help="processing real data")
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
+    parser.add_option("--run", dest="run", type="string", default="run1", help="The run period.")
     parser.add_option("--production", dest="production", default=False, action="store_true", help="using production (shifter) role")
  
 
 
     # h5flow parameters
-    parser.add_option("--start_position", dest="startPosition", type=int, default=-1, help="start position within source dset (for partial file processing)")
-    parser.add_option("--end_position", dest="endPosition", type=int, default=-1, help="end position within source dset (for partial file processing)")
+    parser.add_option("--start_position", dest="startPosition", type=int, default=None, help="start position within source dset (for partial file processing)")
+    parser.add_option("--end_position", dest="endPosition", type=int, default=None, help="end position within source dset (for partial file processing)")
     
 
     # justin submit parameters
@@ -144,7 +145,7 @@ def _CheckDatasetForCombinationWorkflow( dataset, detector ) :
        sys.exit("Unable to determine if the correct dataset is deployed for the light+charge combination workflow.\n")
 
     cmds = [ "metacat query -s \"files from %s\" | grep -i Files | cut -f2 -d':'" % (dataset),
-             "metacat query -s \"files from %s having core.run_type=%s\" | grep -i Files | cut -f2 -d':'" % (dataset,run_type) ]
+             "metacat query -s \"files from %s where (core.run_type=%s)\" | grep -i Files | cut -f2 -d':'" % (dataset,run_type) ]
 
     nfiles = []
     for cmd in cmds :
@@ -157,7 +158,7 @@ def _CheckDatasetForCombinationWorkflow( dataset, detector ) :
     if nfiles[0] == nfiles[1] :
        success = True
     else :
-       sys.exit( "All files in dataset [%s, %d] do not belong to the run_type [%s]. Cannot proceed with combination workflow.\n" % (dataset,nfiles[0],run_type) )
+       sys.exit( "FATAL::The files in dataset [%s, %d] do not belong to the run_type [%s]. Cannot proceed with combination workflow.\n" % (dataset,nfiles[0],run_type) )
 
     return success
 
@@ -212,9 +213,13 @@ if __name__ == '__main__' :
    # check that the correct dataset is deployed for ndlar + combined workflow
    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    if opts["tier"] == "flow" and opts["stream"] == "combined" :
+      print( "\tChecking if the dataset for the combination workflow." )
+      log.write( "\tChecking if the dataset for the combination workflow." )
+
       success = _CheckDatasetForCombinationWorkflow( opts['dataset'], opts["detector"] ) 
       if not success :
          sys.exit( "\nThe incorrect type of dataset is deployed for ndlar_flow stage:combination workflow.\nThe input dataset should consists of light raw data.\n" ) 
+
 
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -222,7 +227,7 @@ if __name__ == '__main__' :
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    topdir = opts["outdir"]
    subdir = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-   outdir = "%s/%s" % (topdir,subdir)
+   outdir = "%s/%s/%s" % (topdir,opts['software'],subdir)
    if not opts["testJobscript"] :
       if not os.path.isdir(outdir) :
          print( "\tcreating the output directory [%s]" % outdir )
@@ -299,13 +304,22 @@ if __name__ == '__main__' :
    cmdlist.append( "--env NEVENTS=%d" % opts["nevts"] )
    cmdlist.append( "--env JOBSCRIPT_TEST=%d" % run_tests )
    cmdlist.append( "--env USER=%s" % USER )
+   cmdlist.append( "--env RUN_PERIOD=%s" % opts["run"] )
+
+   rucio_user = "justinreadonly" if not opts["testJobscript"] else USER
+   cmdlist.append( "--env RUCIO_USER=%s" % rucio_user )
 
    file_metadata = "True" if opts["production"] or opts["metadata"] else "False"
    cmdlist.append( "--env MAKE_METADATA=%s" % file_metadata)
 
-
-   cmdlist.append( "--env START_POSITION=%d" % opts["startPosition"] )
-   cmdlist.append( "--env END_POSITION=%d" % opts["endPosition"] )
+   if opts["startPosition"] == None :
+      cmdlist.append( "--env START_POSITION=None" )
+   else :
+      cmdlist.append( "--env START_POSITION=%d" % opts["startPosition"] )
+   if opts["endPosition"] == None :
+      cmdlist.append( "--env END_POSITION=None" )
+   else :
+      cmdlist.append( f"--env END_POSITION=%d" % opts["endPosition"] )
  
    # other justin parameters
    if not opts["testJobscript"] :
@@ -329,13 +343,10 @@ if __name__ == '__main__' :
          cmdlist.append( "--output-pattern='*.json:%s/json'" % DCACHEDIR )
 
 
-
-
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # run justIn launch submission
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    cmdstring = " ".join(cmdlist)
-   auth      = "kx509; voms-proxy-init -noregen -rfc -voms dune:/dune/Role=Analysis"
    cmd       = "%s; justin-test-jobscript %s" % (auth,cmdstring) if opts["testJobscript"] else "%s; justin simple-workflow %s" % (auth,cmdstring)
 
    print( "\n\tBelow is the launch command:\n\t%s\n\n" % cmd )
@@ -373,7 +384,7 @@ if __name__ == '__main__' :
    if not opts["testJobscript"] : 
       shutil.move( PWD+"/justin_submission.log", outdir )
       print( "\n\tDirectory for output files [%s]" % outdir )
-      print( "\n\tSubmission file is here [%s/submission.log]" % outdir ) 
+      print( "\n\tSubmission file is here [%s/justin_submission.log]" % outdir ) 
 
 
    print( "Exit launch 2x2 production jobs\n\n" )

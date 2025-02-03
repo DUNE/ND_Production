@@ -12,7 +12,7 @@ from metacat.webapi import MetaCatClient
 # get the light files - using python interface because
 #    the API returns a HTTPClient.unpack_json_seq object
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-def _GetLightFiles(lightInfoCont) :
+def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
 
    lfiles     = []
    main_query = "files where namespace=neardet-2x2-lar-light and creator=dunepro and core.data_tier=raw"
@@ -24,38 +24,61 @@ def _GetLightFiles(lightInfoCont) :
       
        cmd     = "metacat query \"%s\"" % query
        proc    = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-       pipe    = proc.communicate()[0].decode('ascii')
+       stdout, error = proc.communicate() #[0].decode('ascii')
 
        if proc.returncode != 0 :
-          sys.exit(f"Did not find the file for query [{query}].\n")
+          error = error.decode('ascii')
+          print("Error:[ %s ]" % error.strip())
+          sys.exit("Did not find the file for query [%s].\n" % query)
        else :
-          lfiles.append(pipe.strip())
+          stdout = stdout.decode('ascii')
+          lfiles.append(stdout.strip())
+
 
    for lfile in lfiles :
-       cmd  = f"rucio list-file-replicas {lfile} --pfn"
-       proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-       pipe = proc.communicate()[0].decode('ascii').split("\n")
+       download = True
 
-       download = False
-       for path in pipe :
+       cmd  = f"rucio list-file-replicas {lfile} --pfns"
+       proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+       stdout, error = proc.communicate() #[0].decode('ascii')
+
+       if proc.returncode != 0 :
+          error = error.decode('ascii')
+          print("Error:[ %s ]" % error.strip())
+          sys.exit("Did not find the phyiscal file name for query [%s].\n" % cmd)
+       else :
+          stdout = stdout.decode('ascii').split("\n")
+
+       print( f"\tThe paths for {lfile} is [{stdout}].\n" )
+
+       rucio_download = False
+       download       = False
+
+       for path in stdout :
            if len(path) == 0 : continue
- 
-           pnfs      = path.replace("root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr","/pnfs")
+           pnfs      = path.replace("root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/","/pnfs/")
            filename  = pnfs.split("/")[-1]
            pnfs_path = pnfs.replace(filename,"")
+           cmds      = [ "cat %s\".(get)(%s)(locality)\"" % (pnfs_path,filename),
+                         "mkdir neardet-2x2-lar-light; xrdcopy %s neardet-2x2-lar-light/" % (path.strip()) ]
 
-           cmd  = "cat %s\".(get)(%s)(locality)\"" % (pnfs_path,filename)
-           proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-           pipe = proc.communicate()[0].decode('ascii')
+           for c, cmd in enumerate(cmds) :
+               proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+               pipe = proc.communicate()[0].decode('ascii')
+ 
+               if c == 0 and isOnTapeCheck : 
+                  if proc.returncode != 0 :
+                     print( f"Cannot determine the locality of the file on dCache [{path}]." )
+                  else :
+                     if pipe.strip().find("ONLINE") != -1 :
+                        rucio_download = True
+               if c == 1 :
+                  if proc.returncode == 0 :
+                     download = True
 
-           if proc.returncode != 0 :
-              print( f"Cannot determine the locality of the file on dCache [{path}]." )
-           else :
-              if pipe.strip().find("ONLINE") != -1 :
-                 download = True
-                 break
+           if download : break
 
-       if download :
+       if rucio_download and not download :
           print( f"\tDownloading the light raw file [{lfile}]" )
 
           cmd   = f"rucio download {lfile}"
@@ -66,8 +89,6 @@ def _GetLightFiles(lightInfoCont) :
              sys.exit( f"Cannot download the file [{lfile}]." )
           else :
              print( f"\t\tSuccessfully download the file [{lfile}]." )
-       else :
-          sys.exit( f"The file [{lfile}] is not on disk. Cannot download." )       
 
 
 
@@ -133,6 +154,7 @@ if __name__ == '__main__' :
    # input arguments
    parser = ap()
    parser.add_argument('--file', nargs='?', type=str, required=True, help="The file data identifier (DID)")
+   parser.add_argument('--tapeCheck', action='store_true', help="Check if the file is on tape, only works when running a justin test job.")
    args = parser.parse_args()
 
 
@@ -152,7 +174,7 @@ if __name__ == '__main__' :
    print( f"\t\tThe matching runs/subruns list [ {lightInfoCont} ]\n" )   
 
    # download the light files to local disk (TODO: work for other detector configurations)
-   _GetLightFiles(lightInfoCont)
+   _GetLightFiles(lightInfoCont,args.tapeCheck)
 
    print( "Exit getting the input list of matching light files." )
    print( "\tThe number of files is [%d].\n" % len(lightInfoCont) ) 
