@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- Configurations for GNuMI flux
+     Each is grouped into a <param_set> that are parsed and applied to
+     GNuMIFlux.  Elements should appear in the following order:
+
+     <verbose> : how noisy to be while parsing <param_set>
+     <units>   : sets user coordinate units (e.g. "cm", "meter", etc)
+                 set this first and only once
+     <beamdir> : defines the relative orientation of the beam in user coord
+                 three types are currently supported:
+           "series"    : a sequence of rotations around one axis at a time
+                         each <rotation> needs value and attributes:
+                             axis ('x','y','z') units ('deg' 'rad')
+           "thetaphi3" : 3 pairs of (theta,phi) ala GEANT3
+                         needs 6 values and attribute: units
+           "newxyz"    : 3 direction vectors, ala Geant4
+                         needs 9 values (will normalize each vector)
+     <beampos> :  define the beam origin in the user coordinate system
+                  3 values define the point
+                  if 6 values treat as ( user xyz ) = ( beam xyz )
+                  but must have set <beamdir> first
+     <window> :   define the flux window via three <point> elements
+                  each <point> is a user coord (x,y,z)
+     <enumax>:    set limits on the maximum enu energy:  lowlimit, fudgefactor
+                  set limits on wgt: fudgefactor, # points to use
+                  final reported energy is max(lowlimit,fudgefactor*enumxscan)
+                  where is 'enumxscan' is the highest energy seen when
+                  scanning for x-y weights.
+     <reuse>:     set # of times an entry is sequentially reused
+     <upstreamz>: user coord z to push neutrino orgin to
+                  if abs(z) > 1e30 then leave on the flux window
+
+     The units, beamdir, beampos elements define the user coordinate system
+        user_dir =  rot * beam_dir
+        user_pos = (rot * beam_pos ) + user_pos_beamorigin
+     If more than one <beamdir> or <beampos> is specified the last
+     one of each is used.  Results of rotations from <beamdir> elements
+     are not cummulative.
+
+     Parsing of element contents w/ multiple values is liberal about
+     spacing, line breaks, grouping and separating characters.
+
+  -->
+
+<gnumi_config>
+
+<!--
+  ****************************************************************************
+  **   An attempt for the combined 2x2+MINERvA geometry
+  ****************************************************************************
+  -->
+
+  <param_set name="ProtoDUNE-ND">
+    <!-- verbosity of XML parsing -->
+    <verbose> 0 </verbose>
+
+    <!-- setting user units should be first -->
+    <units> m </units>
+
+    <!-- beamdir must come before beam zero position -->
+    <!-- rotation matrix created by sequence of rotations -->
+    <!-- CW: this is the same as MINOS-ND -->
+    <beamdir type="series">
+       <rotation axis="x" units="rad"> -0.0582977560 </rotation>
+    </beamdir>
+
+    <!-- position in ( user coords ) = ( beam coords ) -->
+    <!-- CW: I *think* this is correct... if the rotation to the beam is done before this, I guess it's okay -->
+    <!-- XML config must have already set the rotation matrix -->
+    <beampos> ( 0, 0, 0 ) = ( 0, 0, 1036.48837 ) </beampos>
+
+    <!-- define flux window in detector coords -->
+    <!-- need 3 positions to define a rectoid -->
+    <!-- first point is the base, 2nd & 3rd should be orthogonal points
+         (ie 2nd 3rd point should not be kitty-corner from 1st) -->
+    <!-- gminos distance to near hall face to detector front 4907.2cm
+         4888.85 - 4907.2 = -18.35,   4966.43 - 4907.2 = 59.23 -->
+    <!-- not yet support beam coords,
+         but if/when must have already specified transform -->
+    <!-- this window is square to the beam but at angle in user coords -->
+    <window>
+      <point coord="det">  5.0, -5.0, -5.0 </point>
+      <point coord="det"> -5.0, -5.0, -5.0 </point>
+      <point coord="det">  5.0,  5.0, -5.0 </point>
+    </window>
+
+    <!-- CW: default enumax... -->
+    <enumax> 120. 1.05 1.05 2500000 </enumax>
+
+    <!-- CW: allow entry to be reused 1000 times -->
+    <!-- CW: maybe too much, but I'm following the NOvA files here -->
+    <reuse> 1000 </reuse>
+
+    <!-- force ray orgin from flux window to user coord z = -100.0 -->
+    <upstreamz> -100.0 </upstreamz>
+
+  </param_set>
+
+  <!-- Use a much bigger window if we care about the rock -->
+  <param_set name="ProtoDUNE-ND-Rock">
+    <using_param_set> ProtoDUNE-ND </using_param_set>
+    <window>
+      <point coord="det">  7.5, -7.5, -20 </point>
+      <point coord="det"> -7.5, -7.5, -20 </point>
+      <point coord="det">  7.5,  7.5, -20 </point>
+    </window>
+    <upstreamz> -500.0 </upstreamz>
+  </param_set>
+
+  <param_set name="MiniRun4">
+    <!-- verbosity of XML parsing -->
+    <verbose> 0 </verbose>
+
+    <!-- setting user units should be first -->
+    <units> m </units>
+
+    <!-- beamdir must come before beam zero position -->
+    <!-- rotation matrix created by sequence of rotations -->
+    <!-- CW: this is the same as MINOS-ND -->
+    <beamdir type="series">
+       <rotation axis="x" units="rad"> -0.0582977560 </rotation>
+    </beamdir>
+
+    <!-- position in ( user coords ) = ( beam coords ) -->
+    <!-- CW: I *think* this is correct... if the rotation to the beam is done before this, I guess it's okay -->
+    <!-- XML config must have already set the rotation matrix -->
+    <!-- Cryostat center is 13 m downstream from center of hall which is origin -->
+    <!-- and 3.1 m below vertical centerline of hall -->
+    <beampos> ( 0, -3.1, 13 ) = ( 0, 0, 1036.48837 ) </beampos>
+
+    <!-- CW: default enumax... -->
+    <enumax> 120. 1.05 1.05 2500000 </enumax>
+
+    <!-- CW: allow entry to be reused 1000 times -->
+    <!-- CW: maybe too much, but I'm following the NOvA files here -->
+    <reuse> 1000 </reuse>
+
+    <!-- MK: don't bother with upstreamz (which may not even be respected in dk2nu mode) -->
+    <!--     just let the ray start on the window -->
+  </param_set>
+
+  <param_set name="MiniRun4-Nu">
+    <using_param_set> MiniRun4 </using_param_set>
+    <window>
+      <point coord="det">  5, -5, 8 </point>
+      <point coord="det"> -5, -5, 8 </point>
+      <point coord="det">  5,  2, 8 </point>
+    </window>
+  </param_set>
+
+  <param_set name="MiniRun4-Rock">
+    <using_param_set> MiniRun4 </using_param_set>
+    <window>
+      <point coord="det">  10,  -5, -90 </point>
+      <point coord="det"> -10,  -5, -90 </point>
+      <point coord="det">  10,  15, -90 </point>
+    </window>
+  </param_set>
+
+  <param_set name="WindowStudy4">
+    <using_param_set> MiniRun4 </using_param_set>
+    <!-- Place the window on the upstream surface of the rock -->
+    <!-- Rock is 165 m long, half-length is 82.5 m, rock center global Z is -49.5892 m,
+         so upstream surface global Z is -49.5892 - 82.5 = -132.0892 m -->
+    <window>
+      <point coord="det">  35.56, -34.66, -132.08 </point>
+      <point coord="det"> -35.56, -34.66, -132.08 </point>
+      <point coord="det">  35.56,  34.66, -132.08 </point>
+    </window>
+  </param_set>
+
+  <param_set name="MiniRun5">
+    <!-- verbosity of XML parsing -->
+    <verbose> 0 </verbose>
+
+    <!-- setting user units should be first -->
+    <units> m </units>
+
+    <!-- beamdir must come before beam zero position -->
+    <!-- rotation matrix created by sequence of rotations -->
+    <!-- CW: this is the same as MINOS-ND -->
+    <beamdir type="series">
+       <rotation axis="x" units="rad"> -0.0582977560 </rotation>
+    </beamdir>
+
+    <!-- position in ( user coords ) = ( beam coords ) -->
+    <!-- Set -42cm below TPC center to be consistent with past geometries -->
+    <beampos> ( 0, -0.42, 0 ) = ( 0, 0, 1036.48837 ) </beampos>
+
+    <!-- CW: default enumax... -->
+    <enumax> 120. 1.05 1.05 2500000 </enumax>
+
+    <!-- CW: allow entry to be reused 1000 times -->
+    <!-- CW: maybe too much, but I'm following the NOvA files here -->
+    <reuse> 1000 </reuse>
+
+    <!-- MK: don't bother with upstreamz (which may not even be respected in dk2nu mode) -->
+    <!--     just let the ray start on the window -->
+  </param_set>
+
+  <param_set name="MiniRun5-Nu">
+    <using_param_set> MiniRun5 </using_param_set>
+    <window>
+      <point coord="det">  5, -3, -5 </point>
+      <point coord="det"> -5, -3, -5 </point>
+      <point coord="det">  5,  3, -5 </point>
+    </window>
+  </param_set>
+
+  <param_set name="MiniRun5-Rock">
+    <using_param_set> MiniRun5 </using_param_set>
+    <window>
+      <point coord="det">  10,  -3, -103 </point>
+      <point coord="det"> -10,  -3, -103 </point>
+      <point coord="det">  10,  17, -103 </point>
+    </window>
+  </param_set>
+
+  <!--
+  ****************************************************************************
+  **   Taken from ND_Production/generator/GNuMIFlux.xml at
+  **   5b47d65cf3aeb7fa1ae72b3e50aafdce6d4d766e.
+  ****************************************************************************
+  -->
+
+  <!--
+  ****************************************************************************
+  **   DUNE section
+  ****************************************************************************
+  -->
+
+  <param_set name="DUNEND">
+    <!-- setting user units should be first -->
+    <units> m </units>
+
+    <!-- beamdir must come before beam zero position -->
+    <!-- rotation matrix created by sequence of rotations -->
+
+    <beamdir type="series">
+      <rotation axis="x" units="rad"> -0.101 </rotation>
+    </beamdir>
+
+
+    <!-- position in ( user coords ) = ( beam coords ) -->
+    <!-- Pick a point in the gdml file and fix it to a point in the beamline coordinate system -->
+    <!-- Center of LArActive volume in MPD_SPY_LAr geometry produced by E. Brianne -->
+    <!-- volArgonCubeActive center position as determined by Chris and Luke independently on 2020-5-12 -->
+    <!-- Using baseline from M. Leidner 2020-5-9 to LAr active volume center -->
+
+    <beampos> ( 0.0, 0.05387, 6.66 ) = ( 0, 0, 562.1179 ) </beampos>
+
+    <!-- define flux window in detector coords -->
+    <!-- need 3 positions to define a rectoid -->
+    <!-- first point is the base, 2nd & 3rd should be orthogonal points
+         (ie 2nd 3rd point should not be kitty-corner from 1st) -->
+    <!-- Should be larger than LAr volume ~8m x 4m -->
+
+    <window>
+      <point coord="det"> 6.0, -5.0, -1.0 </point>
+      <point coord="det"> -6.0,  -5.0, -1.0 </point>
+      <point coord="det">  6.0, 5.0, -1.0 </point>
+    </window>
+
+
+    <enumax> 120. 1.05 1.05 2500000 </enumax>
+
+    <!-- allow entry to be reused 10 times before moving on -->
+    <reuse> 10 </reuse>
+
+    <upstreamz> -3 </upstreamz>
+  </param_set>
+
+  <!--
+  ****************************************************************************
+  **   DUNEROCK section
+  ****************************************************************************
+  -->
+
+  <param_set name="DUNENDROCK">
+    <!-- setting user units should be first -->
+    <units> m </units>
+
+    <!-- beamdir must come before beam zero position -->
+    <!-- rotation matrix created by sequence of rotations -->
+
+    <beamdir type="series">
+      <rotation axis="x" units="rad"> -0.101 </rotation>
+    </beamdir>
+
+
+    <!-- position in ( user coords ) = ( beam coords ) -->
+    <!-- Pick a point in the gdml file and fix it to a point in the beamline coordinate system -->
+    <!-- Center of LArActive volume in MPD_SPY_LAr geometry produced by E. Brianne -->
+    <!-- volArgonCubeActive center position as determined by Chris and Luke independently on 2020-5-12 -->
+    <!-- Using baseline from M. Leidner 2020-5-9 to LAr active volume center -->
+
+    <beampos> ( 0.0, 0.05387, 6.66 ) = ( 0, 0, 562.1179 ) </beampos>
+
+    <!-- define flux window in detector coords -->
+    <!-- need 3 positions to define a rectoid -->
+    <!-- first point is the base, 2nd & 3rd should be orthogonal points
+         (ie 2nd 3rd point should not be kitty-corner from 1st) -->
+    <!-- Should be larger than LAr volume ~8m x 4m -->
+
+    <window>
+      <point coord="det"> 6.0, -15.0, -1.0 </point>
+      <point coord="det"> -6.0,  -15.0, -1.0 </point>
+      <point coord="det">  6.0, 15.0, -1.0 </point>
+    </window>
+
+
+    <enumax> 120. 1.05 1.05 2500000 </enumax>
+
+    <!-- allow entry to be reused 10 times before moving on -->
+    <reuse> 10 </reuse>
+
+    <!-- As discussed in this slack thread https://dunescience.slack.com/archives/C62ALUT7C/p1692270471363809 -->
+    <!-- even if you specify upstreamz here in the xml and don’t pass a -z to gevgen_fnal on the command line -->
+    <!-- the value used is actually just gevgen's default. ALWAYS use -z in the commomand line. -->
+    <upstreamz> -2e30 </upstreamz>
+
+
+  </param_set>
+
+</gnumi_config>
