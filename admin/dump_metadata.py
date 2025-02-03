@@ -90,7 +90,7 @@ def file_format(datapath: Path):
         return 'hdf5'
     return datapath.suffix[1:]
 
-
+# TODO: we should ask Computing to make these namespaces for us soon
 def get_runtype(args: argparse.Namespace):
     if args.app == 'run-spill-build':
         return 'neardet-2x2'
@@ -152,7 +152,7 @@ def dump_metadata(datapath: Path, args: argparse.Namespace):
     meta = {}
 
     meta['file_name'] = datapath.name
-    meta['namespace'] = 'ndprod'
+    meta['namespace'] = args.namespace
     meta['file_size'] = datapath.stat().st_size
 
     if args.sam:                # for samweb validate-metadata
@@ -179,7 +179,7 @@ def dump_metadata(datapath: Path, args: argparse.Namespace):
         'core.file_type': 'mc' if args.mc else 'detector',
         'core.file_format': file_format(datapath),
         'core.group': 'dune',
-        'core.run_type': get_runtype(args),
+        'core.run_type': args.namespace,            # NOTE: must match namespace
         'core.runs': [get_runno(datapath)],
         'core.file_content_status': 'good',
 
@@ -226,6 +226,7 @@ def main():
     inputs.add_argument('--one', type=Path, help='One file to process')
     inputs.add_argument('--all', type=Path, help='Whole directory to process')
     ap.add_argument('--campaign', help='Name of campaign', required=True)
+    ap.add_argument('--namespace', help='metacat namespace to declare dataset to', choices=['neardet-lar-tms'])
     ap.add_argument('--mc', action='store_true',)
     ap.add_argument('--genie-tune', default='AR23_20i_00_000', help='Name of genie tune (CMC)')
     ap.add_argument('--nu', action='store_true', help='true for nu, false for rock')
