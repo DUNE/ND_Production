@@ -366,9 +366,9 @@ def dump(input_file, output_file, keep_all_dets=False):
             if len(event.SegmentDetectors) == 0:
                 continue
         else:
-            # If ARCUBE_ACTIVE_VOLUME is not set, default to previously hard
+            # If ND_PRODUCTION_ACTIVE_VOLUME is not set, default to previously hard
             # coded containerName.
-            if not any(containerName == os.environ.get("ARCUBE_ACTIVE_VOLUME", "volTPCActive")
+            if not any(containerName == os.environ.get("ND_PRODUCTION_ACTIVE_VOLUME", "volTPCActive")
                        for containerName, _hits in event.SegmentDetectors):
                 continue
 
@@ -440,9 +440,9 @@ def dump(input_file, output_file, keep_all_dets=False):
         # Dump the segment containers
         #print("Number of segment containers:", event.SegmentDetectors.size())
         for containerName, hitSegments in event.SegmentDetectors:
-            # If ARCUBE_ACTIVE_VOLUME is not set, default to previously hard
+            # If ND_PRODUCTION_ACTIVE_VOLUME is not set, default to previously hard
             # coded containerName.
-            if (not keep_all_dets) and containerName != os.environ.get("ARCUBE_ACTIVE_VOLUME", "volTPCActive"):
+            if (not keep_all_dets) and containerName != os.environ.get("ND_PRODUCTION_ACTIVE_VOLUME", "volTPCActive"):
                 continue
             segment = np.empty(len(hitSegments), dtype=segments_dtype)
             for iHit, hitSegment in enumerate(hitSegments):

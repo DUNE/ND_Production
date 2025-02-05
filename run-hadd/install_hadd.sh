@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 
-# assume Shifter if ARCUBE_RUNTIME is unset
-export ARCUBE_RUNTIME=${ARCUBE_RUNTIME:-SHIFTER}
+# assume Shifter if ND_PRODUCTION_RUNTIME is unset
+export ND_PRODUCTION_RUNTIME=${ND_PRODUCTION_RUNTIME:-SHIFTER}
 
 
 # Keep track of what container was set before.
-export ORG_ARCUBE_CONTAINER=$ARCUBE_CONTAINER
-export ARCUBE_CONTAINER=mjkramer/sim2x2:ndlar011
+export ORG_ND_PRODUCTION_CONTAINER=$ND_PRODUCTION_CONTAINER
+export ND_PRODUCTION_CONTAINER=mjkramer/sim2x2:ndlar011
 
 
-if [[ "$ARCUBE_RUNTIME" == "SHIFTER" ]]; then
+if [[ "$ND_PRODUCTION_RUNTIME" == "SHIFTER" ]]; then
     # Reload in Shifter
-    if [[ "$SHIFTER_IMAGEREQUEST" != "$ARCUBE_CONTAINER" ]]; then
-        shifter --image=$ARCUBE_CONTAINER --module=none -- "$0" "$@"
+    if [[ "$SHIFTER_IMAGEREQUEST" != "$ND_PRODUCTION_CONTAINER" ]]; then
+        shifter --image=$ND_PRODUCTION_CONTAINER --module=none -- "$0" "$@"
         exit
     fi
 
 else
-    echo "Unsupported \$ARCUBE_RUNTIME"
+    echo "Unsupported \$ND_PRODUCTION_RUNTIME"
     exit
 fi
 
@@ -29,7 +29,7 @@ g++ -o getGhepPOT.exe getGhepPOT.C `root-config --cflags --glibs`
 
 
 # Put back the original container
-export ARCUBE_CONTAINER=$ORG_ARCUBE_CONTAINER
+export ND_PRODUCTION_CONTAINER=$ORG_ND_PRODUCTION_CONTAINER
 
 
 exit

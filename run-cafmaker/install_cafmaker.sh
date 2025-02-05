@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-export ARCUBE_RUNTIME=SHIFTER
-export ARCUBE_CONTAINER=fermilab/fnal-wn-sl7:latest
+export ND_PRODUCTION_RUNTIME=SHIFTER
+export ND_PRODUCTION_CONTAINER=fermilab/fnal-wn-sl7:latest
 
 source ../util/reload_in_container.inc.sh
 

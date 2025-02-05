@@ -5,58 +5,57 @@ set -o pipefail
 
 # NOTE: We assume that this script is "sourced" from e.g.
 # run-edep-sim/run_edep_sim.sh and that the current working directory is e.g.
-# run-edep-sim. Parent dir should be root of 2x2_sim.
-
-# The root of 2x2_sim:
+# run-edep-sim. Parent dir should be root of ND_Production
+# The root of ND_Production:
 baseDir=$(realpath "$PWD"/..)
 
 # Start seeds at 1 instead of 0, just in case GENIE does something
 # weird when given zero (e.g. use the current time)
 # NOTE: We just use the fixed Edep default seed of ???.
-seed=$((1 + ARCUBE_INDEX))
+seed=$((1 + ND_PRODUCTION_INDEX))
 echo "Seed is $seed"
 
-# NOTE: ARCUBE_INDEX is a "number" while globalIdx is the zero-padded string
+# NOTE: ND_PRODUCTION_INDEX is a "number" while globalIdx is the zero-padded string
 # representation of that number. Don't do math with globalIdx! Bash may parse it
 # as an octal number.
 
-globalIdx=$(printf "%07d" "$ARCUBE_INDEX")
+globalIdx=$(printf "%07d" "$ND_PRODUCTION_INDEX")
 echo "globalIdx is $globalIdx"
 
-runOffset=${ARCUBE_RUN_OFFSET:-0}
-runNo=$((ARCUBE_INDEX + runOffset))
+runOffset=${ND_PRODUCTION_RUN_OFFSET:-0}
+runNo=$((ND_PRODUCTION_INDEX + runOffset))
 echo "runNo is $runNo"
 
 # Default to the root of the 2x2_sim repo (but ideally this should be set to
 # somewhere on $SCRATCH)
-ARCUBE_OUTDIR_BASE="${ARCUBE_OUTDIR_BASE:-$PWD/..}"
-mkdir -p "$ARCUBE_OUTDIR_BASE"
-ARCUBE_OUTDIR_BASE=$(realpath "$ARCUBE_OUTDIR_BASE")
-export ARCUBE_OUTDIR_BASE
+ND_PRODUCTION_OUTDIR_BASE="${ND_PRODUCTION_OUTDIR_BASE:-$PWD/..}"
+mkdir -p "$ND_PRODUCTION_OUTDIR_BASE"
+ND_PRODUCTION_OUTDIR_BASE=$(realpath "$ND_PRODUCTION_OUTDIR_BASE")
+export ND_PRODUCTION_OUTDIR_BASE
 
-ARCUBE_LOGDIR_BASE="${ARCUBE_LOGDIR_BASE:-$PWD/..}"
-mkdir -p "$ARCUBE_LOGDIR_BASE"
-ARCUBE_LOGDIR_BASE=$(realpath "$ARCUBE_LOGDIR_BASE")
-export ARCUBE_LOGDIR_BASE
+ND_PRODUCTION_LOGDIR_BASE="${ND_PRODUCTION_LOGDIR_BASE:-$PWD/..}"
+mkdir -p "$ND_PRODUCTION_LOGDIR_BASE"
+ND_PRODUCTION_LOGDIR_BASE=$(realpath "$ND_PRODUCTION_LOGDIR_BASE")
+export ND_PRODUCTION_LOGDIR_BASE
 
 # For "local" (i.e. non-container, non-CVMFS) installs of larnd-sim etc.
 # Default to run-larnd-sim etc.
-export ARCUBE_INSTALL_DIR=${ARCUBE_INSTALL_DIR:-$PWD}
+export ND_PRODUCTION_INSTALL_DIR=${ND_PRODUCTION_INSTALL_DIR:-$PWD}
 
 stepname=$(basename "$PWD")
 
-outDir=$ARCUBE_OUTDIR_BASE/${stepname}/$ARCUBE_OUT_NAME
+outDir=$ND_PRODUCTION_OUTDIR_BASE/${stepname}/$ND_PRODUCTION_OUT_NAME
 echo "outDir is $outDir"
-outName=$ARCUBE_OUT_NAME.$globalIdx
+outName=$ND_PRODUCTION_OUT_NAME.$globalIdx
 echo "outName is $outName"
 mkdir -p "$outDir"
 
-tmpOutDir=$ARCUBE_OUTDIR_BASE/tmp/$stepname/$ARCUBE_OUT_NAME
+tmpOutDir=$ND_PRODUCTION_OUTDIR_BASE/tmp/$stepname/$ND_PRODUCTION_OUT_NAME
 mkdir -p "$tmpOutDir"
 
-subDir=$(printf "%07d" $((ARCUBE_INDEX / 1000 * 1000)))
+subDir=$(printf "%07d" $((ND_PRODUCTION_INDEX / 1000 * 1000)))
 
-logBase=$ARCUBE_LOGDIR_BASE/$stepname/$ARCUBE_OUT_NAME
+logBase=$ND_PRODUCTION_LOGDIR_BASE/$stepname/$ND_PRODUCTION_OUT_NAME
 echo "logBase is $logBase"
 logDir=$logBase/LOGS/$subDir
 timeDir=$logBase/TIMING/$subDir

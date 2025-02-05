@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-fermilab/fnal-wn-sl7:latest}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:latest}
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
@@ -11,8 +11,8 @@ set +o errexit
 source static/setup_minerva.sh
 set -o errexit
 
-inDir=${ARCUBE_OUTDIR_BASE}/run-edep2flat/$ARCUBE_IN_NAME
-inName=$ARCUBE_IN_NAME.$globalIdx
+inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-edep2flat/$ND_PRODUCTION_IN_NAME
+inName=$ND_PRODUCTION_IN_NAME.$globalIdx
 inFile=$(realpath $inDir/FLAT/$subDir/${inName}.EDEPSIM_SPILLS.FLAT.root)
 
 

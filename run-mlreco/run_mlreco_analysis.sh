@@ -6,8 +6,8 @@ source ../util/init.inc.sh
 source load_mlreco.inc.sh
 
 outFile=${tmpOutDir}/${outName}.MLRECO_ANA.hdf5
-inName=${ARCUBE_IN_NAME}.${globalIdx}
-inFile=${ARCUBE_OUTDIR_BASE}/run-mlreco/${ARCUBE_IN_NAME}/MLRECO_INF/${subDir}/${inName}.MLRECO_INF.hdf5
+inName=${ND_PRODUCTION_IN_NAME}.${globalIdx}
+inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-mlreco/${ND_PRODUCTION_IN_NAME}/MLRECO_INF/${subDir}/${inName}.MLRECO_INF.hdf5
 config=ana_240403.cfg
 
 tmpDir=$(mktemp -d)

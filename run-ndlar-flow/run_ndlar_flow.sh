@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 
-# By default (i.e. if ARCUBE_RUNTIME isn't set), run on the host
-if [[ -z "$ARCUBE_RUNTIME" || "$ARCUBE_RUNTIME" == "NONE" ]]; then
+# By default (i.e. if ND_PRODUCTION_RUNTIME isn't set), run on the host
+if [[ -z "$ND_PRODUCTION_RUNTIME" || "$ND_PRODUCTION_RUNTIME" == "NONE" ]]; then
     if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
         module unload python 2>/dev/null
         module load python/3.11
     fi
     source ../util/init.inc.sh
-    source "$ARCUBE_INSTALL_DIR/flow.venv/bin/activate"
+    source "$ND_PRODUCTION_INSTALL_DIR/flow.venv/bin/activate"
 else
     source ../util/reload_in_container.inc.sh
     source ../util/init.inc.sh
-    if [[ -n "$ARCUBE_USE_LOCAL_PRODUCT" && "$ARCUBE_USE_LOCAL_PRODUCT" != "0" ]]; then
+    if [[ -n "$ND_PRODUCTION_USE_LOCAL_PRODUCT" && "$ND_PRODUCTION_USE_LOCAL_PRODUCT" != "0" ]]; then
         # Allow overriding the container's version
-        source "$ARCUBE_INSTALL_DIR/flow.venv/bin/activate"
+        source "$ND_PRODUCTION_INSTALL_DIR/flow.venv/bin/activate"
     fi
 fi
 
-inDir=${ARCUBE_OUTDIR_BASE}/run-larnd-sim/$ARCUBE_IN_NAME
-inName=$ARCUBE_IN_NAME.$globalIdx
+inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-larnd-sim/$ND_PRODUCTION_IN_NAME
+inName=$ND_PRODUCTION_IN_NAME.$globalIdx
 inFile=$(realpath $inDir/LARNDSIM/$subDir/${inName}.LARNDSIM.hdf5)
 
 outFile=$tmpOutDir/${outName}.FLOW.hdf5
@@ -38,7 +38,7 @@ workflow7='yamls/proto_nd_flow/workflows/light/light_event_reconstruction_mc.yam
 # charge-light trigger matching
 workflow8='yamls/proto_nd_flow/workflows/charge/charge_light_assoc_mc.yaml'
 
-cd "$ARCUBE_INSTALL_DIR"/ndlar_flow
+cd "$ND_PRODUCTION_INSTALL_DIR"/ndlar_flow
 
 # Ensure that the second h5flow doesn't run if the first one crashes. This also
 # ensures that we properly report the failure to the production system.
