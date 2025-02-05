@@ -14,12 +14,21 @@ using namespace std;
 
 enum class Format { UNDEFINED, NORMAL, COMPACT };
 static constexpr unsigned _fbsize_words = 5733 + 2;
+static constexpr float ceiling = 10; // where we start the simulation in y
+
+// Single module dimensions
+/*
 static constexpr float box_width[3] = {0.31039 * 2, 1.24078, 0.3151745 * 2}; // meters
 static constexpr float x_border[2] = {-3.10390000e-01,  3.10390000e-01};
 static constexpr float y_border[2] = {-8.38626000e-01,  4.02154000e-01};
 static constexpr float z_border[2] = {-3.15174500e-01,  3.15174500e-01};
+*/
 
-static constexpr float ceiling = 10; // where we start the simulation in y
+// FSD dimensions
+static constexpr float x_border[2] = { -4.67879982e-01,   4.67879982e-01};
+static constexpr float y_border[2] = {-14.879999841e-01, 14.879999841e-01};
+static constexpr float z_border[2] = { -4.761600031e-01,  4.761600031e-01};
+static constexpr float box_width[3] = {x_border[1]-x_border[0], y_border[1]-y_border[0], z_border[1]-z_border[0]};
 
 union {
     float fl[_fbsize_words];
