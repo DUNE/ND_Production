@@ -218,7 +218,7 @@ if __name__ == "__main__":
 
     # Make a bash script to run on the grid
     # Start with the template with functions used for all jobs
-    template = open("template.sh","r").readlines()
+    template = open("template.sh", "r").readlines()
     sh = open( "processnd.sh", "w" )
     sh.writelines(template)
 
