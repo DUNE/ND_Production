@@ -308,6 +308,8 @@ def dump(input_file, output_file, keep_all_dets=False):
         # Check that the edep-sim and GENIE trees have the same number of events
         if entries != genie_entries:
             print("Edep-sim tree and GENIE tree number of entries do not match!")
+            print("Edep-sim tree:", entries)
+            print("GENIE tree   :", genie_entries)
             return
 
     segments_list = list()
@@ -548,6 +550,7 @@ def dump(input_file, output_file, keep_all_dets=False):
             nu_4mom = np.empty((4,), dtype='f4')
             lep_4mom = np.empty((4,), dtype='f4')
             nu_pdg = 0
+            lep_pdg = 0
             target_pdg = 0
 
             # Create particle stack dataset
