@@ -20,8 +20,8 @@ setup corsika
 # setup python v3_9_15
 
 NSHOW=${ARCUBE_NSHOW:-10000}
-RNDSEED=110
-RNDSEED2=1210
+RNDSEED=${runNo}
+RNDSEED2=$(($runNo * 1000 + 1))
 
 if [ "${ARCUBE_LOC}" == "BERN" ]; then
     # Bern (single module tests)
@@ -72,7 +72,7 @@ ELMFLG  F   T                          em. interaction flags (NKG,EGS)
 STEPFC  1.0                            mult. scattering step length fact.
 RADNKG  200.E2                         outer radius for NKG lat.dens.distr.
 ARRANG  0                              rotation of array to north
-ATMOD   1                                    U.S. standard atmosphere (1-Linsley; 22-Keilhauer)
+ATMOD   1                              U.S. standard atmosphere (1-Linsley; 22-Keilhauer)
 LONGI   F  20.  F  F                   longit.distr. & step size & fit & out
 ECTMAP  1.E2                           cut on gamma factor for printout
 MAXPRT  0                            max. number of printed events
@@ -86,12 +86,15 @@ EOF
 }
 gen_corsika_config
 
-corsika77400Linux_QGSJET_fluka < corsika_${runNo}.cfg #> ${logDir}/corsika.${runNo}.log
+corsika77400Linux_QGSJET_fluka < corsika_${runNo}.cfg
 
-printf -v CORSIKA_OUTPUT "DAT%.6d" ${runNo}
+# printf -v CORSIKA_OUTPUT "DAT%.6d" ${runNo}
 # mv ${CORSIKA_OUTPUT} ${outDir}/${outName}.dat
 
 export ARCUBE_CONTAINER=$ORG_ARCUBE_CONTAINER
+
+# For now delete cfg file
+rm corsika_${runNo}.cfg
 
 # Clean up after CORSIKA
 if [ -f .timer.out ]; then

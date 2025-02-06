@@ -3,7 +3,7 @@
 source ../util/init.inc.sh
 
 echo "Running CORSIKA..."
-./run_corsika.sh
+run ./run_corsika.sh
 
 echo "Running conversion..."
-./run_convert.sh
+run ./run_convert.sh
