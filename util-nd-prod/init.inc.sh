@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: keep this ND_Production-specific utils dir for now. Ideally, we have just one `utils` with only ND_PRODUCTION env vars.
+
 set -o errexit
 set -o pipefail
 

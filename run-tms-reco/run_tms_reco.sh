@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-
-source ../util/reload_in_container.inc.sh
+source ../util-nd-prod/reload_in_container.inc.sh
 
 # Setup environment.
 setup() {
@@ -20,7 +19,7 @@ setup() {
 setup
 
 # Must go after setup.
-source ../util/init.inc.sh
+source ../util-nd-prod/init.inc.sh
 
 
 inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-spill-build/$ND_PRODUCTION_SPILL_NAME
