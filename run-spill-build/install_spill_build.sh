@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# the ARCUBE_CONTAINER here.
+export ARCUBE_CONTAINER=mjkramer/sim2x2:genie_edep.3_04_00.20230620
+
 # assume Shifter if ARCUBE_RUNTIME is unset
 export ARCUBE_RUNTIME=${ARCUBE_RUNTIME:-SHIFTER}
 
