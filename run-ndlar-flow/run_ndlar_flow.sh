@@ -24,6 +24,11 @@ inFile=$(realpath $inDir/LARNDSIM/$subDir/${inName}.LARNDSIM.hdf5)
 outFile=$tmpOutDir/${outName}.FLOW.hdf5
 rm -f "$outFile"
 
+if [[ "$ARCUBE_COMPRESS" != "" ]]; then
+    echo "Enabling compression of HDF5 datasets with $ARCUBE_COMPRESS"
+    compression="-z $ARCUBE_COMPRESS"
+fi
+
 # charge workflows
 workflow1='yamls/proto_nd_flow/workflows/charge/charge_event_building_mc.yaml'
 workflow2='yamls/proto_nd_flow/workflows/charge/charge_event_reconstruction_mc.yaml'
@@ -45,16 +50,16 @@ cd "$ARCUBE_INSTALL_DIR"/ndlar_flow
 set -o errexit
 
 #run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5\
-#    -i "$inFile" -o "$outFile"
+#    -i "$inFile" -o "$outFile" $compression
 
-run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5\
-    -i "$inFile" -o "$outFile"
+run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 \
+    -i "$inFile" -o "$outFile" $compression
 
 run h5flow -c $workflow6 $workflow7\
-    -i "$inFile" -o "$outFile"
+    -i "$inFile" -o "$outFile" $compression
 
 run h5flow -c $workflow8\
-    -i "$outFile" -o "$outFile"
+    -i "$outFile" -o "$outFile" $compression
 
 mkdir -p "$outDir/FLOW/$subDir"
 mv "$outFile" "$outDir/FLOW/$subDir"
