@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/prelude.inc.sh"
+
 export ARCUBE_RUNTIME=${ARCUBE_RUNTIME:-NONE}
 
 if [[ "$ARCUBE_RUNTIME" == "SHIFTER" ]]; then
