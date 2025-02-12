@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 
-set -o errexit
+source ../util/init.inc.sh
 
-## CUDA 12.2 makes us crash :(
-# module load cudatoolkit/12.2
-module load cudatoolkit/11.7
-module load python/3.11
+setup_cuda
 
 installDir=${1:-.}
 venvName=larnd.venv
