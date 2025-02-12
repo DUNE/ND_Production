@@ -5,7 +5,7 @@
 
 # see also https://github.com/lbl-neutrino/larnd-sim-example/setup.inc.sh
 
-source ../../util/init.inc.sh
+source ../../util/prelude.inc.sh
 
 setup_cuda
 

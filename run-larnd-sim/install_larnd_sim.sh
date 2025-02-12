@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ../util/init.inc.sh
+source ../util/prelude.inc.sh
 
 setup_cuda
 
