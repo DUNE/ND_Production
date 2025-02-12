@@ -46,8 +46,10 @@ fi
 # The below runs in the "reloaded" process
 
 if [[ "$ARCUBE_RUNTIME" == "SHIFTER" ]]; then
-    if [[ -e /environment ]]; then
-        source /environment # apptainer-built containters
+    if [[ -e /environment ]]; then  # apptainer-built containters
+        set +o errexit              # /environment can return nonzero
+        source /environment
+        set -o errexit
         # Our podman-built containers automagically load the env via $BASH_ENV
         # In their case the file of interest is /opt/environment
     fi
