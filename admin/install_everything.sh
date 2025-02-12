@@ -9,6 +9,14 @@
 
 set -o errexit
 
+if [ -z "$1" ]; then
+  echo "Installation is detector specific, you must pass either '2x2' or 'ndlar' as"
+  echo "the first positional argument of this script."
+  exit 1
+fi
+
+detector=$1
+
 # This is the "default" container. It can be overridden by exporting
 # ARCUBE_CONTAINER before running e.g. run_edep_sim.sh
 # export ARCUBE_RUNTIME="SHIFTER"
@@ -45,7 +53,7 @@ pushd run-ndlar-flow
 popd
 
 pushd run-pandora
-./install_pandora.sh
+./install_pandora.sh "$detector"
 popd
 
 pushd run-mlreco
