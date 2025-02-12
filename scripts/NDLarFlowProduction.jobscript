@@ -286,23 +286,21 @@ get_ordered_light_files() {
 # Get the range of events to process for the light+charge combination workflow
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 get_range_for_light_workflow() {
-   TMP_DIR=${WORKSPACE}
+   TMP_DIR="/tmp" 
    if [ ${JOBSCRIPT_TEST} -eq 1 ]; then
-	   TMP_DIR=/pnfs/dune/scratch/users/${USER}/NDLAR_FLOW_JUSTIN_TMP/$(date +"%Y-%m-%d-%H-%M-%S")/tmp
+      TMP_DIR="/exp/dune/data/users/${USER}/NDLAR_FLOW_JUSTIN_TMP/tmp"
       if [ ! -d ${TMP_DIR} ]; then
-          mkdir -p ${TMP_DIR}
-	  chmod -R 775 ${TMP_DIR}
+           mkdir -p ${TMP_DIR}
       fi
    fi
    IFS=" " read -a LIGHT_INPUT_FILES <<< "$LIGHT_FILENAMES";
-   LIGHT_WORKFLOW="${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME}" 
-   RANGE_SCRIPT="python ${CVMFS_WORKING_DIR}/ndlar_scripts/get_light_event_range.py"
+   WORKFLOW="${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME}" 
+   CHARGEF="${WORKSPACE}/${INPUT_FILE/binary/packet}"
+   FIRSTLIGHTF="${WORKSPACE}/${LIGHT_INPUT_FILES[0]}"
+   LASTLIGHTF="${WORKSPACE}/${LIGHT_INPUT_FILES[-1]}"
+   RANGE_SCRIPT="python3 ${CVMFS_WORKING_DIR}/ndlar_scripts/get_light_event_range.py"
    #RANGE_SCRIPT="python /exp/dune/app/users/twalton/2x2ProdWorkspace/ndlar_reflow/scripts/get_light_event_range.py"
-   ${RANGE_SCRIPT} --workflow="${LIGHT_WORKFLOW}" \
-                   --chargef="${WORKSPACE}/${INPUT_FILE/binary/packet}" \
-                   --first-lightf="${WORKSPACE}/${LIGHT_INPUT_FILES[0]}" \
-                   --last-lightf="${WORKSPACE}/${LIGHT_INPUT_FILES[-1]}" \
-                   --tmpdir="${TMP_DIR}"
+   ${RANGE_SCRIPT} --workflow=${WORKFLOW} --chargef=${CHARGEF} --first-lightf=${FIRSTLIGHTF} --last-lightf=${LASTLIGHTF} --tmpdir=${TMP_DIR}
 }
 
 
@@ -358,26 +356,26 @@ execute_light_workflow() {
       echo -e "\t\tRunning the light workflow: [ ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} ]\n" 2>&1 | tee -a $envlog 
       ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${LIGHT_INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} | tee -a $LIGHT_OUTPUT_LOGFILE 
    elif [[ "${DATA_STREAM}" == "combined" ]]; then
-  
         read -r -a LIGHT_EVENT_RANGE <<< "$(get_range_for_light_workflow)"
-        echo -e "\t\tFor the light+charge combination workflow, the LIGHT_EVENT_RANGE is [ ${LIGHT_EVENT_RANGE[@]} :: ${#LIGHT_EVENT_RANGE[@]} ]" 2>&1 | tee -a $envlog
-        #if [[ "`echo ${#LIGHT_EVENT_RANGE[@]}`" == "0" ]]; then
-        #   echo -e "\t\tFailed to get the event range for the input light files" 2>&1 | tee -a $envlog
-        #   exit 0
-        #fi
+        echo -e "\t\tFor the light+charge combination workflow, the LIGHT_EVENT_RANGE is [ start(${LIGHT_EVENT_RANGE[0]}) :: end(${LIGHT_EVENT_RANGE[1]}) ]" 2>&1 | tee -a $envlog
+        if [[ "`echo ${#LIGHT_EVENT_RANGE[@]}`" == "0" ]]; then
+           echo -e "\t\tFailed to get the event range for the input light files" 2>&1 | tee -a $envlog
+           exit 0
+        fi
 
         echo -e "\t\tRunning the iterative light workflow.\n" 2>&1 | tee -a $envlog
         for filename in "${LIGHT_INPUT_FILES[@]}"; 
         do 
-            #if [[ "$filename" == "${LIGHT_INPUT_FILES[0]}" ]]; then
-            #   H5FLOW_WORKFLOW="${H5FLOW_WORKFLOW} --start_position=${LIGHT_EVENT_RANGE[0]}"
-            #elif [[ "$filename" == "${LIGHT_INPUT_FILES[-1]}" ]]; then
-            #   H5FLOW_WORKFLOW="${H5FLOW_WORKFLOW} --end_position=${LIGHT_EVENT_RANGE[1]}"
-            #fi
+            if [[ "$filename" == "${LIGHT_INPUT_FILES[0]}" && "${LIGHT_EVENT_RANGE[0]}" -ne "-1" ]]; then
+               H5FLOW_WORKFLOW="${H5FLOW_WORKFLOW} --start_position=${LIGHT_EVENT_RANGE[0]}"
+            elif [[ "$filename" == "${LIGHT_INPUT_FILES[-1]}" && "${LIGHT_EVENT_RANGE[1]}" -ne "-1" ]]; then
+               H5FLOW_WORKFLOW="${H5FLOW_WORKFLOW} --end_position=${LIGHT_EVENT_RANGE[1]}"
+            fi
 
             echo -e "\t\t  [ ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${filename} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME} ]" 2>&1 | tee -a $envlog
             ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${filename} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME} >> $LIGHT_OUTPUT_LOGFILE
         done
+
         echo -e "\t\t  [ ${H5FLOW_WORKFLOW} -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME} ]" 2>&1 | tee -a $envlog
         ${H5FLOW_WORKFLOW} -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME} >> $LIGHT_OUTPUT_LOGFILE
    fi
