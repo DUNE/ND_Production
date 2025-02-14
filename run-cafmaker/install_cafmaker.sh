@@ -5,8 +5,10 @@ export ARCUBE_CONTAINER=fermilab/fnal-wn-sl7:latest
 
 source ../util/reload_in_container.inc.sh
 
+set +o errexit
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup edepsim v3_2_0c -q e20:prof
+set -o errexit
 
 mkdir install
 cd install

@@ -5,7 +5,9 @@ export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-fermilab/fnal-wn-sl7:latest}
 source ../util/reload_in_container.inc.sh
 
 cd install/ND_CAFMaker
+set +o errexit
 source ndcaf_setup.sh
+set -o errexit
 cd ../..
 
 # Must go after ndcaf_setup.sh
