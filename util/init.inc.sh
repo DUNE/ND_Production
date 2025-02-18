@@ -64,9 +64,47 @@ mkdir -p "$logDir" "$timeDir"
 logFile=$logDir/$outName.log
 timeFile=$timeDir/$outName.time
 
-timeProg=/usr/bin/time
+# to download time I need to download wget, if not already present,
+if [ ! $(command -v wget) ]; then
+  yum install -y wget
+fi
+
+# if GNU time is already present in /usr/tmp
+timeProg=time
+# if not present there, we include the one present in /PWD/tmp_bin
 # HACK in case we forget to include GNU time in a container
-[[ ! -e "$timeProg" ]] && timeProg=$PWD/../tmp_bin/time
+[[ ! -e "$timeProg" ]] && timeProg=$TWOBYTWO_SIM/tmp_bin/time
+
+# if time is not installed, then install in this way
+if [ ! -e "$timeProg" ]; then
+  TMP_BIN="$TWOBYTWO_SIM/tmp_bin"
+
+  if [ ! -d "$TMP_BIN" ]; then
+      mkdir - p "$TMP_BIN" || { echo "Failed to create $TMP_BIN"; exit 1; }
+  fi
+
+  echo "pwd is $PWD"
+  echo "2x2-sim is $TWOBYTWO_SIM"
+
+  # if [ -z "$TWOBYTWO_SIM" ]; then
+  #   echo "Error: TWOBYTWO_SIM is not set" 
+  #   exit 1
+  # fi
+  
+  cd "$TWOBYTWO_SIM/tmp_bin" # || { echo "Failed to cd into $TWOBYTWO_SIM/tmp_bin"; exit 1; }
+
+  wget -q https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/bin/time || {
+    echo "Download failed"
+    exit 1
+    } 
+    timeProg=$TWOBYTWO_SIM/tmp_bin/time
+
+    if [ ! -x $timeProg ]; then
+      chmod +x "$timeProg"
+    fi
+fi
+
+cd $PWD
 
 run() {
     echo RUNNING "$@" | tee -a "$logFile"

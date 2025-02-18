@@ -28,6 +28,18 @@ elif [[ "$ARCUBE_RUNTIME" == "SINGULARITY" ]]; then
         exit
     fi
 
+elif [[ "$ARCUBE_RUNTIME" == "APPTAINER" ]]; then
+    # Or reload in Singularity
+    echo "run time $ARCUBE_RUNTIME"
+    echo "apptainer name $APPTAINER_NAME"
+    if [[ "$APPTAINER_NAME" != "$ARCUBE_CONTAINER" ]]; then
+        echo "sono dentro all'if"
+        apptainer exec -B $ARCUBE_DIR $ARCUBE_CONTAINER_DIR/$ARCUBE_CONTAINER /bin/bash "$0" "$@"
+        echo "$0"
+        echo "sono dopo apptainer exec"
+        exit
+    fi
+
 elif [[ "$ARCUBE_RUNTIME" == "PODMAN-HPC" ]]; then
     # The 2x2_sim directory:
     arcube_dir=$(realpath $(dirname "$BASH_SOURCE")/..)
@@ -67,6 +79,12 @@ if [[ "$ARCUBE_RUNTIME" == "SHIFTER" ]]; then
 elif [[ "$ARCUBE_RUNTIME" == "SINGULARITY" ]]; then
     # "singularity pull" overwrites /environment
     source "$ARCUBE_DIR"/admin/container_env."$ARCUBE_CONTAINER".sh
+elif [[ "$ARCUBE_RUNTIME" == "APPTAINER" ]]; then
+    # "singularity pull" overwrites /environment
+    # source environment
+    # echo "siamo prima di source container.sh"
+    source "$ARCUBE_DIR"/admin/container_env."$ARCUBE_CONTAINER".sh
+    # echo "sono dopo source container.sh"
 elif [[ "$ARCUBE_RUNTIME" == "PODMAN-HPC" ]]; then
     # Ideally, we'd just tell podman-hpc to overlay the host's libcudart and
     # libcudablas into the container's /usr/lib64, but that currently produces a

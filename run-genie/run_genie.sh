@@ -2,10 +2,14 @@
 
 export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:genie_edep.3_04_00.20230912}
 
+cd $PWD
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
-dk2nuAll=("$ARCUBE_DK2NU_DIR"/*.dk2nu*)
+# dk2nuAll=("$ARCUBE_DK2NU_DIR"/*.dk2nu*)
+dk2nuAll=$(find "$ARCUBE_DK2NU_DIR" -type f -name "*.dk2nu*" -exec basename {} \;)
+echo "dk2nuAll is $dk2nuAll"
+dk2nuAll=($dk2nuAll)
 dk2nuCount=${#dk2nuAll[@]}
 dk2nuIdx=$((ARCUBE_INDEX % dk2nuCount))
 dk2nuFile=${dk2nuAll[$dk2nuIdx]}
@@ -15,6 +19,10 @@ echo "dk2nuFile is $dk2nuFile"
 export GXMLPATH=$PWD/flux            # contains GNuMIFlux.xml
 maxPathFile=$PWD/maxpath/$(basename "$ARCUBE_GEOM" .gdml).$ARCUBE_TUNE.maxpath.xml
 USE_MAXPATH=1
+
+# Evaluate max path lengths from ROOT geometry file
+# gmxpl -f /storage/gpfs_data/neutrino/users/gsantoni/2x2_sim/geometry-sand/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.root -L cm -D g_cm3 -o /storage/gpfs_data/neutrino/users/gsantoni/2x2_sim/run-genie/maxpath/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.$ARCUBE_TUNE.maxpath.xml -seed 21304 --message-thresholds /opt/exp_software/neutrino/al9/GENIE/R-3_04_02/source/config/Messenger_whisper.xml  &> ${ARCUBE_OUTDIR_BASE}/gmxpl.log
+
 if [ ! -f "$maxPathFile" ]; then
     echo ""
     echo "WARNING!!! .maxpath.xml file not found. Is this what you intended???"

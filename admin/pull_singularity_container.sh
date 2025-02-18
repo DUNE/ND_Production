@@ -25,7 +25,8 @@ mkdir -p $SINGULARITY_TMPDIR
 echo "Pulling container... this will take O(1 hour)..."
 echo "Container name: ${CONTAINER_NAME}"
 
-singularity pull docker://mjkramer/${CONTAINER_NAME}
+# singularity pull docker://mjkramer/${CONTAINER_NAME}
+apptainer pull docker://mjkramer/${CONTAINER_NAME}
 
 mv ${CONTAINER_NAME//:/_}.sif $ARCUBE_CONTAINER_DIR
 echo "Finished."
