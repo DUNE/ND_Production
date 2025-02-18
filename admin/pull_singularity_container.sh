@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ARCUBE_CONTAINER_DIR="/storage/gpfs_data/neutrino/users/gsantoni/containers"
+
 # module load singularity
 if [[ -z "$ARCUBE_CONTAINER_DIR" ]]; then
     echo "Set \$ARCUBE_CONTAINER_DIR to a directory to store singularity container file."
@@ -14,11 +16,11 @@ else
     mkdir $ARCUBE_CONTAINER_DIR
 fi
 
-export SINGULARITY_CACHEDIR=$ARCUBE_CONTAINER_DIR/.singularity
-export SINGULARITY_TMPDIR=$ARCUBE_CONTAINER_DIR/.singularity/tmp
+export APPTAINER_CACHEDIR=$ARCUBE_CONTAINER_DIR/.singularity 
+export APPTAINER_TMPDIR=$ARCUBE_CONTAINER_DIR/.singularity/tmp
 
 # edit to pull a different container
-CONTAINER_NAME='sim2x2:genie_edep.LFG_testing.20230228.v2'
+CONTAINER_NAME='sim2x2:genie_edep.3_04_00.20230912'
 
 mkdir -p $SINGULARITY_TMPDIR
 

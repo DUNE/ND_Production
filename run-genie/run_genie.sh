@@ -7,7 +7,7 @@ source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 # dk2nuAll=("$ARCUBE_DK2NU_DIR"/*.dk2nu*)
-dk2nuAll=$(find "$ARCUBE_DK2NU_DIR" -type f -name "*.dk2nu*" -exec basename {} \;)
+dk2nuAll=$(find "$ARCUBE_DK2NU_DIR" -type f -name "*.dk2nu*" -exec realpath {} \;)
 echo "dk2nuAll is $dk2nuAll"
 dk2nuAll=($dk2nuAll)
 dk2nuCount=${#dk2nuAll[@]}
