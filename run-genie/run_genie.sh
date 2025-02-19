@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:genie_edep.3_04_00.20230912}
+# export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:genie_edep.3_04_00.20230912}
 
-cd $PWD
+# cd $PWD
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
@@ -18,6 +18,7 @@ echo "dk2nuFile is $dk2nuFile"
 
 export GXMLPATH=$PWD/flux            # contains GNuMIFlux.xml
 maxPathFile=$PWD/maxpath/$(basename "$ARCUBE_GEOM" .gdml).$ARCUBE_TUNE.maxpath.xml
+echo "maxpathfile is $maxPathFile"
 USE_MAXPATH=1
 
 # Evaluate max path lengths from ROOT geometry file

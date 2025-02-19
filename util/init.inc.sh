@@ -73,38 +73,40 @@ fi
 timeProg=time
 # if not present there, we include the one present in /PWD/tmp_bin
 # HACK in case we forget to include GNU time in a container
-[[ ! -e "$timeProg" ]] && timeProg=$TWOBYTWO_SIM/tmp_bin/time
+[[ ! -e "$timeProg" ]] && timeProg=$ND_PRODUCTION/tmp_bin/time
 
 # if time is not installed, then install in this way
 if [ ! -e "$timeProg" ]; then
-  TMP_BIN="$TWOBYTWO_SIM/tmp_bin"
+  TMP_BIN="$ND_PRODUCTION/tmp_bin"
 
   if [ ! -d "$TMP_BIN" ]; then
       mkdir - p "$TMP_BIN" || { echo "Failed to create $TMP_BIN"; exit 1; }
   fi
 
   echo "pwd is $PWD"
-  echo "2x2-sim is $TWOBYTWO_SIM"
+  echo "ND_Production is $ND_PRODUCTION"
 
   # if [ -z "$TWOBYTWO_SIM" ]; then
   #   echo "Error: TWOBYTWO_SIM is not set" 
   #   exit 1
   # fi
   
-  cd "$TWOBYTWO_SIM/tmp_bin" # || { echo "Failed to cd into $TWOBYTWO_SIM/tmp_bin"; exit 1; }
+  cd "$ND_PRODUCTION/tmp_bin" # || { echo "Failed to cd into $ND_PRODUCTION/tmp_bin"; exit 1; }
 
   wget -q https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/bin/time || {
     echo "Download failed"
     exit 1
     } 
-    timeProg=$TWOBYTWO_SIM/tmp_bin/time
+    timeProg=$ND_PRODUCTION/tmp_bin/time
 
     if [ ! -x $timeProg ]; then
       chmod +x "$timeProg"
     fi
 fi
 
+echo "pwd after tmp_bin is $PWD"
 cd $PWD
+echo "************pwd after second cd is $PWD"
 
 run() {
     echo RUNNING "$@" | tee -a "$logFile"
