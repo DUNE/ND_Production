@@ -167,7 +167,7 @@ if __name__ == '__main__' :
    # get the metadata
    metadata = info['metadata']
    run      = metadata['core.runs'][0]
-   subrun   = int(metadata['core.runs_subruns'][0] - run*1e4)
+   subrun   = int(metadata['core.runs_subruns'][0] - run*1e5)
 
    # get the runs/subruns for the matching light files
    lightInfoCont = _GetLightMetadata(run,subrun)
