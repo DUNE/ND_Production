@@ -61,8 +61,8 @@ def _Update2x2Metadata(did) :
 
     runs_subruns = run*100000+sub
     
-    updated_metadata = did
-    updated_metadata['metadata']['core.runs_subruns'][0] = runs_subruns
+    updated_metadata = dict()
+    updated_metadata['core.runs_subruns'] = [runs_subruns]
 
     return updated_metadata
 
@@ -78,8 +78,8 @@ def _UpdateMx2Metadata(did) :
     subrun       = int(filename.split('_')[2])
     runs_subruns = run*100000+subrun 
 
-    updated_metadata = did
-    updated_metadata['metadata']['core.runs_subruns'][0] = runs_subruns
+    updated_metadata = dict()
+    updated_metadata['core.runs_subruns'] = [runs_subruns]
 
     return updated_metadata 
 
