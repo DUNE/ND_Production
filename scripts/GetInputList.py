@@ -18,10 +18,9 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
    main_query = "files where namespace=neardet-2x2-lar-light and creator=dunepro and core.data_tier=raw"
 
    for lightInfo in lightInfoCont :
-       lrun    = lightInfo[0]
-       lsubrun = lightInfo[1]
-       query   = "%s and core.runs[0]=%s and core.runs_subruns[0]=%s" % (main_query,lrun,lsubrun)
-      
+       lrun    = int(lightInfo[0])
+       lsubrun = int(lrun*1e5 + int(lightInfo[1]))
+       query   = "%s and core.runs[0]=%d and core.runs_subruns[0]=%d" % (main_query,lrun,lsubrun)
        cmd     = "metacat query \"%s\"" % query
        proc    = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
        stdout, error = proc.communicate() #[0].decode('ascii')
