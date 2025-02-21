@@ -255,16 +255,16 @@ fi
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
 get_ordered_light_files() {
    declare -a subruns
-   for filename in ${WORKSPACE}/*.data;
+   for filename in ${WORKSPACE}/*.data*;
    do
-       subrun=`echo $filename | cut -f6 -d'_' | cut -f1 -d'.' | tr -d p`  
+       subrun=`echo $filename | cut -f6 -d'_' | cut -f1 -d'.' | tr -d p` 
        subruns+=($(($subrun)))
    done
    sorted_subruns=($(echo "${subruns[@]}" | tr ' ' '\n' | sort -n))
    outnames=()
    for s in "${sorted_subruns[@]}";
    do
-       for filename in {WORKSPACE}/*.data;
+       for filename in ${WORKSPACE}/*.data*;
        do
            subrun=`echo $filename | cut -f6 -d'_' | cut -f1 -d'.' | tr -d p` 
            if [[ "${subrun}" == "${s}" ]]; then
