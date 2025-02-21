@@ -82,14 +82,13 @@ def _GetGlobalSubrun(metadata) :
     for run_subrun in runs_subruns :
      
         config = ""
-        run    = run_subrun[0][0]
+        run    = int(run_subrun[0][0])
+        sub    = int(int(run_subrun[1][0]) - run*1e5)
 
         if run_subrun[2] == "neardet-2x2-lar-light" :
            config = "lrs"
-           sub    = run_subrun[1][0]
         elif run_subrun[2] == "neardet-2x2-lar-charge" :
            config = "crs"
-           sub    = int(run_subrun[1][0] - run*1e4)
         else :
            print("\tThe run_type [%s] is not implemented. Cannot get the metadata." % run_subrun[2])
            return []
@@ -223,14 +222,9 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     return_md['core.runs'] = runs
 
     # get the runs_subruns
-    tmp = [] 
-    for m in metadata_blocks :
-        subrun_list = m.get('core.runs_subruns')
-        if DETECTOR_CONFIG == "proto_nd" and RUN_PERIOD == "run1" and m.get('core.run_type') == "neardet-2x2-lar-light" :
-           tmp.extend( _GetFixedMetadata(m) ) 
-        else :
-           tmp.extend( [ num for num in subrun_list ] )
-    subruns = list(OrderedDict.fromkeys(tmp))
+    subrun_list = [m.get('core.runs_subruns') for m in metadata_blocks]
+    tmp         = [ n for nums in subrun_list for n in nums ]
+    subruns     = list(OrderedDict.fromkeys(tmp))
     return_md['core.runs_subruns'] = subruns
 
     # get the run_type

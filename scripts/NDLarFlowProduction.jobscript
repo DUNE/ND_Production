@@ -132,6 +132,7 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
    (
       echo -e "\tSetting up the data management tools." 2>&1 | tee -a $envlog
       export GET_INPUT_LIGHT_FILES_SCRIPT=${CVMFS_WORKING_DIR}/ndlar_scripts/GetInputList.py
+      #export GET_INPUT_LIGHT_FILES_SCRIPT=/exp/dune/app/users/twalton/2x2ProdWorkspace/ND_Production/scripts/GetInputList.py
 
       source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
       source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
@@ -165,10 +166,8 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
       exit 0
    fi     
 
-   cd ${namespace}
-   IFS=", " read -a filenames <<< "`ls -xm *.data*`";
-
-   for filename in "${filenames[@]}";
+   cd ${namespace} 
+   for filename in * ;
    do
       PARENT_FILES+=("${namespace}:${filename}")
    done  
@@ -178,7 +177,6 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
    cd ${WORKSPACE} 
    mv ${namespace}/*.data* ${WORKSPACE}/
    rm -rf ${namespace}
-   echo -e "\tThe matching light files are [${filenames[@]}]." 2>&1 | tee -a $envlog
 fi
 
 
@@ -257,9 +255,7 @@ fi
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
 get_ordered_light_files() {
    declare -a subruns
-   lfiles=`ls -xm --width=1000 ${WORKSPACE}/*.data*`  
-   IFS="," read -a filenames <<< "$lfiles";
-   for filename in "${filenames[@]}"; 
+   for filename in ${WORKSPACE}/*.data;
    do
        subrun=`echo $filename | cut -f6 -d'_' | cut -f1 -d'.' | tr -d p`  
        subruns+=($(($subrun)))
@@ -268,7 +264,7 @@ get_ordered_light_files() {
    outnames=()
    for s in "${sorted_subruns[@]}";
    do
-       for filename in "${filenames[@]}";
+       for filename in {WORKSPACE}/*.data;
        do
            subrun=`echo $filename | cut -f6 -d'_' | cut -f1 -d'.' | tr -d p` 
            if [[ "${subrun}" == "${s}" ]]; then
@@ -350,7 +346,7 @@ execute_light_workflow() {
    echo -e "\tThe light output file names are [${LIGHT_OUTPUT_DATAFILE}, ${LIGHT_OUTPUT_LOGFILE}]"  2>&1 | tee -a $envlog
 
    cd ${NDLAR_FLOW_WORKSPACE}
-   H5FLOW_WORKFLOW="h5flow --nompi"
+   H5FLOW_WORKFLOW="h5flow"
 
    if [[ "${DATA_STREAM}" == "light" ]]; then
       echo -e "\t\tRunning the light workflow: [ ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} ]\n" 2>&1 | tee -a $envlog 
@@ -370,6 +366,8 @@ execute_light_workflow() {
                H5FLOW_WORKFLOW="${H5FLOW_WORKFLOW} --start_position=${LIGHT_EVENT_RANGE[0]}"
             elif [[ "$filename" == "${LIGHT_INPUT_FILES[-1]}" && "${LIGHT_EVENT_RANGE[1]}" -ne "-1" ]]; then
                H5FLOW_WORKFLOW="${H5FLOW_WORKFLOW} --end_position=${LIGHT_EVENT_RANGE[1]}"
+            else 
+              H5FLOW_WORKFLOW="h5flow"
             fi
 
             echo -e "\t\t  [ ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${filename} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME} ]" 2>&1 | tee -a $envlog
@@ -377,7 +375,7 @@ execute_light_workflow() {
         done
 
         echo -e "\t\t  [ ${H5FLOW_WORKFLOW} -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME} ]" 2>&1 | tee -a $envlog
-        ${H5FLOW_WORKFLOW} -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME} >> $LIGHT_OUTPUT_LOGFILE
+        h5flow -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME} >> $LIGHT_OUTPUT_LOGFILE
    fi
 
    echo -e "\tMoving the file(s) to the outfiles directory" 2>&1 | tee -a $envlog
