@@ -20,7 +20,10 @@ export APPTAINER_CACHEDIR=$ARCUBE_CONTAINER_DIR/.apptainer
 export APPTAINER_TMPDIR=$ARCUBE_CONTAINER_DIR/.apptainer/tmp
 
 # edit to pull a different container
-CONTAINER_NAME='sim2x2:genie_edep.3_04_00.20230912'
+# GENIE
+# CONTAINER_NAME='sim2x2:genie_edep.3_04_00.20230912'
+# EDEPSIM
+CONTAINER_NAME='sim2x2:ndlar011'
 
 mkdir -p $APPTAINER_TMPDIR
 

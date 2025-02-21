@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:ndlar011}
+# export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:ndlar011}
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
@@ -19,7 +19,7 @@ rm -f "$edepRootFile"
 edepCode="/generator/kinematics/rooTracker/input $genieFile
 /edep/runId $runNo"
 
-# The geometry file is given relative to the root of 2x2_sim
+# The geometry file is given relative to the root of ND_Production
 export ARCUBE_GEOM_EDEP=$baseDir/${ARCUBE_GEOM_EDEP:-$ARCUBE_GEOM}
 
 run edep-sim -C -g "$ARCUBE_GEOM_EDEP" -o "$edepRootFile" -e "$nEvents" \

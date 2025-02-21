@@ -12,8 +12,8 @@ export ARCUBE_CONTAINER_DIR="/storage/gpfs_data/neutrino/users/gsantoni/ND_Produ
 export ARCUBE_DIR=$ND_PRODUCTION
 
 # set the variables for init.inc.sh
-export ARCUBE_OUTDIR_BASE=$ND_PRODUCTION/productions
-export ARCUBE_LOGDIR_BASE=$ND_PRODUCTION/log
+export ARCUBE_OUTDIR_BASE=$ND_PRODUCTION/productions-NOSOURCE
+export ARCUBE_LOGDIR_BASE=$ND_PRODUCTION/log-NOSOURCE
 export ARCUBE_OUT_NAME="genie-arcube-events"
 
 # set the variables for run-genie.sh
