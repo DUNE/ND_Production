@@ -582,7 +582,7 @@ execute_light_charge_association_workflow() {
 
    export NDLAR_FLOW_CHARGE_YAML_DIR=yamls/${DETECTOR_CONFIG}_flow/workflows/charge
 
-   FILENAME="${CHARGE_OUTPUT_DATAFILE}" #${PACKET_OUTPUT_FILE}" 
+   FILENAME="${CHARGE_OUTPUT_DATAFILE}" 
    export COMBINED_OUTPUT_DATAFILE="${FILENAME/.hdf5/.ASSOC.hdf5}"
    export COMBINED_OUTPUT_LOGFILE="${FILENAME/.hdf5/.ASSOC.log}"
    export CHARGE_LIGHT_ASSOC_YAML_NAME="${FILENAME/.hdf5/_charge_light_assoc_${DATA_TYPE}.yaml}"
@@ -619,6 +619,7 @@ execute_light_charge_association_workflow() {
    if [ -f ${COMBINED_OUTPUT_DATAFILE} ]; then
       CREATED_FILES+=("${COMBINED_OUTPUT_DATAFILE}")
       mv ${COMBINED_OUTPUT_DATAFILE} ${OUTFILES_DIR}/
+      rm ${OUTFILES_DIR}/${FILENAME}
    else
       echo -e "FATAL::The file [${COMBINED_OUTPUT_DATAFILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
       exit 0

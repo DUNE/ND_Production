@@ -15,7 +15,7 @@ USER = str(os.environ.get('USER'))
 def _HelpMenu() :
 
     # set up the parser
-    usage     = """ The Data Production for 2x2 Processing """
+    usage     = """ The Data Production for Near Detector Processing """
     formatter = TitledHelpFormatter( indent_increment=5, max_help_position=50, width=300, short_first=10 )
     parser    = OptionParser( formatter = formatter, usage = usage )
 
@@ -35,7 +35,6 @@ def _HelpMenu() :
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
     parser.add_option("--run", dest="run", type="string", default="run1", help="The run period.")
     parser.add_option("--production", dest="production", default=False, action="store_true", help="using production (shifter) role")
- 
 
 
     # h5flow parameters
@@ -45,12 +44,14 @@ def _HelpMenu() :
 
     # justin submit parameters
     parser.add_option("--test-jobscript", dest="testJobscript", default=False, action="store_true", help="test the jobscript")
-    parser.add_option("--namespace", dest="namespace", type="string", default="neardet-2x2-minerva", help="the namespace for the input files [default: %default]")
     parser.add_option("--memory", dest="memory", type="int", default=2000, help="the requested worker node memory usage [default: %default]")
     parser.add_option("--maxDistance", dest="maxDistance", type="int", default=0, help="the max distance for reading from storage [default: %default]")
     parser.add_option("--lifetime", dest="lifetime", type="int", default=1, help="rucio lifetime for output files [default: %default]")
     parser.add_option("--processors", dest="processors", type="int", default=1, help="the number of processors required [default: %default]") 
     parser.add_option("--wallTime", dest="wallTime", type="int", default=80000, help="the maximum wall seconds [default: %default]")
+    parser.add_option("--nersc", dest="nersc", default=False, action="store_true", help="Submit the job to NERSC facility")
+    parser.add_option("--gpu", dest="gpu", default=False, action="store_true", help="The job requires a gpu")
+    parser.add_option("--scope", dest="scope", default="usertests", type="string", help="The scope of the justin job [default: %default]")
 
 
     (opts, args) = parser.parse_args(sys.argv)
@@ -130,6 +131,23 @@ def _CheckEnvironment() :
     return success
 
 
+#=============================================
+# Check the dataset validity
+#=============================================
+def _CheckDataset( dataset ) :
+    success = True
+    print( "\tChecking the validity of the dataset." )
+
+    proc = subprocess.Popen(f'metacat dataset show {dataset}', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)  
+    stdout, error = proc.communicate()
+    if proc.returncode != 0 :
+       print(stdout)
+       success = False
+
+    print( f'\tCompleted checking the validity of the dataset [{dataset}].' )
+    return success
+
+
 
 #======================================================================================================
 # For processing the combined light and charge files, verfied that the correct dataset is deployed
@@ -163,6 +181,20 @@ def _CheckDatasetForCombinationWorkflow( dataset, detector ) :
     return success
 
 
+#======================================================================================================
+# Get the number of files in a dataset
+#======================================================================================================
+def _GetNFilesInDataset( dataset ) :
+
+   cmd  = "metacat query -s \"files from %s\" | grep -i Files | cut -f2 -d':'" % dataset
+   proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+   pipe = proc.communicate()[0].decode('ascii')
+   if proc.returncode != 0 :
+      sys.exit("Cannot retrieve the number of files in dataset [%s]" % dataset)
+   files_in_dataset = int(pipe)
+  
+   return files_in_dataset
+
 
 
 ##########################################################################
@@ -171,7 +203,7 @@ def _CheckDatasetForCombinationWorkflow( dataset, detector ) :
 
 if __name__ == '__main__' :
 
-   print( "Enter launch the 2x2 production jobs via justIN\n" )
+   print( "Enter launch the near detector production jobs via justIN\n" )
 
    #+++++++++++++++++++++++++++++++++++++++++++++
    # create a submission log
@@ -209,6 +241,14 @@ if __name__ == '__main__' :
       sys.exit( "\nAll environment variables are not setup!\n" )
 
 
+   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   # check the validity of the dataset
+   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   success = _CheckDataset( opts['dataset'] )
+   if not success :
+      sys.exit( "\nThis is not a good dataset. Check the quality of the dataset [%s]." % opts['dataset'] )
+
+
    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # check that the correct dataset is deployed for ndlar + combined workflow
    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -221,23 +261,31 @@ if __name__ == '__main__' :
          sys.exit( "\nThe incorrect type of dataset is deployed for ndlar_flow stage:combination workflow.\nThe input dataset should consists of light raw data.\n" ) 
 
 
-
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # output directory
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    topdir = opts["outdir"]
    subdir = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-   outdir = "%s/%s/%s" % (topdir,opts['software'],subdir)
+
+   if topdir.find("/pnfs") == -1 :
+      outdir = topdir
+   else :
+       outdir = "%s/%s/%s" % (topdir,opts['software'],subdir)
+
    if not opts["testJobscript"] :
       if not os.path.isdir(outdir) :
-         print( "\tcreating the output directory [%s]" % outdir )
-         log.write( "\tcreating the output directory [%s]" % outdir )
-         os.umask(0)
-         os.makedirs(outdir,mode=0o1775)
-         os.makedirs("%s/data"%outdir,mode=0o1775)
-         os.makedirs("%s/logs"%outdir,mode=0o1775)
-         os.makedirs("%s/json"%outdir,mode=0o1775)
-         os.makedirs("%s/config"%outdir,mode=0o1775)
+         if outdir.find("/pnfs") == -1 :
+            print( "\tthe output directory [%s] is not on pnfs. will not create." % outdir )
+            log.write( "\tthe output directory [%s] is not on pnfs. will not create." % outdir )
+         else : 
+            print( "\tcreating the output directory [%s]" % outdir )
+            log.write( "\tcreating the output directory [%s]" % outdir )
+            os.umask(0)
+            os.makedirs(outdir,mode=0o1775)
+            os.makedirs("%s/data"%outdir,mode=0o1775)
+            os.makedirs("%s/logs"%outdir,mode=0o1775)
+            os.makedirs("%s/json"%outdir,mode=0o1775)
+            os.makedirs("%s/config"%outdir,mode=0o1775)
       else :
          print( "\tThe output directory [%s] already exist!" % outdir )
          log.write( "\tThe output directory [%s] already exist!\n" % outdir )
@@ -251,13 +299,7 @@ if __name__ == '__main__' :
  
    # get the number of files
    nfiles = opts["nfiles"]
-   cmd    = "metacat query -s \"files from %s\" | grep -i Files | cut -f2 -d':'" % opts["dataset"]
-   proc   = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-   pipe   = proc.communicate()[0].decode('ascii')
-   if proc.returncode != 0 :
-      log.write("Cannot retrieve the number of files in dataset [%s]" % opts["dataset"])
-      sys.exit("Cannot retrieve the number of files in dataset [%s]" % opts["dataset"])
-   files_in_dataset = int(pipe)
+   files_in_dataset = _GetNFilesInDataset(opts["dataset"]) 
 
    if nfiles == -1 :
       nfiles = files_in_dataset 
@@ -320,6 +362,14 @@ if __name__ == '__main__' :
       cmdlist.append( "--env END_POSITION=None" )
    else :
       cmdlist.append( f"--env END_POSITION=%d" % opts["endPosition"] )
+
+   # set nersc parameters
+   if opts["production"] and opts["nersc"] :
+      if not opts["gpu"] :
+         cmdlist.append( "--site US_NERSC-CPU" )
+      else :
+         cmdlist.append( "--site US_NERSC-GPU" )
+         cmdlist.append( "--gpu" ) 
  
    # other justin parameters
    if not opts["testJobscript"] :
@@ -328,19 +378,23 @@ if __name__ == '__main__' :
       cmdlist.append( "--lifetime-days %d" % opts["lifetime"] )
       cmdlist.append( "--wall-seconds %d" % opts["wallTime"] )
       cmdlist.append( "--processors %d" % opts["processors"] )
+      cmdlist.append( "--scope %s" % opts["scope"] )
 
    # set the output directories
-   if not opts["testJobscript"] : 
+   if not opts["testJobscript"] :
+      WRITE_DIR=outdir
+ 
       if opts["outdir"].find("pnfs") != -1 :
          tmp_outdir = outdir.replace("/pnfs/","/")
-         DCACHEDIR = "https://fndcadoor.fnal.gov:2880%s" % tmp_outdir
-         log.write( "\t\tThe top output directory is [%s]" % DCACHEDIR )
-         print( "\t\tThe top output directory is [%s]" % DCACHEDIR )
+         WRITE_DIR = "https://fndcadoor.fnal.gov:2880%s" % tmp_outdir
+
+      log.write( "\t\tThe top output directory is [%s]" % WRITE_DIR )
+      print( "\t\tThe top output directory is [%s]" % WRITE_DIR )
   
-         cmdlist.append( "--output-pattern='*.hdf5:%s/data'" % DCACHEDIR )
-         cmdlist.append( "--output-pattern='*.yaml:%s/config'" % DCACHEDIR )
-         cmdlist.append( "--output-pattern='*.log:%s/logs'" % DCACHEDIR )
-         cmdlist.append( "--output-pattern='*.json:%s/json'" % DCACHEDIR )
+      cmdlist.append( "--output-pattern='*.hdf5:%s/data'" % WRITE_DIR )
+      cmdlist.append( "--output-pattern='*.yaml:%s/config'" % WRITE_DIR )
+      cmdlist.append( "--output-pattern='*.log:%s/logs'" % WRITE_DIR )
+      cmdlist.append( "--output-pattern='*.json:%s/json'" % WRITE_DIR )
 
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -361,6 +415,7 @@ if __name__ == '__main__' :
    log.write( "\tCompleted launching the justin submission." )
    print( "\tCompleted launching the justin submission." )
 
+
    for s in stdout :
        log.write( "\t\tMessage: %s\n" % s)
        print( "\t\tMessage: %s" % s)
@@ -373,18 +428,16 @@ if __name__ == '__main__' :
       log.close()
       sys.exit( "Unable to launch jobs successful." )
 
-
-
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # end
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    log.write( "Exit launch 2x2 production jobs\n\n" )
    log.close() 
   
-   if not opts["testJobscript"] : 
+   if not opts["testJobscript"] and os.path.isdir(outdir) : 
       shutil.move( PWD+"/justin_submission.log", outdir )
       print( "\n\tDirectory for output files [%s]" % outdir )
       print( "\n\tSubmission file is here [%s/justin_submission.log]" % outdir ) 
 
 
-   print( "Exit launch 2x2 production jobs\n\n" )
+   print( "Exit launch near detector production jobs for [%s, %s]\n\n" % (opts["detector"],opts["tier"]) )
