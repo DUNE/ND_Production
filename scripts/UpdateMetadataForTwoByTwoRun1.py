@@ -25,7 +25,7 @@ def _GetMetacatClient() :
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def _Update2x2Metadata(did) :
 
-    sqlite_filename = "/cvmfs/minerva.opensciencegrid.org/minerva2x2/databases/mx2x2runs_v0.1_alpha3.sqlite"
+    sqlite_filename = "/cvmfs/minerva.opensciencegrid.org/minerva2x2/databases/mx2x2runs_v0.2_beta1.sqlite"
 
     try :
        connect = sqlite3.connect(f"file:{sqlite_filename}?mode=ro", uri=True)
