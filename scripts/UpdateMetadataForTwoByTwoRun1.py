@@ -5,6 +5,7 @@ import datetime as dt
 
 import sqlite3
 
+from pathlib import Path
 from argparse import ArgumentParser as ap
 from metacat.webapi import MetaCatClient
 
@@ -18,6 +19,19 @@ def _GetMetacatClient() :
                            timeout=30)
     return client
 
+
+#++++++++++++++++++++++++++++++++++++++++++++
+# get the run info from the light file name
+#+++++++++++++++++++++++++++++++++++++++++++
+def _GetRunInfoFromLightFile(filename) :
+    lrs2morcs = {87: 50001, 92: 50005, 93: 50006, 94: 50007, 96: 50009,
+                 97: 50010, 104: 50017, 105: 50018}
+    parts = Path(filename).stem.split('_')
+    assert parts[5].startswith('p')
+    lrs_run, lrs_subrun = int(parts[4]), int(parts[5][1:])
+    morcs_run = lrs2morcs[lrs_run] if lrs_run in lrs2morcs else -1
+    return morcs_run, lrs_subrun
+  
 
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -35,8 +49,6 @@ def _Update2x2Metadata(did) :
        print(f"Error connecting to the sqlite database: {e}")    
        return []
 
-    runs_subruns  = (did['metadata']['core.runs'],did['metadata']['core.runs_subruns'],did['metadata']['core.application.name']) 
-
     table_name = ""
     if did['metadata']['core.application.name'] == "crs_daq" :
        table_name = "CRS_summary"
@@ -53,8 +65,17 @@ def _Update2x2Metadata(did) :
     connect.close()
 
     if len(rvalue) == 0 :
-       print( "Unable to get the run information for the runs database for filename [%s]" % did['name'] )
-       return None
+       if did['metadata']['core.application.name'] == "lrs_daq" :
+          r,s = _GetRunInfoFromLightFile( did['name'] ) 
+          if r == -1 :
+             print( "Unable to get the run information for the runs database for filename [%s]" % did['name'] )
+             return None
+           else :
+             rvalue.append(r)
+             rvalue.append(s) 
+       else : 
+          print( "Unable to get the run information for the runs database for filename [%s]" % did['name'] )
+          return None
 
     run = int(rvalue[0])
     sub = int(rvalue[1])
