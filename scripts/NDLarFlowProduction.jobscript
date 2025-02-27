@@ -132,7 +132,6 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
    (
       echo -e "\tSetting up the data management tools." 2>&1 | tee -a $envlog
       export GET_INPUT_LIGHT_FILES_SCRIPT=${CVMFS_WORKING_DIR}/ndlar_scripts/GetInputList.py
-      #export GET_INPUT_LIGHT_FILES_SCRIPT=/exp/dune/app/users/twalton/2x2ProdWorkspace/ND_Production/scripts/GetInputList.py
 
       source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
       source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
@@ -295,7 +294,6 @@ get_range_for_light_workflow() {
    FIRSTLIGHTF="${WORKSPACE}/${LIGHT_INPUT_FILES[0]}"
    LASTLIGHTF="${WORKSPACE}/${LIGHT_INPUT_FILES[-1]}"
    RANGE_SCRIPT="python3 ${CVMFS_WORKING_DIR}/ndlar_scripts/get_light_event_range.py"
-   #RANGE_SCRIPT="python /exp/dune/app/users/twalton/2x2ProdWorkspace/ndlar_reflow/scripts/get_light_event_range.py"
    ${RANGE_SCRIPT} --workflow=${WORKFLOW} --chargef=${CHARGEF} --first-lightf=${FIRSTLIGHTF} --last-lightf=${LASTLIGHTF} --tmpdir=${TMP_DIR}
 }
 
