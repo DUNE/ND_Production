@@ -22,13 +22,14 @@ setup corsika
 NSHOW=${ARCUBE_NSHOW:-10000}
 RNDSEED=${runNo}
 RNDSEED2=$(($runNo * 1000 + 1))
+THETAP=30 #Originally 84.9
 
 if [ "${ARCUBE_LOC}" == "BERN" ]; then
     # Bern (single module tests)
     DETNAME=BERN
     OBSLEV=550E2
-    Bx=21.793
-    Bz=42.701
+    Bx=21.8095
+    Bz=42.8863
 elif [ "${ARCUBE_LOC}" == "MINOS" ]; then
     # MINOS Hall (2x2)
     DETNAME=MINOS_HALL
@@ -54,8 +55,8 @@ EVTNR   1                              number of first shower event
 NSHOW   ${NSHOW}                       number of showers to generate
 PRMPAR  14                             particle type of prim. particle  (14=p)
 ESLOPE  -2.7                           slope of primary energy spectrum
-ERANGE  1.3 100000                    energy range of primary (GeV)
-THETAP  0.  84.9                        range of zenith angle (degree)
+ERANGE  1.3 100000                     energy range of primary (GeV)
+THETAP  0.  ${THETAP}                  range of zenith angle (degree)
 PHIP    -180.  180.                    range of azimuth angle (degree)
 SEED    ${RNDSEED}   0  0                 seed for 1. random number sequence
 SEED    ${RNDSEED2}   0  0                 seed for 2. random number sequence
@@ -63,7 +64,7 @@ QGSJET  T   0                              QGSJET for high energy & debug level
 QGSSIG  T                                    QGSJET cross-sections enable
 OBSLEV  ${OBSLEV}                         observation level in cm
 CURVOUT F
-MAGNET  ${Bx} ${Bz}                 Earth's mag. field at detector- Bx & Bz
+MAGNET  ${Bx} ${Bz}                    Earth's mag. field at detector- Bx & Bz (uT)
 HADFLG  0  0  0  0  0  2               flags hadr.interact.&fragmentation
 ECUTS   0.05 0.05 0.05 0.05            energy cuts for particles
 MUADDI  F                              additional info for muons
@@ -76,10 +77,10 @@ ATMOD   1                              U.S. standard atmosphere (1-Linsley; 22-K
 LONGI   F  20.  F  F                   longit.distr. & step size & fit & out
 ECTMAP  1.E2                           cut on gamma factor for printout
 MAXPRT  0                            max. number of printed events
-DIRECT  ${PWD}/                             output directory
+DIRECT  ${PWD}/                        output directory
 DATDIR  /cvmfs/mu2e.opensciencegrid.org/artexternals/corsika/v77400/Linux64bit+3.10-2.17/run                      CORSIKA directory
 DATBAS  F                              write .dbase file
-USER    ${USER}                         user
+USER    ${USER}                        user
 DEBUG   F  6  F  1000000               debug flag and log.unit for out
 EXIT                                   terminates input
 EOF
