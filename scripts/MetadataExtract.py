@@ -61,7 +61,7 @@ def _GetGlobalSubrun(metadata) :
     filename = ""
     if RUN_PERIOD == "run1" :
        if DETECTOR_CONFIG == "proto_nd" :
-          filename = "/cvmfs/minerva.opensciencegrid.org/minerva2x2/databases/mx2x2runs_v0.1_alpha3.sqlite"
+          filename = "/cvmfs/minerva.opensciencegrid.org/minerva2x2/databases/mx2x2runs_v0.2_beta1.sqlite"
        else :
           print("The detector configuration [%s] is unknown." % DETECTOR_CONFIG)
           return []
