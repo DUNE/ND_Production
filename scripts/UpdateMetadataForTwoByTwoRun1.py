@@ -70,7 +70,7 @@ def _Update2x2Metadata(did) :
           if r == -1 :
              print( "Unable to get the run information for the runs database for filename [%s]" % did['name'] )
              return None
-           else :
+          else :
              rvalue.append(r)
              rvalue.append(s) 
        else : 
