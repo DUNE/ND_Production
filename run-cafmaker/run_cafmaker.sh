@@ -12,6 +12,8 @@ cd ../..
 
 # Must go after ndcaf_setup.sh
 source ../util/init.inc.sh
+# Prevent excessive memory use
+export OMP_NUM_THREADS=1
 
 outFile=${tmpOutDir}/${outName}.CAF.root
 flatOutFile=${tmpOutDir}/${outName}.CAF.flat.root
