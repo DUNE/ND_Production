@@ -2,7 +2,10 @@
 
 set -o errexit
 
-module load python/3.11
+if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
+    module unload python 2>/dev/null
+    module load python/3.11
+fi
 
 installDir=${1:-.}
 venvName=flow.venv

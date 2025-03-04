@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
+export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-deeplearnphysics/larcv2:ub20.04-cuda11.6-pytorch1.13-larndsim}
+
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 source load_mlreco.inc.sh
 
-[ -z "$ARCUBE_SPINE_CONFIG" ] && export ARCUBE_SPINE_CONFIG="2x2_full_chain_240819.cfg"
+[ -z "$ARCUBE_SPINE_CONFIG" ] && export ARCUBE_SPINE_CONFIG="2x2_full_chain_flash_240819.cfg"
 
 # Only export onwards if the vars are filled. The exports are a tip from Kazu and
 # required for NDLAr.

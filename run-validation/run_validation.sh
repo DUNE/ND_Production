@@ -2,6 +2,8 @@
 
 set -o errexit
 
+export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:ndlar011}
+
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 

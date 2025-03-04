@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# DEPRECATED. In production we use the Python venv from the edep-sim container.
+
 # assume Shifter if ARCUBE_RUNTIME is unset
 export ARCUBE_RUNTIME=${ARCUBE_RUNTIME:-SHIFTER}
 
