@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:genie_edep.3_04_00.20230912}
+
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
@@ -53,6 +55,7 @@ args_gevgen_fnal=( \
 [ -n "${ARCUBE_TOP_VOLUME}" ] && args_gevgen_fnal+=( -t "$ARCUBE_TOP_VOLUME" )
 [ -n "${ARCUBE_FID_CUT_STRING}" ] && args_gevgen_fnal+=( -F "$ARCUBE_FID_CUT_STRING" )
 [ -n "${ARCUBE_ZMIN}" ] && args_gevgen_fnal+=( -z "$ARCUBE_ZMIN" )
+[ -n "${ARCUBE_EVENT_GEN_LIST}" ] && args_gevgen_fnal+=( --event-generator-list "$ARCUBE_EVENT_GEN_LIST" )
 
 run gevgen_fnal "${args_gevgen_fnal[@]}"
 

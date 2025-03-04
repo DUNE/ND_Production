@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-fermilab/fnal-wn-sl7:latest}
+
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 

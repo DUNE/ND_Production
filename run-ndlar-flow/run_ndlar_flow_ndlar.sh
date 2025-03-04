@@ -24,6 +24,11 @@ inFile=$(realpath $inDir/LARNDSIM/$subDir/${inName}.LARNDSIM.hdf5)
 outFile=$tmpOutDir/${outName}.FLOW.hdf5
 rm -f "$outFile"
 
+if [[ "$ARCUBE_COMPRESS" != "" ]]; then
+    echo "Enabling compression of HDF5 datasets with $ARCUBE_COMPRESS"
+    compression="-z $ARCUBE_COMPRESS"
+fi
+
 # charge workflows
 workflow1='yamls/ndlar_flow/workflows/charge/charge_event_building.yaml'
 workflow2='yamls/ndlar_flow/workflows/charge/charge_event_reconstruction.yaml'
@@ -40,7 +45,7 @@ set -o errexit
 # AB August 6th 2024: Like 2x2, not currently running the final calibration.
 #run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5\
 run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4\
-    -i "$inFile" -o "$outFile"
+    -i "$inFile" -o "$outFile" $compression
 
 mkdir -p "$outDir/FLOW/$subDir"
 mv "$outFile" "$outDir/FLOW/$subDir"
