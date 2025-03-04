@@ -24,9 +24,7 @@ fi
 rootCode='
 auto t = (TTree*) _file0->Get("gRooTracker");
 std::cout << t->GetEntries() << std::endl;'
-# nEvents=$(echo "$rootCode" | root -l -b "$inputFile" | tail -1)
-# nEvents=$(($nEvents / 2))
-nEvents=50000
+nEvents=$(echo "$rootCode" | root -l -b "$inputFile" | tail -1)
 
 edepRootFile=$tmpOutDir/${outName}.EDEPSIM.root
 rm -f "$edepRootFile"
