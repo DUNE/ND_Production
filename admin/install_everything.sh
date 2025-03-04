@@ -20,6 +20,10 @@ set -o errexit
 # export ARCUBE_DIR=$PWD
 # export ARCUBE_CONTAINER_DIR=$ARCUBE_DIR/admin/containers
 
+pushd run-corsika
+./install_corsika
+popd
+
 pushd run-hadd
 ./install_hadd.sh
 popd
