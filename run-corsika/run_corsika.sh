@@ -22,7 +22,7 @@ setup corsika
 NSHOW=${ARCUBE_NSHOW:-10000}
 RNDSEED=${runNo}
 RNDSEED2=$(($runNo * 1000 + 1))
-THETAP=30 #Originally 84.9
+THETAP=70 #Originally 84.9
 
 if [ "${ARCUBE_LOC}" == "BERN" ]; then
     # Bern (single module tests)
@@ -55,7 +55,7 @@ EVTNR   1                              number of first shower event
 NSHOW   ${NSHOW}                       number of showers to generate
 PRMPAR  14                             particle type of prim. particle  (14=p)
 ESLOPE  -2.7                           slope of primary energy spectrum
-ERANGE  1.3 100000                     energy range of primary (GeV)
+ERANGE  5.3 100000                     energy range of primary (GeV)
 THETAP  0.  ${THETAP}                  range of zenith angle (degree)
 PHIP    -180.  180.                    range of azimuth angle (degree)
 SEED    ${RNDSEED}   0  0                 seed for 1. random number sequence
