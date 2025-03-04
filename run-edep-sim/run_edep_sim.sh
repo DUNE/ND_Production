@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:ndlar011}
+
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
@@ -22,8 +24,9 @@ fi
 rootCode='
 auto t = (TTree*) _file0->Get("gRooTracker");
 std::cout << t->GetEntries() << std::endl;'
-nEvents=$(echo "$rootCode" | root -l -b "$inputFile" | tail -1)
+# nEvents=$(echo "$rootCode" | root -l -b "$inputFile" | tail -1)
 # nEvents=$(($nEvents / 2))
+nEvents=50000
 
 edepRootFile=$tmpOutDir/${outName}.EDEPSIM.root
 rm -f "$edepRootFile"
@@ -34,6 +37,7 @@ edepCode="/generator/kinematics/rooTracker/input $inputFile
 # The geometry file is given relative to the root of 2x2_sim
 export ARCUBE_GEOM_EDEP=$baseDir/${ARCUBE_GEOM_EDEP:-$ARCUBE_GEOM}
 
+# gdb -ex=r --args edep-sim -C -g "$ARCUBE_GEOM_EDEP" -o "$edepRootFile" -e "$nEvents" \
 run edep-sim -C -g "$ARCUBE_GEOM_EDEP" -o "$edepRootFile" -e "$nEvents" \
     <(echo "$edepCode") "$ARCUBE_EDEP_MAC"
 
