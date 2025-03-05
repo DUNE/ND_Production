@@ -114,16 +114,7 @@ def main(sim_file, input_type, det_complex):
         plt.close()
 
         ### Plot number of hit segments per event id
-        event_ids = np.unique(segments['event_id'])
-        n_segments = np.zeros(event_ids.size)
-        current_evt = 0
-        current_id = segments['event_id'][0]
-        for segment in segments:
-            if segment['event_id'] != current_id:
-                current_id = segment['event_id']
-                current_evt += 1
-            n_segments[current_evt] += 1
-
+        _event_ids, n_segments = np.unique(segments['event_id'], return_counts=True)
         plt.hist(n_segments, bins=100)
         plt.xlabel(r'N segments')
         plt.ylabel('Spills')
