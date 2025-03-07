@@ -55,7 +55,7 @@ set -o errexit
 # Enable LZF compression of output file
 opts="-z lzf"
 
-run h5flow $opts -c $workflow1 $workflow2 $workflow3 $workflow4 \
+run h5flow $opts -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5 \
     -i "$inFile" -o "$outFile" $compression
 
 run h5flow $opts -c $workflow6 $workflow7\
