@@ -365,11 +365,14 @@ if __name__ == '__main__' :
 
    # set nersc parameters
    if opts["production"] and opts["nersc"] :
+      cmdlist.append( "--scope neardet-lar-2x2" )
       if not opts["gpu"] :
          cmdlist.append( "--site US_NERSC-CPU" )
       else :
          cmdlist.append( "--site US_NERSC-GPU" )
          cmdlist.append( "--gpu" ) 
+   else :
+      cmdlist.append( "--scope %s" % opts["scope"] )
  
    # other justin parameters
    if not opts["testJobscript"] :
@@ -378,7 +381,6 @@ if __name__ == '__main__' :
       cmdlist.append( "--lifetime-days %d" % opts["lifetime"] )
       cmdlist.append( "--wall-seconds %d" % opts["wallTime"] )
       cmdlist.append( "--processors %d" % opts["processors"] )
-      cmdlist.append( "--scope %s" % opts["scope"] )
 
    # set the output directories
    if not opts["testJobscript"] :
