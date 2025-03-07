@@ -2,7 +2,11 @@
 
 # export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:ndlar011}
 
-source ../util/reload_in_container.inc.sh
+source /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/setup-edepsim.sh
+
+cd $PWD
+
+# source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 genieOutPrefix=${ARCUBE_OUTDIR_BASE}/run-genie/${ARCUBE_GENIE_NAME}/GTRAC/$subDir/${ARCUBE_GENIE_NAME}.$globalIdx

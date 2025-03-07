@@ -2,13 +2,20 @@
 
 # export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:genie_edep.3_04_00.20230912}
 
-# source ../setup-genie.sh
+source /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/setup-genie.sh
 
-# cd $PWD
-source ../util/reload_in_container.inc.sh
-# source ../admin/container_env.sim2x2_genie_edep.3_04_00.20230912.sif.sh
+cd $PWD
+
+# se si simula sulla grid il source va commentato perchè non serve (in quanto carico già l'immagine nel submit.sub), 
+# altrimenti va scommentato
+# source ../util/reload_in_container.inc.sh
+
+# serve fare questo source perchè anche se lanciando il job io ci metto già il container, 
+# quel container non ha le variabili d'ambiente, perchè sono state sovrascritte, per cui devo rifare il source
+source ../admin/container_env.sim2x2_genie_edep.3_04_00.20230912.sif.sh
 source ../util/init.inc.sh
 
+# echo "sono prima del flusso" &>> ./std_out.log
 # dk2nuAll=("$ARCUBE_DK2NU_DIR"/*.dk2nu*)
 dk2nuAll=$(find "$ARCUBE_DK2NU_DIR" -type f -name "*.dk2nu*" -exec realpath {} \;)
 echo "dk2nuAll is $dk2nuAll"
@@ -19,10 +26,13 @@ dk2nuFile=${dk2nuAll[$dk2nuIdx]}
 echo "dk2nuIdx is $dk2nuIdx"
 echo "dk2nuFile is $dk2nuFile"
 
+# echo "sono prima di max path" &>> ./std_out.log
 export GXMLPATH=$PWD/flux            # contains GNuMIFlux.xml
 # maxPathFile=$PWD/maxpath/$(basename "$ARCUBE_GEOM" .gdml).$ARCUBE_TUNE.maxpath.xml
 
 maxPathFile=$PWD/maxpath/$(basename "$ARCUBE_GEOM" .gdml).maxpath.xml
+
+# echo "$LINENO"
 
 if [ ! -f "$maxPathFile" ]; then
     # Since I have no maxpath file already present, I need to convert gdml in root and then produce maxpath from the root file
@@ -31,7 +41,9 @@ if [ ! -f "$maxPathFile" ]; then
     gmxpl -f /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/geometry-sand/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.root -L cm -D g_cm3 -o /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/maxpath/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.maxpath.xml -seed 21304 --message-thresholds /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/Messenger.xml  &> ${ARCUBE_LOGDIR_BASE}/gmxpl.log
 fi
 
-echo "maxpathfile is $maxPathFile"
+# echo "$LINENO" &>> ./std_out.log
+
+# echo "maxpathfile is $maxPathFile"
 USE_MAXPATH=1
 
 if [ ! -f "$maxPathFile" ]; then
@@ -42,6 +54,8 @@ if [ ! -f "$maxPathFile" ]; then
     USE_MAXPATH=0
 fi
 
+# echo "$LINENO" &>> ./std_out.log
+
 genieOutPrefix=$tmpOutDir/$outName
 
 # HACK: gevgen_fnal hardcodes the name of the status file (unlike gevgen, which
@@ -49,9 +63,11 @@ genieOutPrefix=$tmpOutDir/$outName
 
 dk2nuFile=$(realpath "$dk2nuFile")
 # The geometry file is given relative to the root of 2x2_sim
-# ($baseDir is already an absoulte path)
+# ($baseDir is already an absolute path)
 geomFile=$baseDir/$ARCUBE_GEOM
 ARCUBE_XSEC_FILE=$(realpath "$ARCUBE_XSEC_FILE")
+
+# echo "$LINENO" &>> ./std_out.log
 
 tmpDir=$(mktemp -d)
 pushd "$tmpDir"
@@ -65,7 +81,7 @@ args_gevgen_fnal=( \
     -r "$runNo" \
     -L cm -D g_cm3 \
     --cross-sections "$ARCUBE_XSEC_FILE" \
-    # --tune "$ARCUBE_TUNE" \
+    --tune "$ARCUBE_TUNE" \
     --seed "$seed" \
     -o "$genieOutPrefix" \
     -t "$ARCUBE_TOP_VOLUME" \
@@ -78,6 +94,10 @@ args_gevgen_fnal=( \
 [ -n "${ARCUBE_ZMIN}" ] && args_gevgen_fnal+=( -z "$ARCUBE_ZMIN" )
 [ -n "${ARCUBE_EVENT_GEN_LIST}" ] && args_gevgen_fnal+=( --event-generator-list "$ARCUBE_EVENT_GEN_LIST" )
 
+# echo "temporary dir $tmpDir"
+
+# echo "sono prima di gevgen" &>> /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/std_out.log
+
 run gevgen_fnal "${args_gevgen_fnal[@]}"
 
 statDir=$logBase/STATUS/$subDir
@@ -85,6 +105,8 @@ mkdir -p "$statDir"
 mv genie-mcjob-"$runNo".status "$statDir/$outName.status"
 popd
 rmdir "$tmpDir"
+
+# echo "$LINENO" &>> ./std_out.log
 
 # use consistent naming convention w/ rest of sim chain
 mv "$genieOutPrefix"."$runNo".ghep.root "$genieOutPrefix".GHEP.root

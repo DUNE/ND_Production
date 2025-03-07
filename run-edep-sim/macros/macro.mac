@@ -3,7 +3,7 @@
 ################################
 
 ## Replace this with the name of a GENIE rooTracker file
-/generator/kinematics/rooTracker/input /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/productions-volSAND/run-genie/genie-sand-events/GTRAC/0000000/genie-sand-events.0000000.GTRAC.root
+## /generator/kinematics/rooTracker/input /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/productions-volSAND/run-genie/genie-sand-events/GTRAC/0000000/genie-sand-events.0000000.GTRAC.root
 
 ## Use the T2K rooTracker input format.  This is directly supported by GENIE.
 /generator/kinematics/set rooTracker
@@ -29,6 +29,6 @@
 ## Make sure EDEPSIM updates the kinematics generator.
 /generator/add
 
-/edep/runId 0
+## /edep/runId 0
 /run/initialize
 /run/beamOn 1158
