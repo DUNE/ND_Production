@@ -45,10 +45,10 @@ def _HelpMenu() :
     # justin submit parameters
     parser.add_option("--test-jobscript", dest="testJobscript", default=False, action="store_true", help="test the jobscript")
     parser.add_option("--memory", dest="memory", type="int", default=2000, help="the requested worker node memory usage [default: %default]")
-    parser.add_option("--maxDistance", dest="maxDistance", type="int", default=0, help="the max distance for reading from storage [default: %default]")
+    parser.add_option("--maxDistance", dest="maxDistance", type="int", default=102, help="the max distance for reading from storage [default: %default]")
     parser.add_option("--lifetime", dest="lifetime", type="int", default=1, help="rucio lifetime for output files [default: %default]")
     parser.add_option("--processors", dest="processors", type="int", default=1, help="the number of processors required [default: %default]") 
-    parser.add_option("--wallTime", dest="wallTime", type="int", default=80000, help="the maximum wall seconds [default: %default]")
+    parser.add_option("--wallTime", dest="wallTime", type="int", default=3600, help="the maximum wall seconds [default: %default]")
     parser.add_option("--nersc", dest="nersc", default=False, action="store_true", help="Submit the job to NERSC facility")
     parser.add_option("--gpu", dest="gpu", default=False, action="store_true", help="The job requires a gpu")
     parser.add_option("--scope", dest="scope", default="usertests", type="string", help="The scope of the justin job [default: %default]")
@@ -363,9 +363,18 @@ if __name__ == '__main__' :
    else :
       cmdlist.append( f"--env END_POSITION=%d" % opts["endPosition"] )
 
+   # other justin parameters
+   if not opts["testJobscript"] :
+      cmdlist.append( "--max-distance %d" % opts["maxDistance"] )
+      cmdlist.append( "--rss-mib %d" % opts["memory"] )
+      cmdlist.append( "--lifetime-days %d" % opts["lifetime"] )
+      cmdlist.append( "--wall-seconds %d" % opts["wallTime"] )
+      cmdlist.append( "--processors %d" % opts["processors"] )
+
    # set nersc parameters
    if opts["production"] and opts["nersc"] :
       cmdlist.append( "--scope neardet-lar-2x2" )
+      cmdlist.append( "--max-distance 102" )
       if not opts["gpu"] :
          cmdlist.append( "--site US_NERSC-CPU" )
       else :
@@ -374,13 +383,6 @@ if __name__ == '__main__' :
    else :
       cmdlist.append( "--scope %s" % opts["scope"] )
  
-   # other justin parameters
-   if not opts["testJobscript"] :
-      cmdlist.append( "--max-distance %d" % opts["maxDistance"] )
-      cmdlist.append( "--rss-mib %d" % opts["memory"] )
-      cmdlist.append( "--lifetime-days %d" % opts["lifetime"] )
-      cmdlist.append( "--wall-seconds %d" % opts["wallTime"] )
-      cmdlist.append( "--processors %d" % opts["processors"] )
 
    # set the output directories
    if not opts["testJobscript"] :
