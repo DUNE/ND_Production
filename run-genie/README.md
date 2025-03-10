@@ -27,9 +27,9 @@ Configure all the variables needed during the execution modifying the script `se
    - `ARCUBE_EXPOSURE`, with number of POT
    - `ARCUBE_XSEC_FILE`, with the .xml file with all the cross sections. It's ok a precomputed file downloaded from https://scisoft.fnal.gov/scisoft/packages/genie_xsec/
    - `ARCUBE_INDEX`, if you run on the cluster this should be initialized with the first argument passed to the executable, if you run in bash this index can be updated each loop
-5. Execute run-genie.sh, inside a loop to produce more files
+5. Execute `run-genie.sh`, inside a loop to produce more files
 
-N. B. Make sure that all the files are inside ARCUBE_DIR, which is the directory bounded with container
+N. B. Make sure that all the files are inside `ARCUBE_DIR`, which is the directory bounded with container
 
 ## Production from bash
 You just need to do `source setup-genie.sh` and everything should work. You should see: 
@@ -37,7 +37,7 @@ You just need to do `source setup-genie.sh` and everything should work. You shou
 - in `ARCUBE_LOGDIR_BASE`: `run-genie\ARCUBE_OUT_NAME\` with `LOGS`, `STATUS` and `TIMING` folders, which contain `000...` folders with some infos about the productions
 
 ## Production on HTC cluster
-In `submit.sub` file
+Inside `submit.sub` file
 
 The executable is `run_genie.sh`, so you need to add inside this script `source /$PATH/setup-genie.sh` to have all the needed variables available during the execution.
 
@@ -57,7 +57,6 @@ source ../utile/reload_in_container.sh
 since you with the above lines in the `submit.sub`, you are already running inside the container. However, in this case, since this Apptainer image has been built with a convoluted process and the environment file at some point has been overwritten, you need to source this file which is a copy of the original environment file: 
 ```
 source ../admin/container_env.sim2x2_genie_edep.3_04_00.20230912.sif.sh
-../admin/container_env.sim2x2_genie_edep.3_04_00.20230912.sif.sh
 ```
 
 To execute more than one job, you can pass to the executable ${Item} as argument and in the script you have to set `ARCUBE_INDEX = ${1}`. In this way the files produced are consistent with this index.
