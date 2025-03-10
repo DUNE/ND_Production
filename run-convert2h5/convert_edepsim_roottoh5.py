@@ -259,7 +259,7 @@ def updateHDF5File(output_file, trajectories, segments, vertices, genie_s, genie
                 f['mc_hdr'][ngenie_h:] = genie_h
 
 # Read a file and dump it.
-def dump(input_file, output_file, keep_all_dets=False):
+def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
 
     """
     Script to convert edep-sim root output to an h5 file formatted in a way
@@ -320,6 +320,10 @@ def dump(input_file, output_file, keep_all_dets=False):
 
     # For assigning unique-in-file track IDs:
     trackCounter = 0
+    cosmicEvtId = 0
+
+    if is_cosmic_sim:
+        print("Renumbering event IDs to remove gaps for cosmic sim. Vertex ID remains as-is and will match the edep-sim ID.")
 
     for jentry in tqdm(range(entries)):
         #print(jentry,"/",entries)
@@ -342,6 +346,10 @@ def dump(input_file, output_file, keep_all_dets=False):
                 spillCounter += 1
                 lastSpill = spill_it
             t_spill = spillCounter * spillPeriod_s * 1E6 # convert to us
+
+        if is_cosmic_sim:
+            spill_it = (event.RunId * 1E6) + cosmicEvtId
+            cosmicEvtId += 1
 
         #print("event",event.EventId,"in spill",spill_it)
 
