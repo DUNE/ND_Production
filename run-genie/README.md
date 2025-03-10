@@ -2,7 +2,8 @@
 
 ## Software versions
 
-• GENIE 3.04.00
+• GENIE 3.04.00 
+
 • ROOT 6.18.06
 
 ## Configuration
