@@ -1,6 +1,9 @@
 # run-genie.sh TUTORIAL
 
-## Software versions inside the container
+## Container
+sim2x2:genie_edep.3_04_00.20230912
+
+With these versions:
 
 • GENIE 3.04.00 
 
