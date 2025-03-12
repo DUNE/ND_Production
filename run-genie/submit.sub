@@ -13,10 +13,11 @@ Requirements = HasSingularity
 # config_path             = $(config_folder)/$(config_file)
 
 # pot
-pot                     = 1.E16
+# pot                     = 1.E16
 
 executable              = run_genie.sh                                    
-arguments               = $(Item) $(pot)
+arguments               = $(Item) 
+# $(pot)
 # transfer_input_files    = /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/libLHAPDF.so, macro.template.mac, $(config_path)
 # environment             = "USER=aruggeridune"
 log                     = $(ClusterId).$(Process).$(Item).log
@@ -24,5 +25,4 @@ output                  = $(ClusterId).$(Process).$(Item).out
 error                   = $(ClusterId).$(Process).$(Item).err
 should_transfer_files   = Yes
 when_to_transfer_output = ON_EXIT
-queue 
-# from seq 0 9 |
+queue from seq 0 9 |

@@ -6,6 +6,8 @@ source /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/setup-genie.sh
 
 cd $PWD
 
+export ARCUBE_INDEX=${1}
+
 # se si simula sulla grid il source va commentato perchè non serve (in quanto carico già l'immagine nel submit.sub), 
 # altrimenti va scommentato
 # source ../util/reload_in_container.inc.sh
@@ -28,9 +30,9 @@ echo "dk2nuFile is $dk2nuFile"
 
 # echo "sono prima di max path" &>> ./std_out.log
 export GXMLPATH=$PWD/flux            # contains GNuMIFlux.xml
-# maxPathFile=$PWD/maxpath/$(basename "$ARCUBE_GEOM" .gdml).$ARCUBE_TUNE.maxpath.xml
+maxPathFile=$PWD/maxpath/$(basename "$ARCUBE_GEOM" .gdml).$ARCUBE_TUNE.maxpath.xml
 
-maxPathFile=$PWD/maxpath/$(basename "$ARCUBE_GEOM" .gdml).maxpath.xml
+# maxPathFile=$PWD/maxpath/$(basename "$ARCUBE_GEOM" .gdml).maxpath.xml
 
 # echo "$LINENO"
 

@@ -16,14 +16,14 @@ export ARCUBE_CONTAINER_DIR="/storage/gpfs_data/neutrino/users/gsantoni/ND_Produ
 export ARCUBE_DIR=$ND_PRODUCTION
 
 # set the variables for init.inc.sh
-export ARCUBE_OUTDIR_BASE=$ND_PRODUCTION/productions-volSAND-HPC2
-export ARCUBE_LOGDIR_BASE=$ND_PRODUCTION/log-volSAND-HPC2
+export ARCUBE_OUTDIR_BASE=$ND_PRODUCTION/productions-multiple-2
+export ARCUBE_LOGDIR_BASE=$ND_PRODUCTION/log-multiple-2
 export ARCUBE_OUT_NAME="genie-sand-events"
 
 # set the variables for run-genie.sh
 export ARCUBE_CONTAINER="sim2x2_genie_edep.3_04_00.20230912.sif"
 export ARCUBE_DK2NU_DIR="/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/dk2nu_files_Sept21/neutrino"
-# export ARCUBE_GEOM="geometry/Merged2x2MINERvA_v4/Merged2x2MINERvA_v4_noRock.gdml"
+# export ARCUBE_GEOM="geometry/Merged2x2MINERvA_v4/Merged2x2MINERvA_v4_noRock.gdml"
 export ARCUBE_GEOM="geometry-sand/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.gdml" #SAND
 # importante mettere il TUNE ufficiale di DUNE
 export ARCUBE_TUNE="AR23_20i_00_000"

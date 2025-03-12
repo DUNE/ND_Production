@@ -6,11 +6,15 @@ source /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/setup-edepsim.sh
 
 cd $PWD
 
-# source ../util/reload_in_container.inc.sh
+export ARCUBE_INDEX=${1}
+
+# source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 genieOutPrefix=${ARCUBE_OUTDIR_BASE}/run-genie/${ARCUBE_GENIE_NAME}/GTRAC/$subDir/${ARCUBE_GENIE_NAME}.$globalIdx
 genieFile="$genieOutPrefix".GTRAC.root
+
+echo "genieFile is $genieFile"
 
 rootCode='
 auto t = (TTree*) _file0->Get("gRooTracker");
