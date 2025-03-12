@@ -62,5 +62,7 @@ since you with the above lines in the `submit.sub`, you are already running insi
 source ../admin/container_env.sim2x2_genie_edep.3_04_00.20230912.sif.sh
 ```
 
-To execute more than one job, you can pass to the executable ${Item} as argument and in the script you have to set `ARCUBE_INDEX = ${1}`. In this way the files produced are consistent with this index.
+To execute more than one job, you can pass to the executable ${Item} as argument and in the script you have to set `ARCUBE_INDEX = ${1}`. In this way the files produced are consistent with this index. 
+
+When the jobs are completed you should see the same output as described above. Useful info about the production process can be found in the `.err, .log, .out` files, produced during the job execution. If you don't see them, you can fetch them with the command: `condor_transfer_data <JOB_ID>`.
 
