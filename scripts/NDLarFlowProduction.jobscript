@@ -13,8 +13,8 @@
 # enter the software setup script
 #+++++++++++++++++++++++++++++++++++++++++
 export JUSTIN_SUBID=`echo "${JUSTIN_JOBSUB_ID}" | sed 's/@/./g'`
-echo -e "Creating the file $HOME/workspace/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log" > $HOME/workspace/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log
-export envlog="$HOME/workspace/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log"
+echo -e "Creating the file $PWD/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log" > $PWD/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log
+export envlog="$PWD/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log"
 
 
 #++++++++++++++++++++++++++++++++++++++++++
@@ -67,7 +67,13 @@ echo -e "\t\tthe current directory is $PWD" 2>&1 | tee -a $envlog
 # setup workspace
 #+++++++++++++++++++++++++++++++++++
 export WORKSPACE=/home/workspace
+
+if [[  "${JUSTIN_SITE_NAME}" == *"NERSC"* ]]; then 
+   export WORKSPACE=${PWD}
+fi
+
 cd ${WORKSPACE}
+echo -e "The workspace directory is ${WORKSPACE}" 2>&1 | tee -a $envlog
 
 
 
@@ -121,7 +127,7 @@ echo -e "The input file is ${INPUT_FILE}" 2>&1 | tee -a $envlog
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 PARENT_FILES=("${did}")
 CREATED_FILES=()
-
+MATCHED_LIGHT_FILES=()
 
 #+++++++++++++++++++++++++++++++++++++++++++++++
 # Get the corresponding light files
@@ -169,6 +175,7 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
    for filename in * ;
    do
       PARENT_FILES+=("${namespace}:${filename}")
+      MATCHED_LIGHT_FILES+=("${filename}")
    done  
 
    echo -e "\tThe parent files are [${PARENT_FILES[@]}].\n" 2>&1 | tee -a $envlog
@@ -249,34 +256,6 @@ fi
 
 
 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++
-# get the light files ordered by the subrun number 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++
-get_ordered_light_files() {
-   declare -a subruns
-   for filename in ${WORKSPACE}/*.data*;
-   do
-       subrun=`echo $filename | cut -f6 -d'_' | cut -f1 -d'.' | tr -d p` 
-       subruns+=($(($subrun)))
-   done
-   sorted_subruns=($(echo "${subruns[@]}" | tr ' ' '\n' | sort -n))
-   outnames=()
-   for s in "${sorted_subruns[@]}";
-   do
-       for filename in ${WORKSPACE}/*.data*;
-       do
-           subrun=`echo $filename | cut -f6 -d'_' | cut -f1 -d'.' | tr -d p` 
-           if [[ "${subrun}" == "${s}" ]]; then
-              outnames+=(`echo $filename | cut -f4 -d'/'`)
-              break
-           fi
-       done
-   done
-   echo "${outnames[@]}"
-}
-
-
-
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Get the range of events to process for the light+charge combination workflow
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -288,11 +267,10 @@ get_range_for_light_workflow() {
            mkdir -p ${TMP_DIR}
       fi
    fi
-   IFS=" " read -a LIGHT_INPUT_FILES <<< "$LIGHT_FILENAMES";
    WORKFLOW="${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME}" 
    CHARGEF="${WORKSPACE}/${INPUT_FILE/binary/packet}"
-   FIRSTLIGHTF="${WORKSPACE}/${LIGHT_INPUT_FILES[0]}"
-   LASTLIGHTF="${WORKSPACE}/${LIGHT_INPUT_FILES[-1]}"
+   FIRSTLIGHTF="${WORKSPACE}/${MATCHED_LIGHT_FILES[0]}"
+   LASTLIGHTF="${WORKSPACE}/${MATCHED_LIGHT_FILES[-1]}"
    RANGE_SCRIPT="python3 ${CVMFS_WORKING_DIR}/ndlar_scripts/get_light_event_range.py"
    ${RANGE_SCRIPT} --workflow=${WORKFLOW} --chargef=${CHARGEF} --first-lightf=${FIRSTLIGHTF} --last-lightf=${LASTLIGHTF} --tmpdir=${TMP_DIR}
 }
@@ -303,13 +281,11 @@ get_range_for_light_workflow() {
 # Run the light workflow
 #+++++++++++++++++++++++++++++++++++++++++
 execute_light_workflow() {
-   echo -e "Enter executing the light workflow for data stream [${DATA_STREAM}]" 2>&1 | tee -a $envlog
+   echo -e "Enter executing the light workflow for data stream [${DATA_STREAM}] and input file [${INPUT_FILE}]" 2>&1 | tee -a $envlog
 
    LIGHT_INPUT_FILE="${INPUT_FILE}"
    if [[ "${DATA_STREAM}" == "combined" ]]; then
-      LIGHT_FILENAMES=$(get_ordered_light_files)
-      IFS=" " read -a LIGHT_INPUT_FILES <<< "$LIGHT_FILENAMES";
-      LIGHT_INPUT_FILE=${LIGHT_INPUT_FILES[0]}
+      LIGHT_INPUT_FILE=${MATCHED_LIGHT_FILES[0]}
    fi
 
    export NDLAR_FLOW_LIGHT_YAML_DIR=yamls/${DETECTOR_CONFIG}_flow/workflows/light
@@ -326,7 +302,7 @@ execute_light_workflow() {
    fi
 
    if [ -f ${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml ]; then
-      echo -e "\t\tCopying [cp $NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml ${LIGHT_EVENT_RECO_YAML_NAME}" 2>&1 | tee -a $envlog
+      echo -e "\t\tCopying [cp $NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml ${LIGHT_EVENT_RECO_YAML_NAME}]" 2>&1 | tee -a $envlog
       cd ${NDLAR_FLOW_WORKSPACE}/${NDLAR_FLOW_LIGHT_YAML_DIR} 
       cp light_event_reconstruction_${DATA_TYPE}.yaml ${LIGHT_EVENT_RECO_YAML_NAME}
    else 
@@ -358,11 +334,11 @@ execute_light_workflow() {
         fi
 
         echo -e "\t\tRunning the iterative light workflow.\n" 2>&1 | tee -a $envlog
-        for filename in "${LIGHT_INPUT_FILES[@]}"; 
+        for filename in "${MATCHED_LIGHT_FILES[@]}"; 
         do 
-            if [[ "$filename" == "${LIGHT_INPUT_FILES[0]}" && "${LIGHT_EVENT_RANGE[0]}" -ne "-1" ]]; then
+            if [[ "$filename" == "${MATCHED_LIGHT_FILES[0]}" && "${LIGHT_EVENT_RANGE[0]}" -ne "-1" ]]; then
                H5FLOW_WORKFLOW="${H5FLOW_WORKFLOW} --start_position=${LIGHT_EVENT_RANGE[0]}"
-            elif [[ "$filename" == "${LIGHT_INPUT_FILES[-1]}" && "${LIGHT_EVENT_RANGE[1]}" -ne "-1" ]]; then
+            elif [[ "$filename" == "${MATCHED_LIGHT_FILES[-1]}" && "${LIGHT_EVENT_RANGE[1]}" -ne "-1" ]]; then
                H5FLOW_WORKFLOW="${H5FLOW_WORKFLOW} --end_position=${LIGHT_EVENT_RANGE[1]}"
             else 
               H5FLOW_WORKFLOW="h5flow"
