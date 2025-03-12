@@ -1,4 +1,4 @@
-# run-genie.sh TUTORIAL
+# run_genie.sh TUTORIAL
 
 ## Container
 sim2x2:genie_edep.3_04_00.20230912
