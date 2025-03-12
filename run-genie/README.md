@@ -1,6 +1,6 @@
 # run-genie.sh TUTORIAL
 
-## Software versions
+## Software versions inside the container
 
 • GENIE 3.04.00 
 
