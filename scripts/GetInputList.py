@@ -18,6 +18,8 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
    main_query = "files where namespace=neardet-2x2-lar-light and creator=dunepro and core.data_tier=raw"
 
    for lightInfo in lightInfoCont :
+       if lightInfo[0] == None : continue
+
        lrun    = int(lightInfo[0])
        lsubrun = int(lrun*1e5 + int(lightInfo[1]))
        query   = "%s and core.runs[0]=%d and core.runs_subruns[0]=%d" % (main_query,lrun,lsubrun)
@@ -34,6 +36,7 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
           lfiles.append(stdout.strip())
 
 
+   ndownloads = 0
    for lfile in lfiles :
        download = True
 
@@ -88,8 +91,9 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
              sys.exit( f"Cannot download the file [{lfile}]." )
           else :
              print( f"\t\tSuccessfully download the file [{lfile}]." )
+             ndownloads += 1
 
-
+   return ndownloads
 
 
 
@@ -173,10 +177,10 @@ if __name__ == '__main__' :
    print( f"\t\tThe matching runs/subruns list [ {lightInfoCont} ]\n" )   
 
    # download the light files to local disk (TODO: work for other detector configurations)
-   _GetLightFiles(lightInfoCont,args.tapeCheck)
+   downloadFiles = _GetLightFiles(lightInfoCont,args.tapeCheck)
 
    print( "Exit getting the input list of matching light files." )
-   print( "\tThe number of files is [%d].\n" % len(lightInfoCont) ) 
+   print( "\tThe number of files is [%d].\n" % downloadFiles ) 
 
 
 
