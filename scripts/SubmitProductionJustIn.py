@@ -34,7 +34,9 @@ def _HelpMenu() :
     parser.add_option("--data", dest="data", default=False, action="store_true", help="processing real data")
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
     parser.add_option("--run", dest="run", type="string", default="run1", help="The run period.")
+    parser.add_option("--rse", dest="rse", default=False, action="store_true", help="Outputs go to a rucio storage element")
     parser.add_option("--production", dest="production", default=False, action="store_true", help="using production (shifter) role")
+
 
 
     # h5flow parameters
@@ -46,7 +48,7 @@ def _HelpMenu() :
     parser.add_option("--test-jobscript", dest="testJobscript", default=False, action="store_true", help="test the jobscript")
     parser.add_option("--memory", dest="memory", type="int", default=2000, help="the requested worker node memory usage [default: %default]")
     parser.add_option("--maxDistance", dest="maxDistance", type="int", default=102, help="the max distance for reading from storage [default: %default]")
-    parser.add_option("--lifetime", dest="lifetime", type="int", default=1, help="rucio lifetime for output files [default: %default]")
+    parser.add_option("--lifetime", dest="lifetime", type="int", default=7, help="rucio lifetime for output files [default: %default]")
     parser.add_option("--processors", dest="processors", type="int", default=1, help="the number of processors required [default: %default]") 
     parser.add_option("--wallTime", dest="wallTime", type="int", default=3600, help="the maximum wall seconds [default: %default]")
     parser.add_option("--nersc", dest="nersc", default=False, action="store_true", help="Submit the job to NERSC facility")
@@ -317,12 +319,6 @@ if __name__ == '__main__' :
    cmdlist.append( "--jobscript %s" % jobscript)
 
 
-   # set the authenication
-   auth = "kx509; voms-proxy-init -noregen -rfc -voms dune:/dune/Role=Analysis; htgettoken -a htvaultprod.fnal.gov -i dune"
-   if opts["production"] :
-      auth = "kx509; voms-proxy-init -noregen -rfc -voms dune:/dune/Role=Production; htgettoken -a htvaultprod.fnal.gov -i dune -r production"
-
-
    # determine the data type
    if opts["data"] and opts["mc"] :
       sys.exit( "The jobscript can not process both data and simulation, simultaneously" )
@@ -363,6 +359,14 @@ if __name__ == '__main__' :
    else :
       cmdlist.append( f"--env END_POSITION=%d" % opts["endPosition"] )
 
+   # set nersc parameters
+   if opts["production"] and opts["nersc"] :
+      if not opts["gpu"] :
+         cmdlist.append( "--site US_NERSC-CPU" )
+      else :
+         cmdlist.append( "--site US_NERSC-GPU" )
+         cmdlist.append( "--gpu" ) 
+ 
    # other justin parameters
    if not opts["testJobscript"] :
       cmdlist.append( "--max-distance %d" % opts["maxDistance"] )
@@ -370,19 +374,7 @@ if __name__ == '__main__' :
       cmdlist.append( "--lifetime-days %d" % opts["lifetime"] )
       cmdlist.append( "--wall-seconds %d" % opts["wallTime"] )
       cmdlist.append( "--processors %d" % opts["processors"] )
-
-   # set nersc parameters
-   if opts["production"] and opts["nersc"] :
-      cmdlist.append( "--scope neardet-lar-2x2" )
-      cmdlist.append( "--max-distance 102" )
-      if not opts["gpu"] :
-         cmdlist.append( "--site US_NERSC-CPU" )
-      else :
-         cmdlist.append( "--site US_NERSC-GPU" )
-         cmdlist.append( "--gpu" ) 
-   else :
       cmdlist.append( "--scope %s" % opts["scope"] )
- 
 
    # set the output directories
    if not opts["testJobscript"] :
@@ -394,18 +386,24 @@ if __name__ == '__main__' :
 
       log.write( "\t\tThe top output directory is [%s]" % WRITE_DIR )
       print( "\t\tThe top output directory is [%s]" % WRITE_DIR )
-  
-      cmdlist.append( "--output-pattern='*.hdf5:%s/data'" % WRITE_DIR )
-      cmdlist.append( "--output-pattern='*.yaml:%s/config'" % WRITE_DIR )
-      cmdlist.append( "--output-pattern='*.log:%s/logs'" % WRITE_DIR )
-      cmdlist.append( "--output-pattern='*.json:%s/json'" % WRITE_DIR )
-
+ 
+      if not opts["rse"] : 
+         cmdlist.append( "--output-pattern='*.hdf5:%s/data'" % WRITE_DIR )
+         cmdlist.append( "--output-pattern='*.yaml:%s/config'" % WRITE_DIR )
+         cmdlist.append( "--output-pattern='*.log:%s/logs'" % WRITE_DIR )
+         cmdlist.append( "--output-pattern='*.json:%s/json'" % WRITE_DIR )
+      else :
+         cmdlist.append( "--output-pattern='*.hdf5:%s'" % WRITE_DIR )
+         cmdlist.append( "--output-pattern='*.yaml:%s'" % WRITE_DIR )
+         cmdlist.append( "--output-pattern='*.log:%s'" % WRITE_DIR )
+         cmdlist.append( "--output-pattern='*.json:%s'" % WRITE_DIR )
+ 
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # run justIn launch submission
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    cmdstring = " ".join(cmdlist)
-   cmd       = "%s; justin-test-jobscript %s" % (auth,cmdstring) if opts["testJobscript"] else "%s; justin simple-workflow %s" % (auth,cmdstring)
+   cmd       = "justin-test-jobscript %s" % (cmdstring) if opts["testJobscript"] else "justin simple-workflow %s" % (cmdstring)
 
    print( "\n\tBelow is the launch command:\n\t%s\n\n" % cmd )
    log.write( "\n\tBelow is the launch command:\n\t%s\n\n" % cmd )
