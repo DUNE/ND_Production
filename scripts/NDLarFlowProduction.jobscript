@@ -627,8 +627,8 @@ conda deactivate
 #++++++++++++++++++++++++++++++++++++++++
 if [[ "${MAKE_METADATA}" == "True" ]]; then
    echo -e "Creating the metadata json file(s) for the output data file(s) [${CREATED_FILES}]" 2>&1 | tee -a $envlog
-   
-   export METADATA_EXTRACT=/exp/dune/app/users/twalton/2x2ProdWorkspace/ND_Production/scripts/MetadataExtract.py
+  
+   export METADATA_EXTRACT=${CVMFS_TWOBYTWO_DIR}/${TWOBYTWO_RELEASE}/ndlar_scripts/MetadataExtract.py 
    cd ${OUTFILES_DIR}
 
    CREATED_FILES_ARRAY=$( IFS=$','; echo "${CREATED_FILES[*]}" )
