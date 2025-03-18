@@ -21,7 +21,7 @@ set -o errexit
 # export ARCUBE_CONTAINER_DIR=$ARCUBE_DIR/admin/containers
 
 pushd run-corsika
-./install_corsika
+./install_corsika.sh
 popd
 
 pushd run-hadd
