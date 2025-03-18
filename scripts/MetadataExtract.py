@@ -1,11 +1,10 @@
 #!/bin/env python
 
-
 import os, sys, string, re, shutil, math, time, subprocess, json
 import datetime as dt
 
 import sqlite3
-#import h5py
+import h5py
 
 from argparse import ArgumentParser as ap
 from metacat.webapi import MetaCatClient
@@ -24,9 +23,7 @@ DATA_STREAM           = str(os.environ.get('DATA_STREAM'))
 LIGHT_CONFIG_FILES    = str(os.environ.get('LIGHT_CONFIG_FILES'))
 CHARGE_CONFIG_FILES   = str(os.environ.get('CHARGE_CONFIG_FILES'))
 COMBINED_CONFIG_FILES = str(os.environ.get('COMBINED_CONFIG_FILES'))
-
-
-
+JUSTIN_WORKFLOW = "justin workflow [%s, %s]" % ( str(os.environ.get('JUSTIN_WORKFLOW_ID')), str(os.environ.get('JUSTIN_SITE_NAME')) )
 
 #+++++++++++++++++++++++++++++++++
 # get the metacat client
@@ -36,21 +33,6 @@ def _GetMetacatClient() :
                            auth_server_url='https://metacat.fnal.gov:8143/auth/dune',
                            timeout=30)
     return client
-
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++
-# Fix the light file core.runs_subrun field
-#++++++++++++++++++++++++++++++++++++++++++++++++
-def _GetFixedMetadata(metadata) :
-    rvalues = []
-    run     = metadata['core.runs'][0]
-    subs    = metadata['core.runs_subruns']
-    for sub in subs :
-        rvalues.append( int((int(run)*1e4) + int(sub)) )
-
-    return rvalues
-
 
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -70,11 +52,12 @@ def _GetGlobalSubrun(metadata) :
        return []
 
     try :
-       connect = sqlite3.connect(f"file:{filename}?mode=ro", uri=True)
+       cmd     = "file:%s?mode=ro" % filename
+       connect = sqlite3.connect(cmd, uri=True)
        cursor  = connect.cursor()
     except sqlite3.Error as e :
        pass
-       print(f"Error connecting to the sqlite database: {e}")    
+       print("Error connecting to the sqlite database: [%s]" % (e.sqlite_errorname))    
        return []
 
     global_values = []
@@ -109,17 +92,44 @@ def _GetGlobalSubrun(metadata) :
 #++++++++++++++++++++++++++++
 def _GetNumberOfEvents(filename,workflow) :
     nevts = 0
-    """
     if filename.find(".hdf5") != -1 :
        f = h5py.File(filename,'r') 
-       evts  = lf['%s/events/data' % workflow]
+       evts  = f['%s/events/data' % workflow]
        nevts = len(evts)
     else :
        print( "Unable to determine the number of events for file [%s]." % filename )
        return -1
-    """
     return nevts
 
+
+#++++++++++++++++++++++++++++
+# get the first event number 
+#++++++++++++++++++++++++++++
+def _GetFirstEventNumber(filename,workflow) :
+    first = -1
+    if filename.find(".hdf5") != -1 :
+       f = h5py.File(filename,'r') 
+       evts  = f['%s/events/data' % workflow]
+       first = evts[0][0].item()
+    else :
+       print( "Unable to determine the number of events for file [%s]." % filename )
+       return -1
+    return first
+
+
+#++++++++++++++++++++++++++++
+# get the first event number 
+#++++++++++++++++++++++++++++
+def _GetLastEventNumber(filename,workflow) :
+    last = -1
+    if filename.find(".hdf5") != -1 :
+       f = h5py.File(filename,'r') 
+       evts = f['%s/events/data' % workflow]
+       last = evts[-1][0].item()
+    else :
+       print( "Unable to determine the number of events for file [%s]." % filename )
+       return -1
+    return last
 
 
 #+++++++++++++++++++++++++++++
@@ -130,7 +140,6 @@ def _GetApplicationFamily(tier) :
        return "ndlar_flow"
     else :
        return ""
-
 
 
 #+++++++++++++++++++++++++++++++++
@@ -147,13 +156,11 @@ def _GetConfigFiles(workflow) :
        return ""
 
 
-
 #+++++++++++++++++++++++++++++++++
 # get the parent file(s)
 #+++++++++++++++++++++++++++++++++
 def _GetParentFiles(workflow,metadata) :
     parents = []
-
     for key, data in metadata.items() :
         if workflow.find("light") != -1 :
            if data['core.run_type'].find("light")  != -1 : parents.append(key)
@@ -165,8 +172,6 @@ def _GetParentFiles(workflow,metadata) :
            sys.exit( "The workflow [%s] is not implemented" % workflow )
 
     return parents
-
-
 
 
 #+++++++++++++++++++++++++++++++
@@ -183,8 +188,6 @@ def _GetChecksum(filename) :
     return stdout
 
 
-
-
 #+++++++++++++++++++++++
 # get the metadata 
 #+++++++++++++++++++++++
@@ -198,16 +201,16 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     return_md['core.file_format'] = filename.split(".")[-1]
     return_md['core.file_type']   = metadata_blocks[0].get('core.file_type')
 
-    return_md['core.events']              = "" if not os.path.exists(filename) else _GetNumberOfEvents(filename,workflow)
-    return_md['core.last_event_number']   = ""
-    return_md['core.first_event_number']  = ""
+    return_md['core.events']              = -1 if not os.path.exists(filename) else _GetNumberOfEvents(filename,workflow)
+    return_md['core.last_event_number']   = -1 if not os.path.exists(filename) else _GetLastEventNumber(filename,workflow)
+    return_md['core.first_event_number']  = -1 if not os.path.exists(filename) else _GetFirstEventNumber(filename,workflow)
     return_md['core.file_content_status'] = "good"
 
     return_md['dune.dqc_quality']         = "unknown"
     return_md['dune.campaign']            = RUN_PERIOD
     return_md['dune_requestid']           = ""
     return_md['dune.config_file']         = _GetConfigFiles(workflow)
-    return_md['dune.workflow']            = "justin"
+    return_md['dune.workflow']            = JUSTIN_WORKFLOW
     return_md['dune.output_status']       = "good"
     return_md['core.application.family']  = _GetApplicationFamily(tier)
     return_md['core.application.name']    = tier

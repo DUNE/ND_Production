@@ -28,7 +28,6 @@ else
 fi
  
 
-
 #++++++++++++++++++++++++++++++++++++++++
 # setup environment variables 
 #++++++++++++++++++++++++++++++++++++++++
@@ -39,6 +38,7 @@ export RUCIO_ACCOUNT=${RUCIO_USER}
 export CVMFS_TWOBYTWO_DIR="/cvmfs/minerva.opensciencegrid.org/minerva2x2/2x2tmp"
 export CVMFS_WORKING_DIR="${CVMFS_TWOBYTWO_DIR}/${TWOBYTWO_RELEASE}"
 
+export SOFTWARE=${TWOBYTWO_RELEASE}
 
 
 #+++++++++++++++++++++++++++++++++++++++++
@@ -51,7 +51,6 @@ if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
 fi
 
 
-
 #+++++++++++++++++++++++++++++++++++++++++
 # get the site information
 #+++++++++++++++++++++++++++++++++++++++++
@@ -62,19 +61,15 @@ echo -e "\t\tjustin site is $JUSTIN_SITE_NAME" 2>&1 | tee -a $envlog
 echo -e "\t\tthe current directory is $PWD" 2>&1 | tee -a $envlog
 
 
-
 #++++++++++++++++++++++++++++++++++++
 # setup workspace
 #+++++++++++++++++++++++++++++++++++
 export WORKSPACE=/home/workspace
-
 if [[  "${JUSTIN_SITE_NAME}" == *"NERSC"* ]]; then 
    export WORKSPACE=${PWD}
 fi
-
 cd ${WORKSPACE}
 echo -e "The workspace directory is ${WORKSPACE}" 2>&1 | tee -a $envlog
-
 
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -101,7 +96,6 @@ echo -e "\tThe file physical file name (PFN) is [$pfn]" | tee -a $envlog
 echo -e "\tThe file Rucio storage element (RSE) is [$rse]\n" | tee -a $envlog
 
 
-
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Copy file to local disk
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -111,7 +105,6 @@ fi
 echo -e "Running xrdcopy ${pfn} ${WORKSPACE}/" 2>&1 | tee -a $envlog
 xrdcopy ${pfn} ${WORKSPACE}/ 
 echo -e "\tCompleted the copying.\n" 2>&1 | tee -a $envlog
-
 
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -129,12 +122,12 @@ PARENT_FILES=("${did}")
 CREATED_FILES=()
 MATCHED_LIGHT_FILES=()
 
+
 #+++++++++++++++++++++++++++++++++++++++++++++++
 # Get the corresponding light files
 #++++++++++++++++++++++++++++++++++++++++++++++++
 if [[ "${DATA_STREAM}" == "combined" ]]; then
    echo -e "Downloading the matching light files for the charge+light combination workflow." 2>&1 | tee -a $envlog
-
    (
       echo -e "\tSetting up the data management tools." 2>&1 | tee -a $envlog
       export GET_INPUT_LIGHT_FILES_SCRIPT=${CVMFS_WORKING_DIR}/ndlar_scripts/GetInputList.py
@@ -177,7 +170,6 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
       PARENT_FILES+=("${namespace}:${filename}")
       MATCHED_LIGHT_FILES+=("${filename}")
    done  
-
    echo -e "\tThe parent files are [${PARENT_FILES[@]}].\n" 2>&1 | tee -a $envlog
 
    cd ${WORKSPACE} 
@@ -198,18 +190,14 @@ if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
 fi
 
 
-
 #+++++++++++++++++++++++++++++++++++++++++++
 # setup the 2x2 ndlar software
 #+++++++++++++++++++++++++++++++++++++++++++
 echo -e "Setup and enter the conda environment for the software release [${TWOBYTWO_RELEASE}]" 2>&1 | tee -a $envlog
-export NDLAR_CVMFS_AREA=${CVMFS_WORKING_DIR}/ndlar_flow 
-
-echo -e "\tRunning [ source ${CVMFS_TWOBYTWO_DIR}/v00_00_01/anaconda/etc/profile.d/conda.sh ]" 2>&1 | tee -a $envlog
-
 export EXTERNAL_RELEASE=v00_00_01
 export CONDA_ENVS_DIRS=${CVMFS_TWOBYTWO_DIR}/${EXTERNAL_RELEASE}/conda_envs/.
 
+echo -e "\tRunning [ source ${CVMFS_TWOBYTWO_DIR}/v00_00_01/anaconda/etc/profile.d/conda.sh ]" 2>&1 | tee -a $envlog
 source ${CVMFS_TWOBYTWO_DIR}/${EXTERNAL_RELEASE}/anaconda/etc/profile.d/conda.sh
 conda activate ndlar_flow_${TWOBYTWO_RELEASE}
 
@@ -221,24 +209,22 @@ else
 fi
 
 
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Setup the ndlar flow workspace
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+export NDLAR_CVMFS_AREA=${CVMFS_WORKING_DIR}/ndlar_flow 
+export NDLAR_FLOW_WORKSPACE=${WORKSPACE}/ndlar_flow
+mkdir -p ${NDLAR_FLOW_WORKSPACE}
+
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Copy the configuration files to the local area
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-export NDLAR_FLOW_WORKSPACE=${WORKSPACE}/ndlar_flow
-if [ ! -d ${NDLAR_FLOW_WORKSPACE} ]; then
-   mkdir -p ${NDLAR_FLOW_WORKSPACE}
-fi
-
 if [ -d ${NDLAR_CVMFS_AREA}/yamls/${DETECTOR_CONFIG}_flow ]; then
    echo -e "\tCopying the configuration directory [${NDLAR_CVMFS_AREA}/yamls/${DETECTOR_CONFIG}_flow] to the workspace [${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow]" 2>&1 | tee -a $envlog
-   if [ ! -d ${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow ]; then
-      mkdir -p ${NDLAR_FLOW_WORKSPACE}/yamls/ 
-   fi
+   mkdir -p ${NDLAR_FLOW_WORKSPACE}/yamls/ 
    cp -r ${NDLAR_CVMFS_AREA}/yamls/${DETECTOR_CONFIG}_flow ${NDLAR_FLOW_WORKSPACE}/yamls/
-   chmod -R 775 ${NDLAR_FLOW_WORKSPACE}
 fi
-
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -247,13 +233,9 @@ fi
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 if [ -d ${NDLAR_CVMFS_AREA}/data/${DETECTOR_CONFIG}_flow ]; then
    echo -e "\tCopying the constants directory [${NDLAR_CVMFS_AREA}/data/${DETECTOR_CONFIG}_flow] to the workspace [${NDLAR_FLOW_WORKSPACE}/data/${DETECTOR_CONFIG}_flow]" 2>&1 | tee -a $envlog
-   if [ ! -d ${NDLAR_FLOW_WORKSPACE}/data/${DETECTOR_CONFIG}_flow ]; then
-      mkdir -p ${NDLAR_FLOW_WORKSPACE}/data/ 
-   fi
+   mkdir -p ${NDLAR_FLOW_WORKSPACE}/data/ 
    cp -r ${NDLAR_CVMFS_AREA}/data/${DETECTOR_CONFIG}_flow ${NDLAR_FLOW_WORKSPACE}/data/
-   chmod -R 775 ${NDLAR_FLOW_WORKSPACE}
 fi
-
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -632,13 +614,11 @@ fi
 
 
 
-
 #++++++++++++++++++++++++++++++++++++++++
 # exit the conda environment
 #++++++++++++++++++++++++++++++++++++++++
 echo -e "\nExit the conda environment [${CONDA_DEFAULT_ENV}]" 2>&1 | tee -a $envlog
 conda deactivate 
-echo -e "\tThe current conda environment is [${CONDA_DEFAULT_ENV}]" 2>&1 | tee -a $envlog
 
 
 
@@ -648,7 +628,7 @@ echo -e "\tThe current conda environment is [${CONDA_DEFAULT_ENV}]" 2>&1 | tee -
 if [[ "${MAKE_METADATA}" == "True" ]]; then
    echo -e "Creating the metadata json file(s) for the output data file(s) [${CREATED_FILES}]" 2>&1 | tee -a $envlog
    
-   export METADATA_EXTRACT=${CVMFS_TWOBYTWO_DIR}/${TWOBYTWO_RELEASE}/ndlar_scripts/MetadataExtract.py
+   export METADATA_EXTRACT=/exp/dune/app/users/twalton/2x2ProdWorkspace/ND_Production/scripts/MetadataExtract.py
    cd ${OUTFILES_DIR}
 
    CREATED_FILES_ARRAY=$( IFS=$','; echo "${CREATED_FILES[*]}" )
@@ -656,29 +636,28 @@ if [[ "${MAKE_METADATA}" == "True" ]]; then
    WORKFLOW_ARRAY=$( IFS=$','; echo "${WORKFLOW[*]}" )
 
    if [ -f "$METADATA_EXTRACT" ]; then
-      echo -e "\tRunning the command [python ${METADATA_EXTRACT} --input=\"${CREATED_FILES_ARRAY[@]}\" --parents=\"${PARENT_FILES_ARRAY[@]}\" --workflow=\"${WORKFLOW_ARRAY[@]}\" --tier=\"${DATA_TIER}\" --namespace=\"neardet-2x2-lar-flow\"]" 2>&1 | tee -a $envlog
+      echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} --input=\"${CREATED_FILES_ARRAY[@]}\" --parents=\"${PARENT_FILES_ARRAY[@]}\" --workflow=\"${WORKFLOW_ARRAY[@]}\" --tier=\"${DATA_TIER}\" --namespace=\"neardet-2x2-lar-flow\"]" 2>&1 | tee -a $envlog
       (
-         export SOFTWARE=${TWOBYTWO_RELEASE}
-
          source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
          source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 
          setup metacat 
          setup python v3_9_15 
+         setup h5py v3_1_0 -q e19:p383b 
 
          python ${METADATA_EXTRACT} --input="${CREATED_FILES_ARRAY[@]}" --parents="${PARENT_FILES_ARRAY[@]}" --workflow="${WORKFLOW_ARRAY[@]}" --tier="${DATA_TIER}" --namespace="neardet-2x2-lar-flow"
       )
    else :
       echo -e "Cannot create the metadata json file(s). The script [$METADATA_EXTRACT] does not exist." 2>&1 | tee -a $envlog
    fi
-
+   
    if [ "`ls *json | wc -l`" == "0" ]; then
       echo -e "\tFailed to create the metadata json file(s).\n" 2>&1 | tee -a $envlog
-      exit 0
    fi
 
    cd ${WORKSPACE}
 fi
+
 
 
 
