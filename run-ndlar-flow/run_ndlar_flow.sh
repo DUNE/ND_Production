@@ -52,13 +52,16 @@ set -o errexit
 #run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5\
 #    -i "$inFile" -o "$outFile" $compression
 
-run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 \
+# Enable LZF compression of output file
+opts="-z lzf"
+
+run h5flow $opts -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5 \
     -i "$inFile" -o "$outFile" $compression
 
-run h5flow -c $workflow6 $workflow7\
+run h5flow $opts -c $workflow6 $workflow7\
     -i "$inFile" -o "$outFile" $compression
 
-run h5flow -c $workflow8\
+run h5flow $opts -c $workflow8\
     -i "$outFile" -o "$outFile" $compression
 
 mkdir -p "$outDir/FLOW/$subDir"

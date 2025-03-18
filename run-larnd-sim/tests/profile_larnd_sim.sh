@@ -3,9 +3,11 @@
 # NOTE: Run me from the parent directory (run-larnd-sim)
 # $ tests/profile_larnd_sim.sh
 
-module load cudatoolkit/11.7
-module load Nsight-Systems/2022.2.1
-module load python/3.11
+# see also https://github.com/lbl-neutrino/larnd-sim-example/setup.inc.sh
+
+source ../../util/prelude.inc.sh
+
+setup_cuda
 
 export ARCUBE_INDEX=124
 export ARCUBE_OUTDIR_BASE=/pscratch/sd/m/mkramer/out.MiniRun5
@@ -30,7 +32,9 @@ cd "$tmpDir"
 set +o errexit                  # in case it crashes
 
 # run nsys profile --cuda-memory-usage=true simulate_pixels.py "$ARCUBE_LARNDSIM_CONFIG" \
-run nsys profile -t nvtx,cuda --cuda-memory-usage=true simulate_pixels.py "$ARCUBE_LARNDSIM_CONFIG" \
+run nsys profile -t nvtx,cuda --cuda-memory-usage=true \
+    --python-backtrace=cuda --python-sampling=true \
+    simulate_pixels.py "$ARCUBE_LARNDSIM_CONFIG" \
     --input_filename "$inFile" \
     --output_filename "$outFile" \
     --rand_seed "$seed"

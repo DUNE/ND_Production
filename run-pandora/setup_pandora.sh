@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# The setup scripts can return nonzero
+set +o errexit
+
 # Assumes ARCUBE_RUNTIME, ARCUBE_CONTAINER & ARCUBE_DIR have already been set
 # Core software packages
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
@@ -52,3 +55,5 @@ fi
 
 # Specify LArRecoND input data format: SP (SpacePoint data) or SPMC (SpacePoint MC)
 export ARCUBE_PANDORA_INPUT_FORMAT=SPMC
+
+set -o errexit

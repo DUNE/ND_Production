@@ -1,24 +1,13 @@
 #!/usr/bin/env bash
 
 # By default (i.e. if ARCUBE_RUNTIME isn't set), run on the host's venv
-if [[ -z "$ARCUBE_RUNTIME" || "$ARCUBE_RUNTIME" == "NONE" ]]; then
-    if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
-        module unload python 2>/dev/null
-        module unload cudatoolkit 2>/dev/null
-        ## CUDA 12.2 makes us crash :(
-        # module load cudatoolkit/12.2
-        module load cudatoolkit/11.7
-        module load python/3.11
-    fi
-    source ../util/init.inc.sh
+source ../util/reload_in_container.inc.sh
+source ../util/init.inc.sh
+
+if [[ ( (-z "$ARCUBE_RUNTIME") || ("$ARCUBE_RUNTIME" == "NONE") )
+      || ( (-n "$ARCUBE_USE_LOCAL_PRODUCT") && ("$ARCUBE_USE_LOCAL_PRODUCT" != "0") ) ]]; then
+    # Allow overriding the container's /opt/venv
     source "$ARCUBE_INSTALL_DIR/larnd.venv/bin/activate"
-else
-    source ../util/reload_in_container.inc.sh
-    source ../util/init.inc.sh
-    if [[ -n "$ARCUBE_USE_LOCAL_PRODUCT" && "$ARCUBE_USE_LOCAL_PRODUCT" != "0" ]]; then
-        # Allow overriding the container's /opt/venv
-        source "$ARCUBE_INSTALL_DIR/larnd.venv/bin/activate"
-    fi
 fi
 
 inDir=${ARCUBE_OUTDIR_BASE}/run-convert2h5/$ARCUBE_CONVERT2H5_NAME
