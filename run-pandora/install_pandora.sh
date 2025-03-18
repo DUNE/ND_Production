@@ -74,13 +74,9 @@ make -j4 install
 
 # LArRecoND (DUNE ND reco)
 cd $ARCUBE_PANDORA_INSTALL
-# git clone https://github.com/PandoraPFA/LArRecoND.git
-# FIXME
-git clone https://github.com/mjkramer/LArRecoND.git
+git clone https://github.com/PandoraPFA/LArRecoND.git
 cd LArRecoND
-# FIXME
-# git checkout $ARCUBE_PANDORA_LAR_RECO_ND_VERSION
-git checkout fix-MiniRunF6.3
+git checkout $ARCUBE_PANDORA_LAR_RECO_ND_VERSION
 mkdir build
 cd build
 cmake -DCMAKE_MODULE_PATH="$ARCUBE_PANDORA_INSTALL/PandoraPFA/cmakemodules;$ROOTSYS/etc/cmake" \
