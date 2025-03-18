@@ -8,7 +8,7 @@ cd $PWD
 
 export ARCUBE_INDEX=${1}
 
-# source ../util/reload_in_container.inc.sh
+# source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 genieOutPrefix=${ARCUBE_OUTDIR_BASE}/run-genie/${ARCUBE_GENIE_NAME}/GTRAC/$subDir/${ARCUBE_GENIE_NAME}.$globalIdx
@@ -35,3 +35,5 @@ run edep-sim -C -g "$ARCUBE_GEOM_EDEP" -o "$edepRootFile" -e "$nEvents" \
 
 mkdir -p "$outDir/EDEPSIM/$subDir"
 mv "$edepRootFile" "$outDir/EDEPSIM/$subDir"
+
+cd $ND_PRODUCTION

@@ -9,6 +9,8 @@ With these versions:
 
 • ROOT 6.28.06
 
+You need to pull it from DockerHub! See few lines below
+
 ## Configuration
 Configure all the variables needed during the execution modifying the script `setup-edepsim.sh`. It will be very similar to `setup-genie.sh`
 1. Set up your working directory, initializing `BASE_DIR` and `ND_PRODUCTION` (or the name of the folder of this repo)

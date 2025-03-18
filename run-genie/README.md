@@ -9,6 +9,8 @@ With these versions:
 
 • ROOT 6.18.06
 
+You need to pull it from DockerHub! See few lines below
+
 ## Configuration
 Configure all the variables needed during the execution modifying the script `setup-genie.sh`. 
 1. Set up your working directory, initializing `BASE_DIR` and `ND_PRODUCTION` (or the name of the folder of this repo)
@@ -35,12 +37,14 @@ Configure all the variables needed during the execution modifying the script `se
 N. B. Make sure that all the files are inside `ARCUBE_DIR`, which is the directory bounded with container
 
 ## Production from bash
-You just need to do `source setup-genie.sh` and everything should work. You should see: 
+After you set your variables, you just need to do `source setup-genie.sh` and everything should work. You should see: 
 - in `ARCUBE_OUTDIR_BASE`: `run-genie\ARCUBE_OUT_NAME\` with `GTRAC` and `GHEP` folders, which contain `000...` folders with the productions
 - in `ARCUBE_LOGDIR_BASE`: `run-genie\ARCUBE_OUT_NAME\` with `LOGS`, `STATUS` and `TIMING` folders, which contain `000...` folders with some infos about the productions
 
 ## Production on HTC cluster
-Inside `submit.sub` file
+N. B. In this branch everything is already set to run on cluster, so you don't need to do any of the following steps.
+
+Let's go through `submit.sub` file:
 
 The executable is `run_genie.sh`, so you need to add inside this script `source /$PATH/setup-genie.sh` to have all the needed variables available during the execution.
 
