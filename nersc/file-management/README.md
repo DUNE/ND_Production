@@ -2,15 +2,35 @@
 
 There are four nodes provided by NERSC (`dtn0{1..4}.nersc.gov`) for the purpose of data transfer. The script `transfer_to_fnal.py` uses `gfal-*` tools to move files from NERSC disk to Fermilab disk via `xrootd` protocol.
 
-To run the script you will need a valid x509 certificate. I usually generate this on the DUNE GPVMs and copy it across to `/tmp` on the data transfer nodes. For example on the DUNE GPVMs for my username and uids:
+To run the script you will need a valid x509 certificate. 
 
-`setup_fnal_security` is a NOvA script!!! run `voms-proxy-init -rfc -noregen -voms dune:/dune/Role=Analysis` instead on the gpvm's
 
+### Obtaining a certificate:
+I usually generate this on the DUNE GPVMs and copy it across to `/tmp` on the data transfer nodes. For example on the DUNE GPVMs for my username and uids:
+(NOTE: obtain your uid by `id -u`)
 ```
-setup_fnal_security 
+source /cvmfs/larsoft.opensciencegrid.org/spack-packages/setup-env.sh  # on the DUNE GPVMs
+spack load kx509                                                       # load the certificate tool
+kx509                                                                  # create the certificate
+voms-proxy-init -rfc -noregen -voms dune:/dune/Role=Analysis           # obtain your DUNE permissions
+scp /tmp/x509up_u50363 abooth@dtn01.nersc.gov:/tmp/x509up_u99810       # this would be your own username and id
+
+# log onto NERSC data transfer node
+export X509_USER_PROXY=/tmp/x509up_u99810                              # on the NERSC dtn, set the path to the file just scp-ed. 
+```
+
+
+**If you are a member of NOvA**:
+
+Alternatively, if you are a member of the NOvA experiment, you can simply log onto the NOvA GPVMs and do
+```
+setup_fnal_security
 scp /tmp/x509up_u50363 abooth@dtn01.nersc.gov:/tmp/x509up_u99810
 ```
+as this scripts does the above steps for you automatically. If you are _not_ a NOvA member you can completely ignore the `setup_fnal_security` recommendation.
 
+
+### Performing the copy:
 The transfer script uses `gfal-*` tools, they are available as standard on the data transfer nodes. `python` however is not available in the usual way. The NERSC service desk advised that it can be access via global common:
 
 ```
