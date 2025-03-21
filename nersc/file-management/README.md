@@ -4,8 +4,10 @@ There are four nodes provided by NERSC (`dtn0{1..4}.nersc.gov`) for the purpose 
 
 To run the script you will need a valid x509 certificate. I usually generate this on the DUNE GPVMs and copy it across to `/tmp` on the data transfer nodes. For example on the DUNE GPVMs for my username and uids:
 
+`setup_fnal_security` is a NOvA script!!! run `voms-proxy-init -rfc -noregen -voms dune:/dune/Role=Analysis` instead on the gpvm's
+
 ```
-setup_fnal_security
+setup_fnal_security 
 scp /tmp/x509up_u50363 abooth@dtn01.nersc.gov:/tmp/x509up_u99810
 ```
 
