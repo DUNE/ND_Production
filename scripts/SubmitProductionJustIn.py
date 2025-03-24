@@ -344,7 +344,7 @@ if __name__ == '__main__' :
    cmdlist.append( "--env USER=%s" % USER )
    cmdlist.append( "--env RUN_PERIOD=%s" % opts["run"] )
 
-   rucio_user = "justinreadonly" if not opts["testJobscript"] else USER
+   rucio_user = "justinreadonly" #if not opts["testJobscript"] else USER
    cmdlist.append( "--env RUCIO_USER=%s" % rucio_user )
 
    file_metadata = "True" if opts["production"] or opts["metadata"] else "False"
@@ -403,7 +403,7 @@ if __name__ == '__main__' :
    # run justIn launch submission
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    cmdstring = " ".join(cmdlist)
-   cmd       = "justin-test-jobscript %s" % (cmdstring) if opts["testJobscript"] else "justin simple-workflow %s" % (cmdstring)
+   cmd       = "justin-test-jobscript %s" % (cmdstring) if opts["testJobscript"] else "justin get-token; justin simple-workflow %s" % (cmdstring)
 
    print( "\n\tBelow is the launch command:\n\t%s\n\n" % cmd )
    log.write( "\n\tBelow is the launch command:\n\t%s\n\n" % cmd )

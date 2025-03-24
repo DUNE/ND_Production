@@ -131,8 +131,10 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
    (
       echo -e "\tSetting up the data management tools." 2>&1 | tee -a $envlog
       export GET_INPUT_LIGHT_FILES_SCRIPT=${CVMFS_WORKING_DIR}/ndlar_scripts/GetInputList.py
+      #export GET_INPUT_LIGHT_FILES_SCRIPT=/exp/dune/app/users/twalton/2x2ProdWorkspace/ND_Production/scripts/GetInputList.py
 
-      source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+
+      #source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
       source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
 
       setup metacat -z /cvmfs/dune.opensciencegrid.org/products/dune 

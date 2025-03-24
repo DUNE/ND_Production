@@ -53,6 +53,7 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
 
        print( f"\tThe paths for {lfile} is [{stdout}].\n" )
 
+       """
        rucio_download = False
        download       = False
 
@@ -81,17 +82,20 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
            if download : break
 
        if rucio_download and not download :
-          print( f"\tDownloading the light raw file [{lfile}]" )
+       """
+       print( f"\tDownloading the light raw file [{lfile}]" )
 
-          cmd   = f"rucio download {lfile}"
-          proc  = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-          pipe  = proc.communicate()[0].decode('ascii')
+       cmd   = f"rucio download {lfile}"
+       proc  = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+       pipe  = proc.communicate()[0].decode('ascii')
 
-          if proc.returncode != 0 :
-             sys.exit( f"Cannot download the file [{lfile}]." )
-          else :
-             print( f"\t\tSuccessfully download the file [{lfile}]." )
-             ndownloads += 1
+       print(pipe)
+
+       if proc.returncode != 0 :
+          sys.exit( f"Cannot download the file [{lfile}]." )
+       else :
+          print( f"\t\tSuccessfully download the file [{lfile}]." )
+          ndownloads += 1
 
    return ndownloads
 
