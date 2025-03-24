@@ -11,7 +11,6 @@ baseDir=$(realpath "$PWD"/..)
 
 # Start seeds at 1 instead of 0, just in case GENIE does something
 # weird when given zero (e.g. use the current time)
-# NOTE: We just use the fixed Edep default seed of ???.
 seed=$((1 + ND_PRODUCTION_INDEX))
 echo "Seed is $seed"
 
@@ -26,7 +25,7 @@ runOffset=${ND_PRODUCTION_RUN_OFFSET:-0}
 runNo=$((ND_PRODUCTION_INDEX + runOffset))
 echo "runNo is $runNo"
 
-# Default to the root of the 2x2_sim repo (but ideally this should be set to
+# Default to the root of the ND_Production directory (but ideally this should be set to
 # somewhere on $SCRATCH)
 ND_PRODUCTION_OUTDIR_BASE="${ND_PRODUCTION_OUTDIR_BASE:-$PWD/..}"
 mkdir -p "$ND_PRODUCTION_OUTDIR_BASE"
@@ -38,8 +37,7 @@ mkdir -p "$ND_PRODUCTION_LOGDIR_BASE"
 ND_PRODUCTION_LOGDIR_BASE=$(realpath "$ND_PRODUCTION_LOGDIR_BASE")
 export ND_PRODUCTION_LOGDIR_BASE
 
-# For "local" (i.e. non-container, non-CVMFS) installs of larnd-sim etc.
-# Default to run-larnd-sim etc.
+# For "local" (i.e. non-container, non-CVMFS) installs of dune-tms etc.
 export ND_PRODUCTION_INSTALL_DIR=${ND_PRODUCTION_INSTALL_DIR:-$PWD}
 
 stepname=$(basename "$PWD")

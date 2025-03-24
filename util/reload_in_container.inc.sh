@@ -29,7 +29,7 @@ elif [[ "$ND_PRODUCTION_RUNTIME" == "SINGULARITY" ]]; then
     fi
 
 elif [[ "$ND_PRODUCTION_RUNTIME" == "PODMAN-HPC" ]]; then
-    # The 2x2_sim directory:
+    # The ND_Production directory:
     nd_production_dir=$(realpath $(dirname "$BASH_SOURCE")/..)
     # HACK: Check if we're "in podman" by seeing whether our UID is 0 (root)
     # This will break if you run 2x2_sim as the true superuser, but why would
