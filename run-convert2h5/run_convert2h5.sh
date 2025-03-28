@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:ndlar011}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-mjkramer/sim2x2:ndlar011}
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
@@ -8,21 +8,21 @@ source ../util/init.inc.sh
 
 # If we're using a container, it's responsible for the Python libraries. With no
 # container, use a venv.
-if [[ "$ARCUBE_RUNTIME" == "NONE" ]]; then
+if [[ "$ND_PRODUCTION_RUNTIME" == "NONE" ]]; then
     source convert.venv/bin/activate
 fi
 
-if [[ -n "$ARCUBE_SPILL_NAME" ]]; then
-    inName=$ARCUBE_SPILL_NAME.$globalIdx
-    inFile=$ARCUBE_OUTDIR_BASE/run-spill-build/${ARCUBE_SPILL_NAME}/EDEPSIM_SPILLS/$subDir/${inName}.EDEPSIM_SPILLS.root
+if [[ -n "$ND_PRODUCTION_SPILL_NAME" ]]; then
+    inName=$ND_PRODUCTION_SPILL_NAME.$globalIdx
+    inFile=$ND_PRODUCTION_OUTDIR_BASE/run-spill-build/${ND_PRODUCTION_SPILL_NAME}/EDEPSIM_SPILLS/$subDir/${inName}.EDEPSIM_SPILLS.root
 else
-    inName=$ARCUBE_SINGLE_NAME.$globalIdx
-    inFile=$ARCUBE_OUTDIR_BASE/run-edep-sim/${ARCUBE_SINGLE_NAME}/EDEPSIM/$subDir/${inName}.EDEPSIM.root
+    inName=$ND_PRODUCTION_SINGLE_NAME.$globalIdx
+    inFile=$ND_PRODUCTION_OUTDIR_BASE/run-edep-sim/${ND_PRODUCTION_SINGLE_NAME}/EDEPSIM/$subDir/${inName}.EDEPSIM.root
 fi
 
 outFile=$tmpOutDir/${outName}.EDEPSIM.hdf5
 
-if [[ "$ARCUBE_KEEP_ALL_DETS" == "1" ]]; then
+if [[ "$ND_PRODUCTION_KEEP_ALL_DETS" == "1" ]]; then
     keepAllDets=--keep_all_dets
 else
     keepAllDets=""

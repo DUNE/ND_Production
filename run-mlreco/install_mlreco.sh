@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-export ARCUBE_RUNTIME=SHIFTER
-# export ARCUBE_CONTAINER=deeplearnphysics/larcv2:ub20.04-cuda11.3-cudnn8-pytorch1.10.0-larndsim-2022-11-03
+export ND_PRODUCTION_RUNTIME=SHIFTER
+# export ND_PRODUCTION_CONTAINER=deeplearnphysics/larcv2:ub20.04-cuda11.3-cudnn8-pytorch1.10.0-larndsim-2022-11-03
 ## Above but with venv support:
-# export ARCUBE_CONTAINER=mjkramer/sim2x2:mlreco001
+# export ND_PRODUCTION_CONTAINER=mjkramer/sim2x2:mlreco001
 # This is the one that Francois has actually been using:
-export ARCUBE_CONTAINER=deeplearnphysics/larcv2:ub20.04-cuda11.6-pytorch1.13-larndsim
+export ND_PRODUCTION_CONTAINER=deeplearnphysics/larcv2:ub20.04-cuda11.6-pytorch1.13-larndsim
 
 source ../util/reload_in_container.inc.sh
 

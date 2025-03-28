@@ -6,8 +6,8 @@ source ../util/init.inc.sh
 source load_mlreco.inc.sh
 
 outFile=${tmpOutDir}/${outName}.MLRECO_INF.hdf5
-inName=${ARCUBE_IN_NAME}.${globalIdx}
-inFile=${ARCUBE_OUTDIR_BASE}/run-mlreco/${ARCUBE_IN_NAME}/LARCV/${subDir}/${inName}.LARCV.root
+inName=${ND_PRODUCTION_IN_NAME}.${globalIdx}
+inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-mlreco/${ND_PRODUCTION_IN_NAME}/LARCV/${subDir}/${inName}.LARCV.root
 config=2x2_full_chain_240403.cfg
 
 tmpDir=$(mktemp -d)

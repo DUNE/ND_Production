@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-fermilab/fnal-wn-sl7:latest}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:latest}
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
@@ -34,10 +34,10 @@ fi
 
 #Temporary hack to run locally
 #tmp_dir="/pscratch/sd/m/mkramer/out.MiniRun5"
-#inDir=${tmp_dir}/run-spill-build/$ARCUBE_IN_NAME/EDEPSIM_SPILLS
+#inDir=${tmp_dir}/run-spill-build/$ND_PRODUCTION_IN_NAME/EDEPSIM_SPILLS
 
-inDir=${ARCUBE_OUTDIR_BASE}/run-spill-build/$ARCUBE_IN_NAME/EDEPSIM_SPILLS/$subDir
-inName=$ARCUBE_IN_NAME.$globalIdx
+inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-spill-build/$ND_PRODUCTION_IN_NAME/EDEPSIM_SPILLS/$subDir
+inName=$ND_PRODUCTION_IN_NAME.$globalIdx
 inFile=${inName}.EDEPSIM_SPILLS.root
 
 echo $inFile

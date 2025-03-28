@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Reload in Shifter if necessary
-if [[ "$SHIFTER_IMAGEREQUEST" != "$ARCUBE_CONTAINER" ]]; then
-	shifter --image=$ARCUBE_CONTAINER --module=none -- "$0" "$@"
+if [[ "$SHIFTER_IMAGEREQUEST" != "$ND_PRODUCTION_CONTAINER" ]]; then
+	shifter --image=$ND_PRODUCTION_CONTAINER --module=none -- "$0" "$@"
 	exit
 fi
 

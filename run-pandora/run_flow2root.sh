@@ -1,29 +1,29 @@
 #!/usr/bin/env bash
 
 # Example run environment setup
-#export ARCUBE_RUNTIME=SHIFTER
-#export ARCUBE_CONTAINER=fermilab/fnal-wn-sl7:latest
-#export ARCUBE_DIR=$(realpath "$PWD"/..)
-#export ARCUBE_IN_NAME=Tutorial.flow
-#export ARCUBE_OUT_NAME=Tutorial.flow2root
-#export ARCUBE_INDEX=0
+#export ND_PRODUCTION_RUNTIME=SHIFTER
+#export ND_PRODUCTION_CONTAINER=fermilab/fnal-wn-sl7:latest
+#export ND_PRODUCTION_DIR=$(realpath "$PWD"/..)
+#export ND_PRODUCTION_IN_NAME=Tutorial.flow
+#export ND_PRODUCTION_OUT_NAME=Tutorial.flow2root
+#export ND_PRODUCTION_INDEX=0
 
 # Container
-source $ARCUBE_DIR/util/reload_in_container.inc.sh
+source $ND_PRODUCTION_DIR/util/reload_in_container.inc.sh
 
 # Setup Pandora environment
-source $ARCUBE_DIR/run-pandora/setup_pandora.sh
+source $ND_PRODUCTION_DIR/run-pandora/setup_pandora.sh
 
-# Set other environment variables: globalIdx, ARCUBE_OUTDIR_BASE, tmpOutDir, outDir, outName, subDir
-source $ARCUBE_DIR/util/init.inc.sh
+# Set other environment variables: globalIdx, ND_PRODUCTION_OUTDIR_BASE, tmpOutDir, outDir, outName, subDir
+source $ND_PRODUCTION_DIR/util/init.inc.sh
 
 # Input HDF5 file
-inName=${ARCUBE_IN_NAME}.${globalIdx}
-inFile=${ARCUBE_OUTDIR_BASE}/run-ndlar-flow/${ARCUBE_IN_NAME}/FLOW/${subDir}/${inName}.FLOW.hdf5
+inName=${ND_PRODUCTION_IN_NAME}.${globalIdx}
+inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/${ND_PRODUCTION_IN_NAME}/FLOW/${subDir}/${inName}.FLOW.hdf5
 
 # Convert input HDF5 file to ROOT
-source $ARCUBE_PANDORA_INSTALL/pandora.venv/bin/activate
-python3 $ARCUBE_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile 0 $tmpOutDir
+source $ND_PRODUCTION_PANDORA_INSTALL/pandora.venv/bin/activate
+python3 $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile 0 $tmpOutDir
 deactivate
 
 # Move ROOT file from tmpOutDir to output directory
