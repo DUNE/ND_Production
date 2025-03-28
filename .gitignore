@@ -13,3 +13,15 @@ slurm-*.out
 *.hdf5
 *.root
 tmp_bin
+*.log
+*.status
+*.time
+containers
+*.png
+*.pdf
+*.tar.gz
+.vscode
+*.root_hist
+*.txt
+prova.sh
+run-genie/maxpath/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.maxpath.xml
