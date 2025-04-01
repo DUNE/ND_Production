@@ -28,6 +28,7 @@ echo "runNo is $runNo"
 # Default to the root of the ND_Production directory (but ideally this should be set to
 # somewhere on $SCRATCH)
 ND_PRODUCTION_OUTDIR_BASE="${ND_PRODUCTION_OUTDIR_BASE:-$PWD/..}"
+echo "$PWD"
 mkdir -p "$ND_PRODUCTION_OUTDIR_BASE"
 ND_PRODUCTION_OUTDIR_BASE=$(realpath "$ND_PRODUCTION_OUTDIR_BASE")
 export ND_PRODUCTION_OUTDIR_BASE
@@ -70,31 +71,31 @@ fi
 timeProg=time
 # if not present there, we include the one present in /PWD/tmp_bin
 # HACK in case we forget to include GNU time in a container
-[[ ! -e "$timeProg" ]] && timeProg=$ND_PRODUCTION/tmp_bin/time
+[[ ! -e "$timeProg" ]] && timeProg=$WORKING_DIR/tmp_bin/time
 
 # if time is not installed, then install in this way
 if [ ! -e "$timeProg" ]; then
-  TMP_BIN="$ND_PRODUCTION/tmp_bin"
+  TMP_BIN="$WORKING_DIR/tmp_bin"
 
   if [ ! -d "$TMP_BIN" ]; then
       mkdir - p "$TMP_BIN" || { echo "Failed to create $TMP_BIN"; exit 1; }
   fi
 
   echo "pwd is $PWD"
-  echo "ND_Production is $ND_PRODUCTION"
+  echo "ND_Production is $WORKING_DIR"
 
   # if [ -z "$TWOBYTWO_SIM" ]; then
   #   echo "Error: TWOBYTWO_SIM is not set" 
   #   exit 1
   # fi
   
-  cd "$ND_PRODUCTION/tmp_bin" # || { echo "Failed to cd into $ND_PRODUCTION/tmp_bin"; exit 1; }
+  cd "$WORKING_DIR/tmp_bin" # || { echo "Failed to cd into $ND_PRODUCTION/tmp_bin"; exit 1; }
 
   wget -q https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/bin/time || {
     echo "Download failed"
     exit 1
     } 
-    timeProg=$ND_PRODUCTION/tmp_bin/time
+    timeProg=$WORKING_DIR/tmp_bin/time
 
     if [ ! -x $timeProg ]; then
       chmod +x "$timeProg"
