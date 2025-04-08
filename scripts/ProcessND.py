@@ -120,9 +120,6 @@ def run_tms(sh, args):
     print("\n\n\necho running TMS", file=sh)
     print("echo Local files right now:\nls -alh", file=sh)
     global N_TO_SHOW
-    # print >> sh, "ifdh cp /cvmfs/dune.osgstorage.org/pnfs/fnal.gov/usr/dune/persistent/stash/ND_simulation/production_v01/dune-tms.tar.gz dune-tms.tar.gz"
-    # print >> sh, "ifdh cp " + args.tms_reco_tar + " dune-tms.tar.gz"
-    # print >> sh, "tar -xzvf dune-tms.tar.gz"
     print("cd $INPUT_TAR_DIR_LOCAL/dune-tms; . setup.sh; cd -", file=sh)
     if "v3" in args.genie_tune:
         print("setup edepsim v3_2_0 -q e20:prof", file=sh)
@@ -145,10 +142,9 @@ def run_tms(sh, args):
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
 # Print an error message to stderr (cerr)
-echo "Error: tms failed with exit code $exit_code" >&2
-echo "Error: tms failed with exit code $exit_code"
-# Exit the script with a non-zero exit code
-#exit $exit_code
+echo "Error: tms failed with exit code $exit_code. Will attempt to save any files that exist" >&2
+echo "Error: tms failed with exit code $exit_code. Will attempt to save any files that exist"
+# Do not exit the script with a non-zero exit code because its almost done. Save genie and edep files if possible
 fi""",
         file=sh,
     )
@@ -177,16 +173,8 @@ def run_g4(sh, args):
         print("cp %s.${RUN}.ghep.root input_file.ghep.root" % mode, file=sh)
     else:
         # We need to get the input file
-        # print >> sh, "ifdh cp %s/genie/%s/%02.0fm/${RDIR}/%s.${RUN}.ghep.root input_file.ghep.root" % (args.indir, args.horn, args.oa, mode)
         print("filename=${allfiles[${PROCESS}]}", file=sh)
         print("ifdh cp $filename input_file.ghep.root", file=sh)
-        # Need to pick run based on the filename
-        # print >> sh, "basefilename=`basename $filename`"
-        # print >> sh, """RUN=$(echo "$basefilename" | grep -oE '[0-9]+' | head -1)"""
-        # print >> sh, "RDIR=$((${RUN} / 1000))"
-        # print >> sh, "if [ ${RUN} -lt 10000 ]; then"
-        # print >> sh, "RDIR=0$((${RUN} / 1000))"
-        # print >> sh, "fi"
 
     # Needed for genie3, rootracker file changed between versions.
     if "v3" in args.genie_tune and False:
@@ -314,8 +302,7 @@ if [ $exit_code -ne 0 ]; then
 # Print an error message to stderr (cerr)
 echo "Error: edep-sim failed with exit code $exit_code" >&2
 echo "Error: edep-sim failed with exit code $exit_code"
-# Exit the script with a non-zero exit code
-#exit $exit_code
+# Still attempt to save the genie files
 fi""",
         file=sh,
     )
@@ -457,7 +444,6 @@ if __name__ == "__main__":
         help="dropbox directory",
         default="/pnfs/dune/scratch/dunepro/dropbox/neardet",
     )
-    # parser.add_option('--tms_reco_tar', help='The tar file which contains the tms reco code', default='/cvmfs/dune.osgstorage.org/pnfs/fnal.gov/usr/dune/persistent/stash/ND_simulation/production_v01/dune-tms.tar.gz')
     parser.add_option("--data_stream", help="data_stream", default="physics")
     parser.add_option("--file_format", help="file format", default="root")
     parser.add_option(
