@@ -19,13 +19,20 @@ def run_gen( sh, args ):
 
     # Modify GNuMIFlux.xml to the specified off-axis position
     print >> sh, "sed \"s/<beampos> ( 0.0, 0.05387, 6.66 )/<beampos> ( %1.2f, 0.05387, 6.66 )/g\" ${ND_PRODUCTION_CONFIG}/GNuMIFlux.xml > GNuMIFlux.xml" % args.oa
+    if args.large_flux_window:
+        print >> sh, '''sed -i '/<point coord="det"> /s/-6.0,\s*-5.0,\s*-1.0/-45.0, -18.0, -40.0/g' GNuMIFlux.xml'''
+        print >> sh, '''sed -i '/<point coord="det"> /s/6.0,\s*-5.0,\s*-1.0/15.0, -18.0, -40.0/g' GNuMIFlux.xml'''
+        print >> sh, '''sed -i '/<point coord="det"> /s/6.0,\s*5.0,\s*-1.0/15.0, 27.0, -40.0/g' GNuMIFlux.xml'''
+        print >> sh, '''sed -i '/<upstreamz> /s/-3/-40.0/g' GNuMIFlux.xml'''
+        print >> sh, 'cat GNuMIFlux.xml'
+        
   
     print >> sh, "export GXMLPATH=${PWD}:${GXMLPATH}"
     print >> sh, "export GNUMIXML=\"GNuMIFlux.xml\""
     
     if args.b_field_location != None:
         assert args.b_field_filename != None, "Expected a b_field_filename in conjunction with b_field_location"
-        print >> sh, "cp %s %s" % (args.b_field_location, args.b_field_filename)
+        print >> sh, "ifdh cp %s %s" % (args.b_field_location, args.b_field_filename)
         
         
     if "v3" in args.genie_tune:
@@ -67,7 +74,16 @@ def run_gen( sh, args ):
         print >> sh, "    --event-generator-list Default+CCMEC"
 
     # Copy the output
-    
+    print >> sh, """# Store the exit code of the previous command
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+# Print an error message to stderr (cerr)
+echo "Error: genie failed with exit code $exit_code" >&2
+echo "Error: genie failed with exit code $exit_code"
+# Exit the script with a non-zero exit code
+exit $exit_code
+fi"""
+ 
     
 
 
@@ -91,6 +107,16 @@ def run_tms( sh, args ):
       print >> sh, "EDEP_FILE=${EDEP_OUTPUT_FILE}"
     
     print >> sh, "$INPUT_TAR_DIR_LOCAL/dune-tms/bin/ConvertToTMSTree.exe ${EDEP_OUTPUT_FILE}"
+    # Copy the output
+    print >> sh, """# Store the exit code of the previous command
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+# Print an error message to stderr (cerr)
+echo "Error: tms failed with exit code $exit_code" >&2
+echo "Error: tms failed with exit code $exit_code"
+# Exit the script with a non-zero exit code
+#exit $exit_code
+fi"""
     # Finds the name regardless of which algs were turned on.
     # Names like neutrino.0.edep_LineCandidates_AStar_Cluster1.root
     print >> sh, "TMS_OUTPUT_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_TMS_RecoCandidates_*.root}`"
@@ -111,7 +137,17 @@ def run_g4( sh, args ):
         print >> sh, "cp %s.${RUN}.ghep.root input_file.ghep.root" % mode
     else:
         # We need to get the input file
-        print >> sh, "ifdh cp %s/genie/%s/%02.0fm/${RDIR}/%s.${RUN}.ghep.root input_file.ghep.root" % (args.indir, args.horn, args.oa, mode)
+        #print >> sh, "ifdh cp %s/genie/%s/%02.0fm/${RDIR}/%s.${RUN}.ghep.root input_file.ghep.root" % (args.indir, args.horn, args.oa, mode)
+        print >> sh, "filename=${allfiles[${PROCESS}]}"
+        print >> sh, "ifdh cp $filename input_file.ghep.root"
+        # Need to pick run based on the filename
+        #print >> sh, "basefilename=`basename $filename`"
+        #print >> sh, """RUN=$(echo "$basefilename" | grep -oE '[0-9]+' | head -1)"""
+        #print >> sh, "RDIR=$((${RUN} / 1000))"
+        #print >> sh, "if [ ${RUN} -lt 10000 ]; then"
+        #print >> sh, "RDIR=0$((${RUN} / 1000))"
+        #print >> sh, "fi"
+        
 
     # Needed for genie3, rootracker file changed between versions.
     if "v3" in args.genie_tune and False:
@@ -173,7 +209,7 @@ def run_g4( sh, args ):
     
     if args.b_field_location != None:
         assert args.b_field_filename != None, "Expected a b_field_filename in conjunction with b_field_location"
-        print >> sh, "cp %s %s" % (args.b_field_location, args.b_field_filename)
+        print >> sh, "ifdh cp %s %s" % (args.b_field_location, args.b_field_filename)
 
     #Run it
     print >> sh, "edep-sim -C \\"
@@ -185,6 +221,16 @@ def run_g4( sh, args ):
     print >> sh, "  -o ${EDEP_OUTPUT_FILE} \\"
     print >> sh, "  -e ${NSPILL} \\"
     print >> sh, "  dune-nd.mac"
+
+    print >> sh, """# Store the exit code of the previous command
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+# Print an error message to stderr (cerr)
+echo "Error: edep-sim failed with exit code $exit_code" >&2
+echo "Error: edep-sim failed with exit code $exit_code"
+# Exit the script with a non-zero exit code
+#exit $exit_code
+fi"""
 
 def run_larcv( sh, args ):
 
@@ -232,6 +278,7 @@ if __name__ == "__main__":
     parser.add_option('--spill_pot', help='POT per spill', type = "float", default=7.5e13)
     parser.add_option('--first_run', help='First run number to use', default=0, type = "int")
     parser.add_option('--oa', help='Off-axis position in meters', default=0, type = "float")
+    parser.add_option('--large_flux_window', help='Use a larger flux window', default=False, action="store_true")
     parser.add_option('--test', help='Use test mode (interactive job)', default=False, action="store_true")
     parser.add_option('--overlay', help='Simulate full spills (default is single events)', default=False, action="store_true")
     parser.add_option('--timing', help='Simulate a random time in spill. default/fixed/spill (default is 1ns for single events and a random spill time for overlay or event_multiplicity > 1). ', default = "default")
@@ -298,21 +345,16 @@ if __name__ == "__main__":
     print >> sh, "start_process_nd_run_time=`date +%s`"
     print >> sh, "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh"
     print >> sh, "setup ifdhc"
-    if "v3" in args.genie_tune and not args.use_dk2nu:
+    if "v3" in args.genie_tune:
+        print >> sh, "setup dk2nugenie  v01_10_01c  -q e20:prof"
         print >> sh, "setup genie %s -q e20:prof" % args.genie_tune
-        print >> sh, "setup genie_xsec %s -q %s" % (args.genie_xsec_version, args.genie_options)
+        print >> sh, "setup genie_xsec    %s   -q %s" % (args.genie_xsec_version, args.genie_options)
         print >> sh, "setup genie_phyopt %s -q %s" % (args.genie_phyopt_version, args.genie_phyopt_options)
-
-    elif "v3" in args.genie_tune and args.use_dk2nu:
-        print >> sh, "setup dk2nugenie v01_10_01c -q e20:prof"
-        print >> sh, "setup genie v3_02_02_p01 -q e20:prof"
-        print >> sh, "setup genie_xsec v3_02_00 -q G1810a0211a:e1000:k250"
-        print >> sh, "setup genie_phyopt v3_02_00 -q dkcharmtau"
     else:
         print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
         print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
         print >> sh, "setup genie_phyopt v2_12_10   -q dkcharmtau"
-    
+    #print >> sh, "setup geant4 v4_10_3_p03e -q e17:prof"
     print >> sh, "setup geant4 v4_11_0_p01c -q e20:prof"
     print >> sh, "setup ND_Production v01_05_00 -q e17:prof"
     print >> sh, "setup jobsub_client"
@@ -472,9 +514,6 @@ if __name__ == "__main__":
 
     sh.writelines(copylines)
 
-    print >> sh, 'echo "Reached end of processnd.sh, exiting with exit code zero"'
-    print >> sh, "exit 0"
-
     if not args.test:
         if "tmsreco" in args.stages or "all" in args.stages:
             TMS_TAR_FILE = args.tms_reco_tar
@@ -483,3 +522,4 @@ if __name__ == "__main__":
         else:
             print "Script processnd.sh created. Submit example:\n"
             print "jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=4000MB file://processnd.sh" % N_TO_SHOW
+
