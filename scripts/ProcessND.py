@@ -6,75 +6,75 @@ import sys
 N_TO_SHOW = 1000
 
 def run_gen( sh, args ):
-    print >> sh, "\n\n\necho running genie"
-    print >> sh, "echo Local files right now:\nls -alh"
+    print("\n\n\necho running genie", file=sh)
+    print("echo Local files right now:\nls -alh", file=sh)
     mode = "neutrino" if args.horn == "FHC" else "antineutrino"
     fluxopt = ""
     maxmb = 100
     if args.use_dk2nu:
         fluxopt = "--dk2nu"
         maxmb = 300
-    print >> sh, "${ND_PRODUCTION_DIR}/bin/copy_dune_flux --top %s --flavor %s --maxmb=100 %s" % (args.fluxdir, mode, fluxopt)
-    print >> sh, "ls flux_files/ -alh"
+    print("${ND_PRODUCTION_DIR}/bin/copy_dune_flux --top %s --flavor %s --maxmb=100 %s" % (args.fluxdir, mode, fluxopt), file=sh)
+    print("ls flux_files/ -alh", file=sh)
 
     # Modify GNuMIFlux.xml to the specified off-axis position
-    print >> sh, "sed \"s/<beampos> ( 0.0, 0.05387, 6.66 )/<beampos> ( %1.2f, 0.05387, 6.66 )/g\" ${ND_PRODUCTION_CONFIG}/GNuMIFlux.xml > GNuMIFlux.xml" % args.oa
+    print("sed \"s/<beampos> ( 0.0, 0.05387, 6.66 )/<beampos> ( %1.2f, 0.05387, 6.66 )/g\" ${ND_PRODUCTION_CONFIG}/GNuMIFlux.xml > GNuMIFlux.xml" % args.oa, file=sh)
     if args.large_flux_window:
-        print >> sh, '''sed -i '/<point coord="det"> /s/-6.0,\s*-5.0,\s*-1.0/-45.0, -18.0, -40.0/g' GNuMIFlux.xml'''
-        print >> sh, '''sed -i '/<point coord="det"> /s/6.0,\s*-5.0,\s*-1.0/15.0, -18.0, -40.0/g' GNuMIFlux.xml'''
-        print >> sh, '''sed -i '/<point coord="det"> /s/6.0,\s*5.0,\s*-1.0/15.0, 27.0, -40.0/g' GNuMIFlux.xml'''
-        print >> sh, '''sed -i '/<upstreamz> /s/-3/-40.0/g' GNuMIFlux.xml'''
-        print >> sh, 'cat GNuMIFlux.xml'
+        print('''sed -i '/<point coord="det"> /s/-6.0,\s*-5.0,\s*-1.0/-45.0, -18.0, -40.0/g' GNuMIFlux.xml''', file=sh)
+        print('''sed -i '/<point coord="det"> /s/6.0,\s*-5.0,\s*-1.0/15.0, -18.0, -40.0/g' GNuMIFlux.xml''', file=sh)
+        print('''sed -i '/<point coord="det"> /s/6.0,\s*5.0,\s*-1.0/15.0, 27.0, -40.0/g' GNuMIFlux.xml''', file=sh)
+        print('''sed -i '/<upstreamz> /s/-3/-40.0/g' GNuMIFlux.xml''', file=sh)
+        print('cat GNuMIFlux.xml', file=sh)
         
   
-    print >> sh, "export GXMLPATH=${PWD}:${GXMLPATH}"
-    print >> sh, "export GNUMIXML=\"GNuMIFlux.xml\""
+    print("export GXMLPATH=${PWD}:${GXMLPATH}", file=sh)
+    print("export GNUMIXML=\"GNuMIFlux.xml\"", file=sh)
     
     if args.b_field_location != None:
         assert args.b_field_filename != None, "Expected a b_field_filename in conjunction with b_field_location"
-        print >> sh, "ifdh cp %s %s" % (args.b_field_location, args.b_field_filename)
+        print("ifdh cp %s %s" % (args.b_field_location, args.b_field_filename), file=sh)
         
         
     if "v3" in args.genie_tune:
         if args.manual_genie_xsec_file != None:
-            print >> sh, "GENIEXSECFILETOUSE=%s" % args.manual_genie_xsec_file
+            print("GENIEXSECFILETOUSE=%s" % args.manual_genie_xsec_file, file=sh)
         else:
             if args.use_big_genie_file:
-                print >> sh, "GENIEXSECFILETOUSE=`dirname $GENIEXSECFILE`/gxspl-FNALbig.xml.gz"
+                print("GENIEXSECFILETOUSE=`dirname $GENIEXSECFILE`/gxspl-FNALbig.xml.gz", file=sh)
             else:
-                print >> sh, "GENIEXSECFILETOUSE=$GENIEXSECFILE"
+                print("GENIEXSECFILETOUSE=$GENIEXSECFILE", file=sh)
         
   
     # Run GENIE
     flux = "dk2nu" if args.use_dk2nu else "gsimple"
-    print >> sh, "gevgen_fnal \\"
-    print >> sh, "    -f flux_files/%s*,DUNEND \\" % flux
+    print("gevgen_fnal \\", file=sh)
+    print("    -f flux_files/%s*,DUNEND \\" % flux, file=sh)
     if args.manual_geometry_override != None:
-        print "Using manual geometry override"
-        print >> sh, "    -g %s \\" % args.manual_geometry_override
+        print("Using manual geometry override")
+        print("    -g %s \\" % args.manual_geometry_override, file=sh)
     else:
         if args.anti_fiducial:
-            print "USING ANTI FIDUCIAL:anti_fiducial_%s.gdml" % args.geometry
-            print >> sh, "    -g ${ND_PRODUCTION_GDML}/anti_fiducial_%s.gdml \\" % args.geometry
+            print("USING ANTI FIDUCIAL:anti_fiducial_%s.gdml" % args.geometry)
+            print("    -g ${ND_PRODUCTION_GDML}/anti_fiducial_%s.gdml \\" % args.geometry, file=sh)
         else:
-            print >> sh, "    -g ${ND_PRODUCTION_GDML}/%s.gdml \\" % args.geometry
-    print >> sh, "    -t %s \\" % args.topvol
-    print >> sh, "    -L cm -D g_cm3 \\"
-    print >> sh, "    -e %g \\" % args.pot
-    print >> sh, "    --seed ${SEED} \\"
-    print >> sh, "    -r ${RUN} \\"
-    print >> sh, "    -o %s \\" % mode
-    print >> sh, "    --message-thresholds ${ND_PRODUCTION_CONFIG}/Messenger_production.xml \\"
-    print >> sh, "    --event-record-print-level 0 \\"
+            print("    -g ${ND_PRODUCTION_GDML}/%s.gdml \\" % args.geometry, file=sh)
+    print("    -t %s \\" % args.topvol, file=sh)
+    print("    -L cm -D g_cm3 \\", file=sh)
+    print("    -e %g \\" % args.pot, file=sh)
+    print("    --seed ${SEED} \\", file=sh)
+    print("    -r ${RUN} \\", file=sh)
+    print("    -o %s \\" % mode, file=sh)
+    print("    --message-thresholds ${ND_PRODUCTION_CONFIG}/Messenger_production.xml \\", file=sh)
+    print("    --event-record-print-level 0 \\", file=sh)
     # Needed for genie3
     if "v3" in args.genie_tune:
-        print >> sh, "    --cross-sections $GENIEXSECFILETOUSE --tune $GENIE_XSEC_TUNE "
+        print("    --cross-sections $GENIEXSECFILETOUSE --tune $GENIE_XSEC_TUNE ", file=sh)
     else:
-        print >> sh, "    --cross-sections ${GENIEXSECPATH}/gxspl-FNALsmall.xml \\"
-        print >> sh, "    --event-generator-list Default+CCMEC"
+        print("    --cross-sections ${GENIEXSECPATH}/gxspl-FNALsmall.xml \\", file=sh)
+        print("    --event-generator-list Default+CCMEC", file=sh)
 
     # Copy the output
-    print >> sh, """# Store the exit code of the previous command
+    print("""# Store the exit code of the previous command
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
 # Print an error message to stderr (cerr)
@@ -82,33 +82,33 @@ echo "Error: genie failed with exit code $exit_code" >&2
 echo "Error: genie failed with exit code $exit_code"
 # Exit the script with a non-zero exit code
 exit $exit_code
-fi"""
+fi""", file=sh)
  
     
 
 
 def run_tms( sh, args ):
-    print >> sh, "\n\n\necho running TMS"
-    print >> sh, "echo Local files right now:\nls -alh"
+    print("\n\n\necho running TMS", file=sh)
+    print("echo Local files right now:\nls -alh", file=sh)
     global N_TO_SHOW
     #print >> sh, "ifdh cp /cvmfs/dune.osgstorage.org/pnfs/fnal.gov/usr/dune/persistent/stash/ND_simulation/production_v01/dune-tms.tar.gz dune-tms.tar.gz"
     #print >> sh, "ifdh cp " + args.tms_reco_tar + " dune-tms.tar.gz"
     #print >> sh, "tar -xzvf dune-tms.tar.gz"
-    print >> sh, "cd $INPUT_TAR_DIR_LOCAL/dune-tms; . setup.sh; cd -"
+    print("cd $INPUT_TAR_DIR_LOCAL/dune-tms; . setup.sh; cd -", file=sh)
     if "v3" in args.genie_tune:
-      print >> sh, "setup edepsim v3_2_0 -q e20:prof"
+      print("setup edepsim v3_2_0 -q e20:prof", file=sh)
     else:
-      print >> sh, "setup edepsim v3_0_1b -q e17:prof"
+      print("setup edepsim v3_0_1b -q e17:prof", file=sh)
     if not any(x in stages for x in ["gen", "genie", "generator"]):
-      print >> sh, "filename=${allfiles[${PROCESS}]}"
-      print >> sh, "basefilename=`basename $filename`"
-      print >> sh, "ifdh cp ${filename} ${basefilename}"
-      print >> sh, "EDEP_OUTPUT_FILE=${basefilename}"
-      print >> sh, "EDEP_FILE=${EDEP_OUTPUT_FILE}"
+      print("filename=${allfiles[${PROCESS}]}", file=sh)
+      print("basefilename=`basename $filename`", file=sh)
+      print("ifdh cp ${filename} ${basefilename}", file=sh)
+      print("EDEP_OUTPUT_FILE=${basefilename}", file=sh)
+      print("EDEP_FILE=${EDEP_OUTPUT_FILE}", file=sh)
     
-    print >> sh, "$INPUT_TAR_DIR_LOCAL/dune-tms/bin/ConvertToTMSTree.exe ${EDEP_OUTPUT_FILE}"
+    print("$INPUT_TAR_DIR_LOCAL/dune-tms/bin/ConvertToTMSTree.exe ${EDEP_OUTPUT_FILE}", file=sh)
     # Copy the output
-    print >> sh, """# Store the exit code of the previous command
+    print("""# Store the exit code of the previous command
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
 # Print an error message to stderr (cerr)
@@ -116,30 +116,30 @@ echo "Error: tms failed with exit code $exit_code" >&2
 echo "Error: tms failed with exit code $exit_code"
 # Exit the script with a non-zero exit code
 #exit $exit_code
-fi"""
+fi""", file=sh)
     # Finds the name regardless of which algs were turned on.
     # Names like neutrino.0.edep_LineCandidates_AStar_Cluster1.root
-    print >> sh, "TMS_OUTPUT_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_TMS_RecoCandidates_*.root}`"
-    print >> sh, "TMS_READOUT_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_TMS_Readout.root}`"
+    print("TMS_OUTPUT_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_TMS_RecoCandidates_*.root}`", file=sh)
+    print("TMS_READOUT_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_TMS_Readout.root}`", file=sh)
     # Example name: neutrino.0.edep_TMS_EventViewer_AStar_Cluster1.pdf
-    print >> sh, "TMS_PDF_FILE=" # First make it blank
-    print >> sh, "TMS_PDF_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_*.pdf}`" # Now try to get the pdf file
+    print("TMS_PDF_FILE=", file=sh) # First make it blank
+    print("TMS_PDF_FILE=`ls ${EDEP_OUTPUT_FILE/.root/_*.pdf}`", file=sh) # Now try to get the pdf file
     
 
 def run_g4( sh, args ):
-    print >> sh, "\n\n\necho running edep sim"
-    print >> sh, "echo Local files right now:\nls -alh"
+    print("\n\n\necho running edep sim", file=sh)
+    print("echo Local files right now:\nls -alh", file=sh)
     mode = "neutrino" if args.horn == "FHC" else "antineutrino"
 
     # Get the input file
     if any(x in stages for x in ["gen", "genie", "generator"]):
         # Then we just made the GENIE file, and it's sitting in the working directory
-        print >> sh, "cp %s.${RUN}.ghep.root input_file.ghep.root" % mode
+        print("cp %s.${RUN}.ghep.root input_file.ghep.root" % mode, file=sh)
     else:
         # We need to get the input file
         #print >> sh, "ifdh cp %s/genie/%s/%02.0fm/${RDIR}/%s.${RUN}.ghep.root input_file.ghep.root" % (args.indir, args.horn, args.oa, mode)
-        print >> sh, "filename=${allfiles[${PROCESS}]}"
-        print >> sh, "ifdh cp $filename input_file.ghep.root"
+        print("filename=${allfiles[${PROCESS}]}", file=sh)
+        print("ifdh cp $filename input_file.ghep.root", file=sh)
         # Need to pick run based on the filename
         #print >> sh, "basefilename=`basename $filename`"
         #print >> sh, """RUN=$(echo "$basefilename" | grep -oE '[0-9]+' | head -1)"""
@@ -151,26 +151,26 @@ def run_g4( sh, args ):
 
     # Needed for genie3, rootracker file changed between versions.
     if "v3" in args.genie_tune and False:
-        print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
-        print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
-        print >> sh, "setup genie_phyopt v2_12_10   -q dkcharmtau"
+        print("setup dk2nugenie   v01_06_01f -q e17:prof", file=sh)
+        print("setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC", file=sh)
+        print("setup genie_phyopt v2_12_10   -q dkcharmtau", file=sh)
     # convert to rootracker to run edep-sim
-    print >> sh, "gntpc -i input_file.ghep.root -f rootracker --event-record-print-level 0 --message-thresholds ${ND_PRODUCTION_CONFIG}/Messenger_production.xml"
+    print("gntpc -i input_file.ghep.root -f rootracker --event-record-print-level 0 --message-thresholds ${ND_PRODUCTION_CONFIG}/Messenger_production.xml", file=sh)
 
     # Get the number of events in the genie file
     # if we're doing overlay, then we want to get the poisson mean and then the number of spills, and be careful not to overshoot
     if args.overlay:
-        print >> sh, "MEAN=$(echo \"std::cout << gtree->GetEntries()*(%3.3g/%3.3g) << std::endl;\" | genie -l -b input_file.ghep.root 2>/dev/null  | tail -1)" % (args.spill_pot, args.pot)
-        print >> sh, "NSPILL=$(echo \"std::cout << (int)floor(0.9*gtree->GetEntries()/${MEAN}) << std::endl;\" | genie -l -b input_file.ghep.root 2>/dev/null  | tail -1)"
+        print("MEAN=$(echo \"std::cout << gtree->GetEntries()*(%3.3g/%3.3g) << std::endl;\" | genie -l -b input_file.ghep.root 2>/dev/null  | tail -1)" % (args.spill_pot, args.pot), file=sh)
+        print("NSPILL=$(echo \"std::cout << (int)floor(0.9*gtree->GetEntries()/${MEAN}) << std::endl;\" | genie -l -b input_file.ghep.root 2>/dev/null  | tail -1)", file=sh)
 
         # change the macro to use mean
-        print >> sh, "sed \"s/count\/set fixed/count\/set mean/g\" ${ND_PRODUCTION_CONFIG}/dune-nd.mac > dune-nd.mac"
-        print >> sh, "sed -i \"s/count\/fixed\/number 1/count\/mean\/number ${MEAN}/g\" dune-nd.mac"
+        print("sed \"s/count\/set fixed/count\/set mean/g\" ${ND_PRODUCTION_CONFIG}/dune-nd.mac > dune-nd.mac", file=sh)
+        print("sed -i \"s/count\/fixed\/number 1/count\/mean\/number ${MEAN}/g\" dune-nd.mac", file=sh)
     else:
-        print >> sh, "NSPILL=$(echo \"std::cout << gtree->GetEntries() << std::endl;\" | genie -l -b input_file.ghep.root 2>/dev/null  | tail -1)"
-        print >> sh, "cat ${ND_PRODUCTION_CONFIG}/dune-nd.mac > dune-nd.mac"
+        print("NSPILL=$(echo \"std::cout << gtree->GetEntries() << std::endl;\" | genie -l -b input_file.ghep.root 2>/dev/null  | tail -1)", file=sh)
+        print("cat ${ND_PRODUCTION_CONFIG}/dune-nd.mac > dune-nd.mac", file=sh)
         if args.event_multiplicity > 1:
-            print >> sh, "sed -i \"s/count\/fixed\/number 1/count\/fixed\/number %s/g\" dune-nd.mac" % args.event_multiplicity
+            print("sed -i \"s/count\/fixed\/number 1/count\/fixed\/number %s/g\" dune-nd.mac" % args.event_multiplicity, file=sh)
             
     
     should_simulate_spill_time = False
@@ -187,42 +187,42 @@ def run_g4( sh, args ):
         # /generator/time/set fixed -> time\/set spil
         # r'' option requires fewer \" but within sed's option we still need \/ to differentiate inside quotes sed -i 's/old-text/new-text/g' input.txt
         # https://github.com/ClarkMcGrew/edep-sim/blob/eaf8b1f8fc083c0a0e1a4d7f1efd413378e6d3df/src/kinem/EDepSimSpillTimeFactory.cc
-        print >> sh, r'sed -i "s/\/generator\/time\/set fixed//g" dune-nd.mac'
-        print >> sh, r'sed -i "s/\/generator\/add//g" dune-nd.mac'
-        print >> sh, "echo /generator/time/spill/start %s ns >> dune-nd.mac" % args.spill_start
-        print >> sh, "echo /generator/time/spill/bunchSep %s ns >> dune-nd.mac" % args.bunch_separation
-        print >> sh, "echo /generator/time/spill/bunchLength %s ns >> dune-nd.mac" % args.bunch_length
-        print >> sh, "echo /generator/time/spill/bunchCount %s >> dune-nd.mac" % args.bunch_count
-        print >> sh, "echo /generator/time/set spill >> dune-nd.mac"
-        print >> sh, "echo /generator/add >> dune-nd.mac" # Makes sure to update the generator based on parameters
+        print(r'sed -i "s/\/generator\/time\/set fixed//g" dune-nd.mac', file=sh)
+        print(r'sed -i "s/\/generator\/add//g" dune-nd.mac', file=sh)
+        print("echo /generator/time/spill/start %s ns >> dune-nd.mac" % args.spill_start, file=sh)
+        print("echo /generator/time/spill/bunchSep %s ns >> dune-nd.mac" % args.bunch_separation, file=sh)
+        print("echo /generator/time/spill/bunchLength %s ns >> dune-nd.mac" % args.bunch_length, file=sh)
+        print("echo /generator/time/spill/bunchCount %s >> dune-nd.mac" % args.bunch_count, file=sh)
+        print("echo /generator/time/set spill >> dune-nd.mac", file=sh)
+        print("echo /generator/add >> dune-nd.mac", file=sh) # Makes sure to update the generator based on parameters
         # TODO make batch structure changable with parameters
 
     # Get edep-sim
     # Needed for genie3, rootracker file changed between versions.
     if "v3" in args.genie_tune:
-        print >> sh, "setup edepsim v3_2_0 -q e20:prof"
+        print("setup edepsim v3_2_0 -q e20:prof", file=sh)
     else:
-        print >> sh, "setup edepsim v3_0_1b -q e17:prof"
+        print("setup edepsim v3_0_1b -q e17:prof", file=sh)
         
-    print >> sh, "EDEP_OUTPUT_FILE=%s.${RUN}.edep.root" % mode
+    print("EDEP_OUTPUT_FILE=%s.${RUN}.edep.root" % mode, file=sh)
     
     
     if args.b_field_location != None:
         assert args.b_field_filename != None, "Expected a b_field_filename in conjunction with b_field_location"
-        print >> sh, "ifdh cp %s %s" % (args.b_field_location, args.b_field_filename)
+        print("ifdh cp %s %s" % (args.b_field_location, args.b_field_filename), file=sh)
 
     #Run it
-    print >> sh, "edep-sim -C \\"
+    print("edep-sim -C \\", file=sh)
     if args.manual_geometry_override != None:
-        print "Using manual geometry override"
-        print >> sh, "  -g %s \\" % args.manual_geometry_override
+        print("Using manual geometry override")
+        print("  -g %s \\" % args.manual_geometry_override, file=sh)
     else:
-        print >> sh, "  -g ${ND_PRODUCTION_GDML}/%s.gdml \\" % args.geometry
-    print >> sh, "  -o ${EDEP_OUTPUT_FILE} \\"
-    print >> sh, "  -e ${NSPILL} \\"
-    print >> sh, "  dune-nd.mac"
+        print("  -g ${ND_PRODUCTION_GDML}/%s.gdml \\" % args.geometry, file=sh)
+    print("  -o ${EDEP_OUTPUT_FILE} \\", file=sh)
+    print("  -e ${NSPILL} \\", file=sh)
+    print("  dune-nd.mac", file=sh)
 
-    print >> sh, """# Store the exit code of the previous command
+    print("""# Store the exit code of the previous command
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
 # Print an error message to stderr (cerr)
@@ -230,19 +230,19 @@ echo "Error: edep-sim failed with exit code $exit_code" >&2
 echo "Error: edep-sim failed with exit code $exit_code"
 # Exit the script with a non-zero exit code
 #exit $exit_code
-fi"""
+fi""", file=sh)
 
 def run_larcv( sh, args ):
 
-    print "LArCV stage is not currently supported.  Sorry"
+    print("LArCV stage is not currently supported.  Sorry")
     return
 
     mode = "neutrino" if args.horn == "FHC" else "antineutrino"
 
     # Get the input file, unless we just ran edep-sim and it's sitting in the working directory
     if not any(x in stages for x in ["g4", "geant4", "edepsim", "edep-sim"]):
-        print >> sh, "setup edepsim v2_0_1 -q e17:prof"
-        print >> sh, "ifdh cp %s/edep/%s/%02.0fm/${RDIR}/%s.${RUN}.edep.root %s.${RUN}.edep.root" % (args.indir, args.horn, args.oa, mode, mode)
+        print("setup edepsim v2_0_1 -q e17:prof", file=sh)
+        print("ifdh cp %s/edep/%s/%02.0fm/${RDIR}/%s.${RUN}.edep.root %s.${RUN}.edep.root" % (args.indir, args.horn, args.oa, mode, mode), file=sh)
 
     # Get larcv stuff
     #print >> sh, "ifdh cp %s/larcv2.tar.bz2 larcv2.tar.bz2" % args.tardir
@@ -250,12 +250,12 @@ def run_larcv( sh, args ):
     #print >> sh, "tar -xf larcv2.tar"
 
     # additional python setup needed
-    print >> sh, "setup python_future_six_request  v1_3 -q python2.7-ucs2"
+    print("setup python_future_six_request  v1_3 -q python2.7-ucs2", file=sh)
 
     # run LArCV2
-    print >> sh, ". larcv2/configure.sh"
-    print >> sh, "supera_dir=${LARCV_BASEDIR}/larcv/app/Supera"
-    print >> sh, "python ${supera_dir}/run_supera.py reco/larcv.cfg %s.${RUN}.edep.root" % mode
+    print(". larcv2/configure.sh", file=sh)
+    print("supera_dir=${LARCV_BASEDIR}/larcv/app/Supera", file=sh)
+    print("python ${supera_dir}/run_supera.py reco/larcv.cfg %s.${RUN}.edep.root" % mode, file=sh)
 
 
 if __name__ == "__main__":
@@ -334,42 +334,42 @@ if __name__ == "__main__":
         fluxid = 1
 
     if "cvmfs" not in args.fluxdir:
-        print "WARNING: specified flux file directory:"
-        print args.fluxdir
-        print "is not in cvmfs. The flux setup probably will not work unless you really know what you are doing"
+        print("WARNING: specified flux file directory:")
+        print(args.fluxdir)
+        print("is not in cvmfs. The flux setup probably will not work unless you really know what you are doing")
     if "persistent" in args.outdir:
-        print "FATAL: Cannot use persistent in outdir. Please use scratch and then copy over."
+        print("FATAL: Cannot use persistent in outdir. Please use scratch and then copy over.")
         exit()
 
     # Software setup -- eventually we may want options for this
-    print >> sh, "start_process_nd_run_time=`date +%s`"
-    print >> sh, "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh"
-    print >> sh, "setup ifdhc"
+    print("start_process_nd_run_time=`date +%s`", file=sh)
+    print("source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh", file=sh)
+    print("setup ifdhc", file=sh)
     if "v3" in args.genie_tune:
-        print >> sh, "setup dk2nugenie  v01_10_01c  -q e20:prof"
-        print >> sh, "setup genie %s -q e20:prof" % args.genie_tune
-        print >> sh, "setup genie_xsec    %s   -q %s" % (args.genie_xsec_version, args.genie_options)
-        print >> sh, "setup genie_phyopt %s -q %s" % (args.genie_phyopt_version, args.genie_phyopt_options)
+        print("setup dk2nugenie  v01_10_01c  -q e20:prof", file=sh)
+        print("setup genie %s -q e20:prof" % args.genie_tune, file=sh)
+        print("setup genie_xsec    %s   -q %s" % (args.genie_xsec_version, args.genie_options), file=sh)
+        print("setup genie_phyopt %s -q %s" % (args.genie_phyopt_version, args.genie_phyopt_options), file=sh)
     else:
-        print >> sh, "setup dk2nugenie   v01_06_01f -q e17:prof"
-        print >> sh, "setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC"
-        print >> sh, "setup genie_phyopt v2_12_10   -q dkcharmtau"
+        print("setup dk2nugenie   v01_06_01f -q e17:prof", file=sh)
+        print("setup genie_xsec   v2_12_10   -q DefaultPlusValenciaMEC", file=sh)
+        print("setup genie_phyopt v2_12_10   -q dkcharmtau", file=sh)
     #print >> sh, "setup geant4 v4_10_3_p03e -q e17:prof"
-    print >> sh, "setup geant4 v4_11_0_p01c -q e20:prof"
-    print >> sh, "setup ND_Production v01_05_00 -q e17:prof"
-    print >> sh, "setup jobsub_client"
-    print >> sh, "setup cigetcert"
+    print("setup geant4 v4_11_0_p01c -q e20:prof", file=sh)
+    print("setup ND_Production v01_05_00 -q e17:prof", file=sh)
+    print("setup jobsub_client", file=sh)
+    print("setup cigetcert", file=sh)
 
 
     # If we are going to do a sam metadata, set it up
     if args.sam_name is not None:
-        print >> sh, "setup sam_web_client v2_2"
+        print("setup sam_web_client v2_2", file=sh)
 
 
     # edep-sim needs to know the location of this file, and also needs to have this location in its path
-    print >> sh, "G4_cmake_file=`find ${GEANT4_FQ_DIR}/lib64 -name 'Geant4Config.cmake'`"
-    print >> sh, "export Geant4_DIR=`dirname $G4_cmake_file`"
-    print >> sh, "export PATH=$PATH:$GEANT4_FQ_DIR/bin"
+    print("G4_cmake_file=`find ${GEANT4_FQ_DIR}/lib64 -name 'Geant4Config.cmake'`", file=sh)
+    print("export Geant4_DIR=`dirname $G4_cmake_file`", file=sh)
+    print("export PATH=$PATH:$GEANT4_FQ_DIR/bin", file=sh)
     
     stages = (args.stages).lower()
     
@@ -388,52 +388,52 @@ if __name__ == "__main__":
           process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
           output, error = process.communicate()
           all_files = output.split()
-          print >> sh, "allfiles=(" + " ".join(all_files) + ")"
+          print("allfiles=(" + " ".join(all_files) + ")", file=sh)
       else:
           all_files=[]
           for root, dirnames, filenames in os.walk(args.indir):
-            for filename in fnmatch.filter(map(lambda x: x, filenames), '*.root'):
+            for filename in fnmatch.filter([x for x in filenames], '*.root'):
               fullfilename = os.path.join(root, filename)
               all_files.append(fullfilename)
           N_TO_SHOW = len(all_files)
           all_files = sorted(all_files)
-          print >> sh, "allfiles=(" + " ".join(all_files) + ")"
+          print("allfiles=(" + " ".join(all_files) + ")", file=sh)
 
     # if test mode, run it in a new directory so we don't tarbomb
     # Run number and random seed must be set in the script because the $PROCRESS variable is different for each job
     if not allfiles_mode:
         if args.test:
-            print >> sh, "mkdir test;cd test"
-            print >> sh, "RUN=%d" % args.first_run
-            print >> sh, "SEED=%d" % (1E6*args.oa + args.first_run)
+            print("mkdir test;cd test", file=sh)
+            print("RUN=%d" % args.first_run, file=sh)
+            print("SEED=%d" % (1E6*args.oa + args.first_run), file=sh)
         else:
-            print >> sh, "RUN=$((${PROCESS}+%d))" % args.first_run
-            print >> sh, "SEED=$((1000000*%d+${RUN}))" % (int(args.oa))
+            print("RUN=$((${PROCESS}+%d))" % args.first_run, file=sh)
+            print("SEED=$((1000000*%d+${RUN}))" % (int(args.oa)), file=sh)
     else:
         if args.test:
-            print >> sh, "PROCESS=0" # test with first file
-            print >> sh, "mkdir test;cd test"
-            print >> sh, "SEED=%d" % (1E6*args.oa + args.first_run)
-        print >> sh, "filename=`basename ${allfiles[${PROCESS}]}`"
-        print >> sh, 'echo "Found filename=${filename}"'
-        print >> sh, 'RUN=`echo $filename | grep -Po "(?<=\.)\d+(?=_)"`'
-        print >> sh, 'echo "Found RUN=${RUN}"'
+            print("PROCESS=0", file=sh) # test with first file
+            print("mkdir test;cd test", file=sh)
+            print("SEED=%d" % (1E6*args.oa + args.first_run), file=sh)
+        print("filename=`basename ${allfiles[${PROCESS}]}`", file=sh)
+        print('echo "Found filename=${filename}"', file=sh)
+        print('RUN=`echo $filename | grep -Po "(?<=\.)\d+(?=_)"`', file=sh)
+        print('echo "Found RUN=${RUN}"', file=sh)
 
     # Set the run dir in the script, as it can be different for different jobs within one submission if N is large
-    print >> sh, "RDIR=$((${RUN} / 1000))"
-    print >> sh, "if [ ${RUN} -lt 10000 ]; then"
-    print >> sh, "RDIR=0$((${RUN} / 1000))"
-    print >> sh, "fi"
+    print("RDIR=$((${RUN} / 1000))", file=sh)
+    print("if [ ${RUN} -lt 10000 ]; then", file=sh)
+    print("RDIR=0$((${RUN} / 1000))", file=sh)
+    print("fi", file=sh)
 
     copylines = []
 
     # put the timestamp for unique file names
-    print >> sh, "TIMESTAMP=`date +%s`"
+    print("TIMESTAMP=`date +%s`", file=sh)
     
     if args.geometry_location != None:
-        print("Copying geometry files from %s" % args.geometry_location)
-        print >> sh, "echo Copying geometry files from %s" % args.geometry_location
-        print >> sh, "ifdh cp %s ." % args.geometry_location
+        print(("Copying geometry files from %s" % args.geometry_location))
+        print("echo Copying geometry files from %s" % args.geometry_location, file=sh)
+        print("ifdh cp %s ." % args.geometry_location, file=sh)
 
     # Generator/GENIE stage
     if any(x in stages for x in ["gen", "genie", "generator"]):
@@ -504,11 +504,11 @@ if __name__ == "__main__":
             copylines.append( 'if test -f "$TMS_PDF_FINAL_FILE"; then ifdh cp ${TMS_PDF_FINAL_FILE} %s/tmsreco/%s/%02.0fm/${RDIR}/${TMS_PDF_FINAL_FILE}; fi\n' % (args.outdir, args.horn, args.oa) )
             
             
-    print >> sh, "\n\necho Done running stages."
-    print >> sh, "end_process_nd_run_time=`date +%s`"
-    print >> sh, "runtime=$((end_process_nd_run_time-start_process_nd_run_time))"
-    print >> sh, 'echo "Runtime (s): "${runtime}'
-    print >> sh, "echo Local files right now:\nls -alh"
+    print("\n\necho Done running stages.", file=sh)
+    print("end_process_nd_run_time=`date +%s`", file=sh)
+    print("runtime=$((end_process_nd_run_time-start_process_nd_run_time))", file=sh)
+    print('echo "Runtime (s): "${runtime}', file=sh)
+    print("echo Local files right now:\nls -alh", file=sh)
     
 
 
@@ -517,9 +517,9 @@ if __name__ == "__main__":
     if not args.test:
         if "tmsreco" in args.stages or "all" in args.stages:
             TMS_TAR_FILE = args.tms_reco_tar
-            print "Script processnd.sh created. Submit example:\n"
-            print "jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=4000MB --use-cvmfs-dropbox --tar_file_name=dropbox://%s file://processnd.sh" % (N_TO_SHOW, TMS_TAR_FILE)
+            print("Script processnd.sh created. Submit example:\n")
+            print("jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=4000MB --use-cvmfs-dropbox --tar_file_name=dropbox://%s file://processnd.sh" % (N_TO_SHOW, TMS_TAR_FILE))
         else:
-            print "Script processnd.sh created. Submit example:\n"
-            print "jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=4000MB file://processnd.sh" % N_TO_SHOW
+            print("Script processnd.sh created. Submit example:\n")
+            print("jobsub_submit --group dune --role=Analysis -N %s --OS=SL7 --expected-lifetime=24h --memory=4000MB file://processnd.sh" % N_TO_SHOW)
 
