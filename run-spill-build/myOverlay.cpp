@@ -47,11 +47,15 @@ double getProductionTime_LBNF() {
 
 // this is the time of neutrino interaction with the detector
 // Z_coord is taken from GENIE and it's in detector coordinates, where 0 corresponds to the start of ND
-double getInteractionTime_LBNF(double Z_coord) {
+double getInteractionTime_LBNF(TG4Event const& event) {
 
-  return getProductionTime_LBNF() + Z_coord / nuSpeed;
+  auto v = event.Primaries[0];
+  double z_coord = v.Position.Z();
 
+  return getProductionTime_LBNF() + z_coord / nuSpeed;
+  
 }
+
 
 struct TaggedTime {
   double time;
@@ -226,12 +230,12 @@ void myOverlay(std::string inFileName1,
       TG4Event* edep_evt = is_fidvol ? edep_evt_1 : edep_evt_2;
 
       // I am considering just 1 primary vertex!!
-      assert(event->Primaries.size() != 0u && "Multiple interaction vertices in the same event not supported!!");
+      assert(edep_evt->Primaries.size() != 0u && "Multiple interaction vertices in the same event not supported!!");
 
       auto v = edep_evt->Primaries[0];
       nPrimaryPart += v.Particles.size();
-      double z_1 = v.Position.Z();
-      times.push_back(TaggedTime(getInteractionTime_LBNF(z_1), 1, evt_it + i));
+      // double z_1 = v.Position.Z();
+      times.push_back(TaggedTime(getInteractionTime_LBNF(*edep_evt), 1, evt_it + i));
       nTrajectories += edep_evt->Trajectories.size();
     }
 
