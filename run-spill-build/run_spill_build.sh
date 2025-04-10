@@ -74,7 +74,7 @@ LIBTG4EVENT_DIR=${LIBTG4EVENT_DIR:-libTG4Event}
 
 run root -l -b -q \
     -e "gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\")" \
-    "overlaySinglesIntoSpillsSorted.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD)"
+    "myOverlay.cpp(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD)"
 
 mkdir -p "$outDir/EDEPSIM_SPILLS/$subDir"
 mv "$spillFile" "$outDir/EDEPSIM_SPILLS/$subDir"

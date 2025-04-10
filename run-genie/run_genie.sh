@@ -40,7 +40,7 @@ if [ ! -f "$maxPathFile" ]; then
     # Evaluate max path lengths from ROOT geometry file
     echo $(basename $ND_PRODUCTION_GEOM .gdml)
     echo "/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root"
-    gmxpl -f /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root --tune $ND_PRODUCTION_TUNE -L cm -D g_cm3 -t $ND_PRODUCTION_TOP_VOLUME -o /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/maxpath/$(basename $ND_PRODUCTION_GEOM .gdml).maxpath.xml -seed 21304 --message-thresholds /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/Messenger.xml  &> ${ND_PRODUCTION_LOGDIR_BASE}/gmxpl.log
+    gmxpl -f /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root -L cm -D g_cm3 --tune $ND_PRODUCTION_TUNE -t $ND_PRODUCTION_TOP_VOLUME -o /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/maxpath/$(basename $ND_PRODUCTION_GEOM .gdml).maxpath.xml -seed 21304 --message-thresholds /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/Messenger.xml  &> ${ND_PRODUCTION_LOGDIR_BASE}/gmxpl.log
 fi
 
 echo "maxpath is $maxPathFile"
