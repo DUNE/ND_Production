@@ -96,16 +96,6 @@ echo -e "\tThe file physical file name (PFN) is [$pfn]" | tee -a $envlog
 echo -e "\tThe file Rucio storage element (RSE) is [$rse]\n" | tee -a $envlog
 
 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Copy file to local disk
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
-   compgen -c | grep -i xrd 2>&1 | tee -a $envlog
-fi
-echo -e "Running xrdcopy ${pfn} ${WORKSPACE}/" 2>&1 | tee -a $envlog
-xrdcopy ${pfn} ${WORKSPACE}/ 
-echo -e "\tCompleted the copying.\n" 2>&1 | tee -a $envlog
-
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Get the input filename
@@ -113,6 +103,35 @@ echo -e "\tCompleted the copying.\n" 2>&1 | tee -a $envlog
 IFS='/' read -r -a array <<< "$pfn"
 export INPUT_FILE="${array[-1]}"
 echo -e "The input file is ${INPUT_FILE}" 2>&1 | tee -a $envlog
+
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Copy file to local disk
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+echo -e "Using rucio to download file [$did]" 2>&1 | tee -a $envlog
+(
+   source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+   source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+
+   setup python v3_9_15
+   setup rucio
+
+   if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
+      rucio whoami  2>&1 | tee -a $envlog
+   fi
+     
+   rucio download ${did} --dir ${WORKSPACE}
+
+   subdir=`echo $did | cut -f1 -d':'`
+   mv ${WORKSPACE}/${subdir}/* ${WORKSPACE}/
+   rm -rf ${subdir}
+  
+   if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
+      ls -lha * 2>&1 | tee -a $envlog
+   fi
+)
+
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -123,6 +142,7 @@ CREATED_FILES=()
 MATCHED_LIGHT_FILES=()
 
 
+
 #+++++++++++++++++++++++++++++++++++++++++++++++
 # Get the corresponding light files
 #++++++++++++++++++++++++++++++++++++++++++++++++
@@ -131,19 +151,13 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
    (
       echo -e "\tSetting up the data management tools." 2>&1 | tee -a $envlog
       export GET_INPUT_LIGHT_FILES_SCRIPT=${CVMFS_WORKING_DIR}/ndlar_scripts/GetInputList.py
-      #export GET_INPUT_LIGHT_FILES_SCRIPT=/exp/dune/app/users/twalton/2x2ProdWorkspace/ND_Production/scripts/GetInputList.py
-
-
-      #source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+    
+      source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
       source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
 
-      setup metacat -z /cvmfs/dune.opensciencegrid.org/products/dune 
-      setup python v3_9_15 -z /cvmfs/larsoft.opensciencegrid.org/products
-      setup rucio -z /cvmfs/dune.opensciencegrid.org/products/dune 
-
-      if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
-         rucio whoami  2>&1 | tee -a $envlog
-      fi
+      setup python v3_9_15 
+      setup metacat 
+      setup rucio 
 
       echo -e "\tRunning the command [ python ${GET_INPUT_LIGHT_FILES_SCRIPT} --file=${did} ].\n" 2>&1 | tee -a $envlog 
       python ${GET_INPUT_LIGHT_FILES_SCRIPT} --file=${did} 2>&1 | tee -a $envlog
@@ -156,7 +170,6 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
       echo -e "FATAL::The detector configuration [${DETECTOR_CONFIG}] is not implemented. Cannot continue.\n" 2>&1 | tee -a $envlog
       exit 0
    fi
-
    if [ ! -d ${namespace} ]; then
       echo -e "\tFailed to get the matching light files.\n" 2>&1 | tee -a $envlog
       exit 0
@@ -192,10 +205,11 @@ if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
 fi
 
 
+
 #+++++++++++++++++++++++++++++++++++++++++++
 # setup the 2x2 ndlar software
 #+++++++++++++++++++++++++++++++++++++++++++
-echo -e "Setup and enter the conda environment for the software release [${TWOBYTWO_RELEASE}]" 2>&1 | tee -a $envlog
+echo -e "\nSetup and enter the conda environment for the software release [${TWOBYTWO_RELEASE}]" 2>&1 | tee -a $envlog
 export EXTERNAL_RELEASE=v00_00_01
 export CONDA_ENVS_DIRS=${CVMFS_TWOBYTWO_DIR}/${EXTERNAL_RELEASE}/conda_envs/.
 
@@ -244,12 +258,12 @@ fi
 # Get the range of events to process for the light+charge combination workflow
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 get_range_for_light_workflow() {
-   TMP_DIR="/tmp" 
+   TMP_DIR="${WORKSPACE}/tmp" 
    if [ ${JOBSCRIPT_TEST} -eq 1 ]; then
       TMP_DIR="/exp/dune/data/users/${USER}/NDLAR_FLOW_JUSTIN_TMP/tmp"
-      if [ ! -d ${TMP_DIR} ]; then
-           mkdir -p ${TMP_DIR}
-      fi
+   fi
+   if [ ! -d ${TMP_DIR} ]; then
+      mkdir -p ${TMP_DIR}
    fi
    WORKFLOW="${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME}" 
    CHARGEF="${WORKSPACE}/${INPUT_FILE/binary/packet}"
@@ -272,29 +286,25 @@ execute_light_workflow() {
       LIGHT_INPUT_FILE=${MATCHED_LIGHT_FILES[0]}
    fi
 
-   export NDLAR_FLOW_LIGHT_YAML_DIR=yamls/${DETECTOR_CONFIG}_flow/workflows/light
+   export NDLAR_FLOW_LIGHT_YAML_DIR=${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/light
    export LIGHT_EVENT_BUILD_YAML_NAME="${LIGHT_INPUT_FILE/.data*/_light_event_build.yaml}"
    export LIGHT_EVENT_RECO_YAML_NAME="${LIGHT_INPUT_FILE/.data*/_light_event_reco.yaml}"
 
-   if [ -f ${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_building_mpd.yaml ]; then
-      echo -e "\t\tCopying [cp $NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_building_mpd.yaml ${LIGHT_EVENT_BUILD_YAML_NAME}]" 2>&1 | tee -a $envlog  
-      cd ${NDLAR_FLOW_WORKSPACE}/${NDLAR_FLOW_LIGHT_YAML_DIR} 
-      cp light_event_building_mpd.yaml ${LIGHT_EVENT_BUILD_YAML_NAME}
+   if [ -f ${NDLAR_FLOW_LIGHT_YAML_DIR}/light_event_building_mpd.yaml ]; then
+      echo -e "\t\tCopying [cp ${NDLAR_FLOW_LIGHT_YAML_DIR}/light_event_building_mpd.yaml ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME}]" 2>&1 | tee -a $envlog  
+      cp ${NDLAR_FLOW_LIGHT_YAML_DIR}/light_event_building_mpd.yaml ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME}
    else 
-      echo -e "The file [$NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_building_mpd.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
+      echo -e "The file [${NDLAR_FLOW_LIGHT_YAML_DIR}/light_event_building_mpd.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
       exit 0
    fi
 
-   if [ -f ${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml ]; then
-      echo -e "\t\tCopying [cp $NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml ${LIGHT_EVENT_RECO_YAML_NAME}]" 2>&1 | tee -a $envlog
-      cd ${NDLAR_FLOW_WORKSPACE}/${NDLAR_FLOW_LIGHT_YAML_DIR} 
-      cp light_event_reconstruction_${DATA_TYPE}.yaml ${LIGHT_EVENT_RECO_YAML_NAME}
+   if [ -f ${NDLAR_FLOW_LIGHT_YAML_DIR}/light_event_reconstruction_${DATA_TYPE}.yaml ]; then
+      echo -e "\t\tCopying [cp ${NDLAR_FLOW_LIGHT_YAML_DIR}/light_event_reconstruction_${DATA_TYPE}.yaml ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME}]" 2>&1 | tee -a $envlog
+      cp ${NDLAR_FLOW_LIGHT_YAML_DIR}/light_event_reconstruction_${DATA_TYPE}.yaml ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME}
    else 
-      echo -e "The file [$NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
+      echo -e "The file [${NDLAR_FLOW_LIGHT_YAML_DIR}/light_event_reconstruction_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
       exit 0
    fi
-
-   LIGHT_CONFIG="${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME} ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME}"
 
    export LIGHT_OUTPUT_LOGFILE="${LIGHT_INPUT_FILE/.data*/.FLOW.log}"
    export LIGHT_OUTPUT_DATAFILE="${LIGHT_INPUT_FILE/.data*/.FLOW.hdf5}"
@@ -302,16 +312,18 @@ execute_light_workflow() {
       export LIGHT_OUTPUT_DATAFILE="${PACKET_OUTPUT_FILE/.hdf5/.FLOW.hdf5}"
    fi
    echo -e "\tThe light output file names are [${LIGHT_OUTPUT_DATAFILE}, ${LIGHT_OUTPUT_LOGFILE}]"  2>&1 | tee -a $envlog
+   #echo -e "Output of the light workflow.\n\n" > ${LIGHT_OUTPUT_LOGFILE}
 
    cd ${NDLAR_FLOW_WORKSPACE}
-   H5FLOW_WORKFLOW="h5flow"
 
    if [[ "${DATA_STREAM}" == "light" ]]; then
-      echo -e "\t\tRunning the light workflow: [ ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} ]\n" 2>&1 | tee -a $envlog 
-      ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${LIGHT_INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} | tee -a $LIGHT_OUTPUT_LOGFILE 
+      LIGHT_CONFIG="yamls/${DETECTOR_CONFIG}_flow/workflows/light/${LIGHT_EVENT_BUILD_YAML_NAME} yamls/${DETECTOR_CONFIG}_flow/workflows/light/${LIGHT_EVENT_RECO_YAML_NAME}"
+      echo -e "\t\tRunning the light workflow: [ h5flow -i ${WORKSPACE}/${INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} ]\n" 2>&1 | tee -a $envlog 
+      h5flow -i ${WORKSPACE}/${LIGHT_INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} | tee -a $LIGHT_OUTPUT_LOGFILE 
    elif [[ "${DATA_STREAM}" == "combined" ]]; then
         read -r -a LIGHT_EVENT_RANGE <<< "$(get_range_for_light_workflow)"
-        echo -e "\t\tFor the light+charge combination workflow, the LIGHT_EVENT_RANGE is [ start(${LIGHT_EVENT_RANGE[0]}) :: end(${LIGHT_EVENT_RANGE[1]}) ]" 2>&1 | tee -a $envlog
+
+        echo -e "\t\tFor the light+charge combination workflow, the LIGHT_EVENT_RANGE is [ start is ${LIGHT_EVENT_RANGE[0]} :: end is ${LIGHT_EVENT_RANGE[1]} ]" 2>&1 | tee -a $envlog
         if [[ "`echo ${#LIGHT_EVENT_RANGE[@]}`" == "0" ]]; then
            echo -e "\t\tFailed to get the event range for the input light files" 2>&1 | tee -a $envlog
            exit 0
@@ -321,27 +333,27 @@ execute_light_workflow() {
         for filename in "${MATCHED_LIGHT_FILES[@]}"; 
         do 
             if [[ "$filename" == "${MATCHED_LIGHT_FILES[0]}" && "${LIGHT_EVENT_RANGE[0]}" -ne "-1" ]]; then
-               H5FLOW_WORKFLOW="${H5FLOW_WORKFLOW} --start_position=${LIGHT_EVENT_RANGE[0]}"
+               H5FLOW_WORKFLOW="h5flow --start_position=${LIGHT_EVENT_RANGE[0]}"
             elif [[ "$filename" == "${MATCHED_LIGHT_FILES[-1]}" && "${LIGHT_EVENT_RANGE[1]}" -ne "-1" ]]; then
-               H5FLOW_WORKFLOW="${H5FLOW_WORKFLOW} --end_position=${LIGHT_EVENT_RANGE[1]}"
+               H5FLOW_WORKFLOW="h5flow --end_position=${LIGHT_EVENT_RANGE[1]}"
             else 
-              H5FLOW_WORKFLOW="h5flow"
+               H5FLOW_WORKFLOW="h5flow"
             fi
 
-            echo -e "\t\t  [ ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${filename} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME} ]" 2>&1 | tee -a $envlog
-            ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${filename} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME} >> $LIGHT_OUTPUT_LOGFILE
+            echo -e "\t\t  [ ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${filename} -o ${LIGHT_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/light/${LIGHT_EVENT_BUILD_YAML_NAME} ]" 2>&1 | tee -a $envlog
+            ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${filename} -o ${LIGHT_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/light/${LIGHT_EVENT_BUILD_YAML_NAME} # $LIGHT_OUTPUT_LOGFILE
         done
 
-        echo -e "\t\t  [ ${H5FLOW_WORKFLOW} -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME} ]" 2>&1 | tee -a $envlog
-        h5flow -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME} >> $LIGHT_OUTPUT_LOGFILE
+        echo -e "\t\t  [ h5flow -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/light/${LIGHT_EVENT_RECO_YAML_NAME} ]" 2>&1 | tee -a $envlog
+        h5flow -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/light/${LIGHT_EVENT_RECO_YAML_NAME} # $LIGHT_OUTPUT_LOGFILE
    fi
 
-   echo -e "\tMoving the file(s) to the outfiles directory" 2>&1 | tee -a $envlog
+   echo -e "\tMoving the light file(s) to the outfiles directory" 2>&1 | tee -a $envlog
    if [ -f ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME} ]; then 
-      mv ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME} ${OUTFILES_DIR}
+      mv ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_BUILD_YAML_NAME} ${OUTFILES_DIR}/
    fi 
    if [ -f ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME} ]; then
-      mv ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME} ${OUTFILES_DIR}
+      mv ${NDLAR_FLOW_LIGHT_YAML_DIR}/${LIGHT_EVENT_RECO_YAML_NAME} ${OUTFILES_DIR}/
    fi 
    if [ -f ${LIGHT_OUTPUT_LOGFILE} ]; then
       mv ${LIGHT_OUTPUT_LOGFILE}  ${OUTFILES_DIR}/
@@ -356,7 +368,6 @@ execute_light_workflow() {
    if [[ "${MAKE_METADATA}" == "True" ]]; then
       export LIGHT_CONFIG_FILES="${LIGHT_EVENT_BUILD_YAML_NAME},${LIGHT_EVENT_RECO_YAML_NAME}"
    fi
-
    if [[ ${DATA_STREAM} == "light" ]]; then
       CREATED_FILES+=("${LIGHT_OUTPUT_DATAFILE}")
    fi   
@@ -381,17 +392,13 @@ execute_charge_binary_to_packet_workflow() {
    fi   
 
    export PACKET_OUTPUT_FILE="${INPUT_FILE/binary/packet}"
-   export PACKET_OUTPUT_LOGFILE="${PACKET_OUTPUT_FILE/.hdf5*/.log}"
 
    echo -e "\tRunning the charge raw data to packet data conversion workflow." 2>&1 | tee -a $envlog 
-   echo -e "\t[ python ${CONVERT_DATA_WORKFLOW} -i ${WORKSPACE}/${INPUT_FILE} -o ${PACKET_OUTPUT_FILE} --direct >> $PACKET_OUTPUT_LOGFILE ]" 2>&1 | tee -a $envlog 
+   echo -e "\t[ python ${CONVERT_DATA_WORKFLOW} -i ${WORKSPACE}/${INPUT_FILE} -o ${PACKET_OUTPUT_FILE} --direct ]" 2>&1 | tee -a $envlog 
 
-   python ${CONVERT_DATA_WORKFLOW} -i ${WORKSPACE}/${INPUT_FILE} -o ${PACKET_OUTPUT_FILE} --direct >> $PACKET_OUTPUT_LOGFILE 
+   python ${CONVERT_DATA_WORKFLOW} -i ${WORKSPACE}/${INPUT_FILE} -o ${PACKET_OUTPUT_FILE} --direct  
    
-   echo -e "\tMoving the file(s) to the outfiles directory" 2>&1 | tee -a $envlog
-   if [ -f ${PACKET_OUTPUT_LOGFILE} ]; then
-      mv ${PACKET_OUTPUT_LOGFILE}  ${OUTFILES_DIR}/
-   fi 
+   echo -e "\tMoving the output file to the outfiles directory" 2>&1 | tee -a $envlog
    if [ -f ${PACKET_OUTPUT_FILE} ]; then
       mv ${PACKET_OUTPUT_FILE} ${OUTFILES_DIR}/
    else 
@@ -411,58 +418,48 @@ execute_charge_binary_to_packet_workflow() {
 execute_charge_workflow() {
    echo -e "Enter executing the charge workflow for data stream [${DATA_STREAM}]" 2>&1 | tee -a $envlog
 
-   export NDLAR_FLOW_CHARGE_YAML_DIR=yamls/${DETECTOR_CONFIG}_flow/workflows/charge
-  
    PACKNAME_FILE="${INPUT_FILE/binary/packet}"
 
+   export NDLAR_FLOW_CHARGE_YAML_DIR=${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/charge
    export CHARGE_EVENT_BUILD_YAML_NAME="${PACKNAME_FILE/.hdf5*/_charge_event_building.yaml}"
    export CHARGE_EVENT_RECO_YAML_NAME="${PACKNAME_FILE/.hdf5*/_charge_event_reconstruction.yaml}"
    export CHARGE_EVENT_COMB_YAML_NAME="${PACKNAME_FILE/.hdf5*/_charge_combined_reconstruction.yaml}"
    export CHARGE_EVENT_PROMPT_YAML_NAME="${PACKNAME_FILE/.hdf5*/_charge_prompt_calibration.yaml}"
    export CHARGE_EVENT_CALIB_YAML_NAME="${PACKNAME_FILE/.hdf5*/_charge_calibration.yaml}"
 
-   if [ -f ${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_event_building_${DATA_TYPE}.yaml ]; then
-      echo -e "\t\tCopying [cp $NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_event_building_${DATA_TYPE}.yaml ${CHARGE_EVENT_BUILD_YAML_NAME}]" 2>&1 | tee -a $envlog  
-      cd ${NDLAR_FLOW_WORKSPACE}/${NDLAR_FLOW_CHARGE_YAML_DIR} 
-      cp charge_event_building_${DATA_TYPE}.yaml ${CHARGE_EVENT_BUILD_YAML_NAME}
+   if [ -f ${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_event_building_${DATA_TYPE}.yaml ]; then
+      echo -e "\t\tCopying [cp ${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_event_building_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_BUILD_YAML_NAME}]" 2>&1 | tee -a $envlog  
+      cp ${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_event_building_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_BUILD_YAML_NAME}
    else 
-      echo -e "The file [$NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_event_building_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
+      echo -e "The file [${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_event_building_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
       exit 0
    fi
-
-   if [ -f ${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_event_reconstruction_${DATA_TYPE}.yaml ]; then
-      echo -e "\t\tCopying [cp $NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_event_reconstruction_${DATA_TYPE}.yaml ${CHARGE_EVENT_RECO_YAML_NAME}]" 2>&1 | tee -a $envlog  
-      cd ${NDLAR_FLOW_WORKSPACE}/${NDLAR_FLOW_CHARGE_YAML_DIR} 
-      cp charge_event_reconstruction_${DATA_TYPE}.yaml ${CHARGE_EVENT_RECO_YAML_NAME}
+   if [ -f ${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_event_reconstruction_${DATA_TYPE}.yaml ]; then
+      echo -e "\t\tCopying [cp ${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_event_reconstruction_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_RECO_YAML_NAME}]" 2>&1 | tee -a $envlog  
+      cp ${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_event_reconstruction_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_RECO_YAML_NAME}
    else 
-      echo -e "The file [$NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_event_reconstruction_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
+      echo -e "The file [${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_event_reconstruction_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
       exit 0
    fi
-
-   if [ -f ${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/combined/combined_reconstruction_${DATA_TYPE}.yaml ]; then
-      echo -e "\t\tCopying [cp $NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/combined/combined_reconstruction_${DATA_TYPE}.yaml ${CHARGE_EVENT_BUILD_YAML_NAME}]" 2>&1 | tee -a $envlog  
-      cd ${NDLAR_FLOW_WORKSPACE}/"${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}" 
-      cp combined_reconstruction_${DATA_TYPE}.yaml ${CHARGE_EVENT_COMB_YAML_NAME}
+   if [ -f "${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}"/combined_reconstruction_${DATA_TYPE}.yaml ]; then
+      echo -e "\t\tCopying [cp ${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}/combined_reconstruction_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}/${CHARGE_EVENT_BUILD_YAML_NAME}]" 2>&1 | tee -a $envlog  
+      cp "${NDLAR_FLOW_CHARGE_YAML_DIR/charged/combined}"/combined_reconstruction_${DATA_TYPE}.yaml "${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}"/${CHARGE_EVENT_COMB_YAML_NAME}
    else 
-      echo -e "The file [$NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/combined/combined_reconstruction_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
+      echo -e "The file [${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}/combined_reconstruction_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
       exit 0
    fi
-
-   if [ -f ${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/prompt_calibration_${DATA_TYPE}.yaml ]; then
-      echo -e "\t\tCopying [cp $NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/prompt_calibration_${DATA_TYPE}.yaml ${CHARGE_EVENT_PROMPT_YAML_NAME}]" 2>&1 | tee -a $envlog  
-      cd ${NDLAR_FLOW_WORKSPACE}/${NDLAR_FLOW_CHARGE_YAML_DIR} 
-      cp prompt_calibration_${DATA_TYPE}.yaml ${CHARGE_EVENT_PROMPT_YAML_NAME}
+   if [ -f ${NDLAR_FLOW_CHARGE_YAML_DIR}/prompt_calibration_${DATA_TYPE}.yaml ]; then
+      echo -e "\t\tCopying [cp ${NDLAR_FLOW_CHARGE_YAML_DIR}/prompt_calibration_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_PROMPT_YAML_NAME}]" 2>&1 | tee -a $envlog  
+      cp ${NDLAR_FLOW_CHARGE_YAML_DIR}/prompt_calibration_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_PROMPT_YAML_NAME}
    else 
-      echo -e "The file [$NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/prompt_calibration_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
+      echo -e "The file [${NDLAR_FLOW_CHARGE_YAML_DIR}/prompt_calibration_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
       exit 0
    fi
-
-   if [ -f ${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/final_calibration_${DATA_TYPE}.yaml ]; then
-      echo -e "\t\tCopying [cp $NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/final_calibration_${DATA_TYPE}.yaml ${CHARGE_EVENT_CALIB_YAML_NAME}]" 2>&1 | tee -a $envlog  
-      cd ${NDLAR_FLOW_WORKSPACE}/${NDLAR_FLOW_CHARGE_YAML_DIR} 
-      cp final_calibration_${DATA_TYPE}.yaml ${CHARGE_EVENT_CALIB_YAML_NAME}
+   if [ -f ${NDLAR_FLOW_CHARGE_YAML_DIR}/final_calibration_${DATA_TYPE}.yaml ]; then
+      echo -e "\t\tCopying [cp ${NDLAR_FLOW_CHARGE_YAML_DIR}/final_calibration_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_CALIB_YAML_NAME}]" 2>&1 | tee -a $envlog  
+      cp ${NDLAR_FLOW_CHARGE_YAML_DIR}/final_calibration_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_CALIB_YAML_NAME}
    else 
-      echo -e "The file [$NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/final_calibration_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
+      echo -e "The file [${NDLAR_FLOW_CHARGE_YAML_DIR}/final_calibration_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
       exit 0
    fi
 
@@ -474,25 +471,21 @@ execute_charge_workflow() {
    fi
 
    echo -e "\tThe charge output file names are [${CHARGE_OUTPUT_DATAFILE}, ${CHARGE_OUTPUT_LOGFILE}]"  2>&1 | tee -a $envlog
-
+  
    C1="${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_BUILD_YAML_NAME}"
    C2="${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_RECO_YAML_NAME}"
    C3="${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}/${CHARGE_EVENT_COMB_YAML_NAME}"
    C4="${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_PROMPT_YAML_NAME}"
    C5="${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_CALIB_YAML_NAME}"
-
    CHARGE_CONFIG="${C1} ${C2} ${C3} ${C4} ${C5}"
-   H5FLOW_WORKFLOW="h5flow --nompi" 
-  
-   cd ${NDLAR_FLOW_WORKSPACE}
 
    echo -e "\tRunning the charge building workflow." 2>&1 | tee -a $envlog 
-   echo -e "\t\t[ ${H5FLOW_WORKFLOW} -i ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE} -o ${CHARGE_OUTPUT_DATAFILE} -c ${CHARGE_CONFIG} >> $CHARGE_OUTPUT_LOGFILE ]" 2>&1 | tee -a $envlog 
+   echo -e "\t\t[ h5flow -i ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE} -o ${CHARGE_OUTPUT_DATAFILE} -c ${CHARGE_CONFIG} >> $CHARGE_OUTPUT_LOGFILE ]" 2>&1 | tee -a $envlog 
 
-   ${H5FLOW_WORKFLOW} -i ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE} -o ${CHARGE_OUTPUT_DATAFILE} -c ${CHARGE_CONFIG} >> $CHARGE_OUTPUT_LOGFILE 
+   cd ${NDLAR_FLOW_WORKSPACE}
+   h5flow -i ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE} -o ${CHARGE_OUTPUT_DATAFILE} -c ${CHARGE_CONFIG} # $CHARGE_OUTPUT_LOGFILE 
 
-   echo -e "\tMoving the file(s) to the outfiles directory" 2>&1 | tee -a $envlog
-
+   echo -e "\tMoving the charge file(s) to the outfiles directory" 2>&1 | tee -a $envlog
    if [ -f ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_BUILD_YAML_NAME} ]; then
       mv ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_EVENT_BUILD_YAML_NAME} ${OUTFILES_DIR}/
    fi 
@@ -515,7 +508,7 @@ execute_charge_workflow() {
       mv ${CHARGE_OUTPUT_DATAFILE} ${OUTFILES_DIR}/
    else 
       echo -e "FATAL::The file [${CHARGE_OUTPUT_DATAFILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
-      exit 0
+      exit 1
    fi
 
    if [[ "${MAKE_METADATA}" == "True" ]]; then
@@ -538,36 +531,27 @@ execute_charge_workflow() {
 execute_light_charge_association_workflow() {
    echo -e "Enter executing the light+charge association workflow for data stream [${DATA_STREAM}]" 2>&1 | tee -a $envlog
 
-   export NDLAR_FLOW_CHARGE_YAML_DIR=yamls/${DETECTOR_CONFIG}_flow/workflows/charge
+   export NDLAR_FLOW_CHARGE_YAML_DIR=${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/charge
+   export COMBINED_OUTPUT_DATAFILE="${CHARGE_OUTPUT_DATAFILE/.hdf5/.ASSOC.hdf5}"
+   export COMBINED_OUTPUT_LOGFILE="${CHARGE_OUTPUT_DATAFILE/.hdf5/.ASSOC.log}"
+   export CHARGE_LIGHT_ASSOC_YAML_NAME="${CHARGE_OUTPUT_DATAFILE/.hdf5/_charge_light_assoc_${DATA_TYPE}.yaml}"
 
-   FILENAME="${CHARGE_OUTPUT_DATAFILE}" 
-   export COMBINED_OUTPUT_DATAFILE="${FILENAME/.hdf5/.ASSOC.hdf5}"
-   export COMBINED_OUTPUT_LOGFILE="${FILENAME/.hdf5/.ASSOC.log}"
-   export CHARGE_LIGHT_ASSOC_YAML_NAME="${FILENAME/.hdf5/_charge_light_assoc_${DATA_TYPE}.yaml}"
-
-   if [ -f ${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml ]; then
-      echo -e "\t\tCopying [cp $NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml ${CHARGE_LIGHT_ASSOC_YAML_NAME}]" 2>&1 | tee -a $envlog  
-      cd ${NDLAR_FLOW_WORKSPACE}/${NDLAR_FLOW_CHARGE_YAML_DIR} 
-      cp charge_light_assoc_${DATA_TYPE}.yaml ${CHARGE_LIGHT_ASSOC_YAML_NAME}
+   if [ -f ${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_light_assoc_${DATA_TYPE}.yaml ]; then
+      echo -e "\t\tCopying [cp ${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_light_assoc_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_LIGHT_ASSOC_YAML_NAME}]" 2>&1 | tee -a $envlog  
+      cp ${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_light_assoc_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_LIGHT_ASSOC_YAML_NAME}
    else 
-      echo -e "The file [$NDLAR_FLOW_WORKSPACE/yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
+      echo -e "The file [${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_light_assoc_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
       exit 0
    fi
 
    echo -e "\tThe charge+light association output file names are [${COMBINED_OUTPUT_DATAFILE}, ${COMBINED_OUTPUT_LOGFILE}]"  2>&1 | tee -a $envlog
-
-   CONFIG="${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_LIGHT_ASSOC_YAML_NAME}" 
-   H5FLOW_WORKFLOW="h5flow --nompi"
+   echo -e "\tRunning the charge+light association workflow." 2>&1 | tee -a $envlog 
+   echo -e "\t\t[ h5flow -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/${CHARGE_LIGHT_ASSOC_YAML_NAME} >> ${COMBINED_OUTPUT_LOGFILE} ]" 2>&1 | tee -a $envlog 
 
    cd ${NDLAR_FLOW_WORKSPACE}
+   h5flow -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/${CHARGE_LIGHT_ASSOC_YAML_NAME} # ${COMBINED_OUTPUT_LOGFILE}
 
-   echo -e "\tRunning the charge+light association workflow." 2>&1 | tee -a $envlog 
-   echo -e "\t\t[ ${H5FLOW_WORKFLOW} -i ${OUTFILES_DIR}/${FILENAME} -o ${COMBINED_OUTPUT_DATAFILE} -c ${CONFIG} >> ${COMBINED_OUTPUT_LOGFILE} ]" 2>&1 | tee -a $envlog 
-
-   ${H5FLOW_WORKFLOW} -i ${OUTFILES_DIR}/${FILENAME} -o ${COMBINED_OUTPUT_DATAFILE} -c ${CONFIG} >> ${COMBINED_OUTPUT_LOGFILE}
-
-   echo -e "\tMoving the file(s) to the outfiles directory" 2>&1 | tee -a $envlog
-
+   echo -e "\tMoving the charge+light combined file(s) to the outfiles directory" 2>&1 | tee -a $envlog
    if [ -f ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_LIGHT_ASSOC_YAML_NAME} ]; then
       mv ${NDLAR_FLOW_CHARGE_YAML_DIR}/${CHARGE_LIGHT_ASSOC_YAML_NAME} ${OUTFILES_DIR}/
    fi 
@@ -577,10 +561,10 @@ execute_light_charge_association_workflow() {
    if [ -f ${COMBINED_OUTPUT_DATAFILE} ]; then
       CREATED_FILES+=("${COMBINED_OUTPUT_DATAFILE}")
       mv ${COMBINED_OUTPUT_DATAFILE} ${OUTFILES_DIR}/
-      rm ${OUTFILES_DIR}/${FILENAME}
+      rm ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE}
    else
       echo -e "FATAL::The file [${COMBINED_OUTPUT_DATAFILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
-      exit 0
+      exit 1
    fi 
 
    if [[ "${MAKE_METADATA}" == "True" ]]; then
@@ -640,12 +624,12 @@ if [[ "${MAKE_METADATA}" == "True" ]]; then
    if [ -f "$METADATA_EXTRACT" ]; then
       echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} --input=\"${CREATED_FILES_ARRAY[@]}\" --parents=\"${PARENT_FILES_ARRAY[@]}\" --workflow=\"${WORKFLOW_ARRAY[@]}\" --tier=\"${DATA_TIER}\" --namespace=\"neardet-2x2-lar-flow\"]" 2>&1 | tee -a $envlog
       (
-         source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+         #source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
          source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 
          setup metacat 
          setup python v3_9_15 
-         setup h5py v3_1_0 -q e19:p383b 
+         #setup h5py v3_1_0 -q e19:p383b 
 
          python ${METADATA_EXTRACT} --input="${CREATED_FILES_ARRAY[@]}" --parents="${PARENT_FILES_ARRAY[@]}" --workflow="${WORKFLOW_ARRAY[@]}" --tier="${DATA_TIER}" --namespace="neardet-2x2-lar-flow"
       )
@@ -667,16 +651,19 @@ fi
 # final clean up
 #++++++++++++++++++++++
 if [  -f "$INPUT_FILE" ]; then
-   echo -e "\nRemoving the local copy of the input file ${WORKSPACE}/${INPUT_FILE}\n" 2>&1 | tee -a $envlog
+   echo -e "\nRemoving the local copy of the input file ${WORKSPACE}/${INPUT_FILE}." 2>&1 | tee -a $envlog
    rm -f ${WORKSPACE}/${INPUT_FILE}
 fi
+if [ -f "$PACKET_OUTPUT_FILE" ]; then
+   echo -e "\nRemoving the binary conversion file ${WORKSPACE}/${PACKET_OUTPUT_FILE}." 2>&1 | tee -a $envlog
+fi
 if [ -d ${NDLAR_FLOW_WORKSPACE} ]; then
-   echo -e "\nRemoving the local copy of ndlar_flow directory [${NDLAR_FLOW_WORKSPACE}]\n" 2>&1 | tee -a $envlog
+   echo -e "\nRemoving the local copy of ndlar_flow directory [${NDLAR_FLOW_WORKSPACE}]." 2>&1 | tee -a $envlog
    rm -rf ${NDLAR_FLOW_WORKSPACE}
 fi
 if [[ "${DATA_STREAM}" == "combined" ]]; then
    if [ "`ls ${WORKSPACE}/*.data* | wc -l`" -ne "0" ]; then
-      echo -e "\nRemoving the matching light files.\n" 2>&1 | tee -a $envlog
+      echo -e "\nRemoving the matching light files." 2>&1 | tee -a $envlog
       rm -rf ${WORKSPACE}/*.data*
    fi
 fi

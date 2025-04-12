@@ -52,37 +52,6 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
           stdout = stdout.decode('ascii').split("\n")
 
        print( f"\tThe paths for {lfile} is [{stdout}].\n" )
-
-       """
-       rucio_download = False
-       download       = False
-
-       for path in stdout :
-           if len(path) == 0 : continue
-           pnfs      = path.replace("root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/","/pnfs/")
-           filename  = pnfs.split("/")[-1]
-           pnfs_path = pnfs.replace(filename,"")
-           cmds      = [ "cat %s\".(get)(%s)(locality)\"" % (pnfs_path,filename),
-                         "mkdir neardet-2x2-lar-light; xrdcopy %s neardet-2x2-lar-light/" % (path.strip()) ]
-
-           for c, cmd in enumerate(cmds) :
-               proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-               pipe = proc.communicate()[0].decode('ascii')
- 
-               if c == 0 and isOnTapeCheck : 
-                  if proc.returncode != 0 :
-                     print( f"Cannot determine the locality of the file on dCache [{path}]." )
-                  else :
-                     if pipe.strip().find("ONLINE") != -1 :
-                        rucio_download = True
-               if c == 1 :
-                  if proc.returncode == 0 :
-                     download = True
-
-           if download : break
-
-       if rucio_download and not download :
-       """
        print( f"\tDownloading the light raw file [{lfile}]" )
 
        cmd   = f"rucio download {lfile}"

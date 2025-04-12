@@ -347,7 +347,7 @@ if __name__ == '__main__' :
    rucio_user = "justinreadonly" #if not opts["testJobscript"] else USER
    cmdlist.append( "--env RUCIO_USER=%s" % rucio_user )
 
-   file_metadata = "True" if opts["production"] or opts["metadata"] else "False"
+   file_metadata = "True" if opts["metadata"] else "False"
    cmdlist.append( "--env MAKE_METADATA=%s" % file_metadata)
 
    if opts["startPosition"] == None :
@@ -393,11 +393,13 @@ if __name__ == '__main__' :
          cmdlist.append( "--output-pattern='*.log:%s/logs'" % WRITE_DIR )
          cmdlist.append( "--output-pattern='*.json:%s/json'" % WRITE_DIR )
       else :
-         cmdlist.append( "--output-pattern='*.hdf5:%s'" % WRITE_DIR )
-         cmdlist.append( "--output-pattern='*.yaml:%s'" % WRITE_DIR )
-         cmdlist.append( "--output-pattern='*.log:%s'" % WRITE_DIR )
-         cmdlist.append( "--output-pattern='*.json:%s'" % WRITE_DIR )
- 
+         #cmdlist.append( "--output-pattern='*.hdf5:%s'" % WRITE_DIR )
+         #cmdlist.append( "--output-pattern='*.yaml:%s'" % WRITE_DIR )
+         cmdlist.append( "--output-pattern *.log:%s" % WRITE_DIR )
+         cmdlist.append( "--output-pattern *.json:%s" % WRITE_DIR )
+         cmdlist.append( "--output-pattern *.hdf5:%s" % WRITE_DIR ) 
+         cmdlist.append( "--output-rse %s" % WRITE_DIR ) 
+                 
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # run justIn launch submission
