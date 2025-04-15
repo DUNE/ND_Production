@@ -3,7 +3,8 @@
 # The setup scripts can return nonzero
 set +o errexit
 
-# Assumes ARCUBE_RUNTIME, ARCUBE_CONTAINER & ARCUBE_DIR have already been set
+# Assumes ND_PRODUCTION_RUNTIME, ND_PRODUCTION_CONTAINER & ND_PRODUCTION_DIR
+# have already been set
 
 # Core software packages
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh

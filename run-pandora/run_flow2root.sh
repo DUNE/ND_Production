@@ -8,8 +8,8 @@
 #export ND_PRODUCTION_OUT_NAME=Tutorial.flow2root
 #export ND_PRODUCTION_INDEX=0
 
-export ARCUBE_DIR=${ARCUBE_DIR:-$(realpath "$PWD"/..)}
-export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-fermilab/fnal-wn-sl7:latest}
+export ND_PRODUCTION_DIR=${ND_PRODUCTION_DIR:-$(realpath "$PWD"/..)}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:latest}
 
 # Container
 source $ND_PRODUCTION_DIR/util/reload_in_container.inc.sh
@@ -26,7 +26,7 @@ inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/${ND_PRODUCTION_IN_NAME}/FLOW
 
 # Is this data or MC?
 isData=1
-[ "${ARCUBE_PANDORA_INPUT_FORMAT}" ==  "SPMC" ] && isData=0
+[ "${ND_PRODUCTION_PANDORA_INPUT_FORMAT}" ==  "SPMC" ] && isData=0
 
 # Convert input HDF5 file to ROOT
 source $ND_PRODUCTION_PANDORA_INSTALL/pandora.venv/bin/activate

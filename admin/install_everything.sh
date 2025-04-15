@@ -14,8 +14,8 @@ pushd run-corsika
 ./install_corsika.sh
 popd
 
-# If using the ARCUBE_USE_GHEP_POT option, need to install a single executable
-# via install_hadd.sh.
+# If using the ND_PRODUCTION_USE_GHEP_POT option, need to install a single
+# executable via install_hadd.sh.
 pushd run-hadd
 ./install_hadd.sh
 popd

@@ -28,7 +28,7 @@ else
     keepAllDets=""
 fi
 
-if [[ "$ARCUBE_COSMIC_SIM" == "1" ]]; then
+if [[ "$ND_PRODUCTION_COSMIC_SIM" == "1" ]]; then
     isCosmicSim=--is_cosmic_sim
 else
     isCosmicSim=""

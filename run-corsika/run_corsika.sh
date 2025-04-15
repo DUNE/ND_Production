@@ -2,9 +2,9 @@
 
 # CORSIKA needs the FNAL environment to run
 # So override the container definition and put it back at the end
-ORG_CONTAINER=${ARCUBE_CONTAINER}
-export ARCUBE_RUNTIME=SHIFTER
-export ARCUBE_CONTAINER=fermilab/fnal-wn-sl7:latest
+ORG_CONTAINER=${ND_PRODUCTION_CONTAINER}
+export ND_PRODUCTION_RUNTIME=SHIFTER
+export ND_PRODUCTION_CONTAINER=fermilab/fnal-wn-sl7:latest
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
@@ -19,26 +19,26 @@ source /cvmfs/mu2e.opensciencegrid.org/setupmu2e-art.sh
 setup corsika
 # setup python v3_9_15
 
-NSHOW=${ARCUBE_NSHOW:-10000}
+NSHOW=${ND_PRODUCTION_NSHOW:-10000}
 RNDSEED=${runNo}
 RNDSEED2=$(($runNo * 1000 + 1))
 THETAP=70 #Originally 84.9
 
-if [ "${ARCUBE_LOC}" == "BERN" ]; then
+if [ "${ND_PRODUCTION_LOC}" == "BERN" ]; then
     # Bern (single module tests)
     DETNAME=BERN
     OBSLEV=550E2
     Bx=21.8095
     Bz=42.8863
-elif [ "${ARCUBE_LOC}" == "MINOS" ]; then
+elif [ "${ND_PRODUCTION_LOC}" == "MINOS" ]; then
     # MINOS Hall (2x2)
     DETNAME=MINOS_HALL
     OBSLEV=119E2
     Bx=19.310
     Bz=49.433
 else
-    echo "Invalid location for cosmic simulation: ${ARCUBE_LOC}"
-    echo "Set \$ARCUBE_LOC to a valid choice"
+    echo "Invalid location for cosmic simulation: ${ND_PRODUCTION_LOC}"
+    echo "Set \$ND_PRODUCTION_LOC to a valid choice"
     exit 1
 fi
 
@@ -92,7 +92,7 @@ corsika77400Linux_QGSJET_fluka < corsika_${runNo}.cfg
 # printf -v CORSIKA_OUTPUT "DAT%.6d" ${runNo}
 # mv ${CORSIKA_OUTPUT} ${outDir}/${outName}.dat
 
-export ARCUBE_CONTAINER=$ORG_ARCUBE_CONTAINER
+export ND_PRODUCTION_CONTAINER=$ORG_ND_PRODUCTION_CONTAINER
 
 # For now delete cfg file
 rm corsika_${runNo}.cfg

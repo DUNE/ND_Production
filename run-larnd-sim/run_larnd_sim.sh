@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# By default (i.e. if ARCUBE_RUNTIME isn't set), run on the host's venv
+# By default (i.e. if ND_PRODUCTION_RUNTIME isn't set), run on the host's venv
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 

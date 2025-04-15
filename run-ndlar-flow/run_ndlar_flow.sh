@@ -24,9 +24,9 @@ inFile=$(realpath $inDir/LARNDSIM/$subDir/${inName}.LARNDSIM.hdf5)
 outFile=$tmpOutDir/${outName}.FLOW.hdf5
 rm -f "$outFile"
 
-if [[ "$ARCUBE_COMPRESS" != "" ]]; then
-    echo "Enabling compression of HDF5 datasets with $ARCUBE_COMPRESS"
-    compression="-z $ARCUBE_COMPRESS"
+if [[ "$ND_PRODUCTION_COMPRESS" != "" ]]; then
+    echo "Enabling compression of HDF5 datasets with $ND_PRODUCTION_COMPRESS"
+    compression="-z $ND_PRODUCTION_COMPRESS"
 fi
 
 # charge workflows
