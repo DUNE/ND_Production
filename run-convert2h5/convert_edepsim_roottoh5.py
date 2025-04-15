@@ -15,7 +15,7 @@ from ROOT import TG4Event, TFile, TMap
 
 # Output array datatypes
 segments_dtype = np.dtype([("event_id","u4"),("vertex_id", "u8"), ("segment_id", "u4"),
-                           ("z_end", "f4"),("traj_id", "u4"), ("file_traj_id", "u4"), ("tran_diff", "f4"),
+                           ("z_end", "f4"),("traj_id", "i4"), ("file_traj_id", "u4"), ("tran_diff", "f4"),
                            ("z_start", "f4"), ("x_end", "f4"),
                            ("y_end", "f4"), ("n_electrons", "u4"),
                            ("pdg_id", "i4"), ("x_start", "f4"),
@@ -28,14 +28,14 @@ segments_dtype = np.dtype([("event_id","u4"),("vertex_id", "u8"), ("segment_id",
                            ("n_photons","f4")], align=True)
 
 trajectories_dtype = np.dtype([("event_id","u4"), ("vertex_id", "u8"),
-                               ("traj_id", "u4"), ("file_traj_id", "u4"), ("parent_id", "i4"), ("primary", "?"),
+                               ("traj_id", "i4"), ("file_traj_id", "u4"), ("parent_id", "i4"), ("primary", "?"),
                                ("E_start", "f4"), ("pxyz_start", "f4", (3,)),
                                ("xyz_start", "f4", (3,)), ("t_start", "f8"),
                                ("E_end", "f4"), ("pxyz_end", "f4", (3,)),
                                ("xyz_end", "f4", (3,)), ("t_end", "f8"),
-                               ("pdg_id", "i4"), ("start_process", "u4"),
-                               ("start_subprocess", "u4"), ("end_process", "u4"),
-                               ("end_subprocess", "u4"),("dist_travel", "f4")], align=True)
+                               ("pdg_id", "i4"), ("start_process", "i4"),
+                               ("start_subprocess", "i4"), ("end_process", "i4"),
+                               ("end_subprocess", "i4"),("dist_travel", "f4")], align=True)
 
 vertices_dtype = np.dtype([("event_id","u4"), ("vertex_id","u8"),
                            ("x_vert","f4"), ("y_vert","f4"), ("z_vert","f4"),
@@ -259,7 +259,7 @@ def updateHDF5File(output_file, trajectories, segments, vertices, genie_s, genie
                 f['mc_hdr'][ngenie_h:] = genie_h
 
 # Read a file and dump it.
-def dump(input_file, output_file, keep_all_dets=False):
+def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
 
     """
     Script to convert edep-sim root output to an h5 file formatted in a way
@@ -308,6 +308,8 @@ def dump(input_file, output_file, keep_all_dets=False):
         # Check that the edep-sim and GENIE trees have the same number of events
         if entries != genie_entries:
             print("Edep-sim tree and GENIE tree number of entries do not match!")
+            print("Edep-sim tree:", entries)
+            print("GENIE tree   :", genie_entries)
             return
 
     segments_list = list()
@@ -318,6 +320,10 @@ def dump(input_file, output_file, keep_all_dets=False):
 
     # For assigning unique-in-file track IDs:
     trackCounter = 0
+    cosmicEvtId = 0
+
+    if is_cosmic_sim:
+        print("Renumbering event IDs to remove gaps for cosmic sim. Vertex ID remains as-is and will match the edep-sim ID.")
 
     for jentry in tqdm(range(entries)):
         #print(jentry,"/",entries)
@@ -340,6 +346,10 @@ def dump(input_file, output_file, keep_all_dets=False):
                 spillCounter += 1
                 lastSpill = spill_it
             t_spill = spillCounter * spillPeriod_s * 1E6 # convert to us
+
+        if is_cosmic_sim:
+            spill_it = (event.RunId * 1E6) + cosmicEvtId
+            cosmicEvtId += 1
 
         #print("event",event.EventId,"in spill",spill_it)
 
@@ -548,6 +558,7 @@ def dump(input_file, output_file, keep_all_dets=False):
             nu_4mom = np.empty((4,), dtype='f4')
             lep_4mom = np.empty((4,), dtype='f4')
             nu_pdg = 0
+            lep_pdg = 0
             target_pdg = 0
 
             # Create particle stack dataset

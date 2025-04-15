@@ -22,7 +22,7 @@ else
 fi
 
 
-rm getGhepPOT.exe
+rm -f getGhepPOT.exe
 
 
 g++ -o getGhepPOT.exe getGhepPOT.C `root-config --cflags --glibs`

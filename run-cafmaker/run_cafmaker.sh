@@ -5,17 +5,21 @@ export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:l
 source ../util/reload_in_container.inc.sh
 
 cd install/ND_CAFMaker
+set +o errexit
 source ndcaf_setup.sh
+set -o errexit
 cd ../..
 
 # Must go after ndcaf_setup.sh
 source ../util/init.inc.sh
+# Prevent excessive memory use
+export OMP_NUM_THREADS=1
 
 outFile=${tmpOutDir}/${outName}.CAF.root
 flatOutFile=${tmpOutDir}/${outName}.CAF.flat.root
 cfgFile=$(mktemp --suffix .cfg)
 
-# Compulsory arguments.
+# Compulsory arguments regardless of use case.
 args_gen_cafmaker_cfg=( \
     --base-dir "$ND_PRODUCTION_OUTDIR_BASE" \
     --spine-name "$ND_PRODUCTION_SPINE_NAME" \

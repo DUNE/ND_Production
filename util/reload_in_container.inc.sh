@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 
-# NOTE: We're not currently running larnd-sim in a container (at least on
-# NERSC). The actual CUDA version used for larnd-sim is specified in
-# run_larnd_sim.sh etc.
-setup_cuda() {
-    module unload cudatoolkit 2>/dev/null
-    module load cudatoolkit/12.2
-}
+source "$(dirname "${BASH_SOURCE[0]}")/prelude.inc.sh"
 
 # Assume Shifter if ND_PRODUCTION_RUNTIME is unset.
 # (Individual scripts can override this; e.g. larnd-sim by default runs on the
@@ -55,8 +49,10 @@ fi
 # The below runs in the "reloaded" process
 
 if [[ "$ND_PRODUCTION_RUNTIME" == "SHIFTER" ]]; then
-    if [[ -e /environment ]]; then
-        source /environment # apptainer-built containters
+    if [[ -e /environment ]]; then  # apptainer-built containters
+        set +o errexit              # /environment can return nonzero
+        source /environment
+        set -o errexit
         # Our podman-built containers automagically load the env via $BASH_ENV
         # In their case the file of interest is /opt/environment
     fi
