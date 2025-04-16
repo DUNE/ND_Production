@@ -2,7 +2,10 @@
 
 set -o errexit
 
-module load python/3.11
+if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
+    module unload python 2>/dev/null
+    module load python/3.11
+fi
 
 installDir=${1:-.}
 venvName=flow.venv
@@ -41,7 +44,7 @@ pip install -e .
 cd ..
 
 # install ndlar_flow
-git clone -b MiniRun6-v1 https://github.com/larpix/ndlar_flow.git
+git clone -b develop https://github.com/larpix/ndlar_flow.git
 cd ndlar_flow
 pip install -e .
 cd scripts/proto_nd_scripts

@@ -30,18 +30,18 @@ if [[ "$ND_PRODUCTION_COMPRESS" != "" ]]; then
 fi
 
 # charge workflows
-workflow1='yamls/proto_nd_flow/workflows/charge/charge_event_building_mc.yaml'
-workflow2='yamls/proto_nd_flow/workflows/charge/charge_event_reconstruction_mc.yaml'
-workflow3='yamls/proto_nd_flow/workflows/combined/combined_reconstruction_mc.yaml'
-workflow4='yamls/proto_nd_flow/workflows/charge/prompt_calibration_mc.yaml'
-workflow5='yamls/proto_nd_flow/workflows/charge/final_calibration_mc.yaml'
+workflow1='yamls/fsd_flow/workflows/charge/charge_event_building_mc.yaml'
+workflow2='yamls/fsd_flow/workflows/charge/charge_event_reconstruction_mc.yaml'
+workflow3='yamls/fsd_flow/workflows/combined/combined_reconstruction_mc.yaml'
+workflow4='yamls/fsd_flow/workflows/charge/prompt_calibration_mc.yaml'
+workflow5='yamls/fsd_flow/workflows/charge/final_calibration_mc.yaml'
 
 # light workflows
-workflow6='yamls/proto_nd_flow/workflows/light/light_event_building_mc.yaml'
-workflow7='yamls/proto_nd_flow/workflows/light/light_event_reconstruction_mc.yaml'
+# workflow6='yamls/fsd_flow/workflows/light/light_event_building_mc.yaml'
+# workflow7='yamls/fsd_flow/workflows/light/light_event_reconstruction.yaml'
 
 # charge-light trigger matching
-workflow8='yamls/proto_nd_flow/workflows/charge/charge_light_assoc_mc.yaml'
+# workflow8='yamls/fsd_flow/workflows/charge/charge_light_assoc.yaml'
 
 cd "$ND_PRODUCTION_INSTALL_DIR"/ndlar_flow
 
@@ -52,17 +52,14 @@ set -o errexit
 #run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5\
 #    -i "$inFile" -o "$outFile" $compression
 
-# Enable LZF compression of output file
-opts="-z lzf"
-
-run h5flow $opts -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5 \
+run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4\
     -i "$inFile" -o "$outFile" $compression
 
-run h5flow $opts -c $workflow6 $workflow7\
-    -i "$inFile" -o "$outFile" $compression
+# run h5flow -c $workflow6 $workflow7\
+    # -i "$inFile" -o "$outFile" $compression
 
-run h5flow $opts -c $workflow8\
-    -i "$outFile" -o "$outFile" $compression
+# run h5flow -c $workflow8\
+    # -i "$outFile" -o "$outFile" $compression
 
 mkdir -p "$outDir/FLOW/$subDir"
 mv "$outFile" "$outDir/FLOW/$subDir"

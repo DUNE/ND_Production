@@ -1,36 +1,24 @@
 #!/usr/bin/env bash
 
-# Run me from the root directory of 2x2_sim
+# Run me from the root directory of ND_Production
 
-# Currently larnd-sim and ndlar_flow are the only things we're installing
-# locally. Everything else comes either from a container or CVMFS. If using
-# the ND_PRODUCTION_USE_GHEP_POT option, need to install a single executable via
-# install_hadd.sh.
+if [ -z "$1" ]; then
+  echo "Installation is detector specific, you must pass either '2x2' or 'ndlar' as"
+  echo "the first positional argument of this script."
+  exit 1
+fi
 
-set -o errexit
+detector=$1
 
-# This is the "default" container. It can be overridden by exporting
-# ND_PRODUCTION_CONTAINER before running e.g. run_edep_sim.sh
-# export ND_PRODUCTION_RUNTIME="SHIFTER"
-# export ND_PRODUCTION_CONTAINER=mjkramer/sim2x2:genie_edep.3_04_00.20230620
+pushd run-corsika
+./install_corsika.sh
+popd
 
-# export ND_PRODUCTION_RUNTIME="SINGULARITY"
-# export ND_PRODUCTION_CONTAINER=sim2x2_genie_edep.LFG_testing.20230228.v2.sif
-
-# export ND_PRODUCTION_DIR=$PWD
-# export ND_PRODUCTION_CONTAINER_DIR=$ND_PRODUCTION_DIR/admin/containers
-
+# If using the ND_PRODUCTION_USE_GHEP_POT option, need to install a single
+# executable via install_hadd.sh.
 pushd run-hadd
 ./install_hadd.sh
 popd
-
-# pushd run-spill-build
-# ./install_spill_build.sh
-# popd
-
-# pushd run-convert2h5
-# ./install_convert2h5.sh
-# popd
 
 pushd run-larnd-sim
 ./install_larnd_sim.sh
@@ -41,7 +29,7 @@ pushd run-ndlar-flow
 popd
 
 pushd run-pandora
-./install_pandora.sh
+./install_pandora.sh "$detector"
 popd
 
 pushd run-mlreco
@@ -51,10 +39,6 @@ popd
 pushd run-cafmaker
 ./install_cafmaker.sh
 popd
-
-# pushd validation
-# ./install_validation.sh
-# popd
 
 # HACK because we forgot to include GNU time in some of the containers
 # Hope you have it on your host system!

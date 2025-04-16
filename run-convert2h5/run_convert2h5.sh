@@ -28,12 +28,18 @@ else
     keepAllDets=""
 fi
 
+if [[ "$ND_PRODUCTION_COSMIC_SIM" == "1" ]]; then
+    isCosmicSim=--is_cosmic_sim
+else
+    isCosmicSim=""
+fi
+
 # After going from ROOT 6.14.06 to 6.28.06, apparently we need to point CPATH to
 # the edepsim-io headers. Otherwise convert2h5 fails. (This "should" be set in
 # the container already.)
 export CPATH=$EDEPSIM/include/EDepSim:$CPATH
 
-run ./convert_edepsim_roottoh5.py --input_file "$inFile" --output_file "$outFile" "$keepAllDets"
+run ./convert_edepsim_roottoh5.py --input_file "$inFile" --output_file "$outFile" "$keepAllDets" "$isCosmicSim"
 
 h5OutDir=$outDir/EDEPSIM_H5/$subDir
 mkdir -p "$h5OutDir"

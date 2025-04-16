@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# DEPRECATED. In production we use the Python venv from the edep-sim container.
+
 # assume Shifter if ND_PRODUCTION_RUNTIME is unset
 export ND_PRODUCTION_RUNTIME=${ND_PRODUCTION_RUNTIME:-SHIFTER}
 

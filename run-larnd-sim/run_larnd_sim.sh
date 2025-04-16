@@ -1,24 +1,13 @@
 #!/usr/bin/env bash
 
 # By default (i.e. if ND_PRODUCTION_RUNTIME isn't set), run on the host's venv
-if [[ -z "$ND_PRODUCTION_RUNTIME" || "$ND_PRODUCTION_RUNTIME" == "NONE" ]]; then
-    if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
-        module unload python 2>/dev/null
-        module unload cudatoolkit 2>/dev/null
-        ## CUDA 12.2 makes us crash :(
-        # module load cudatoolkit/12.2
-        module load cudatoolkit/11.7
-        module load python/3.11
-    fi
-    source ../util/init.inc.sh
+source ../util/reload_in_container.inc.sh
+source ../util/init.inc.sh
+
+if [[ ( (-z "$ND_PRODUCTION_RUNTIME") || ("$ND_PRODUCTION_RUNTIME" == "NONE") )
+      || ( (-n "$ND_PRODUCTION_USE_LOCAL_PRODUCT") && ("$ND_PRODUCTION_USE_LOCAL_PRODUCT" != "0") ) ]]; then
+    # Allow overriding the container's /opt/venv
     source "$ND_PRODUCTION_INSTALL_DIR/larnd.venv/bin/activate"
-else
-    source ../util/reload_in_container.inc.sh
-    source ../util/init.inc.sh
-    if [[ -n "$ND_PRODUCTION_USE_LOCAL_PRODUCT" && "$ND_PRODUCTION_USE_LOCAL_PRODUCT" != "0" ]]; then
-        # Allow overriding the container's /opt/venv
-        source "$ND_PRODUCTION_INSTALL_DIR/larnd.venv/bin/activate"
-    fi
 fi
 
 inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-convert2h5/$ND_PRODUCTION_CONVERT2H5_NAME
