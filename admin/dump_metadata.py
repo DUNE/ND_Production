@@ -200,7 +200,7 @@ def dump_metadata(datapath: Path, args: argparse.Namespace):
             'dune_mc.ND_Production.tag': get_current_git_branch(args.repo_ndprod) if args.repo_ndprod else 'nd-production-v02.01',
 
             'dune_mc.nu': args.nu,
-            'dune_mc.rock': not args.nu,
+            'dune_mc.rock': not args.nu
 
             # todo: we will need to return to this, once we can run this script WITHIN the nersc job...
             # 'cluster.gen_site': 'nersc',
