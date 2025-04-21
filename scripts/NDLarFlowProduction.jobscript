@@ -443,7 +443,7 @@ execute_charge_workflow() {
    fi
    if [ -f "${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}"/combined_reconstruction_${DATA_TYPE}.yaml ]; then
       echo -e "\t\tCopying [cp ${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}/combined_reconstruction_${DATA_TYPE}.yaml ${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}/${CHARGE_EVENT_BUILD_YAML_NAME}]" 2>&1 | tee -a $envlog  
-      cp "${NDLAR_FLOW_CHARGE_YAML_DIR/charged/combined}"/combined_reconstruction_${DATA_TYPE}.yaml "${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}"/${CHARGE_EVENT_COMB_YAML_NAME}
+      cp "${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}"/combined_reconstruction_${DATA_TYPE}.yaml "${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}"/${CHARGE_EVENT_COMB_YAML_NAME}
    else 
       echo -e "The file [${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}/combined_reconstruction_${DATA_TYPE}.yaml] is not found! Exiting!" 2>&1 | tee -a $envlog
       exit 0
