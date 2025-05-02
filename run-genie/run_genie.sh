@@ -15,13 +15,14 @@ echo "dk2nuFile is $dk2nuFile"
 export GXMLPATH=$PWD/flux            # contains GNuMIFlux.xml
 maxPathFile=$PWD/maxpath/$(basename "$ND_PRODUCTION_GEOM" .gdml).$ND_PRODUCTION_TUNE.maxpath.xml
 USE_MAXPATH=1
-if [ ! -f "$maxPathFile" ]; then
+if [ ! -f "$maxPathFile" ] && [ -z "$ND_PRODUCTION_MAX_PATH_FILE"]; then
     echo ""
     echo "WARNING!!! .maxpath.xml file not found. Is this what you intended???"
     echo "           I WILL CONTINUE WITH NO maxPathFile"
     echo ""
     USE_MAXPATH=0
 fi
+[ -n "${ND_PRODUCTION_MAX_PATH_FILE}" ] && maxPathFile=$baseDir/$ND_PRODUCTION_MAX_PATH_FILE
 
 genieOutPrefix=$tmpOutDir/$outName
 
