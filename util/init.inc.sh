@@ -64,29 +64,6 @@ timeProg=/usr/bin/time
 # HACK in case we forget to include GNU time in a container
 [[ ! -e "$timeProg" ]] && timeProg=$PWD/../tmp_bin/time
 
-# check if "time" file exists; if not, download it from the link provided by Matt
-if [ ! -f "$timeProg" ]; then
-  TMP_BIN="$ND_PRODUCTION_DIR/tmp_bin"
-
-  # check if TMP_BIN directory exists otherwise create it
-  if [ ! -d "$TMP_BIN" ]; then
-      mkdir -p "$TMP_BIN" || { echo "Failed to create $TMP_BIN"; exit 1; }
-  fi
-  
-  # download the container-compatible version of GNU time into the right path
-  TIME_LINK="https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/bin/time"
-  wget -q -O "$TMP_BIN/time" ${TIME_LINK} || {
-    echo "Download failed"
-    exit 1
-    } 
-    timeProg=$TMP_BIN/time
-
-    # check if "time" is executable
-    if [ ! -x $timeProg ]; then
-      chmod +x "$timeProg"
-    fi
-fi
-
 run() {
     echo RUNNING "$@" | tee -a "$logFile"
     time "$timeProg" --append -f "$1 %P %M %E" -o "$timeFile" "$@" 2>&1 | tee -a "$logFile"

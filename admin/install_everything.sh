@@ -10,9 +10,9 @@ fi
 
 detector=$1
 
-# pushd run-corsika
-# ./install_corsika.sh
-# popd
+pushd run-corsika
+./install_corsika.sh
+popd
 
 # If using the ND_PRODUCTION_USE_GHEP_POT option, need to install a single
 # executable via install_hadd.sh.
@@ -20,21 +20,21 @@ pushd run-hadd
 ./install_hadd.sh
 popd
 
-# pushd run-larnd-sim
-# ./install_larnd_sim.sh
-# popd
+pushd run-larnd-sim
+./install_larnd_sim.sh
+popd
 
-# pushd run-ndlar-flow
-# ./install_ndlar_flow.sh
-# popd
+pushd run-ndlar-flow
+./install_ndlar_flow.sh
+popd
 
-# pushd run-pandora
-# ./install_pandora.sh "$detector"
-# popd
+pushd run-pandora
+./install_pandora.sh "$detector"
+popd
 
-# pushd run-mlreco
-# ./install_mlreco.sh
-# popd
+pushd run-mlreco
+./install_mlreco.sh
+popd
 
 pushd run-cafmaker
 ./install_cafmaker.sh
