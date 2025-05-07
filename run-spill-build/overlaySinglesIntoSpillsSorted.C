@@ -289,6 +289,14 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
   event_spill_map->Write("event_spill_map", 1);
   auto p = new TParameter<double>("spillPeriod_s", spillPeriod_s);
   p->Write();
+  auto potps = new TParameter<double>("pot_per_spill", is_n_int_mode ? -1 : spillPOT);
+  potps->Write();
+  const auto inFile1POT_used = N_evts_1 ? (inFile1POT * evt_it_1 / N_evts_1) : 0;
+  auto pot1 = new TParameter<double>("pot1", inFile1POT_used);
+  pot1->Write();
+  const auto inFile2POT_used = N_evts_2 ? (inFile2POT * evt_it_2 / N_evts_2) : 0;
+  auto pot2 = new TParameter<double>("pot2", inFile2POT_used);
+  pot2->Write();
 
   outFile->mkdir("DetSimPassThru");
   outFile->cd("DetSimPassThru");
