@@ -98,3 +98,5 @@ git clone -b v0.2.3 https://github.com/DeepLearnPhysics/spine.git
 # the old yaml.load API has been removed
 # sed -i 's/yaml.load(open(filename))/yaml.load(open(filename), yaml.Loader)/' \
 #     dune-nd-lar-reco/load_helpers.py
+
+git clone -b main https://github.com/DeepLearnPhysics/spine_prod.git
