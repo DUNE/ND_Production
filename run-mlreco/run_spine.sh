@@ -17,12 +17,16 @@ source load_mlreco.inc.sh
 outFile=${tmpOutDir}/${outName}.MLRECO_SPINE.hdf5
 inName=${ND_PRODUCTION_IN_NAME}.${globalIdx}
 inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-mlreco/${ND_PRODUCTION_IN_NAME}/LARCV/${subDir}/${inName}.LARCV.root
-config=$ND_PRODUCTION_SPINE_CONFIG
+config=`basename ${ND_PRODUCTION_SPINE_CONFIG}`
 
 tmpDir=$(mktemp -d)
 mkdir "${tmpDir}/log_trash" 
 
-sed "s!%TMPDIR%!${tmpDir}!g" "configs/${config}" > "${tmpDir}/${config}"
+if [[ $ND_PRODUCTION_SPINE_CONFIG == *"spine_prod"* ]]; then
+    sed "s!%TMPDIR%!${tmpDir}!g" "install/${ND_PRODUCTION_SPINE_CONFIG}" > "${tmpDir}/${config}"
+else
+    sed "s!%TMPDIR%!${tmpDir}!g" "configs/${config}" > "${tmpDir}/${config}"
+fi
 
 run python3 install/spine/bin/run.py \
     --config "${tmpDir}/${config}" \
