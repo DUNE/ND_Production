@@ -17,7 +17,9 @@ setup() {
 
 ###################################################################################
 
+set +o errexit
 setup
+set -o errexit
 
 # Must go after setup.
 source ../util/init.inc.sh
