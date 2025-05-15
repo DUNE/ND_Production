@@ -9,9 +9,9 @@
     cd ${ROOTSYS}/bin; source thisroot.sh; cd -
 
 
-    set +o errexit
+
     source scl_source enable devtoolset-7
-    set -o errexit
+
 
     export GEN_DIR=/opt/generators
     export GENIE=${GEN_DIR}/GENIE/R-3_04_00
