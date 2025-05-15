@@ -43,7 +43,7 @@ echo "and"
 echo "  ${ND_PRODUCTION_TMSRECOREADOUT_OUTFILE}"
 
 
-run ConvertToTMSTree.exe "$inFile"
+run ${PWD}/dune-tms/bin/ConvertToTMSTree.exe "$inFile"
 
 
 tmsRecoOutDir=$outDir/TMSRECO/$subDir
