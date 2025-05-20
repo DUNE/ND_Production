@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ARCUBE_CONTAINER_DIR="/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/containers"
+ND_PRODUCTION_CONTAINER_DIR="/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/containers"
 
 # module load singularity
 if [[ -z "$ND_PRODUCTION_CONTAINER_DIR" ]]; then
@@ -16,8 +16,8 @@ else
     mkdir $ND_PRODUCTION_CONTAINER_DIR
 fi
 
-export APPTAINER_CACHEDIR=$ARCUBE_CONTAINER_DIR/.apptainer 
-export APPTAINER_TMPDIR=$ARCUBE_CONTAINER_DIR/.apptainer/tmp
+export APPTAINER_CACHEDIR=$ND_PRODUCTION_CONTAINER_DIR/.apptainer 
+export APPTAINER_TMPDIR=$ND_PRODUCTION_CONTAINER_DIR/.apptainer/tmp
 
 # edit to pull a different container
 # GENIE
@@ -30,8 +30,8 @@ mkdir -p $APPTAINER_TMPDIR
 echo "Pulling container... this will take O(1 hour)..."
 echo "Container name: ${CONTAINER_NAME}"
 
-# singularity pull docker://mjkramer/${CONTAINER_NAME}
-apptainer pull docker://mjkramer/${CONTAINER_NAME}
+singularity pull docker://mjkramer/${CONTAINER_NAME}
+# apptainer pull docker://mjkramer/${CONTAINER_NAME}
 
 mv ${CONTAINER_NAME//:/_}.sif $ND_PRODUCTION_CONTAINER_DIR
 echo "Finished."

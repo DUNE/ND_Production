@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export BASE_DIR="/storage/gpfs_data/neutrino/users/gsantoni"
-export WORKING_DIR="$BASE_DIR/ND_Production"
+export ND_PRODUCTION_DIR="$BASE_DIR/ND_Production"
 
 export PWD="/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-edep-sim"
 
@@ -17,11 +17,11 @@ export ND_PRODUCTION_RUN_OFFSET=0
 export ND_PRODUCTION_OUT_NAME=sand-events
 
 # same of genie
-export ND_PRODUCTION_RUNTIME=APPTAINER
+export ND_PRODUCTION_RUNTIME=SINGULARITY
 export ND_PRODUCTION_CONTAINER_DIR="/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/containers"
-export ND_PRODUCTION_DIR=$WORKING_DIR
-export ND_PRODUCTION_OUTDIR_BASE=$WORKING_DIR/productions-prova-ND-hpc
-export ND_PRODUCTION_LOGDIR_BASE=$WORKING_DIR/log-prova-ND-hpc
+# export ND_PRODUCTION_DIR=$WORKING_DIR
+export ND_PRODUCTION_OUTDIR_BASE=$ND_PRODUCTION_DIR/productions-check2
+export ND_PRODUCTION_LOGDIR_BASE=$ND_PRODUCTION_DIR/log-check2
 # export ND_PRODUCTION_INDEX=0
 
 # for i in $(seq 0 9); do

@@ -148,14 +148,26 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
     evts_per_spill_2 = ((double)N_evts_2)/(inFile2POT/spillPOT);
   }
 
-  std::cout << "File: " << inFileName1 << std::endl;
-  std::cout << "    Number of spills: "<< (is_n_int_mode ? 
-    std::floor((double)N_evts_1/evts_per_spill_1) : inFile1POT/spillPOT) << std::endl;
-  std::cout << "    Events per spill: "<< evts_per_spill_1 << std::endl;
+  // std::cout << "File: " << inFileName1 << std::endl;
+  // std::cout << "    Number of spills: "<< (is_n_int_mode ? 
+  //   std::floor((double)N_evts_1/evts_per_spill_1) : inFile1POT/spillPOT) << std::endl;
+  // std::cout << "    Events per spill: "<< evts_per_spill_1 << std::endl;
 
-  std::cout << "File: " << inFileName2 << std::endl;
-  std::cout << "    Number of spills: "<< inFile2POT/spillPOT << std::endl;
-  std::cout << "    Events per spill: "<< evts_per_spill_2 << std::endl;
+  // std::cout << "File: " << inFileName2 << std::endl;
+  // std::cout << "    Number of spills: "<< inFile2POT/spillPOT << std::endl;
+  // std::cout << "    Events per spill: "<< evts_per_spill_2 << std::endl;
+
+  std::ofstream ofs("spills_info.txt");
+  if (ofs.is_open()){
+    ofs << "File: " << inFileName1 << std::endl;
+    ofs << "    Number of spills: "<< (is_n_int_mode ? 
+      std::floor((double)N_evts_1/evts_per_spill_1) : inFile1POT/spillPOT) << std::endl;
+    ofs << "    Events per spill: "<< evts_per_spill_1 << std::endl;
+
+    ofs << "File: " << inFileName2 << std::endl;
+    ofs << "    Number of spills: "<< inFile2POT/spillPOT << std::endl;
+    ofs << "    Events per spill: "<< evts_per_spill_2 << std::endl;
+  }
 
   TG4Event* edep_evt_1 = NULL;
   if(have_nu_lar) edep_evts_1->SetBranchAddress("Event",&edep_evt_1);
@@ -206,6 +218,9 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
       TTree* gn_tree = is_nu ? genie_evts_1 : genie_evts_2;
 
       int& evt_it = is_nu ? evt_it_1 : evt_it_2;
+
+      std::cout<<"evt_it: "<<evt_it<<std::endl;
+
       in_tree->GetEntry(evt_it);
       gn_tree->GetEntry(evt_it);
 
@@ -250,6 +265,9 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
         // https://github.com/DUNE/2x2_sim/issues/54
         v->InteractionNumber = evt_it_1 + evt_it_2;
       }
+
+      std::cout<<"EVENT: "<<edep_evt->EventId<<std::endl;
+      std::cout<<"TIME: "<<edep_evt->Primaries[0].Position.T()<<std::endl;
 
       // ... trajectories
       for (std::vector<TG4Trajectory>::iterator t = edep_evt->Trajectories.begin(); t != edep_evt->Trajectories.end(); ++t) {
