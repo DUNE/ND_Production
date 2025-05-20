@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-deeplearnphysics/larcv2:ub20.04-cuda11.6-pytorch1.13-larndsim}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-deeplearnphysics/larcv2:ub2204-cu124-torch251-larndsim}
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
