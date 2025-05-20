@@ -12,4 +12,4 @@ LIBTG4EVENT_DIR=${LIBTG4EVENT_DIR:-libTG4Event}
 
 run root -l -b -q \
     -e "gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\")" \
-    "convertEvtToSpillBased2.cpp(\"$INPUT_FILE\", \"$OUTPUT_FILE\")"
+    "convertEvtToSpillBased.cpp(\"$INPUT_FILE\", \"$OUTPUT_FILE\")"
