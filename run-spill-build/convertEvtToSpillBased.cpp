@@ -1,9 +1,6 @@
 #include "TG4Event.h"
 #include "gRooTracker.h"
 
-//std::string inFileName = "sand-events.0000000.EDEPSIM_SPILLS.root";
-
-
 
 void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
 
@@ -14,8 +11,6 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
     std::unique_ptr<TFile> inFile(TFile::Open(inFileName.c_str()));
     // input tree
     std::unique_ptr<TTree> edep_tree(inFile->Get<TTree>("EDepSimEvents"));
-    // // input RDF
-    // ROOT::RDataFrame edep_df("EDepSimEvents", inFileName.c_str());
     edep_tree->SetBranchAddress("Event", &edep_evt);
 
     // output file
@@ -23,8 +18,6 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
     // output tree
     auto outTree = edep_tree->CloneTree(0);
     outTree->SetBranchAddress("Event", &spill);
-    // // output RDF
-    // ROOT::RDataFrame out_df("EDepSimEvents", outFileName.c_str());
     
     TMap* input_map = (TMap*)inFile->Get("event_spill_map");
 
@@ -70,6 +63,14 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
     //     myfile3<<'\n';
     // }
 
+    // ofstream myfile4;
+    // myfile4.open("particles_size.txt", std::ios::app);
+
+    // ofstream myfile5;
+    // myfile5.open("points.txt", std::ios::app);
+
+    int entry = 0;
+
     for (auto &pair : spill_event_map){
         auto spillId = pair.first;
         auto eventIds = pair.second;
@@ -79,20 +80,33 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
 
         std::map<std::string, std::vector<TG4HitSegment>> SegmentDetectors;
 
-        for (auto &evId : eventIds){
-            std::cout<<"evId: "<<evId<<std::endl;
-            edep_tree->GetEntry(evId);
+        for (int i = 0; i < eventIds.size(); i++){
+            std::cout<<"evId: "<<eventIds[i]<<std::endl;
+            edep_tree->GetEntry(entry + i);
             spill->RunId = edep_evt->RunId;
             spill->EventId = spillId;
 
             // interaction vertex
             auto& v = edep_evt->Primaries[0];
+            // myfile4<<"evId: "<<eventIds[i]<<" "<<edep_evt->EventId<<std::endl;
+            // myfile4<<"edepsim size: "<<edep_evt->Primaries[0].Particles.size()<<std::endl;
             spill->Primaries.push_back(v);
+            // myfile4<<"spill nr: "<<spillId<<" "<<"event nr: "<<i<<std::endl;
+            // myfile4<<"overlay size: "<<spill->Primaries[i].Particles.size()<<std::endl;
 
             // trajectories
+            // myfile5<<"evId: "<<eventIds[i]<<" "<<edep_evt->EventId<<std::endl;
+            // myfile5<<"edepsim size: "<<edep_evt->Trajectories.size()<<std::endl;
             for (auto &t : edep_evt->Trajectories){
+                // myfile5<<"edepsim point X: "<<t.Points[0].Position.X()<<std::endl;
                 spill->Trajectories.push_back(t);
+                // myfile5<<"overlay size: "<<spill->Trajectories[j].Points[0].Position.X()<<std::endl;
             }
+
+            // myfile5<<"spill nr: "<<spillId<<" "<<"event nr: "<<i<<std::endl;
+            // for (int j=0; j < spill->Trajectories.size(); j++){
+            //     myfile5<<"overlay size: "<<spill->Trajectories[j].Points[0].Position.X()<<std::endl;
+            // }
 
             // energy depositions
             for (auto &d : edep_evt->SegmentDetectors){
@@ -101,6 +115,7 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
                 }
             }
         }// loop over events of the same spillId
+    entry += eventIds.size();
     spill->SegmentDetectors = std::vector<std::pair<std::string, std::vector<TG4HitSegment>>>(SegmentDetectors.begin(), SegmentDetectors.end());
     outTree->Fill();
     delete spill;
@@ -108,11 +123,3 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
     outFile->cd();
     outTree->Write();
 }
-
-    // TIterator* it = event_spill_map.MakeIterator();
-    // TObject* event_tobj;
-    // while ((event_tobj = it->Next())) {
-    //     TObject* spillId = event_spill_map.GetValue(event_tobj)
-    // }
-
-
