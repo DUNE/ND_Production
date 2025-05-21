@@ -17,13 +17,20 @@ inFile=$(realpath $inDir/EDEPSIM_H5/$subDir/${inName}.EDEPSIM.hdf5)
 outFile=$tmpOutDir/${outName}.LARNDSIM.hdf5
 rm -f "$outFile"
 
+compression="None"
+if [[ "$ND_PRODUCTION_COMPRESS" != "" ]]; then
+    echo "Enabling compression of HDF5 datasets with $ND_PRODUCTION_COMPRESS"
+    compression="$ND_PRODUCTION_COMPRESS"
+fi
+
 cd "$ND_PRODUCTION_INSTALL_DIR"
 
 if [[ -n "$ND_PRODUCTION_LARNDSIM_CONFIG" ]]; then
     run simulate_pixels.py "$ND_PRODUCTION_LARNDSIM_CONFIG" \
         --input_filename "$inFile" \
         --output_filename "$outFile" \
-        --rand_seed "$seed"
+        --rand_seed "$seed" \
+        --compression "$compression"
 else
     [ -z "$ND_PRODUCTION_LARNDSIM_DETECTOR_PROPERTIES" ] && export ND_PRODUCTION_LARNDSIM_DETECTOR_PROPERTIES="larnd-sim/larndsim/detector_properties/2x2.yaml"
     [ -z "$ND_PRODUCTION_LARNDSIM_PIXEL_LAYOUT" ] && export ND_PRODUCTION_LARNDSIM_PIXEL_LAYOUT="larnd-sim/larndsim/pixel_layouts/multi_tile_layout-2.4.16.yaml"
@@ -39,8 +46,9 @@ else
         --response_file "$ND_PRODUCTION_LARNDSIM_RESPONSE_FILE" \
         --light_lut_filename  "$ND_PRODUCTION_LARNDSIM_LUT_FILENAME" \
         --light_det_noise_filename "$ND_PRODUCTION_LARNDSIM_LIGHT_DET_NOISE_FILENAME" \
-        --rand_seed $seed \
-        --simulation_properties "$ND_PRODUCTION_LARNDSIM_SIMULATION_PROPERTIES"
+        --rand_seed "$seed" \
+        --simulation_properties "$ND_PRODUCTION_LARNDSIM_SIMULATION_PROPERTIES" \
+        --compression "$compression"
 fi
 
 mkdir -p "$outDir/LARNDSIM/$subDir"
