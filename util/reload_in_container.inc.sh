@@ -62,7 +62,9 @@ if [[ "$ND_PRODUCTION_RUNTIME" == "SHIFTER" ]]; then
     export LD_LIBRARY_PATH="$cudadir"/math_libs/12.2/targets/x86_64-linux/lib:"$cudadir"/cuda/12.2/lib64:$LD_LIBRARY_PATH
 elif [[ "$ND_PRODUCTION_RUNTIME" == "SINGULARITY" ]]; then
     # "singularity pull" overwrites /environment
+    set +o errexit
     source "$ND_PRODUCTION_DIR"/admin/container_env."$ND_PRODUCTION_CONTAINER".sh
+    set -o errexit
 elif [[ "$ND_PRODUCTION_RUNTIME" == "PODMAN-HPC" ]]; then
     # Ideally, we'd just tell podman-hpc to overlay the host's libcudart and
     # libcudablas into the container's /usr/lib64, but that currently produces a
