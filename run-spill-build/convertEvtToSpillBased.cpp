@@ -12,6 +12,8 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
     // input tree
     std::unique_ptr<TTree> edep_tree(inFile->Get<TTree>("EDepSimEvents"));
     edep_tree->SetBranchAddress("Event", &edep_evt);
+    // input geom
+    auto geom = (TGeoManager*) inFile->Get("EDepSimGeometry");
 
     // output file
     std::unique_ptr<TFile> outFile(TFile::Open(outFileName.c_str(), "RECREATE"));
@@ -19,10 +21,13 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
     auto outTree = edep_tree->CloneTree(0);
     outTree->SetBranchAddress("Event", &spill);
     
+    // import the TMap created in run-spill-build
     TMap* input_map = (TMap*)inFile->Get("event_spill_map");
 
+    // create a map to match the eventIds with the corresponding spillId
     std::map<int, std::vector<int>> spill_event_map;
 
+    // loop over the entries to read the spillId from the TMap
     for (int i = 0; i < edep_tree->GetEntries(); i++){ 
 
         edep_tree->GetEntry(i);
@@ -36,41 +41,15 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
         auto* spillIdStr = dynamic_cast<TObjString*>(spillId_obj);
         auto spillId = std::atoi(spillIdStr->GetString());
 
-        // ofstream myfile2;
-        // myfile2.open("event_list.txt", std::ios::app);
-        // myfile2<<"runId "<<edep_evt->RunId<<std::endl;
-        // myfile2<<"eventId "<<edep_evt->EventId<<std::endl;
-        // myfile2<<"spillId "<<spillIdStr->GetString()<<std::endl;
-
+        // fill the map assigning the eventIds to the corresponding spillId
         spill_event_map[spillId].push_back(edep_evt->EventId);
-
-        // ofstream myfile;
-        // myfile.open("spill_list.txt", std::ios::app);
-        // myfile<<"runId "<<edep_evt->RunId<<std::endl;
-        // myfile<<"eventId "<<edep_evt->EventId<<std::endl;
-        // myfile<<"spillId "<<spillId<<std::endl;
   
     }
 
-    // ofstream myfile3;
-    // myfile3.open("spill_event_map.txt", std::ios::app);
-    // for (int spillId = 0; spillId < 199; spillId++){
-    //     myfile3<<"spillId "<<spillId<<std::endl;
-    //     myfile3<<"eventIds ";
-    //     for (auto spillId : spill_event_map.at(spillId)){
-    //         myfile3<<spillId<<" ";
-    //     }
-    //     myfile3<<'\n';
-    // }
-
-    // ofstream myfile4;
-    // myfile4.open("particles_size.txt", std::ios::app);
-
-    // ofstream myfile5;
-    // myfile5.open("points.txt", std::ios::app);
-
+    // useful to keep track of the number of the entry I have to take from the edep_tree
     int entry = 0;
 
+    // loop over the map: for each spillId I loop over all the events
     for (auto &pair : spill_event_map){
         auto spillId = pair.first;
         auto eventIds = pair.second;
@@ -80,6 +59,7 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
 
         std::map<std::string, std::vector<TG4HitSegment>> SegmentDetectors;
 
+        // loop over each event in a single spill
         for (int i = 0; i < eventIds.size(); i++){
             std::cout<<"evId: "<<eventIds[i]<<std::endl;
             edep_tree->GetEntry(entry + i);
@@ -88,25 +68,12 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
 
             // interaction vertex
             auto& v = edep_evt->Primaries[0];
-            // myfile4<<"evId: "<<eventIds[i]<<" "<<edep_evt->EventId<<std::endl;
-            // myfile4<<"edepsim size: "<<edep_evt->Primaries[0].Particles.size()<<std::endl;
             spill->Primaries.push_back(v);
-            // myfile4<<"spill nr: "<<spillId<<" "<<"event nr: "<<i<<std::endl;
-            // myfile4<<"overlay size: "<<spill->Primaries[i].Particles.size()<<std::endl;
 
             // trajectories
-            // myfile5<<"evId: "<<eventIds[i]<<" "<<edep_evt->EventId<<std::endl;
-            // myfile5<<"edepsim size: "<<edep_evt->Trajectories.size()<<std::endl;
             for (auto &t : edep_evt->Trajectories){
-                // myfile5<<"edepsim point X: "<<t.Points[0].Position.X()<<std::endl;
                 spill->Trajectories.push_back(t);
-                // myfile5<<"overlay size: "<<spill->Trajectories[j].Points[0].Position.X()<<std::endl;
             }
-
-            // myfile5<<"spill nr: "<<spillId<<" "<<"event nr: "<<i<<std::endl;
-            // for (int j=0; j < spill->Trajectories.size(); j++){
-            //     myfile5<<"overlay size: "<<spill->Trajectories[j].Points[0].Position.X()<<std::endl;
-            // }
 
             // energy depositions
             for (auto &d : edep_evt->SegmentDetectors){
@@ -114,12 +81,16 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
                     SegmentDetectors[d.first].push_back(h);
                 }
             }
-        }// loop over events of the same spillId
+        }// end loop over events of the same spillId
     entry += eventIds.size();
     spill->SegmentDetectors = std::vector<std::pair<std::string, std::vector<TG4HitSegment>>>(SegmentDetectors.begin(), SegmentDetectors.end());
     outTree->Fill();
     delete spill;
-    }// loop over spills
+    }// end loop over spills
+
     outFile->cd();
     outTree->Write();
+    geom->Write();
+
+    outFile->Close();
 }
