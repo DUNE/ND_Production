@@ -5,7 +5,7 @@ export ND_PRODUCTION_RUNTIME=SHIFTER
 ## Above but with venv support:
 # export ND_PRODUCTION_CONTAINER=mjkramer/sim2x2:mlreco001
 # This is the one that Francois has actually been using:
-export ND_PRODUCTION_CONTAINER=deeplearnphysics/larcv2:ub2204-cu121-torch251-larndsim
+export ND_PRODUCTION_CONTAINER=deeplearnphysics/larcv2:ub2204-cu124-torch251-larndsim
 
 source ../util/reload_in_container.inc.sh
 
