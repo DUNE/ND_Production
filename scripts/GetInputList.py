@@ -14,6 +14,8 @@ from metacat.webapi import MetaCatClient
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
 
+   env = "export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app;export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune;"
+
    lfiles     = []
    main_query = "files where namespace=neardet-2x2-lar-light and creator=dunepro and core.data_tier=raw"
 
@@ -23,7 +25,7 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
        lrun    = int(lightInfo[0])
        lsubrun = int(lrun*1e5 + int(lightInfo[1]))
        query   = "%s and core.runs[0]=%d and core.runs_subruns[0]=%d" % (main_query,lrun,lsubrun)
-       cmd     = "metacat query \"%s\"" % query
+       cmd     = "%s; metacat query \"%s\"" % (env,query)
        proc    = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
        stdout, error = proc.communicate() #[0].decode('ascii')
 
