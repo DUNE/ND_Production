@@ -14,8 +14,6 @@ from metacat.webapi import MetaCatClient
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
 
-   env = "export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app;export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune;"
-
    lfiles     = []
    main_query = "files where namespace=neardet-2x2-lar-light and creator=dunepro and core.data_tier=raw"
 
@@ -25,7 +23,7 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
        lrun    = int(lightInfo[0])
        lsubrun = int(lrun*1e5 + int(lightInfo[1]))
        query   = "%s and core.runs[0]=%d and core.runs_subruns[0]=%d" % (main_query,lrun,lsubrun)
-       cmd     = "%s; metacat query \"%s\"" % (env,query)
+       cmd     = "metacat query \"%s\"" % query
        proc    = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
        stdout, error = proc.communicate() #[0].decode('ascii')
 
@@ -54,6 +52,37 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
           stdout = stdout.decode('ascii').split("\n")
 
        print( f"\tThe paths for {lfile} is [{stdout}].\n" )
+
+       """
+       rucio_download = False
+       download       = False
+
+       for path in stdout :
+           if len(path) == 0 : continue
+           pnfs      = path.replace("root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/","/pnfs/")
+           filename  = pnfs.split("/")[-1]
+           pnfs_path = pnfs.replace(filename,"")
+           cmds      = [ "cat %s\".(get)(%s)(locality)\"" % (pnfs_path,filename),
+                         "mkdir neardet-2x2-lar-light; xrdcopy %s neardet-2x2-lar-light/" % (path.strip()) ]
+
+           for c, cmd in enumerate(cmds) :
+               proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+               pipe = proc.communicate()[0].decode('ascii')
+ 
+               if c == 0 and isOnTapeCheck : 
+                  if proc.returncode != 0 :
+                     print( f"Cannot determine the locality of the file on dCache [{path}]." )
+                  else :
+                     if pipe.strip().find("ONLINE") != -1 :
+                        rucio_download = True
+               if c == 1 :
+                  if proc.returncode == 0 :
+                     download = True
+
+           if download : break
+
+       if rucio_download and not download :
+       """
        print( f"\tDownloading the light raw file [{lfile}]" )
 
        cmd   = f"rucio download {lfile}"

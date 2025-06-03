@@ -208,10 +208,10 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
 
     return_md['dune.dqc_quality']         = "unknown"
     return_md['dune.campaign']            = RUN_PERIOD
-    return_md['dune_requestid']           = ""
+    return_md['dune.requestid']           = ""
     return_md['dune.config_file']         = _GetConfigFiles(workflow)
-    return_md['dune.workflow']            = JUSTIN_WORKFLOW
-    return_md['dune.output_status']       = "good"
+    return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW }
+    return_md['dune.output_status']       = "confirmed"
     return_md['core.application.family']  = _GetApplicationFamily(tier)
     return_md['core.application.name']    = tier
     return_md['core.application.version'] = SOFTWARE

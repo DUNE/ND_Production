@@ -287,7 +287,6 @@ if __name__ == '__main__' :
             os.makedirs("%s/data"%outdir,mode=0o1775)
             os.makedirs("%s/logs"%outdir,mode=0o1775)
             os.makedirs("%s/json"%outdir,mode=0o1775)
-            os.makedirs("%s/config"%outdir,mode=0o1775)
       else :
          print( "\tThe output directory [%s] already exist!" % outdir )
          log.write( "\tThe output directory [%s] already exist!\n" % outdir )
@@ -389,16 +388,12 @@ if __name__ == '__main__' :
  
       if not opts["rse"] : 
          cmdlist.append( "--output-pattern='*.hdf5:%s/data'" % WRITE_DIR )
-         cmdlist.append( "--output-pattern='*.yaml:%s/config'" % WRITE_DIR )
          cmdlist.append( "--output-pattern='*.log:%s/logs'" % WRITE_DIR )
          cmdlist.append( "--output-pattern='*.json:%s/json'" % WRITE_DIR )
       else :
-         #cmdlist.append( "--output-pattern='*.hdf5:%s'" % WRITE_DIR )
-         #cmdlist.append( "--output-pattern='*.yaml:%s'" % WRITE_DIR )
          cmdlist.append( "--output-pattern *.log:%s" % WRITE_DIR )
          cmdlist.append( "--output-pattern *.json:%s" % WRITE_DIR )
          cmdlist.append( "--output-pattern *.hdf5:%s" % WRITE_DIR ) 
-         cmdlist.append( "--output-rse %s" % WRITE_DIR ) 
                  
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
