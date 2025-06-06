@@ -44,7 +44,7 @@ Create a script to configure all the variables needed during the execution (i.e.
 
 ![Screenshot 2025-06-06 alle 10 15 26](https://github.com/user-attachments/assets/f05347eb-d8be-4c69-9361-85a5df14c418)
 
-# N.B. 
+N.B. 
 
 At the moment of writing (June '25), we have no default geometry for SAND, hence there is no default maxpath file. GENIE works even without maxpath file, but if you want to use it, you have to generate it during the execution. You can do this by adding the following few lines in `run.sh` (changing properly the paths):
 
