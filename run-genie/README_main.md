@@ -39,7 +39,7 @@ Create a script to configure all the variables needed during the execution (i.e.
 4. `cd` into `run-genie` folder
 5. Add a line to execute `run-genie.sh` with the option `"$@"`
 
-![alt text](ND_Production/run-genie/Screenshot 2025-06-06 alle 10.15.26.png "Example of launch_genie.sh")
+![Screenshot](ND_Production/run-genie/Screenshot 2025-06-06 alle 10.15.26.png "Example of launch_genie.sh")
 
 Prepare `submit.sub` file: 
 You need to add the option for running a job inside a Singularity image: 
@@ -51,7 +51,7 @@ Requirements = HasSingularity
 
 To execute more than one job, you can pass to the executable ${Item} as argument and in the script you have to set `ND_PRODUCTION_INDEX = ${1}`. In this way the files produced are consistent with this index. 
 
-![alt text](ND_Production/run-genie/Screenshot 2025-06-06 alle 10.18.59.png "Example of submit.sub")
+![Screenshot](ND_Production/run-genie/Screenshot 2025-06-06 alle 10.18.59.png "Example of submit.sub")
 
 When the jobs are completed you should see:
 - in `ND_PRODUCTION_OUTDIR_BASE`: `run-genie\ND_PRODUCTION_OUT_NAME\` with `GTRAC` and `GHEP` folders, which contain `000...` folders with the productions
