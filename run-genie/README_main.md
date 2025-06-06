@@ -79,7 +79,6 @@ Pull the container using the script in `/admin` called `pull_singularity_contain
 
 N. B. Make sure that all the files are inside `ND_PRODUCTION_DIR`, which is the directory bounded with container
 
-## Production from bash
 After you set your variables, you just need to do `source launch_genie.sh` and everything should work. You should see: 
 - in `ND_PRODUCTION_OUTDIR_BASE`: `run-genie\ND_PRODUCTION_OUT_NAME\` with `GTRAC` and `GHEP` folders, which contain `000...` folders with the productions
 - in `ND_PRODUCTION_LOGDIR_BASE`: `run-genie\ND_PRODUCTION_OUT_NAME\` with `LOGS`, `STATUS` and `TIMING` folders, which contain `000...` folders with some infos about the productions
