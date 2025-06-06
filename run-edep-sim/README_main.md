@@ -33,6 +33,7 @@ Create a script to configure all the variables needed during the execution (i.e.
 ![Screenshot 2025-06-06 alle 10 52 20](https://github.com/user-attachments/assets/cbb2aeec-18b1-4400-bc6e-36ce6ba56c13)
 
 Prepare `submit.sub` file: 
+
 You need to add the option for running a job inside a Singularity image: 
 ```
 +SingularityImage = "docker://mjkramer/sim2x2:genie_edep.3_04_00.20230912"
