@@ -15,6 +15,9 @@ Execute the script `/admin/install_everything.sh`. There are some settings for N
 N.B. Run it from `ND_Production` folder!
 
 ## Production on HTCondor
+
+# Configuration file
+
 Create a script to configure all the variables needed during the execution (i.e. `launch_genie.sh`). In this script you have to `export` all the following variables.
 
 1. Set up your working directory:
@@ -40,6 +43,23 @@ Create a script to configure all the variables needed during the execution (i.e.
 5. Add a line to execute `run-genie.sh` with the option `"$@"`
 
 ![Screenshot 2025-06-06 alle 10 15 26](https://github.com/user-attachments/assets/f05347eb-d8be-4c69-9361-85a5df14c418)
+
+# N.B. 
+
+At the moment of writing (June '25), we have no default geometry for SAND, hence there is no default maxpath file. GENIE works even without maxpath file, but if you want to use it, you have to generate it during the execution. You can do this by adding the following few lines in `run.sh` (changing properly the paths):
+
+```
+if [ ! -f "$maxPathFile" ]; then
+    # Since I have no maxpath file already present, I need to convert gdml in root and then produce maxpath from the root file
+    echo "TGeoManager::SetVerboseLevel(0); TGeoManager::Import(\"/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$ND_PRODUCTION_GEOM\"); TFile f(\"/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root\",\"RECREATE\"); gGeoManager->Write(\"geo\"); f.Close();" | root -l -b
+    
+    # Evaluate max path lengths from ROOT geometry file
+    echo "/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root"
+    gmxpl -f /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root -L cm -D g_cm3 --tune $ND_PRODUCTION_TUNE -t $ND_PRODUCTION_TOP_VOLUME -o /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/maxpath/$(basename $ND_PRODUCTION_GEOM .gdml).maxpath.xml -seed 21304 --message-thresholds /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/Messenger.xml  &> ${ND_PRODUCTION_LOGDIR_BASE}/gmxpl.log
+fi
+```
+
+# Submit file
 
 Prepare `submit.sub` file: 
 
