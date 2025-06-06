@@ -30,6 +30,8 @@ Create a script to configure all the variables needed during the execution (i.e.
 5. `cd` into `run-edep-sim` folder
 6. Add a line to execute `run_edep_sim.sh` with the option `"$@"`
 
+![Screenshot 2025-06-06 alle 10 52 20](https://github.com/user-attachments/assets/cbb2aeec-18b1-4400-bc6e-36ce6ba56c13)
+
 Prepare `submit.sub` file: 
 You need to add the option for running a job inside a Singularity image: 
 ```
@@ -41,6 +43,8 @@ Requirements = HasSingularity
 The executable is `launch_edep_sim.sh`.
 
 To execute more than one job, you can pass to the executable ${Item} as argument and in the script you have to set `ND_PRODUCTION_INDEX = ${1}`. In this way the files produced are consistent with this index. 
+
+![Screenshot 2025-06-06 alle 10 49 00](https://github.com/user-attachments/assets/ef4a4c76-77ba-4acb-b5a0-7990a328f1a2)
 
 When the jobs are completed you should see:
 - in `ND_PRODUCTION_OUTDIR_BASE`: `run-edep-sim\ND_PRODUCTION_OUT_NAME\` with `EDEPSIM` folders, which contain `000...` folders with the productions
