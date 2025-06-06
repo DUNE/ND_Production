@@ -29,7 +29,7 @@ Create a script to configure all the variables needed during the execution (i.e.
    - `ND_PRODUCTION_OUT_NAME` with the name of the produced files
 4. Set up variables for GENIE production (`gevgen_fnal` command):
    - `ND_PRODUCTION_DK2NU_DIR` with folder where you have .dk2nu flux files, which can be downloaded from https://www.dropbox.com/scl/fi/2jb14vfz0q2vaot0g178f/OptEngNov2017_150cmTargetCone_NoMod2_Neutrino.tar.gz?rlkey=rtn6jvkdg5n4q0vznfb3wurqk&e=2&dl=0
-   - `ND_PRODUCTION_GEOM` with .gdml file (for SAND geometry, `EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.gdml` is the most recent one)
+   - `ND_PRODUCTION_GEOM` with .gdml file (for SAND geometry, `SAND_opt3_DRIFT1.gdml` is the most recent one)
    - `ND_PRODUCTION_TUNE`, which must be the DUNE official tune (AR23_20i_00_000)
    - `ND_PRODUCTION_DET_LOCATION`, which must be `DUNEND` (taken from GNuMIFlux.xml)
    - `ND_PRODUCTION_TOP_VOLUME`, name of the volume where you want interactions (volSAND if you want the entire SAND volume)
@@ -51,6 +51,7 @@ You need to add the option for running a job inside a Singularity image:
 
 Requirements = HasSingularity
 ```
+The executable is `launch_genie.sh`.
 
 To execute more than one job, you can pass to the executable ${Item} as argument and in the script you have to set `ND_PRODUCTION_INDEX = ${1}`. In this way the files produced are consistent with this index. 
 
@@ -79,6 +80,4 @@ Pull the container using the script in `/admin` called `pull_singularity_contain
 
 N. B. Make sure that all the files are inside `ND_PRODUCTION_DIR`, which is the directory bounded with container
 
-After you set your variables, you just need to do `source launch_genie.sh` and everything should work. You should see: 
-- in `ND_PRODUCTION_OUTDIR_BASE`: `run-genie\ND_PRODUCTION_OUT_NAME\` with `GTRAC` and `GHEP` folders, which contain `000...` folders with the productions
-- in `ND_PRODUCTION_LOGDIR_BASE`: `run-genie\ND_PRODUCTION_OUT_NAME\` with `LOGS`, `STATUS` and `TIMING` folders, which contain `000...` folders with some infos about the productions
+After you set your variables, you just need to do `source launch_genie.sh` and everything should work. You should see an output as described above.
