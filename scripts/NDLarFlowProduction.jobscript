@@ -338,9 +338,6 @@ execute_light_charge_association_workflow() {
 
    h5flow -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml
 
-   if [ -f ${COMBINED_OUTPUT_LOGFILE} ]; then
-      mv ${COMBINED_OUTPUT_LOGFILE}  ${OUTFILES_DIR}/
-   fi
    if [ -f ${COMBINED_OUTPUT_DATAFILE} ]; then
       CREATED_FILES+=("${COMBINED_OUTPUT_DATAFILE}")
       mv ${COMBINED_OUTPUT_DATAFILE} ${OUTFILES_DIR}/
@@ -427,16 +424,19 @@ WORKFLOW=()
 if [[ "${DATA_STREAM}" == "light" ]]; then
    execute_light_workflow
    WORKFLOW+=("light")
+   export NAMESPACE="neardet-2x2-lar-light"
 elif [[ "${DATA_STREAM}" == "charge" ]]; then
    execute_charge_binary_to_packet_workflow
    execute_charge_workflow
    WORKFLOW+=("charge")
+   export NAMESPACE="neardet-2x2-lar-charge"
 elif [[ "${DATA_STREAM}" == "combined" ]]; then
    execute_charge_binary_to_packet_workflow
    execute_light_workflow
    execute_charge_workflow
    execute_light_charge_association_workflow
    WORKFLOW+=("combined")  
+   export NAMESPACE="neardet-2x2-lar"
 fi
 
 
@@ -459,17 +459,17 @@ if [[ "${MAKE_METADATA}" == "True" ]]; then
    PARENT_FILES_ARRAY=$( IFS=$','; echo "${PARENT_FILES[*]}" ) 
    WORKFLOW_ARRAY=$( IFS=$','; echo "${WORKFLOW[*]}" )
 
-   echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} --input=\"${CREATED_FILES_ARRAY[@]}\" --parents=\"${PARENT_FILES_ARRAY[@]}\" --workflow=\"${WORKFLOW_ARRAY[@]}\" --tier=\"${DATA_TIER}\" --namespace=\"neardet-2x2-lar\"]" 2>&1 | tee -a $envlog
-#   (
-#       source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
-#       source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-#
-#       setup metacat 
-#       setup python v3_9_15 
-#       setup h5py v3_1_0 -q e19:p383b 
+   echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} --input=\"${CREATED_FILES_ARRAY[@]}\" --parents=\"${PARENT_FILES_ARRAY[@]}\" --workflow=\"${WORKFLOW_ARRAY[@]}\" --tier=\"${DATA_TIER}\" --namespace=\"${NAMESPACE}\"]" 2>&1 | tee -a $envlog
+   (
+       source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+       source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 
-#       python ${METADATA_EXTRACT} --input="${CREATED_FILES_ARRAY[@]}" --parents="${PARENT_FILES_ARRAY[@]}" --workflow="${WORKFLOW_ARRAY[@]}" --tier="${DATA_TIER}" --namespace="neardet-2x2-lar"
-#   )
+       setup metacat 
+       setup python v3_8_3b 
+       setup h5py v3_1_0d -q e19:p383b:prof 
+
+       python ${METADATA_EXTRACT} --input="${CREATED_FILES_ARRAY[@]}" --parents="${PARENT_FILES_ARRAY[@]}" --workflow="${WORKFLOW_ARRAY[@]}" --tier="${DATA_TIER}" --namespace="${NAMESPACE}"
+   )
 fi
 
 

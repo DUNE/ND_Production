@@ -94,8 +94,12 @@ def _GetNumberOfEvents(filename,workflow) :
     nevts = 0
     if filename.find(".hdf5") != -1 :
        f = h5py.File(filename,'r') 
-       evts  = f['%s/events/data' % workflow]
-       nevts = len(evts)
+       if workflow == "combined" :
+          evts = f['combined/t0/data']
+       else :
+          evts  = f['%s/events/data' % workflow]
+       nevts = evts.len()
+       f.close()
     else :
        print( "Unable to determine the number of events for file [%s]." % filename )
        return -1
@@ -108,9 +112,13 @@ def _GetNumberOfEvents(filename,workflow) :
 def _GetFirstEventNumber(filename,workflow) :
     first = -1
     if filename.find(".hdf5") != -1 :
-       f = h5py.File(filename,'r') 
-       evts  = f['%s/events/data' % workflow]
+       f = h5py.File(filename,'r')
+       if workflow == "combined" :
+          evts = f['combined/t0/data']  
+       else :
+          evts  = f['%s/events/data' % workflow]
        first = evts[0][0].item()
+       f.close()
     else :
        print( "Unable to determine the number of events for file [%s]." % filename )
        return -1
@@ -124,8 +132,12 @@ def _GetLastEventNumber(filename,workflow) :
     last = -1
     if filename.find(".hdf5") != -1 :
        f = h5py.File(filename,'r') 
-       evts = f['%s/events/data' % workflow]
+       if workflow == "combined" :
+          evts = f['combined/t0/data']
+       else :
+          evts = f['%s/events/data' % workflow]
        last = evts[-1][0].item()
+       f.close()
     else :
        print( "Unable to determine the number of events for file [%s]." % filename )
        return -1
@@ -210,8 +222,8 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     return_md['dune.campaign']            = RUN_PERIOD
     return_md['dune.requestid']           = ""
     return_md['dune.config_file']         = _GetConfigFiles(workflow)
-    return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW }
-    return_md['dune.output_status']       = "confirmed"
+    return_md['dune.workflow']            = JUSTIN_WORKFLOW
+    return_md['dune.output_status']       = "good"
     return_md['core.application.family']  = _GetApplicationFamily(tier)
     return_md['core.application.name']    = tier
     return_md['core.application.version'] = SOFTWARE
@@ -285,7 +297,7 @@ if __name__ == '__main__' :
        metadata['parents'] = []
 
        namespace     = args.namespace
-       json_filename = filename.replace(filename.split(".")[-1],"json")
+       json_filename = "%s.json" % filename
        parent_files  = _GetParentFiles(workflows[f].strip(),parent_metadata)
      
        # set the metadata fields
