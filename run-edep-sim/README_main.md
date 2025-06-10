@@ -30,7 +30,7 @@ Create a script to configure all the variables needed during the execution (i.e.
 5. `cd` into `run-edep-sim` folder
 6. Add a line to execute `run_edep_sim.sh` with the option `"$@"`
 
-![Screenshot 2025-06-06 alle 10 52 20](https://github.com/user-attachments/assets/cbb2aeec-18b1-4400-bc6e-36ce6ba56c13)
+![Screenshot 2025-06-10 alle 16 51 46](https://github.com/user-attachments/assets/12da80f4-9e17-4fd3-b06f-f8087b5d7197)
 
 Prepare `submit.sub` file: 
 
