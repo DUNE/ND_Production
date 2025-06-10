@@ -42,7 +42,7 @@ Create a script to configure all the variables needed during the execution (i.e.
 4. `cd` into `run-genie` folder
 5. Add a line to execute `run-genie.sh` with the option `"$@"`
 
-![Screenshot 2025-06-06 alle 10 15 26](https://github.com/user-attachments/assets/f05347eb-d8be-4c69-9361-85a5df14c418)
+![Screenshot 2025-06-10 alle 16 50 44](https://github.com/user-attachments/assets/02623013-e41a-492c-95da-d9e645bca51a)
 
 N.B. 
 
