@@ -1,3 +1,8 @@
+// 16/06/2025
+// this macro is a copy of overlaySinglesIntoSpillsSorted.C, with the following modifications:
+// - Added neutrino TOF with the function getInteractionTime_LBNF. But this computation is just a first order approximation, it needs to be improved
+// - The output structure follows the edep-sim convention, i.e., first come all primary trajectories, then secondaries ones.
+
 #include "TG4Event.h"
 #include "gRooTracker.h"
 

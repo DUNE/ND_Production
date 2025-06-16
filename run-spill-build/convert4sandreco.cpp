@@ -2,7 +2,7 @@
 #include "gRooTracker.h"
 
 
-void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
+void convertEvtToSpill(std::string inFileName, std::string outFileName){
 
     TG4Event* edep_evt = nullptr;
     TG4Event* spill = nullptr;
@@ -93,4 +93,56 @@ void convertEvtToSpillBased(std::string inFileName, std::string outFileName){
     geom->Write();
 
     outFile->Close();
+
 }
+
+/****************************************************************/
+
+void takeInitialSpillTime(std::string inFileName){
+
+    TG4Event* spill = nullptr;
+    double t0_spill;
+
+    // input file (which is the output of the previous function)
+    std::unique_ptr<TFile> inFile(TFile::Open(inFileName.c_str(), "UPDATE"));
+    // input tree
+    std::unique_ptr<TTree> spill_tree(inFile->Get<TTree>("EDepSimEvents"));
+    spill_tree->SetBranchAddress("Event", &spill);
+
+    // output tree
+    std::unique_ptr<TTree> outTree = std::make_unique<TTree>("tSpillTime", "Initial Spill Time");
+    outTree->Branch("t0_spill", &t0_spill);
+
+    int spillN = spill_tree->GetEntries();
+    std::cout<<" number of spills: "<<spillN<<std::endl;
+
+    std::ofstream ofs("t0_spill.txt");
+
+    // I need to store the spill initial time
+    for (int i = 0; i < spill_tree->GetEntries(); i++){
+        spill_tree->GetEntry(i);
+
+        // if (ofs.is_open()){
+        //     ofs << "spill "<<i<<" initial time: "<<std::fixed << std::setprecision(1) << spill->Primaries[0].Position.T()<<std::endl;
+        // }
+
+        // if (i == 0) t0_spill = 0.;
+        // else t0_spill = spill->Primaries[0].Position.T();
+
+        t0_spill = i*1.2E9;
+        std::cout<<t0_spill<<std::endl;
+
+        outTree->Fill();
+    }
+
+    outTree->Write();
+}
+
+void convert4sandreco(std::string inFileName, std::string outFileName){
+    
+    convertEvtToSpill(inFileName, outFileName);
+    takeInitialSpillTime(outFileName);
+
+}
+  
+
