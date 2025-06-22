@@ -5,7 +5,7 @@
 justin-test-jobscript --monte-carlo 1 --jobscript run-genie.jobscript \
     --env ND_PRODUCTION_OUTDIR_BASE=. \
     --env ND_PRODUCTION_LOGDIR_BASE=. \
-    --env ND_PRODUCTION_RUNTIME=JUSTIN \
+    --env ND_PRODUCTION_RUNTIME=NONE \
     --env ND_PRODUCTION_DET_LOCATION=MiniRun5-Nu \
     --env ND_PRODUCTION_EXPOSURE=1E15 \
     --env ND_PRODUCTION_DK2NU_DIR=. \
