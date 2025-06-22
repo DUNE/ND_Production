@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# justin simple-workflow --monte-carlo 2 ...
-
-justin-test-jobscript --monte-carlo 1 --jobscript run-genie.jobscript \
+# justin-test-jobscript --monte-carlo 1 --jobscript run-genie.jobscript \
+justin simple-workflow --monte-carlo 3 --wall-seconds 600 --jobscript run-genie.jobscript \
     --env ND_PRODUCTION_OUT_NAME=MR5_justIN_test \
     --env ND_PRODUCTION_OUTDIR_BASE=. \
     --env ND_PRODUCTION_LOGDIR_BASE=. \

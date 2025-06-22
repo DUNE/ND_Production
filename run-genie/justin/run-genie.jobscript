@@ -3,7 +3,7 @@
 did_pfn_rse=`$JUSTIN_PATH/justin-get-file`
 
 if [ -z "$did_pfn_rse" ] ; then
-  exit 1
+  exit 0
 fi
 
 did=`echo $did_pfn_rse | cut -f1 -d' '`
