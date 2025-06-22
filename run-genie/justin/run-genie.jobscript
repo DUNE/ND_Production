@@ -21,10 +21,8 @@ wget https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/2x2EventGener
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup genie v3_04_00 -q c7:prof
 
-# FIXME
-# wget https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/dk2nu.tar.xz
-# tar xf dk2nu.tar.xz
-cp -r /nashome/m/mkramer/justin-test/dk2nu .
+wget https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/dk2nu.tar.xz
+tar xf dk2nu.tar.xz
 export LD_LIBRARY_PATH=$PWD/dk2nu/lib:$LD_LIBRARY_PATH
 
 ./run_genie.sh
