@@ -1,0 +1,24 @@
+#!/bin/bash
+
+did_pfn_rse=`$JUSTIN_PATH/justin-get-file`
+
+if [ -z "$did_pfn_rse" ] ; then
+  exit 1
+fi
+
+did=`echo $did_pfn_rse | cut -f1 -d' '`
+pfn=`echo $did_pfn_rse | cut -f2 -d' '`
+rse=`echo $did_pfn_rse | cut -f3 -d' '`
+
+export ND_PRODUCTION_INDEX=$pfn
+
+git clone -b feature/mjkramer/justin-test https://github.com/DUNE/ND_Production
+
+cd ND_Production/run-genie
+
+wget https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/2x2EventGeneration/NuMI_dk2nu/newtarget-200kA_20220409/g4numiv6_minervame_me000z-200i_0_0001.dk2nu
+
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup genie v3_04_00 -q e20:prof
+
+./run_genie.sh
