@@ -19,7 +19,7 @@ cd ND_Production/run-genie
 wget https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/2x2EventGeneration/NuMI_dk2nu/newtarget-200kA_20220409/g4numiv6_minervame_me000z-200i_0_0001.dk2nu
 
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-setup genie v3_04_02a -q e26:prof
+setup genie v3_04_00 -q c7:prof
 
 # wget https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/dk2nu.tar.xz
 # tar xf dk2nu.tar.xz
