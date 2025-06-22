@@ -12,7 +12,7 @@ rse=`echo $did_pfn_rse | cut -f3 -d' '`
 
 export ND_PRODUCTION_INDEX=$pfn
 
-git clone -b feature/mjkramer/justin-test https://github.com/DUNE/ND_Production
+git clone -b feature/mjkramer/justin https://github.com/DUNE/ND_Production
 
 cd ND_Production/run-genie
 
