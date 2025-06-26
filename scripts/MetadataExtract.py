@@ -23,7 +23,8 @@ DATA_STREAM           = str(os.environ.get('DATA_STREAM'))
 LIGHT_CONFIG_FILES    = str(os.environ.get('LIGHT_CONFIG_FILES'))
 CHARGE_CONFIG_FILES   = str(os.environ.get('CHARGE_CONFIG_FILES'))
 COMBINED_CONFIG_FILES = str(os.environ.get('COMBINED_CONFIG_FILES'))
-JUSTIN_WORKFLOW = "justin workflow [%s, %s]" % ( str(os.environ.get('JUSTIN_WORKFLOW_ID')), str(os.environ.get('JUSTIN_SITE_NAME')) )
+JUSTIN_WORKFLOW_ID    = str(os.environ.get('JUSTIN_WORKFLOW_ID'))
+JUSTIN_SITE_NAME      = str(os.environ.get('JUSTIN_SITE_NAME')) 
 
 #+++++++++++++++++++++++++++++++++
 # get the metacat client
@@ -103,6 +104,7 @@ def _GetNumberOfEvents(filename,workflow) :
     else :
        print( "Unable to determine the number of events for file [%s]." % filename )
        return -1
+    
     return nevts
 
 
@@ -208,8 +210,8 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     return_md = {}
     return_md['core.data_tier']   = tier
     return_md['core.data_stream'] = metadata_blocks[0].get('core.data_stream')
-    return_md['core.start_time']  = "" if not os.path.exists(filename) else os.path.getctime(filename)
-    return_md['core.end_time']    = "" if not os.path.exists(filename) else os.path.getmtime(filename)
+    return_md['core.start_time']  = -1 if not os.path.exists(filename) else int(os.path.getctime(filename))
+    return_md['core.end_time']    = -1 if not os.path.exists(filename) else int(os.path.getmtime(filename))
     return_md['core.file_format'] = filename.split(".")[-1]
     return_md['core.file_type']   = metadata_blocks[0].get('core.file_type')
 
@@ -222,7 +224,7 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     return_md['dune.campaign']            = RUN_PERIOD
     return_md['dune.requestid']           = ""
     return_md['dune.config_file']         = _GetConfigFiles(workflow)
-    return_md['dune.workflow']            = JUSTIN_WORKFLOW
+    return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW_ID, 'site_name' : JUSTIN_SITE_NAME }
     return_md['dune.output_status']       = "good"
     return_md['core.application.family']  = _GetApplicationFamily(tier)
     return_md['core.application.name']    = tier
