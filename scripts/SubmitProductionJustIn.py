@@ -392,7 +392,6 @@ if __name__ == '__main__' :
          cmdlist.append( "--output-pattern='*.json:%s/json'" % WRITE_DIR )
       else :
          cmdlist.append( "--output-pattern *.log:%s" % WRITE_DIR )
-         cmdlist.append( "--output-pattern *.json:%s" % WRITE_DIR )
          cmdlist.append( "--output-pattern *.hdf5:%s" % WRITE_DIR ) 
                  
 
