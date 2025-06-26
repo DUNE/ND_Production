@@ -1,18 +1,18 @@
 #!/bin/env python3
 
-
 import os, sys, string, re, shutil, math, time, subprocess, json
 import sqlite3
 
 from argparse import ArgumentParser as ap
-from metacat.webapi import MetaCatClient
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # get the light files - using python interface because
-#    the API returns a HTTPClient.unpack_json_seq object
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
+def _GetLightFiles(lightInfoCont) :
+
+   setcmd = "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh; setup python v3_9_15; setup metacat; setup rucio;"
+   envcmd = "export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app;export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune;"
 
    lfiles     = []
    main_query = "files where namespace=neardet-2x2-lar-light and creator=dunepro and core.data_tier=raw"
@@ -23,7 +23,7 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
        lrun    = int(lightInfo[0])
        lsubrun = int(lrun*1e5 + int(lightInfo[1]))
        query   = "%s and core.runs[0]=%d and core.runs_subruns[0]=%d" % (main_query,lrun,lsubrun)
-       cmd     = "metacat query \"%s\"" % query
+       cmd     = "%s %s metacat query \"%s\"" % (setcmd,envcmd,query)
        proc    = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
        stdout, error = proc.communicate() #[0].decode('ascii')
 
@@ -32,74 +32,25 @@ def _GetLightFiles(lightInfoCont,isOnTapeCheck) :
           print("Error:[ %s ]" % error.strip())
           sys.exit("Did not find the file for query [%s].\n" % query)
        else :
-          stdout = stdout.decode('ascii')
-          lfiles.append(stdout.strip())
-
+          stdout = stdout[stdout.decode('ascii').find("neardet-2x2-lar-light"):].decode('ascii').strip()
+          lfiles.append(stdout)
 
    ndownloads = 0
    for lfile in lfiles :
-       download = True
-
-       cmd  = f"rucio list-file-replicas {lfile} --pfns"
-       proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-       stdout, error = proc.communicate() #[0].decode('ascii')
-
-       if proc.returncode != 0 :
-          error = error.decode('ascii')
-          print("Error:[ %s ]" % error.strip())
-          sys.exit("Did not find the phyiscal file name for query [%s].\n" % cmd)
-       else :
-          stdout = stdout.decode('ascii').split("\n")
-
-       print( f"\tThe paths for {lfile} is [{stdout}].\n" )
-
-       """
-       rucio_download = False
-       download       = False
-
-       for path in stdout :
-           if len(path) == 0 : continue
-           pnfs      = path.replace("root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/","/pnfs/")
-           filename  = pnfs.split("/")[-1]
-           pnfs_path = pnfs.replace(filename,"")
-           cmds      = [ "cat %s\".(get)(%s)(locality)\"" % (pnfs_path,filename),
-                         "mkdir neardet-2x2-lar-light; xrdcopy %s neardet-2x2-lar-light/" % (path.strip()) ]
-
-           for c, cmd in enumerate(cmds) :
-               proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-               pipe = proc.communicate()[0].decode('ascii')
- 
-               if c == 0 and isOnTapeCheck : 
-                  if proc.returncode != 0 :
-                     print( f"Cannot determine the locality of the file on dCache [{path}]." )
-                  else :
-                     if pipe.strip().find("ONLINE") != -1 :
-                        rucio_download = True
-               if c == 1 :
-                  if proc.returncode == 0 :
-                     download = True
-
-           if download : break
-
-       if rucio_download and not download :
-       """
-       print( f"\tDownloading the light raw file [{lfile}]" )
-
-       cmd   = f"rucio download {lfile}"
+       cmd   = "%s export RUCIO_ACCOUNT=\"justinreadonly\"; rucio download %s" % (setcmd,lfile)
        proc  = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
        pipe  = proc.communicate()[0].decode('ascii')
+       proc.wait()
 
        print(pipe)
 
        if proc.returncode != 0 :
-          sys.exit( f"Cannot download the file [{lfile}]." )
+          sys.exit( "Cannot download the file [%s].\n" % lfile )
        else :
-          print( f"\t\tSuccessfully download the file [{lfile}]." )
+          print( "\t\tSuccessfully download the file [%s]." % lfile )
           ndownloads += 1
 
    return ndownloads
-
-
 
 
 
@@ -116,7 +67,8 @@ def _GetLightMetadata(run,subrun) :
        return []
 
     try :
-       connect = sqlite3.connect(f"file:{filename}?mode=ro", uri=True)
+       name    = f'file:{filename}?mode=ro'
+       connect = sqlite3.connect(name, uri=True)
        cursor  = connect.cursor()
        query   = "SELECT lrs_run, lrs_subrun FROM All_global_subruns WHERE crs_run=%s and crs_subrun=%s" % (run,subrun) 
        cursor.execute(query)
@@ -133,22 +85,10 @@ def _GetLightMetadata(run,subrun) :
 
     except sqlite3.Error as e :
         pass
-        print(f"Error connecting to the sqlite database: {e}")
+        print("Error connecting to the sqlite database", e)
       
     return []
     
-
-
-#+++++++++++++++++++++++++++++++++
-# get the metacat client
-#+++++++++++++++++++++++++++++++++
-def _GetMetacatClient() :
-    client = MetaCatClient(server_url='https://metacat.fnal.gov:9443/dune_meta_prod/app',
-                           auth_server_url='https://metacat.fnal.gov:8143/auth/dune',
-                           timeout=30)
-    return client
-
-
 
 
 ##########################################################################
@@ -161,13 +101,21 @@ if __name__ == '__main__' :
    # input arguments
    parser = ap()
    parser.add_argument('--file', nargs='?', type=str, required=True, help="The file data identifier (DID)")
-   parser.add_argument('--tapeCheck', action='store_true', help="Check if the file is on tape, only works when running a justin test job.")
    args = parser.parse_args()
 
+   setcmd = "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh; setup python v3_9_15; setup metacat; setup rucio;"
+   envcmd = "export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app;export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune;"
+   cmd     = "%s %s metacat file show -m -j %s" % (setcmd,envcmd,args.file)
+   proc    = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+   stdout, error = proc.communicate()
 
-   # get the metacat client
-   client = _GetMetacatClient()
-   info   = client.get_file(did=args.file,with_metadata=True,with_provenance=True,with_datasets=False) 
+   if proc.returncode != 0 :
+      error = error.decode('ascii')
+      sys.exit("Error:[ %s ]" % error.strip())
+   else :
+      stdout = stdout[stdout.decode('ascii').find("{"):].decode('ascii')
+
+   info = json.loads(stdout)
 
    print( "\tCharge file is [%s]" % args.file )
 
@@ -178,10 +126,10 @@ if __name__ == '__main__' :
 
    # get the runs/subruns for the matching light files
    lightInfoCont = _GetLightMetadata(run,subrun)
-   print( f"\t\tThe matching runs/subruns list [ {lightInfoCont} ]\n" )   
+   print( "\t\tThe matching runs/subruns list :", lightInfoCont, "\n" )   
 
    # download the light files to local disk (TODO: work for other detector configurations)
-   downloadFiles = _GetLightFiles(lightInfoCont,args.tapeCheck)
+   downloadFiles = _GetLightFiles(lightInfoCont)
 
    print( "Exit getting the input list of matching light files." )
    print( "\tThe number of files is [%d].\n" % downloadFiles ) 
