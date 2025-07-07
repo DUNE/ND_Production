@@ -161,6 +161,8 @@ def _CheckDatasetForCombinationWorkflow( dataset, detector ) :
 
     if detector == "proto_nd" :
        run_type = "neardet-2x2-lar-charge"
+    elif detector == "fsd" :
+       run_type = "neardet-fsd-lar-charge"
     else :
        sys.exit("Unable to determine if the correct dataset is deployed for the light+charge combination workflow.\n")
 
