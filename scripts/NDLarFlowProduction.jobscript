@@ -5,7 +5,7 @@
 # 	This script for running the ndlar_flow workflow is based on the data production
 # 	development by Matt Kramer (https://github.com/lbl-neutrino/ndlar_reflow/tree/main)
 # 
-#
+#	Starting on July 1, 2025, please use the software deployed on dune cvmfs repository
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -31,9 +31,9 @@ fi
 #++++++++++++++++++++++++++++++++++++++++
 # setup environment variables 
 #++++++++++++++++++++++++++++++++++++++++
-export CVMFS_TWOBYTWO_DIR="/cvmfs/minerva.opensciencegrid.org/minerva2x2/2x2tmp"
-export CVMFS_WORKING_DIR="${CVMFS_TWOBYTWO_DIR}/${TWOBYTWO_RELEASE}"
-export SOFTWARE=${TWOBYTWO_RELEASE}
+export EXTERNAL_RELEASE="v25.3.0-3"
+export CVMFS_TWOBYTWO_DIR="/cvmfs/dune.opensciencegrid.org/dunend/2x2/"
+export CVMFS_WORKING_DIR="${CVMFS_TWOBYTWO_DIR}/releases/${TWOBYTWO_RELEASE}"
 
 
 #+++++++++++++++++++++++++++++++++++++++++
@@ -125,12 +125,12 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
       source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
       setup python v3_9_15 
 
-      echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_scripts/GetInputList.py --file=${did} ].\n" 2>&1 | tee -a $envlog 
-      python ${CVMFS_WORKING_DIR}/ndlar_scripts/GetInputList.py --file=${did} 2>&1 | tee -a $envlog
+      echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/scripts/GetInputList.py --file=${did} ].\n" 2>&1 | tee -a $envlog 
+      python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/scripts/GetInputList.py --file=${did} 2>&1 | tee -a $envlog
    )
   
    namespace="" 
-   if [[ "${DETECTOR_CONFIG}" == "proto_nd" ]]; then
+   if [[ "${DETECTOR_CONFIG}" == "proto_nd" || "${DETECTOR_CONFIG}" == "fsd" ]]; then
       namespace="neardet-2x2-lar-light"
    else 
       echo -e "FATAL::The detector configuration [${DETECTOR_CONFIG}] is not implemented. Cannot continue.\n" 2>&1 | tee -a $envlog
@@ -170,7 +170,8 @@ get_range_for_light_workflow() {
    CHARGEF="${WORKSPACE}/${PACKET_OUTPUT_FILE}"
    FIRSTLIGHTF="${WORKSPACE}/${MATCHED_LIGHT_FILES[0]}"
    LASTLIGHTF="${WORKSPACE}/${MATCHED_LIGHT_FILES[-1]}"
-   RANGE_SCRIPT="python3 ${CVMFS_WORKING_DIR}/ndlar_scripts/get_light_event_range.py"
+   #RANGE_SCRIPT="python3 ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ndlar_reflow/scripts/get_light_event_range.py"
+   RANGE_SCRIPT="python /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ndlar_reflow/scripts/get_light_event_range.py"
    ${RANGE_SCRIPT} --workflow=${WORKFLOW} --chargef=${CHARGEF} --first-lightf=${FIRSTLIGHTF} --last-lightf=${LASTLIGHTF} --tmpdir=${TMP_DIR}
 }
 
@@ -196,10 +197,13 @@ execute_light_workflow() {
 
    if [[ "${DATA_STREAM}" == "light" ]]; then
       LIGHT_CONFIG="yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_building_mpd.yaml yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml"
-      echo -e "\t\tRunning the light workflow: [ h5flow -i ${WORKSPACE}/${INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} ]\n" 2>&1 | tee -a $envlog 
-      h5flow -i ${WORKSPACE}/${LIGHT_INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} 
+      echo -e "\t\tRunning the light workflow: [ h5flow -z lzf -i ${WORKSPACE}/${INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} ]\n" 2>&1 | tee -a $envlog 
+      h5flow -z lzf -i ${WORKSPACE}/${LIGHT_INPUT_FILE} -o ${LIGHT_OUTPUT_DATAFILE} -c ${LIGHT_CONFIG} 
 
    elif [[ "${DATA_STREAM}" == "combined" ]]; then
+        echo -e "$(get_range_for_light_workflow)"
+        exit 0
+
         read -r -a LIGHT_EVENT_RANGE <<< "$(get_range_for_light_workflow)"
         echo -e "\t\tFor the light+charge combination workflow, the LIGHT_EVENT_RANGE is [ start is ${LIGHT_EVENT_RANGE[0]} :: end is ${LIGHT_EVENT_RANGE[1]} ]" 2>&1 | tee -a $envlog
         if [[ "`echo ${#LIGHT_EVENT_RANGE[@]}`" == "0" ]]; then
@@ -211,19 +215,19 @@ execute_light_workflow() {
         for filename in "${MATCHED_LIGHT_FILES[@]}"; 
         do 
             if [[ "$filename" == "${MATCHED_LIGHT_FILES[0]}" && "${LIGHT_EVENT_RANGE[0]}" -ne "-1" ]]; then
-               H5FLOW_WORKFLOW="h5flow --start_position=${LIGHT_EVENT_RANGE[0]}"
+               H5FLOW_WORKFLOW="h5flow -z lzf --start_position=${LIGHT_EVENT_RANGE[0]}"
             elif [[ "$filename" == "${MATCHED_LIGHT_FILES[-1]}" && "${LIGHT_EVENT_RANGE[1]}" -ne "-1" ]]; then
-               H5FLOW_WORKFLOW="h5flow --end_position=${LIGHT_EVENT_RANGE[1]}"
+               H5FLOW_WORKFLOW="h5flow -z lzf --end_position=${LIGHT_EVENT_RANGE[1]}"
             else 
-               H5FLOW_WORKFLOW="h5flow"
+               H5FLOW_WORKFLOW="h5flow -z lzf"
             fi
 
             echo -e "\t\t  [ ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${filename} -o ${LIGHT_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_building_mpd.yaml ]" 2>&1 | tee -a $envlog
             ${H5FLOW_WORKFLOW} -i ${WORKSPACE}/${filename} -o ${LIGHT_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_building_mpd.yaml 
         done
 
-        echo -e "\t\t  [ h5flow -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml ]" 2>&1 | tee -a $envlog
-        h5flow -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml 
+        echo -e "\t\t  [ h5flow -z lzf -i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml ]" 2>&1 | tee -a $envlog
+        h5flow -z lzf i ${LIGHT_OUTPUT_DATAFILE} -o ${LIGHT_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/light/light_event_reconstruction_${DATA_TYPE}.yaml 
    fi
 
    if [ -f ${LIGHT_OUTPUT_DATAFILE} ]; then
@@ -301,9 +305,9 @@ execute_charge_workflow() {
    CHARGE_CONFIG="${C1} ${C2} ${C3} ${C4} ${C5}"
 
    echo -e "\tRunning the charge building workflow." 2>&1 | tee -a $envlog 
-   echo -e "\t\t[ h5flow -i ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE} -o ${CHARGE_OUTPUT_DATAFILE} -c ${CHARGE_CONFIG} ]" 2>&1 | tee -a $envlog 
+   echo -e "\t\t[ h5flow -z lzf -i ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE} -o ${CHARGE_OUTPUT_DATAFILE} -c ${CHARGE_CONFIG} ]" 2>&1 | tee -a $envlog 
 
-   h5flow -i ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE} -o ${CHARGE_OUTPUT_DATAFILE} -c ${CHARGE_CONFIG}  
+   h5flow -z lzf -i ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE} -o ${CHARGE_OUTPUT_DATAFILE} -c ${CHARGE_CONFIG}  
 
    if [ -f ${CHARGE_OUTPUT_DATAFILE} ]; then
       mv ${CHARGE_OUTPUT_DATAFILE} ${OUTFILES_DIR}/
@@ -335,9 +339,9 @@ execute_light_charge_association_workflow() {
 
    echo -e "\tThe charge+light association output file name is [${COMBINED_OUTPUT_DATAFILE}]"  2>&1 | tee -a $envlog
    echo -e "\tRunning the charge+light association workflow." 2>&1 | tee -a $envlog 
-   echo -e "\t\t[ h5flow -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml ]" 2>&1 | tee -a $envlog 
+   echo -e "\t\t[ h5flow -z lzf -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml ]" 2>&1 | tee -a $envlog 
 
-   h5flow -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml
+   h5flow -z lzf -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml
 
    if [ -f ${COMBINED_OUTPUT_DATAFILE} ]; then
       CREATED_FILES+=("${COMBINED_OUTPUT_DATAFILE}")
@@ -371,12 +375,12 @@ fi
 #+++++++++++++++++++++++++++++++++++++++++++
 # setup the 2x2 ndlar software
 #+++++++++++++++++++++++++++++++++++++++++++
-echo -e "\nSetup and enter the conda environment for the software release [${TWOBYTWO_RELEASE}]" 2>&1 | tee -a $envlog
-export EXTERNAL_RELEASE=v00_00_01
-export CONDA_ENVS_DIRS=${CVMFS_TWOBYTWO_DIR}/${EXTERNAL_RELEASE}/conda_envs/.
+echo -e "\nSetup and enter the miniforge conda environment for the software release [${TWOBYTWO_RELEASE}]" 2>&1 | tee -a $envlog
+echo -e "\tRunning [ source ${CVMFS_TWOBYTWO_DIR}/miniforge/${EXTERNAL_RELEASE}/miniforge3/etc/profile.d/conda.sh ]" 2>&1 | tee -a $envlog
 
-echo -e "\tRunning [ source ${CVMFS_TWOBYTWO_DIR}/v00_00_01/anaconda/etc/profile.d/conda.sh ]" 2>&1 | tee -a $envlog
-source ${CVMFS_TWOBYTWO_DIR}/${EXTERNAL_RELEASE}/anaconda/etc/profile.d/conda.sh
+source ${CVMFS_TWOBYTWO_DIR}/miniforge/${EXTERNAL_RELEASE}/miniforge3/etc/profile.d/conda.sh
+source ${CVMFS_TWOBYTWO_DIR}/miniforge/${EXTERNAL_RELEASE}/conda_envs/conda.envs.sh
+
 conda activate ndlar_flow_${TWOBYTWO_RELEASE}
 
 if [ -z "${CONDA_DEFAULT_ENV}" ]; then
@@ -455,7 +459,7 @@ if [[ "${MAKE_METADATA}" == "True" ]]; then
    echo -e "Creating the metadata json file(s) for the output data file(s) [${CREATED_FILES}]" 2>&1 | tee -a $envlog
    cd ${OUTFILES_DIR} 
 
-   export METADATA_EXTRACT=${CVMFS_TWOBYTWO_DIR}/${TWOBYTWO_RELEASE}/ndlar_scripts/MetadataExtract.py 
+   export METADATA_EXTRACT=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/scripts/MetadataExtract.py 
    CREATED_FILES_ARRAY=$( IFS=$','; echo "${CREATED_FILES[*]}" )
    PARENT_FILES_ARRAY=$( IFS=$','; echo "${PARENT_FILES[*]}" ) 
    WORKFLOW_ARRAY=$( IFS=$','; echo "${WORKFLOW[*]}" )
