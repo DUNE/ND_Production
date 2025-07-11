@@ -103,7 +103,7 @@ void takeInitialSpillTime(std::string inFileName){
     TG4Event* spill = nullptr;
     double t0_spill;
 
-    // input file (which is the output of the previous function)
+    // input file (which is the output of the previous function) - .OVERLAY.root
     std::unique_ptr<TFile> inFile(TFile::Open(inFileName.c_str(), "UPDATE"));
     // input tree
     std::unique_ptr<TTree> spill_tree(inFile->Get<TTree>("EDepSimEvents"));
@@ -144,5 +144,4 @@ void convert4sandreco(std::string inFileName, std::string outFileName){
     takeInitialSpillTime(outFileName);
 
 }
-  
 
