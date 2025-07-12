@@ -133,11 +133,13 @@ execute_hdf5_root_workflow() {
       echo -e "\tCannot run the convert raw data to packet data. The file [${CONVERT_DATA_WORKFLOW}] does not exist." 2>&1 | tee -a $envlog
       exit 0
    fi   
- 
+
+   isMC=0 
    isFinal=1
    isData=1
    if [[ "${DATA_TYPE}" == "mc" ]]; then 
       isData=0
+      isMC=1
    fi
 
    conda activate ndlar_flow_${TWOBYTWO_RELEASE}
@@ -150,26 +152,32 @@ execute_hdf5_root_workflow() {
    echo -e "\tRunning the pandora workflow in converting hdf5 to root."2>&1 | tee -a $envlog 
    echo -e "\t[ python3 ${CONVERT_DATA_WORKFLOW} ${INPUT_FILE} ${isData} ${isFinal} ${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root ]" 2>&1 | tee -a $envlog
    python3 ${CONVERT_DATA_WORKFLOW} ${INPUT_FILE} ${isData} ${isFinal} "${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root"
-   
-   if [[ "${DATA_TYPE}" == "mc" ]]; then
-      mv "${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root" "${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW.root" 
-   else 
-      if [ ! -f "${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C" ]; then
-         echo -e "\tCannnot run the final step in the root conversion workflow. The file [${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C] does not exist." 2>&1 | tee -a $envlog
-         exit 0
-      fi
 
-      in="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root"
-      out="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW.root"
-
-      echo -e "\t[ root -l -q ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C+\(true,\"${in}\",\"${out}\"\) ]" 2>&1 | tee -a $envlog  
-      root -l -q ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C+\(true,\"${in}\",\"${out}\"\)
-
-      rm ${in}
-   if
-   
    echo -e "\nExit the conda environment [${CONDA_DEFAULT_ENV}]" 2>&1 | tee -a $envlog
    conda deactivate
+   
+   if [ ! -f "${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C" ]; then
+      echo -e "\tCannnot run the final step in the root conversion workflow. The file [${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C] does not exist." 2>&1 | tee -a $envlog
+      exit 0
+   fi
+
+   cp ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C .
+   in="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root"
+   out="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW.root"
+     
+   (
+      source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+      source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+
+      setup root v6_28_12 -q e26:p3915:prof
+
+      echo -e "\t[ root -l -q rootToRootConversion.C+\(isMC,\"${in}\",\"${out}\"\) ]" 2>&1 | tee -a $envlog  
+      root -l -q rootToRootConversion.C+\(isMC,\"${in}\",\"${out}\"\)
+   )
+
+   rm ${in}
+   rm rootToRootConversion*
+   rm AutoDict*
    
    export FLOW_OUTPUT_FILE="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW.root"
    if [ -f ${FLOW_OUTPUT_FILE} ]; then
