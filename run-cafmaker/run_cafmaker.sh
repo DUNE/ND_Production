@@ -31,11 +31,13 @@ args_gen_cafmaker_cfg=( \
 
 [ -n "${ND_PRODUCTION_GHEP_NU_NAME}" ] && args_gen_cafmaker_cfg+=( --ghep-nu-name "$ND_PRODUCTION_GHEP_NU_NAME" )
 [ -n "${ND_PRODUCTION_GHEP_ROCK_NAME}" ] && args_gen_cafmaker_cfg+=( --ghep-rock-name "$ND_PRODUCTION_GHEP_ROCK_NAME" )
+[ -n "${ND_PRODUCTION_HADD_ROCK_NAME}" ] && args_gen_cafmaker_cfg+=( --hadd-rock-name "$ND_PRODUCTION_HADD_ROCK_NAME" )
 [ -n "${ND_PRODUCTION_SPILL_NAME}" ] && args_gen_cafmaker_cfg+=( --edepsim-name "$ND_PRODUCTION_SPILL_NAME" )
 [ -n "${ND_PRODUCTION_MINERVA_NAME}" ] && args_gen_cafmaker_cfg+=( --minerva-name "$ND_PRODUCTION_MINERVA_NAME" )
 [ -n "${ND_PRODUCTION_TMSRECO_NAME}" ] && args_gen_cafmaker_cfg+=( --tmsreco-name "$ND_PRODUCTION_TMSRECO_NAME" )
 [ -n "${ND_PRODUCTION_HADD_FACTOR}" ] && args_gen_cafmaker_cfg+=( --hadd-factor "$ND_PRODUCTION_HADD_FACTOR" )
 [ -n "${ND_PRODUCTION_EXTRA_LINES}" ] && args_gen_cafmaker_cfg+=( --extra-lines "$ND_PRODUCTION_EXTRA_LINES" )
+[ "${ND_PRODUCTION_REUSE_ROCK}" == 1 ] && args_gen_cafmaker_cfg+=( --reuse-rock )
 
 ./gen_cafmaker_cfg.py "${args_gen_cafmaker_cfg[@]}"
 
