@@ -24,12 +24,12 @@ def _HelpMenu() :
     parser.add_option("-s", "--software", dest="software", type="string", default="v00_00_01d0", help="software release for processing [default: %default]")
     parser.add_option("-n", "--nfiles", dest="nfiles", type="int", default=-1, help="the number of files to process in the dataset [default is all files in the dataset]") 
     parser.add_option("-e", "--nevts", dest="nevts", type="int", default=-1, help="the number of events to process in the option file [default is all events per file]")
-    parser.add_option("-j", "--jobscript", dest="jobscript", type="string", default="2x2Production.jobscript", help="name of the job processing script [default: %default]")
-    parser.add_option("--outdir", dest="outdir", type="string", default="/pnfs/dune/scratch/users/%s/2x2ProductionData"%USER, help="name of the top output directory [default: %default]")
+    parser.add_option("-j", "--jobscript", dest="jobscript", type="string", default="NDLarFlowProduction.jobscript", help="name of the job processing script [default: %default]")
+    parser.add_option("--outdir", dest="outdir", type="string", default="/pnfs/dune/scratch/users/%s/ProductionDataFor2x2"%USER, help="name of the top output directory [default: %default]")
     parser.add_option("--debug", dest="debug", default=False, action="store_true", help="run in debug mode")
-    parser.add_option("--tier", dest="tier", type="string", default="flow", help="the data tier for processing (flow) [default: %default]")
-    parser.add_option("--stream", dest="stream", type="string", default="light", help="the data stream (light,charge,or combined) [default: %default]")
-    parser.add_option("--detector", dest="detector", type="string", default="proto_nd", help="the detector configuration [default: %default]")
+    parser.add_option("--tier", dest="tier", type="string", default="flow", help="the data tier for processing (flow, reco) [default: %default]")
+    parser.add_option("--stream", dest="stream", type="string", default="light", help="the data stream (light, charge, combined, pandora) [default: %default]")
+    parser.add_option("--detector", dest="detector", type="string", default="proto_nd", help="the detector configuration (proto_nd, fsd, ndlar) [default: %default]")
     parser.add_option("--metadata", dest="metadata", default=False, action="store_true", help="create json file with metadata")
     parser.add_option("--data", dest="data", default=False, action="store_true", help="processing real data")
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
@@ -37,13 +37,10 @@ def _HelpMenu() :
     parser.add_option("--rse", dest="rse", default=False, action="store_true", help="Outputs go to a rucio storage element")
     parser.add_option("--production", dest="production", default=False, action="store_true", help="using production (shifter) role")
 
-
-
     # h5flow parameters
     parser.add_option("--start_position", dest="startPosition", type=int, default=None, help="start position within source dset (for partial file processing)")
     parser.add_option("--end_position", dest="endPosition", type=int, default=None, help="end position within source dset (for partial file processing)")
     
-
     # justin submit parameters
     parser.add_option("--test-jobscript", dest="testJobscript", default=False, action="store_true", help="test the jobscript")
     parser.add_option("--memory", dest="memory", type="int", default=2000, help="the requested worker node memory usage [default: %default]")
@@ -54,7 +51,6 @@ def _HelpMenu() :
     parser.add_option("--nersc", dest="nersc", default=False, action="store_true", help="Submit the job to NERSC facility")
     parser.add_option("--gpu", dest="gpu", default=False, action="store_true", help="The job requires a gpu")
     parser.add_option("--scope", dest="scope", default="usertests", type="string", help="The scope of the justin job [default: %default]")
-
 
     (opts, args) = parser.parse_args(sys.argv)
     opts = vars(opts)
@@ -387,14 +383,16 @@ if __name__ == '__main__' :
 
       log.write( "\t\tThe top output directory is [%s]" % WRITE_DIR )
       print( "\t\tThe top output directory is [%s]" % WRITE_DIR )
- 
+
+      dtype = "hdf5" if opts["tier"] == "flow" else "root"
+    
       if not opts["rse"] : 
-         cmdlist.append( "--output-pattern='*.hdf5:%s/data'" % WRITE_DIR )
+         cmdlist.append( "--output-pattern='*.%s:%s/data'" % (dtype,WRITE_DIR) )
          cmdlist.append( "--output-pattern='*.log:%s/logs'" % WRITE_DIR )
          cmdlist.append( "--output-pattern='*.json:%s/json'" % WRITE_DIR )
       else :
          cmdlist.append( "--output-pattern *.log:%s" % WRITE_DIR )
-         cmdlist.append( "--output-pattern *.hdf5:%s" % WRITE_DIR ) 
+         cmdlist.append( "--output-pattern *.%s:%s" % (dtype,WRITE_DIR) ) 
                  
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
