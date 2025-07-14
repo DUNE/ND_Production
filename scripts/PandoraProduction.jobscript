@@ -205,49 +205,35 @@ execute_hdf5_root_workflow() {
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
-# Run the charge workflow for packet files
+# Run the pandora workflow for ndlar root files
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
-execute_charge_workflow() {
-   echo -e "Enter executing the charge workflow for data stream [${DATA_STREAM}]" 2>&1 | tee -a $envlog
-   cd ${NDLAR_FLOW_WORKSPACE}
+execute_pandora_workflow() {
+   echo -e "Enter executing the pandora workflow for data stream [${DATA_STREAM}]" 2>&1 | tee -a $envlog
 
-   export CHARGE_OUTPUT_DATAFILE="${PACKET_OUTPUT_FILE/.hdf5/_$(date +'%Y_%m_%d_%H_%M_%S').FLOW.hdf5}"
-   if [[ "${DATA_STREAM}" == "combined" ]]; then
-      mv ${OUTFILES_DIR}/${LIGHT_OUTPUT_DATAFILE} ${NDLAR_FLOW_WORKSPACE}/
-      export CHARGE_OUTPUT_DATAFILE="${LIGHT_OUTPUT_DATAFILE}"
+   export PANDORA_OUTPUT_DATAFILE="${FLOW_OUTPUT_FILE/FLOW.root/LAR_RECO_ND.root}"
+   echo -e "\tThe pandora output file name is [${PANDORA_OUTPUT_DATAFILE}]"  2>&1 | tee -a $envlog
+
+
+
+   
+   PANDORA_INPUT_FORMAT=SP
+   if [[ "${DATA_TYPE}" == "mc" ]]; then
+      PANDORA_INPUT_FORMAT=SPMC
    fi
 
-   echo -e "\tThe charge output file names are [${CHARGE_OUTPUT_DATAFILE}]"  2>&1 | tee -a $envlog
- 
-   export NDLAR_FLOW_CHARGE_YAML_DIR=${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow/workflows/charge 
-   C1="${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_event_building_${DATA_TYPE}.yaml"
-   C2="${NDLAR_FLOW_CHARGE_YAML_DIR}/charge_event_reconstruction_${DATA_TYPE}.yaml"
-   C3="${NDLAR_FLOW_CHARGE_YAML_DIR/charge/combined}/combined_reconstruction_${DATA_TYPE}.yaml"
-   C4="${NDLAR_FLOW_CHARGE_YAML_DIR}/prompt_calibration_${DATA_TYPE}.yaml" 
-   C5="${NDLAR_FLOW_CHARGE_YAML_DIR}/final_calibration_${DATA_TYPE}.yaml"
-   CHARGE_CONFIG="${C1} ${C2} ${C3} ${C4} ${C5}"
+   export PANDORA_GEOM=
 
-   echo -e "\tRunning the charge building workflow." 2>&1 | tee -a $envlog 
-   echo -e "\t\t[ h5flow -z lzf -i ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE} -o ${CHARGE_OUTPUT_DATAFILE} -c ${CHARGE_CONFIG} ]" 2>&1 | tee -a $envlog 
 
-   h5flow -z lzf -i ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE} -o ${CHARGE_OUTPUT_DATAFILE} -c ${CHARGE_CONFIG}  
+   inFile=${FLOW_OUTPUT_FILE}
+   ln -sf $inFile LArRecoNDInput.root
 
-   if [ -f ${CHARGE_OUTPUT_DATAFILE} ]; then
-      mv ${CHARGE_OUTPUT_DATAFILE} ${OUTFILES_DIR}/
-      rm ${OUTFILES_DIR}/${PACKET_OUTPUT_FILE}
-   else 
-      echo -e "FATAL::The file [${CHARGE_OUTPUT_DATAFILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
-      exit 1
-   fi
-   if [[ "${MAKE_METADATA}" == "True" ]]; then
-      export CHARGE_CONFIG_FILES="charge_event_building_${DATA_TYPE}.yaml,charge_event_reconstruction_${DATA_TYPE}.yaml,combined_reconstruction_${DATA_TYPE}.yaml,prompt_calibration_${DATA_TYPE}.yaml,final_calibration_${DATA_TYPE}.yaml"
-   fi
-   if [[ ${DATA_STREAM} == "charge" ]]; then
-      CREATED_FILES+=("${CHARGE_OUTPUT_DATAFILE}")
-   fi   
 
-   cd ${WORKSPACE}
-   echo -e "Exit executing the charge raw files to hdf5 packet workflow for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
+   ${CVMFS_WORKING_DIR}/pandora/LArRecoND/bin/PandoraInterface -i ${CVMFS_WORKING_DIR}/pandora/LArRecoND/settings/PandoraSettings_LArRecoND_ThreeD.xml \
+       -r AllHitsSliceNu -f ${PANDORA_INPUT_FORMAT} -g ${PANDORA_GEOM} -e ${inFile} -j both -M -N
+
+
+
+   echo -e "Exit executing the pandora workflow  for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
 }
 
 
@@ -295,44 +281,13 @@ if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
 fi
 
 
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Setup the ndlar flow workspace
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-export NDLAR_CVMFS_AREA=${CVMFS_WORKING_DIR}/ndlar_flow
-export NDLAR_FLOW_WORKSPACE=${WORKSPACE}/ndlar_flow
-mkdir -p ${NDLAR_FLOW_WORKSPACE}
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Copy the configuration files to the local area
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-if [ -d ${NDLAR_CVMFS_AREA}/yamls/${DETECTOR_CONFIG}_flow ]; then
-   echo -e "\tCopying the configuration directory [${NDLAR_CVMFS_AREA}/yamls/${DETECTOR_CONFIG}_flow] to the workspace [${NDLAR_FLOW_WORKSPACE}/yamls/${DETECTOR_CONFIG}_flow]" 2>&1 | tee -a $envlog
-   mkdir -p ${NDLAR_FLOW_WORKSPACE}/yamls/
-   cp -r ${NDLAR_CVMFS_AREA}/yamls/${DETECTOR_CONFIG}_flow ${NDLAR_FLOW_WORKSPACE}/yamls/
-fi
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++
-# Copy the data files to the local area
-#   TODO: put the data in conditions database
-#+++++++++++++++++++++++++++++++++++++++++++++++++++
-if [ -d ${NDLAR_CVMFS_AREA}/data/${DETECTOR_CONFIG}_flow ]; then
-   echo -e "\tCopying the constants directory [${NDLAR_CVMFS_AREA}/data/${DETECTOR_CONFIG}_flow] to the workspace [${NDLAR_FLOW_WORKSPACE}/data/${DETECTOR_CONFIG}_flow]" 2>&1 | tee -a $envlog
-   mkdir -p ${NDLAR_FLOW_WORKSPACE}/data/
-   cp -r ${NDLAR_CVMFS_AREA}/data/${DETECTOR_CONFIG}_flow ${NDLAR_FLOW_WORKSPACE}/data/
-fi
-
-
 #++++++++++++++++++++++++++++++++++++++
 # execute the jobs
 #+++++++++++++++++++++++++++++++++++++
 echo -e "\n\n" 2>&1 | tee -a $envlog
 execute_hdf5_root_workflow
-
-
-WORKFLOW=("pandora")
+execute_pandora_workflow
+WWORKFLOW+=("pandora")
 export NAMESPACE="neardet-2x2-lar"
 
 
@@ -367,6 +322,7 @@ if [  -f "$INPUT_FILE" ]; then
    echo -e "\nRemoving the local copy of the input file ${WORKSPACE}/${INPUT_FILE}." 2>&1 | tee -a $envlog
    rm -f ${WORKSPACE}/${INPUT_FILE}
 fi
+
 
 #+++++++++++++++++++++++++++++++++++++++++++
 # marking input file as processed
