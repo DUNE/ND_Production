@@ -58,7 +58,8 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
                                     double inFile1POT = 1.024E19,
                                     double inFile2POT = 1.024E19,
                                     double spillPOT = 5E13,
-                                    double spillPeriod_s = 1.2) {
+                                    double spillPeriod_s = 1.2, 
+                                    int reuseRock = 0) {
 
   // Maximum number of interactions that can be simulated in
   // one spill in "N Interaction" mode. Choice of this number
@@ -143,9 +144,20 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
 
   unsigned int N_evts_2 = 0;
   double evts_per_spill_2 = 0.;
+  std::vector<int> evt_it_2_sequence;
   if(have_nu_rock) {
     N_evts_2 = edep_evts_2->GetEntries();
     evts_per_spill_2 = ((double)N_evts_2)/(inFile2POT/spillPOT);
+    // Create a vector of sequential integers with length equal to the number
+    // of entries in the rock tree to act as rock tree entry indices.
+    for (int idx = 0; idx < N_evts_2; idx++) evt_it_2_sequence.push_back(idx);
+
+    // Now shuffle it with the spillFileId for a seed for reproducibility if we
+    // are reusing rock.
+    if (reuseRock) {
+      std::mt19937 g(spillFileId);
+      std::shuffle(evt_it_2_sequence.begin(), evt_it_2_sequence.end(), g);
+    }
   }
 
   std::cout << "File: " << inFileName1 << std::endl;
@@ -164,6 +176,7 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
   if(have_nu_rock) edep_evts_2->SetBranchAddress("Event",&edep_evt_2);
 
   TMap* event_spill_map = new TMap(N_evts_1+N_evts_2);
+
 
   int evt_it_1 = 0;
   int evt_it_2 = 0;
@@ -206,8 +219,8 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
       TTree* gn_tree = is_nu ? genie_evts_1 : genie_evts_2;
 
       int& evt_it = is_nu ? evt_it_1 : evt_it_2;
-      in_tree->GetEntry(evt_it);
-      gn_tree->GetEntry(evt_it);
+      in_tree->GetEntry(is_nu ? evt_it : evt_it_2_sequence.at(evt_it));
+      gn_tree->GetEntry(is_nu ? evt_it : evt_it_2_sequence.at(evt_it));
 
       TG4Event* edep_evt = is_nu ? edep_evt_1 : edep_evt_2;
       // out_branch->ResetAddress();
@@ -248,7 +261,7 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
         // EDepSimEvents and gRooTracker trees are aligned one-to-one, we just
         // trivially set InteractionNumber to be the current entry number.
         // https://github.com/DUNE/2x2_sim/issues/54
-        v->InteractionNumber = evt_it_1 + evt_it_2;
+        v->InteractionNumber = evt_it_1 + (reuseRock ? evt_it_2_sequence.at(evt_it) : evt_it_2);
       }
 
       // ... trajectories
