@@ -51,6 +51,7 @@ libpath_remove /opt/generators/edep-sim/install/lib
 
 [ -z "${ND_PRODUCTION_SPILL_POT}" ] && export ND_PRODUCTION_SPILL_POT=5e13
 [ -z "${ND_PRODUCTION_SPILL_PERIOD}" ] && export ND_PRODUCTION_SPILL_PERIOD=1.2
+[ -z "${ND_PRODUCTION_REUSE_ROCK}" ] && export ND_PRODUCTION_REUSE_ROCK=0
 
 if [[ "$ND_PRODUCTION_USE_GHEP_POT" == "1" ]]; then
   # Covering the case that we want to use the GHEP POT but build only
@@ -90,7 +91,7 @@ LIBTG4EVENT_DIR=${LIBTG4EVENT_DIR:-libTG4Event}
 
 run root -l -b -q \
     -e "gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\")" \
-    "overlaySinglesIntoSpillsSorted.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD)"
+    "overlaySinglesIntoSpillsSorted.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_REUSE_ROCK)"
 
 mkdir -p "$outDir/EDEPSIM_SPILLS/$subDir"
 mv "$spillFile" "$outDir/EDEPSIM_SPILLS/$subDir"
