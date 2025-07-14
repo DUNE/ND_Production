@@ -1,0 +1,16 @@
+__pycache__
+launchdirs
+output
+.ipynb_checkpoints
+*.o
+*.d
+*.so
+*.pcm
+slurm-*.out
+*.bak*
+*.venv
+*.h5
+*.hdf5
+*.root
+*.exe
+tmp_bin

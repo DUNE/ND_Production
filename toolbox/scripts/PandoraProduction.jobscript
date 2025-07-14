@@ -1,0 +1,361 @@
+#!/bin/bash
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# 	This script for running the pandaro workflow is based on the data production
+# 	development by Matt Kramer (https://github.com/DUNE/2x2_sim/blob/feature_spine_on_data/run-pandora)
+# 
+#	Starting on July 1, 2025, please use the software deployed on dune cvmfs repository
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+#+++++++++++++++++++++++++++++++++++++++++
+# enter the software setup script
+#+++++++++++++++++++++++++++++++++++++++++
+export JUSTIN_SUBID=`echo "${JUSTIN_JOBSUB_ID}" | sed 's/@/./g'`
+echo -e "Creating the file $PWD/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log" > $PWD/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log
+export envlog="$PWD/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log"
+
+
+#++++++++++++++++++++++++++++++++++++++++++
+# sanity check
+#++++++++++++++++++++++++++++++++++++++++++
+if [[ "${DATA_TIER}" != "reco_pandora" ]]; then
+   echo -e "This script [$(basename $BASH_SOURCE)] submits the Pandora reconstruction jobs. Please see the help menu. The data tier is not defined correctly." 2>&1 | tee -a $envlog
+   exit 0
+else 
+   echo -e "Submitting justin jobs via the [$(basename $BASH_SOURCE)] script." 2>&1 | tee -a $envlog
+fi
+ 
+
+#++++++++++++++++++++++++++++++++++++++++
+# setup environment variables 
+#++++++++++++++++++++++++++++++++++++++++
+export EXTERNAL_RELEASE="v25.3.0-3"
+export CVMFS_TWOBYTWO_DIR="/cvmfs/dune.opensciencegrid.org/dunend/2x2/"
+export CVMFS_WORKING_DIR="${CVMFS_TWOBYTWO_DIR}/releases/${TWOBYTWO_RELEASE}"
+
+
+#+++++++++++++++++++++++++++++++++++++++++
+# get the site information
+#+++++++++++++++++++++++++++++++++++++++++
+echo -e "The node working directory $PWD" 2>&1 | tee -a $envlog
+echo -e "\t\thost is `/bin/hostname`" 2>&1 | tee -a $envlog
+echo -e "\t\tjustin site is $JUSTIN_SITE_NAME" 2>&1 | tee -a $envlog
+echo -e "\t\tthe current directory is $PWD" 2>&1 | tee -a $envlog
+
+
+#++++++++++++++++++++++++++++++++++++
+# setup workspace
+#+++++++++++++++++++++++++++++++++++
+export WORKSPACE=${PWD}
+echo -e "The workspace directory is ${WORKSPACE}" 2>&1 | tee -a $envlog
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Ask justin to retrieve the file
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++
+echo -e "\n\nRetrieving the file from the path [$JUSTIN_PATH]." | tee -a $envlog
+
+did_pfn_rse=`$JUSTIN_PATH/justin-get-file`
+did=`echo $did_pfn_rse | cut -f1 -d' '`
+pfn=`echo $did_pfn_rse | cut -f2 -d' '`
+rse=`echo $did_pfn_rse | cut -f3 -d' '`
+
+if [ "${did_pfn_rse}" == "" ] ; then
+  echo -e "justIN does not get a file. Exiting the jobscript." 2>&1 | tee -a $envlog
+  if [ ${JOBSCRIPT_TEST} -eq 0 ]; then
+     echo -e "Updating jobscript name jobscript_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log\n" 2>&1 | tee -a $envlog
+     mv jobscript.log jobscript_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log
+  fi
+  exit 0
+fi
+
+echo -e "\tThe file data identifier (DID) is [$did]" | tee -a $envlog
+echo -e "\tThe file physical file name (PFN) is [$pfn]" | tee -a $envlog
+echo -e "\tThe file Rucio storage element (RSE) is [$rse]\n" | tee -a $envlog
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Get the input filename
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IFS='/' read -r -a array <<< "$pfn"
+export INPUT_FILE="${array[-1]}"
+echo -e "The input file is ${INPUT_FILE}" 2>&1 | tee -a $envlog
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Copy file to local disk
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+echo -e "Using rucio to download file [$did]" 2>&1 | tee -a $envlog
+(
+   source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+   source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+
+   setup python v3_9_15
+   setup rucio
+   export RUCIO_ACCOUNT=justinreadonly
+
+   rucio download ${did} --dir ${WORKSPACE}
+
+   subdir=`echo $did | cut -f1 -d':'`
+   mv ${WORKSPACE}/${subdir}/* ${WORKSPACE}/
+  
+   if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
+      ls -lha * 2>&1 | tee -a $envlog
+   fi
+)
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# containers to store the parent and child files
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+PARENT_FILES=("${did}")
+CREATED_FILES=()
+
+
+#+++++++++++++++++++++++++++++++++++++++++
+# Run the hdf5 to root workflow
+#+++++++++++++++++++++++++++++++++++++++++
+execute_hdf5_root_workflow() {
+   echo -e "Enter executing the hdf5 to root  workflow for data stream [${DATA_STREAM}] and input file [${INPUT_FILE}]" 2>&1 | tee -a $envlog
+
+   IFS='-' read -a flist <<< "${INPUT_FILE}"
+   TMP_OUTPUT_FILE="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root"
+   ROOT_OUTPUT_FILE="${TMP_OUTPUT_FILE/.FLOW_0.root/.FLOW.root}" 
+
+   export OMP_NUM_THREADS=1
+   export HDF5_USE_FILE_LOCKING=FALSE
+
+   source ${CVMFS_TWOBYTWO_DIR}/miniforge/${EXTERNAL_RELEASE}/miniforge3/etc/profile.d/conda.sh
+   source ${CVMFS_TWOBYTWO_DIR}/miniforge/${EXTERNAL_RELEASE}/conda_envs/conda.envs.sh
+
+   export CONVERT_DATA_WORKFLOW=${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py
+   if [ ! -f "${CONVERT_DATA_WORKFLOW}" ]; then
+      echo -e "\tCannot run the convert raw data to packet data. The file [${CONVERT_DATA_WORKFLOW}] does not exist." 2>&1 | tee -a $envlog
+      exit 0
+   fi   
+
+   isMC=0 
+   isFinal=1
+   isData=1
+   if [[ "${DATA_TYPE}" == "mc" ]]; then 
+      isData=0
+      isMC=1
+   fi
+
+   conda activate ndlar_flow_${TWOBYTWO_RELEASE}
+   if [ -z "${CONDA_DEFAULT_ENV}" ]; then
+       echo -e "The conda virtual environment is not activated [ ndlar_flow_${TWOBYTWO_RELEASE} ]. exiting." 2>&1 | tee -a $envlog
+       exit 0
+   fi
+
+   echo -e "\tThe current conda virtual environment is activated: [${CONDA_DEFAULT_ENV}]" 2>&1 | tee -a $envlog
+   echo -e "\tRunning the pandora workflow in converting hdf5 to root."2>&1 | tee -a $envlog 
+   echo -e "\t[ python3 ${CONVERT_DATA_WORKFLOW} ${INPUT_FILE} ${isData} ${isFinal} ${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root ]" 2>&1 | tee -a $envlog
+   python3 ${CONVERT_DATA_WORKFLOW} ${INPUT_FILE} ${isData} ${isFinal} ${TMP_OUTPUT_FILE}
+
+   echo -e "\nExit the conda environment [${CONDA_DEFAULT_ENV}]" 2>&1 | tee -a $envlog
+   conda deactivate
+   
+   if [ ! -f "${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C" ]; then
+      echo -e "\tCannnot run the final step in the root conversion workflow. The file [${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C] does not exist." 2>&1 | tee -a $envlog
+      exit 0
+   fi
+     
+   (
+      source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+      source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+
+      setup root v6_28_12 -q e26:p3915:prof
+
+      echo -e "\t[ root -l -q ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C+\(isMC,\"${TMP_OUTPUT_FILE}\",\"${ROOT_OUTPUT_FILE}\"\) ]" 2>&1 | tee -a $envlog  
+      root -l -q ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C+\(isMC,\"${TMP_OUTPUT_FILE}\",\"${ROOT_OUTPUT_FILE}\"\)
+   )
+
+   rm ${TMP_OUTPUT_FILE}
+   rm rootToRootConversion*
+   rm AutoDict*
+   
+   export FLOW_OUTPUT_FILE="${ROOT_OUTPUT_FILE}"
+   if [ -f ${FLOW_OUTPUT_FILE} ]; then
+      mv ${FLOW_OUTPUT_FILE} ${OUTFILES_DIR}/
+   else 
+      echo -e "FATAL::The file [${FLOW_OUTPUT_FILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
+      exit 1 
+   fi
+
+   echo -e "Exit executing the hdf5 to root  workflow for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++
+# Run the pandora workflow for ndlar root files
+#+++++++++++++++++++++++++++++++++++++++++++++++++++
+execute_pandora_workflow() {
+   echo -e "Enter executing the pandora workflow for data stream [${DATA_STREAM}]" 2>&1 | tee -a $envlog
+
+   export PANDORA_OUTPUT_DATAFILE="${FLOW_OUTPUT_FILE/FLOW.root/LAR_RECO_ND.root}"
+   echo -e "\tThe pandora output file name is [${PANDORA_OUTPUT_DATAFILE}]"  2>&1 | tee -a $envlog
+
+
+
+   
+   PANDORA_INPUT_FORMAT=SP
+   if [[ "${DATA_TYPE}" == "mc" ]]; then
+      PANDORA_INPUT_FORMAT=SPMC
+   fi
+
+   export PANDORA_GEOM=
+
+
+   inFile=${FLOW_OUTPUT_FILE}
+   ln -sf $inFile LArRecoNDInput.root
+
+
+   ${CVMFS_WORKING_DIR}/pandora/LArRecoND/bin/PandoraInterface -i ${CVMFS_WORKING_DIR}/pandora/LArRecoND/settings/PandoraSettings_LArRecoND_ThreeD.xml \
+       -r AllHitsSliceNu -f ${PANDORA_INPUT_FORMAT} -g ${PANDORA_GEOM} -e ${inFile} -j both -M -N
+
+
+
+   echo -e "Exit executing the pandora workflow  for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
+}
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Run the light+charge association workflow 
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+execute_light_charge_association_workflow() {
+   echo -e "Enter executing the light+charge association workflow for data stream [${DATA_STREAM}]" 2>&1 | tee -a $envlog
+   cd ${NDLAR_FLOW_WORKSPACE}
+
+   export COMBINED_OUTPUT_DATAFILE="${CHARGE_OUTPUT_DATAFILE/.hdf5/.ASSOC.hdf5}"
+
+   echo -e "\tThe charge+light association output file name is [${COMBINED_OUTPUT_DATAFILE}]"  2>&1 | tee -a $envlog
+   echo -e "\tRunning the charge+light association workflow." 2>&1 | tee -a $envlog 
+   echo -e "\t\t[ h5flow -z lzf -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml ]" 2>&1 | tee -a $envlog 
+
+   h5flow -z lzf -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml
+
+   if [ -f ${COMBINED_OUTPUT_DATAFILE} ]; then
+      CREATED_FILES+=("${COMBINED_OUTPUT_DATAFILE}")
+      mv ${COMBINED_OUTPUT_DATAFILE} ${OUTFILES_DIR}/
+      rm ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE}
+   else
+      echo -e "FATAL::The file [${COMBINED_OUTPUT_DATAFILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
+      exit 1
+   fi 
+
+   if [[ "${MAKE_METADATA}" == "True" ]]; then
+      export COMBINED_CONFIG_FILES="charge_light_assoc_${DATA_TYPE}.yaml"
+   fi
+
+   cd ${WORKSPACE}
+   echo -e "Exit executing the light+charge association workflow for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
+}
+
+
+#+++++++++++++++++++++++++++++++++++++++++
+# create an output directory
+#+++++++++++++++++++++++++++++++++++++++++
+cd ${WORKSPACE}
+export OUTFILES_DIR=${WORKSPACE}
+echo -e "The output files are placed in the directory [$OUTFILES_DIR]\n" 2>&1 | tee -a $envlog
+if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
+   ls -lhrt ${OUTFILES_DIR} 2>&1 | tee -a $envlog
+fi
+
+
+#++++++++++++++++++++++++++++++++++++++
+# execute the jobs
+#+++++++++++++++++++++++++++++++++++++
+echo -e "\n\n" 2>&1 | tee -a $envlog
+execute_hdf5_root_workflow
+execute_pandora_workflow
+WWORKFLOW+=("pandora")
+export NAMESPACE="neardet-2x2-lar"
+
+
+#++++++++++++++++++++++++++++++++++++++++
+# create metadata json file
+#++++++++++++++++++++++++++++++++++++++++
+echo -e "Creating the metadata json file(s) for the output data file(s) [${CREATED_FILES}]" 2>&1 | tee -a $envlog
+cd ${OUTFILES_DIR} 
+
+export METADATA_EXTRACT=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/scripts/MetadataExtract.py 
+CREATED_FILES_ARRAY=$( IFS=$','; echo "${CREATED_FILES[*]}" )
+PARENT_FILES_ARRAY=$( IFS=$','; echo "${PARENT_FILES[*]}" ) 
+WORKFLOW_ARRAY=$( IFS=$','; echo "${WORKFLOW[*]}" )
+
+echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} --input=\"${CREATED_FILES_ARRAY[@]}\" --parents=\"${PARENT_FILES_ARRAY[@]}\" --workflow=\"${WORKFLOW_ARRAY[@]}\" --tier=\"${DATA_TIER}\" --namespace=\"${NAMESPACE}\"]" 2>&1 | tee -a $envlog
+(
+   source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+   source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+
+   setup metacat 
+   setup python v3_8_3b 
+   setup h5py v3_1_0d -q e19:p383b:prof 
+
+   python ${METADATA_EXTRACT} --input="${CREATED_FILES_ARRAY[@]}" --parents="${PARENT_FILES_ARRAY[@]}" --workflow="${WORKFLOW_ARRAY[@]}" --tier="pandora-reconstruction" --namespace="${NAMESPACE}"
+)
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# remove h5df files that should not be copied to the Rucio storage element or dCache
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+if [  -f "$INPUT_FILE" ]; then
+   echo -e "\nRemoving the local copy of the input file ${WORKSPACE}/${INPUT_FILE}." 2>&1 | tee -a $envlog
+   rm -f ${WORKSPACE}/${INPUT_FILE}
+fi
+
+
+#+++++++++++++++++++++++++++++++++++++++++++
+# marking input file as processed
+#+++++++++++++++++++++++++++++++++++++++++++
+if [ ${JOBSCRIPT_TEST} -eq 0 ]; then
+   echo -e "Marking the input file(s) [${pfn}] as processed.\n" 2>&1 | tee -a $envlog
+   echo -e "${pfn}" > justin-processed-pfns.txt
+fi
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# checking the contents of the current directory 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++
+echo -e "\n\nThe contents in the ${WORKSPACE} directory:" 2>&1 | tee -a $envlog
+ls -lha * 2>&1 | tee -a $envlog
+echo -e "" | tee -a $envlog
+
+
+#+++++++++++++++++++++++++++++++++++++++++
+# end of script
+#+++++++++++++++++++++++++++++++++++++++++
+date +"%n%a %b %d %T %Z %Y%n" | tee -a $envlog
+echo -e "Exit the jobscript.\n\n" 2>&1 | tee -a $envlog
+
+
+if [ ${JOBSCRIPT_TEST} -eq 0 ]; then
+   echo -e "Updating jobscript name jobscript_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log\n" 2>&1 | tee -a $envlog
+   mv jobscript.log jobscript_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log
+fi
+
+
+######################################
+#
+# END OF RUNNING 2x2 PANDORA JOBS
+#
+######################################
+
+exit 0

@@ -1,0 +1,150 @@
+#! /usr/bin/env bash
+
+export b0=`basename $0`
+sargs="$@"
+
+# defaults
+
+
+DOCOPY=true
+FLUXDIR="flux_files"
+USEDK2NU=false
+FLAVOR="neutrino"
+MAXSIZEMB=2000
+DEFAULT_SEARCH_PATH=/cvmfs/dune.osgstorage.org/pnfs/fnal.gov/usr/dune/persistent/stash/Flux/g4lbne/v3r5p4/QGSP_BERT
+FLXFILE_SEARCH_PATH=${DEFAULT_SEARCH_PATH}
+
+##########################################################################
+#
+##########################################################################
+usage() {
+cat >&2 <<EOF
+
+${b0} [--dk2nu] [ -o flux_files ] -f neutrino  [ --max 2000 ]  
+
+Create a subdirectory <flux_files> and populate it with symlinks to the DUNE flux 
+files from: ${DEFAULT_SEARCH_PATH}
+Limit selection to the the space consideration that the "MaxFluxFileMB" 
+parameter would impose if it were being done internally to nutools/GENIEHelper.
+
+Assumes DUNE release is already setup (and that "ifdh" commands are available)
+ 
+   -h | --help                   print this message and quite
+   -o | --outpath   FLUXDIR      output sub-directory (relative to ".")
+                                 [${FLUXDIR}]
+   -m | --maxmb     MAXSIZEMB    maximum size (in MB) [${MAXSIZEMB}]
+   --dk2nu                       override default 'gsimple' assumption
+   -f | --flavor    neutrino|antineutrino|nu|anu
+                                 [${FLAVOR}]
+   -t | --test                   test mode: do all but actually create links
+   --top                         stem of search path for files
+                                 [${FLXFILE_SEARCH_PATH}]
+
+EOF
+}
+
+process_args() {
+  TEMP=`getopt -n $0 -s bash -a \
+     --longoptions="help output: maxmb: dk2nu flavor: test top:" \
+     -o ho:m:f:t -- "$@" `
+  eval set -- "${TEMP}"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      "--"             ) shift;                 break  ;;
+      -h | --help      ) usage;                 exit 0 ;;
+      -o | --output    ) FLUXDIR=$2;            shift  ;;
+      -m | --maxmb     ) MAXSIZEMB="$2";        shift  ;;
+           --dk2nu     ) USEDK2NU=true                 ;;
+      -f | --flavor    ) FLAVOR="$2";           shift  ;;
+      -t | --test      ) DOCOPY=false;                 ;;
+           --top       ) FLXFILE_SEARCH_PATH="$2"; shift ;;
+      -*               ) echo "unknown flag $opt ($1)"
+                         usage
+                         ;;
+     esac
+     shift  # eat up the arg we just used
+  done
+
+
+}
+
+##########################################################################
+
+process_args "$@"
+
+mkdir -p $FLUXDIR
+
+# construct basic path
+REMOTEFLUXPATH=${FLXFILE_SEARCH_PATH}/${FLAVOR}
+
+if [ "$USEDK2NU" == "false" ]; then
+  REMOTEFLUXPATH=${FLXFILE_SEARCH_PATH}/${FLAVOR}/gsimpleND
+else
+  REMOTEFLUXPATH=${FLXFILE_SEARCH_PATH}/${FLAVOR}/flux
+fi
+
+# master list of files
+export LISTFILELOCAL=flux_${FLAVOR}.list
+echo ${REMOTEFLUXPATH}
+ifdh lss ${REMOTEFLUXPATH} > ${LISTFILELOCAL}
+
+nlines=`wc -l $LISTFILELOCAL | cut -d' ' -f1`
+echo "${b0}: Found $nlines flux files"
+
+export MATCHLIST=${LISTFILELOCAL}.match
+if [ -f $MATCHLIST ]; then rm $MATCHLIST; fi
+touch $MATCHLIST
+
+set -o noglob   # no wildcard expansion
+# egrep needs regex rather than glob, this does need trailing "$"
+#  * ==> .*
+# ranges stay the same
+# trailing $ to match end-of-line so we don't pick up blah.root.log
+# or require white space following end of the pattern
+regexpattern=`echo "*.root(\$|[[:space:]])" | sed -e 's/\*/\.\*/g' -e 's/\?/\./g'`
+egrep "${regexpattern}" $LISTFILELOCAL >> $MATCHLIST
+set +o noglob  # restore expansion
+
+# okay ... have a list of matches ... now to shuffle it up
+export SHUFFLELIST=${MATCHLIST}.shuffle
+if [ -f $SHUFFLELIST ]; then rm $SHUFFLELIST; fi
+touch $SHUFFLELIST
+
+# we'll use the "shuf" command to mix things up
+# this _should_ be installed by default as part of the core tools
+# (like cut and sort, etc...)
+shuf -o $SHUFFLELIST $MATCHLIST
+
+SUMMB=0
+NFILES=0
+let round=1023*1024
+let b2mb=1024*1024
+while read line ; do
+  # quote "$line" to retain \t, 'cut' defaults to \t as separator
+  fname=`echo "$line" | cut -f1`
+  bytes=`echo "$line" | cut -f2`
+  let filemb=(bytes+round)/b2mb
+  let summbtest=SUMMB+filemb
+  # quit if the next would exceed our limit, but require at least one
+  if [ $SUMMB -gt 0 -a $summbtest -gt $MAXSIZEMB ]; then
+    echo "${b0}: file # $NFILES would exceed MAXSIZEMB limit $MAXSIZEMB (now ${SUMMB}, would be ${summbtest})"
+    break;
+  fi
+
+  # Make a symbolic link to the file in cvmfs
+  bname=`basename $fname`
+  if [ "$USEDK2NU" == "true" ]; then
+    bname="dk2nu_${bname}"
+  fi
+  if [ "$DOCOPY" == "true" ]; then
+      ln -s $fname $FLUXDIR/$bname
+  fi
+
+  SUMMB=$summbtest
+  let NFILES=NFILES+1
+
+done < $SHUFFLELIST
+echo "symlinked $NFILES files"
+
+###########################################################################
+
