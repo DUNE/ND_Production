@@ -177,7 +177,6 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
 
   TMap* event_spill_map = new TMap(N_evts_1+N_evts_2);
 
-
   int evt_it_1 = 0;
   int evt_it_2 = 0;
 
