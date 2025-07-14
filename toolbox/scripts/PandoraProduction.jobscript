@@ -189,19 +189,6 @@ execute_hdf5_root_workflow() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Run the pandora workflow for ndlar root files
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -211,60 +198,44 @@ execute_pandora_workflow() {
    export PANDORA_OUTPUT_DATAFILE="${FLOW_OUTPUT_FILE/FLOW.root/LAR_RECO_ND.root}"
    echo -e "\tThe pandora output file name is [${PANDORA_OUTPUT_DATAFILE}]"  2>&1 | tee -a $envlog
 
+   export LD_LIBRARY_PATH=${CVMFS_WORKING_DIR}/pandora/PandoraSDK/lib:${CVMFS_WORKING_DIR}/pandora/LArContent/lib:${CVMFS_WORKING_DIR}/pandora/PandoraMonitoring/lib:${CVMFS_WORKING_DIR}/pandora/LArRecoND/lib:${LD_LIBRARY_PATH}
+   export LD_LIBRARY_PATH=/cvmfs/larsoft.opensciencegrid.org/products/tbb/v2021_7_0/Linux64bit+3.10-2.17-e20/lib:${LD_LIBRARY_PATH}
 
+   source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+   setup cmake v3_22_2
+   setup gcc v9_3_0
+   setup eigen v3_3_5
 
-   
    PANDORA_INPUT_FORMAT=SP
    if [[ "${DATA_TYPE}" == "mc" ]]; then
       PANDORA_INPUT_FORMAT=SPMC
    fi
 
-   export PANDORA_GEOM=
+   export PANDORA_DET_GEOM=""
+   if [[ "${DETECTOR_CONFIG}" == "proto_nd" ]]; then
+      export PANDORA_DET_GEOM=${CVMFS_WORKING_DIR}/pandora/LArRecoND/Merged2x2MINERvA_v4_withRock.root
+   else
+      echo -e "FATAL::The detector [${DETECTOR_CONFIG}] root file does not exist. Cannot continue with executing the Pandora reconstruction.\n" 2>&1 | tee -a $envlog
+      exit 0
+   fi
+
+   export PANDORA_SETTINGS=${CVMFS_WORKING_DIR}/pandora/LArRecoND/settings/PandoraSettings_LArRecoND_ThreeD.xml
+
+   IN_FILE=${FLOW_OUTPUT_FILE}
+   ln -sf ${IN_FILE} LArRecoNDInput.root
+
+   echo -e "\tSetup the build area [ source ${CVMFS_WORKING_DIR}/pandora/LArRecoND/scripts/tags.sh ${CVMFS_WORKING_DIR}/pandora ]" 2>&1 | tee -a $envlog 
+   source ${CVMFS_WORKING_DIR}/pandora/LArRecoND/scripts/tags.sh ${CVMFS_WORKING_DIR}/pandora
+
+   echo -e "\tRun the pandora workflow:" 2>&1 | tee -a $envlog
+   echo -e "\t\t[ ${CVMFS_WORKING_DIR}/pandora/LArRecoND/bin/PandoraInterface -i ${PANDORA_SETTINGS} -r AllHitsSliceNu -f ${PANDORA_INPUT_FORMAT} -g ${PANDORA_DET_GEOM} -e ${IN_FILE} -j both -M -N]" 2>&1 | tee -a $envlog
+   ${CVMFS_WORKING_DIR}/pandora/LArRecoND/bin/PandoraInterface -i ${PANDORA_SETTINGS} -r AllHitsSliceNu -f ${PANDORA_INPUT_FORMAT} -g ${PANDORA_DET_GEOM} -e ${IN_FILE} -j both -M -N
 
 
-   inFile=${FLOW_OUTPUT_FILE}
-   ln -sf $inFile LArRecoNDInput.root
-
-
-   ${CVMFS_WORKING_DIR}/pandora/LArRecoND/bin/PandoraInterface -i ${CVMFS_WORKING_DIR}/pandora/LArRecoND/settings/PandoraSettings_LArRecoND_ThreeD.xml \
-       -r AllHitsSliceNu -f ${PANDORA_INPUT_FORMAT} -g ${PANDORA_GEOM} -e ${inFile} -j both -M -N
 
 
 
    echo -e "Exit executing the pandora workflow  for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
-}
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Run the light+charge association workflow 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-execute_light_charge_association_workflow() {
-   echo -e "Enter executing the light+charge association workflow for data stream [${DATA_STREAM}]" 2>&1 | tee -a $envlog
-   cd ${NDLAR_FLOW_WORKSPACE}
-
-   export COMBINED_OUTPUT_DATAFILE="${CHARGE_OUTPUT_DATAFILE/.hdf5/.ASSOC.hdf5}"
-
-   echo -e "\tThe charge+light association output file name is [${COMBINED_OUTPUT_DATAFILE}]"  2>&1 | tee -a $envlog
-   echo -e "\tRunning the charge+light association workflow." 2>&1 | tee -a $envlog 
-   echo -e "\t\t[ h5flow -z lzf -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml ]" 2>&1 | tee -a $envlog 
-
-   h5flow -z lzf -i ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE} -o ${COMBINED_OUTPUT_DATAFILE} -c yamls/${DETECTOR_CONFIG}_flow/workflows/charge/charge_light_assoc_${DATA_TYPE}.yaml
-
-   if [ -f ${COMBINED_OUTPUT_DATAFILE} ]; then
-      CREATED_FILES+=("${COMBINED_OUTPUT_DATAFILE}")
-      mv ${COMBINED_OUTPUT_DATAFILE} ${OUTFILES_DIR}/
-      rm ${OUTFILES_DIR}/${CHARGE_OUTPUT_DATAFILE}
-   else
-      echo -e "FATAL::The file [${COMBINED_OUTPUT_DATAFILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
-      exit 1
-   fi 
-
-   if [[ "${MAKE_METADATA}" == "True" ]]; then
-      export COMBINED_CONFIG_FILES="charge_light_assoc_${DATA_TYPE}.yaml"
-   fi
-
-   cd ${WORKSPACE}
-   echo -e "Exit executing the light+charge association workflow for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
 }
 
 
