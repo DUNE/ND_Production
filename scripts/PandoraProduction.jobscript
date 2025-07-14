@@ -121,7 +121,9 @@ execute_hdf5_root_workflow() {
    echo -e "Enter executing the hdf5 to root  workflow for data stream [${DATA_STREAM}] and input file [${INPUT_FILE}]" 2>&1 | tee -a $envlog
 
    IFS='-' read -a flist <<< "${INPUT_FILE}"
- 
+   TMP_OUTPUT_FILE="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root"
+   ROOT_OUTPUT_FILE="${TMP_OUTPUT_FILE/.FLOW_0.root/.FLOW.root}" 
+
    export OMP_NUM_THREADS=1
    export HDF5_USE_FILE_LOCKING=FALSE
 
@@ -151,7 +153,7 @@ execute_hdf5_root_workflow() {
    echo -e "\tThe current conda virtual environment is activated: [${CONDA_DEFAULT_ENV}]" 2>&1 | tee -a $envlog
    echo -e "\tRunning the pandora workflow in converting hdf5 to root."2>&1 | tee -a $envlog 
    echo -e "\t[ python3 ${CONVERT_DATA_WORKFLOW} ${INPUT_FILE} ${isData} ${isFinal} ${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root ]" 2>&1 | tee -a $envlog
-   python3 ${CONVERT_DATA_WORKFLOW} ${INPUT_FILE} ${isData} ${isFinal} "${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root"
+   python3 ${CONVERT_DATA_WORKFLOW} ${INPUT_FILE} ${isData} ${isFinal} ${TMP_OUTPUT_FILE}
 
    echo -e "\nExit the conda environment [${CONDA_DEFAULT_ENV}]" 2>&1 | tee -a $envlog
    conda deactivate
@@ -160,10 +162,6 @@ execute_hdf5_root_workflow() {
       echo -e "\tCannnot run the final step in the root conversion workflow. The file [${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C] does not exist." 2>&1 | tee -a $envlog
       exit 0
    fi
-
-   cp ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C .
-   in="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW_0.root"
-   out="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW.root"
      
    (
       source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
@@ -171,15 +169,15 @@ execute_hdf5_root_workflow() {
 
       setup root v6_28_12 -q e26:p3915:prof
 
-      echo -e "\t[ root -l -q rootToRootConversion.C+\(isMC,\"${in}\",\"${out}\"\) ]" 2>&1 | tee -a $envlog  
-      root -l -q rootToRootConversion.C+\(isMC,\"${in}\",\"${out}\"\)
+      echo -e "\t[ root -l -q ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C+\(isMC,\"${TMP_OUTPUT_FILE}\",\"${ROOT_OUTPUT_FILE}\"\) ]" 2>&1 | tee -a $envlog  
+      root -l -q ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C+\(isMC,\"${TMP_OUTPUT_FILE}\",\"${ROOT_OUTPUT_FILE}\"\)
    )
 
-   rm ${in}
+   rm ${TMP_OUTPUT_FILE}
    rm rootToRootConversion*
    rm AutoDict*
    
-   export FLOW_OUTPUT_FILE="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW.root"
+   export FLOW_OUTPUT_FILE="${ROOT_OUTPUT_FILE}"
    if [ -f ${FLOW_OUTPUT_FILE} ]; then
       mv ${FLOW_OUTPUT_FILE} ${OUTFILES_DIR}/
    else 
