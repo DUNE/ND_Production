@@ -260,7 +260,7 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
         // EDepSimEvents and gRooTracker trees are aligned one-to-one, we just
         // trivially set InteractionNumber to be the current entry number.
         // https://github.com/DUNE/2x2_sim/issues/54
-        v->InteractionNumber = evt_it_1 + evt_it_2; 
+        v->InteractionNumber = evt_it_1 + evt_it_2;
       }
 
       // ... trajectories
