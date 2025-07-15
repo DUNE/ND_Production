@@ -37,6 +37,16 @@ export CVMFS_WORKING_DIR="${CVMFS_TWOBYTWO_DIR}/releases/${TWOBYTWO_RELEASE}"
 
 
 #+++++++++++++++++++++++++++++++++++++++++
+# setup software external packages
+#+++++++++++++++++++++++++++++++++++++++++
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup cmake v3_22_2
+setup gcc v9_3_0
+setup eigen v3_3_5
+setup edepsim v3_2_0c -q e20:prof
+
+
+#+++++++++++++++++++++++++++++++++++++++++
 # get the site information
 #+++++++++++++++++++++++++++++++++++++++++
 echo -e "The node working directory $PWD" 2>&1 | tee -a $envlog
@@ -163,14 +173,9 @@ execute_hdf5_root_workflow() {
       exit 0
    fi
      
-   (
-      source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
-      source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-
-      setup root v6_28_12 -q e26:p3915:prof
-
-      echo -e "\t[ root -l -q ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C+\(isMC,\"${TMP_OUTPUT_FILE}\",\"${ROOT_OUTPUT_FILE}\"\) ]" 2>&1 | tee -a $envlog  
-      root -l -q ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C+\(isMC,\"${TMP_OUTPUT_FILE}\",\"${ROOT_OUTPUT_FILE}\"\)
+   (  cp ${CVMFS_WORKING_DIR}/pandora/LArRecoND/ndlarflow/rootToRootConversion.C .
+      echo -e "\t[ root -l -q rootToRootConversion.C+\(isMC,\"${TMP_OUTPUT_FILE}\",\"${ROOT_OUTPUT_FILE}\"\) ]" 2>&1 | tee -a $envlog  
+      root -l -q rootToRootConversion.C+\(isMC,\"${TMP_OUTPUT_FILE}\",\"${ROOT_OUTPUT_FILE}\"\)
    )
 
    rm ${TMP_OUTPUT_FILE}
@@ -201,11 +206,6 @@ execute_pandora_workflow() {
    export LD_LIBRARY_PATH=${CVMFS_WORKING_DIR}/pandora/PandoraSDK/lib:${CVMFS_WORKING_DIR}/pandora/LArContent/lib:${CVMFS_WORKING_DIR}/pandora/PandoraMonitoring/lib:${CVMFS_WORKING_DIR}/pandora/LArRecoND/lib:${LD_LIBRARY_PATH}
    export LD_LIBRARY_PATH=/cvmfs/larsoft.opensciencegrid.org/products/tbb/v2021_7_0/Linux64bit+3.10-2.17-e20/lib:${LD_LIBRARY_PATH}
 
-   source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-   setup cmake v3_22_2
-   setup gcc v9_3_0
-   setup eigen v3_3_5
-
    PANDORA_INPUT_FORMAT=SP
    if [[ "${DATA_TYPE}" == "mc" ]]; then
       PANDORA_INPUT_FORMAT=SPMC
@@ -229,7 +229,7 @@ execute_pandora_workflow() {
 
    echo -e "\tRun the pandora workflow:" 2>&1 | tee -a $envlog
    echo -e "\t\t[ ${CVMFS_WORKING_DIR}/pandora/LArRecoND/bin/PandoraInterface -i ${PANDORA_SETTINGS} -r AllHitsSliceNu -f ${PANDORA_INPUT_FORMAT} -g ${PANDORA_DET_GEOM} -e ${IN_FILE} -j both -M -N]" 2>&1 | tee -a $envlog
-   ${CVMFS_WORKING_DIR}/pandora/LArRecoND/bin/PandoraInterface -i ${PANDORA_SETTINGS} -r AllHitsSliceNu -f ${PANDORA_INPUT_FORMAT} -g ${PANDORA_DET_GEOM} -e ${IN_FILE} -j both -M -N
+   ${CVMFS_WORKING_DIR}/pandora/LArRecoND/bin/PandoraInterface -i ${PANDORA_SETTINGS} -r AllHitsSliceNu -f ${PANDORA_INPUT_FORMAT} -g ${PANDORA_DET_GEOM} -e ${IN_FILE} -j both -M 
 
 
 
