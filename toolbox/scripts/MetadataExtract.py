@@ -23,6 +23,7 @@ DATA_STREAM           = str(os.environ.get('DATA_STREAM'))
 LIGHT_CONFIG_FILES    = str(os.environ.get('LIGHT_CONFIG_FILES'))
 CHARGE_CONFIG_FILES   = str(os.environ.get('CHARGE_CONFIG_FILES'))
 COMBINED_CONFIG_FILES = str(os.environ.get('COMBINED_CONFIG_FILES'))
+PANDORA_CONFIG_FILES  = str(os.environ.get('PANDORA_SETTINGS'))
 JUSTIN_WORKFLOW_ID    = str(os.environ.get('JUSTIN_WORKFLOW_ID'))
 JUSTIN_SITE_NAME      = str(os.environ.get('JUSTIN_SITE_NAME')) 
 
@@ -44,7 +45,9 @@ def _GetGlobalSubrun(metadata) :
     filename = ""
     if RUN_PERIOD == "run1" :
        if DETECTOR_CONFIG == "proto_nd" :
-          filename = "/cvmfs/minerva.opensciencegrid.org/minerva2x2/databases/mx2x2runs_v0.2_beta1.sqlite"
+          filename = "/cvmfs/dune.opensciencegrid.org/dunend/2x2/databases/mx2x2runs_v0.2_beta1.sqlite"
+       elif DETECTOR_CONFIG == "fsd" :
+          filename = "/cvmfs/dune.opensciencegrid.org/dunend/2x2/databases/fsd_run_db.20241216.sqlite"
        else :
           print("The detector configuration [%s] is unknown." % DETECTOR_CONFIG)
           return []
@@ -94,13 +97,11 @@ def _GetGlobalSubrun(metadata) :
 def _GetNumberOfEvents(filename,workflow) :
     nevts = 0
     if filename.find(".hdf5") != -1 :
-       f = h5py.File(filename,'r') 
-       if workflow == "combined" :
-          evts = f['combined/t0/data']
-       else :
-          evts  = f['%s/events/data' % workflow]
-       nevts = evts.len()
-       f.close()
+       with h5py.File(filename,'r') as f :
+            evts = f['combined/t0/data'] if workflow == "combined" else f['%s/events/data' % workflow]
+            nevts = evts.len()
+    elif filename.find(".root") != -1 :
+
     else :
        print( "Unable to determine the number of events for file [%s]." % filename )
        return -1
@@ -114,13 +115,11 @@ def _GetNumberOfEvents(filename,workflow) :
 def _GetFirstEventNumber(filename,workflow) :
     first = -1
     if filename.find(".hdf5") != -1 :
-       f = h5py.File(filename,'r')
-       if workflow == "combined" :
-          evts = f['combined/t0/data']  
-       else :
-          evts  = f['%s/events/data' % workflow]
-       first = evts[0][0].item()
-       f.close()
+       with h5py.File(filename,'r') as f :
+            evts = f['combined/t0/data'] if workflow == "combined" else f['%s/events/data' % workflow]
+            first = evts[0][0].item()
+    elif filename.find(".root") != -1 :
+
     else :
        print( "Unable to determine the number of events for file [%s]." % filename )
        return -1
@@ -133,13 +132,11 @@ def _GetFirstEventNumber(filename,workflow) :
 def _GetLastEventNumber(filename,workflow) :
     last = -1
     if filename.find(".hdf5") != -1 :
-       f = h5py.File(filename,'r') 
-       if workflow == "combined" :
-          evts = f['combined/t0/data']
-       else :
-          evts = f['%s/events/data' % workflow]
-       last = evts[-1][0].item()
-       f.close()
+       with h5py.File(filename,'r') as f : 
+            evts = f['combined/t0/data'] workflow == "combined" else f['%s/events/data' % workflow]
+            last = evts[-1][0].item()
+    elif filename.find(".root") != -1 :
+
     else :
        print( "Unable to determine the number of events for file [%s]." % filename )
        return -1
@@ -150,10 +147,8 @@ def _GetLastEventNumber(filename,workflow) :
 # get the application family
 #+++++++++++++++++++++++++++++
 def _GetApplicationFamily(tier) :
-    if tier == "flow" :
-       return "ndlar_flow"
-    else :
-       return ""
+    det = "2x2" if DETECTOR_CONFIG == "proto_nd" else "fsd"
+    return "ndlar_%s_%s" % (det,tier)
 
 
 #+++++++++++++++++++++++++++++++++
@@ -166,6 +161,8 @@ def _GetConfigFiles(workflow) :
        return CHARGE_CONFIG_FILES
     elif workflow == "combined" :
        return COMBINED_CONFIG_FILES
+    elif workflow == "pandora" :
+       return PANDORA_CONFIG_FILES
     else :
        return ""
 

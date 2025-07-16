@@ -60,8 +60,10 @@ def _GetLightFiles(lightInfoCont) :
 def _GetLightMetadata(run,subrun) :
 
     filename = ""
-    if run >= 50005 and run <= 50018 :
-       filename = "/cvmfs/minerva.opensciencegrid.org/minerva2x2/databases/mx2x2runs_v0.2_beta1.sqlite"
+    if run >= 20003 and run <= 20180 :
+       filename = "/cvmfs/dune.opensciencegrid.org/dunend/2x2/databases/fsd_run_db.20241216.sqlite"
+    elif run >= 50005 and run <= 50018 :
+       filename = "/cvmfs/dune.opensciencegrid.org/dunend/2x2/databases/mx2x2runs_v0.2_beta1.sqlite"
     else :
        print("The run period is not implemented.")
        return []

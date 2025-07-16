@@ -2,7 +2,7 @@
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# 	This script for running the pandaro workflow is based on the data production
+# 	This script for running the pandora workflow is based on the data production
 # 	development by Matt Kramer (https://github.com/DUNE/2x2_sim/blob/feature_spine_on_data/run-pandora)
 # 
 #	Starting on July 1, 2025, please use the software deployed on dune cvmfs repository
@@ -43,6 +43,7 @@ source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup cmake v3_22_2
 setup gcc v9_3_0
 setup eigen v3_3_5
+setup tbb v2021_7_0 -q e20
 setup edepsim v3_2_0c -q e20:prof
 
 
@@ -190,6 +191,7 @@ execute_hdf5_root_workflow() {
       exit 1 
    fi
 
+   cd ${WORKSPACE}
    echo -e "Exit executing the hdf5 to root  workflow for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
 }
 
@@ -204,7 +206,6 @@ execute_pandora_workflow() {
    echo -e "\tThe pandora output file name is [${PANDORA_OUTPUT_DATAFILE}]"  2>&1 | tee -a $envlog
 
    export LD_LIBRARY_PATH=${CVMFS_WORKING_DIR}/pandora/PandoraSDK/lib:${CVMFS_WORKING_DIR}/pandora/LArContent/lib:${CVMFS_WORKING_DIR}/pandora/PandoraMonitoring/lib:${CVMFS_WORKING_DIR}/pandora/LArRecoND/lib:${LD_LIBRARY_PATH}
-   export LD_LIBRARY_PATH=/cvmfs/larsoft.opensciencegrid.org/products/tbb/v2021_7_0/Linux64bit+3.10-2.17-e20/lib:${LD_LIBRARY_PATH}
 
    PANDORA_INPUT_FORMAT=SP
    if [[ "${DATA_TYPE}" == "mc" ]]; then
@@ -222,7 +223,7 @@ execute_pandora_workflow() {
    export PANDORA_SETTINGS=${CVMFS_WORKING_DIR}/pandora/LArRecoND/settings/PandoraSettings_LArRecoND_ThreeD.xml
 
    IN_FILE=${FLOW_OUTPUT_FILE}
-   ln -sf ${IN_FILE} LArRecoNDInput.root
+   #ln -sf ${IN_FILE} LArRecoNDInput.root
 
    echo -e "\tSetup the build area [ source ${CVMFS_WORKING_DIR}/pandora/LArRecoND/scripts/tags.sh ${CVMFS_WORKING_DIR}/pandora ]" 2>&1 | tee -a $envlog 
    source ${CVMFS_WORKING_DIR}/pandora/LArRecoND/scripts/tags.sh ${CVMFS_WORKING_DIR}/pandora
@@ -231,11 +232,26 @@ execute_pandora_workflow() {
    echo -e "\t\t[ ${CVMFS_WORKING_DIR}/pandora/LArRecoND/bin/PandoraInterface -i ${PANDORA_SETTINGS} -r AllHitsSliceNu -f ${PANDORA_INPUT_FORMAT} -g ${PANDORA_DET_GEOM} -e ${IN_FILE} -j both -M -N]" 2>&1 | tee -a $envlog
    ${CVMFS_WORKING_DIR}/pandora/LArRecoND/bin/PandoraInterface -i ${PANDORA_SETTINGS} -r AllHitsSliceNu -f ${PANDORA_INPUT_FORMAT} -g ${PANDORA_DET_GEOM} -e ${IN_FILE} -j both -M 
 
+   if [ -f "LArRecoND.root" ]; then
+      mv LArRecoND.root ${PANDORA_OUTPUT_DATAFILE}
+      mv ${PANDORA_OUTFILE} ${OUTFILES_DIR}/
+   else 
+      echo -e "FATAL::The file [${PANDORA_OUTPUT_DATAFILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
+      exit 1
+   fi
+   
+   if [ -f MCHierarchy.root ]; then
+      rm MCHierarchy.root
+   fi
 
+   if [ -f EventHierarchy.root ]; then
+      rm EventHierarchy.root
+   fi 
 
+   CREATED_FILES+=("${PANDORA_OUTPUT_DATAFILE}")
 
-
-   echo -e "Exit executing the pandora workflow  for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
+   cd ${WORKSPACE}
+   echo -e "Exit executing the pandora workflow for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
 }
 
 
@@ -266,7 +282,7 @@ export NAMESPACE="neardet-2x2-lar"
 echo -e "Creating the metadata json file(s) for the output data file(s) [${CREATED_FILES}]" 2>&1 | tee -a $envlog
 cd ${OUTFILES_DIR} 
 
-export METADATA_EXTRACT=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/scripts/MetadataExtract.py 
+export METADATA_EXTRACT=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MetadataExtract.py 
 CREATED_FILES_ARRAY=$( IFS=$','; echo "${CREATED_FILES[*]}" )
 PARENT_FILES_ARRAY=$( IFS=$','; echo "${PARENT_FILES[*]}" ) 
 WORKFLOW_ARRAY=$( IFS=$','; echo "${WORKFLOW[*]}" )
@@ -276,9 +292,9 @@ echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} --input=\"${CREATED_
    source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
    source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 
-   setup metacat 
+   setup metacat
    setup python v3_8_3b 
-   setup h5py v3_1_0d -q e19:p383b:prof 
+   setup h5py v3_1_0d -q e19:p383b:prof  
 
    python ${METADATA_EXTRACT} --input="${CREATED_FILES_ARRAY[@]}" --parents="${PARENT_FILES_ARRAY[@]}" --workflow="${WORKFLOW_ARRAY[@]}" --tier="pandora-reconstruction" --namespace="${NAMESPACE}"
 )
