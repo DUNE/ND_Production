@@ -152,7 +152,7 @@ def _GetFirstEventNumber(filename,workflow) :
 # get the first event number 
 #++++++++++++++++++++++++++++
 def _GetLastEventNumber(filename,workflow) :
-    name = "GetLastEvent:
+    name = "GetLastEvent"
     return _EventHelper(name,filename,workflow)
 
 
