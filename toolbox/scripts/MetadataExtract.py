@@ -6,6 +6,8 @@ import datetime as dt
 import sqlite3
 import h5py
 
+import ROOT # change to uproot with a ups or spack product is available
+
 from argparse import ArgumentParser as ap
 from metacat.webapi import MetaCatClient
 
@@ -20,6 +22,7 @@ SOFTWARE   = str(os.environ.get('SOFTWARE'))
 RUN_PERIOD = str(os.environ.get('RUN_PERIOD'))
 DETECTOR_CONFIG       = str(os.environ.get('DETECTOR_CONFIG'))
 DATA_STREAM           = str(os.environ.get('DATA_STREAM'))
+DATA_TIER             = str(os.environ.get('DATA_TIER'))
 LIGHT_CONFIG_FILES    = str(os.environ.get('LIGHT_CONFIG_FILES'))
 CHARGE_CONFIG_FILES   = str(os.environ.get('CHARGE_CONFIG_FILES'))
 COMBINED_CONFIG_FILES = str(os.environ.get('COMBINED_CONFIG_FILES'))
@@ -92,63 +95,73 @@ def _GetGlobalSubrun(metadata) :
     
 
 #++++++++++++++++++++++++++++
-# get the number of events
-#++++++++++++++++++++++++++++
-def _GetNumberOfEvents(filename,workflow) :
-    nevts = 0
+# event helper function
+#+++++++++++++++++++++++++++
+def _EventHelper(name,filename,workflow) :
+    evt = -1
+
     if filename.find(".hdf5") != -1 :
        with h5py.File(filename,'r') as f :
             evts = f['combined/t0/data'] if workflow == "combined" else f['%s/events/data' % workflow]
-            nevts = evts.len()
-    elif filename.find(".root") != -1 :
 
-    else :
-       print( "Unable to determine the number of events for file [%s]." % filename )
-       return -1
-    
-    return nevts
+            if name == "GetFirstEvent" :
+               evt = evts[0][0].item()
+            elif name == "GetLastEvent" :
+               evt = evts[-1][0].item()
+            elif name == "GetEvents" :
+               evt = evts.len()
+
+    elif filename.find(".root") != -1 :
+       file = ROOT.TFile.Open(filename, "READ")
+       if not file or file.IsZombie() :
+          return nevts
+
+       tree_name = "LArRecoND" if DATA_STREAM == "pandora" else "None"
+       tree  = file.Get(tree_name)
+
+       if name == "GetFirstEvent" :
+          tree.GetEntry(0)
+          evt = tree.event
+       elif name == "GetLastEvent" :
+          n = tree.GetEntries() - 1
+          tree.GetEntry(n)
+          evt = tree.event
+       elif name == "GetEvents" :
+          evt = tree.GetEntries()
+
+    return evt
+
+   
+#++++++++++++++++++++++++++++
+# get the number of events
+#++++++++++++++++++++++++++++
+def _GetNumberOfEvents(filename,workflow) :
+    name = "GetEvents"
+    return _EventHelper(name,filename,workflow)
 
 
 #++++++++++++++++++++++++++++
 # get the first event number 
 #++++++++++++++++++++++++++++
 def _GetFirstEventNumber(filename,workflow) :
-    first = -1
-    if filename.find(".hdf5") != -1 :
-       with h5py.File(filename,'r') as f :
-            evts = f['combined/t0/data'] if workflow == "combined" else f['%s/events/data' % workflow]
-            first = evts[0][0].item()
-    elif filename.find(".root") != -1 :
-
-    else :
-       print( "Unable to determine the number of events for file [%s]." % filename )
-       return -1
-    return first
+    name = "GetFirstEvent"
+    return _EventHelper(name,filename,workflow)
 
 
 #++++++++++++++++++++++++++++
 # get the first event number 
 #++++++++++++++++++++++++++++
 def _GetLastEventNumber(filename,workflow) :
-    last = -1
-    if filename.find(".hdf5") != -1 :
-       with h5py.File(filename,'r') as f : 
-            evts = f['combined/t0/data'] workflow == "combined" else f['%s/events/data' % workflow]
-            last = evts[-1][0].item()
-    elif filename.find(".root") != -1 :
-
-    else :
-       print( "Unable to determine the number of events for file [%s]." % filename )
-       return -1
-    return last
+    name = "GetLastEvent:
+    return _EventHelper(name,filename,workflow)
 
 
 #+++++++++++++++++++++++++++++
 # get the application family
 #+++++++++++++++++++++++++++++
-def _GetApplicationFamily(tier) :
+def _GetApplicationFamily() :
     det = "2x2" if DETECTOR_CONFIG == "proto_nd" else "fsd"
-    return "ndlar_%s_%s" % (det,tier)
+    return "ndlar_%s_%s" % (det,DATA_TIER)
 
 
 #+++++++++++++++++++++++++++++++++
@@ -223,7 +236,7 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     return_md['dune.config_file']         = _GetConfigFiles(workflow)
     return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW_ID, 'site_name' : JUSTIN_SITE_NAME }
     return_md['dune.output_status']       = "good"
-    return_md['core.application.family']  = _GetApplicationFamily(tier)
+    return_md['core.application.family']  = _GetApplicationFamily()
     return_md['core.application.name']    = tier
     return_md['core.application.version'] = SOFTWARE
     return_md['retention.status']         = 'active'
