@@ -30,7 +30,6 @@ def _HelpMenu() :
     parser.add_option("--tier", dest="tier", type="string", default="flow", help="the data tier for processing (flow, reco) [default: %default]")
     parser.add_option("--stream", dest="stream", type="string", default="light", help="the data stream (light, charge, combined, pandora) [default: %default]")
     parser.add_option("--detector", dest="detector", type="string", default="proto_nd", help="the detector configuration (proto_nd, fsd, ndlar) [default: %default]")
-    parser.add_option("--metadata", dest="metadata", default=False, action="store_true", help="create json file with metadata")
     parser.add_option("--data", dest="data", default=False, action="store_true", help="processing real data")
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
     parser.add_option("--run", dest="run", type="string", default="run1", help="The run period.")
@@ -340,12 +339,6 @@ if __name__ == '__main__' :
    cmdlist.append( "--env JOBSCRIPT_TEST=%d" % run_tests )
    cmdlist.append( "--env USER=%s" % USER )
    cmdlist.append( "--env RUN_PERIOD=%s" % opts["run"] )
-
-   rucio_user = "justinreadonly" #if not opts["testJobscript"] else USER
-   cmdlist.append( "--env RUCIO_USER=%s" % rucio_user )
-
-   file_metadata = "True" if opts["metadata"] else "False"
-   cmdlist.append( "--env MAKE_METADATA=%s" % file_metadata)
 
    if opts["startPosition"] == None :
       cmdlist.append( "--env START_POSITION=None" )
