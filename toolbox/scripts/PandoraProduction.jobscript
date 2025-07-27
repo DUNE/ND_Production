@@ -20,7 +20,7 @@ export envlog="$PWD/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}
 #++++++++++++++++++++++++++++++++++++++++++
 # sanity check
 #++++++++++++++++++++++++++++++++++++++++++
-if [[ "${DATA_TIER}" != "reco_pandora" ]]; then
+if [[ "${DATA_TIER}" != "reco" ]]; then
    echo -e "This script [$(basename $BASH_SOURCE)] submits the Pandora reconstruction jobs. Please see the help menu. The data tier is not defined correctly." 2>&1 | tee -a $envlog
    exit 0
 else 
