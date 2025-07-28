@@ -17,16 +17,26 @@ export envlog="$PWD/env_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}
 # setup environment variables 
 #++++++++++++++++++++++++++++++++++++++++
 export EXTERNAL_RELEASE="v25.3.0-3"
+
 export CVMFS_TWOBYTWO_DIR="/cvmfs/dune.opensciencegrid.org/dunend/2x2/"
 export CVMFS_WORKING_DIR="${CVMFS_TWOBYTWO_DIR}/releases/${TWOBYTWO_RELEASE}"
+
 export HDF5_USE_FILE_LOCKING=FALSE
+export OMP_NUM_THREADS=1
 
 export EDEPSIM_VERSION="v3_2_0c"
 export EDEPSIM_QUALIFIER="e20:prof"
 
-export PYTHON_VERSION="v3_9_2"
+export PYTHON_VERSION="v3_9_15"
 export H5PY_VERSION="v3_1_0d"
 export H5PY_QUALIFIER="e20:p392:prof"
+
+export GCC_VERSION="v9_3_0"
+export TBB_VERSION="v2021_7_0"
+export TBB_QUALIFIER="e20"
+
+export ROOT_VERSION="v6_26_06b"
+export ROOT_QUALIFIER="e20:p3913:prof"
 
 
 
@@ -86,7 +96,7 @@ echo -e "Using rucio to download file [$did]" 2>&1 | tee -a $envlog
    source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
    source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 
-   setup python v3_9_15
+   setup python ${PYTHON_VERSION}
    setup rucio
    export RUCIO_ACCOUNT=justinreadonly
 
@@ -94,54 +104,35 @@ echo -e "Using rucio to download file [$did]" 2>&1 | tee -a $envlog
 
    subdir=`echo $did | cut -f1 -d':'`
    mv ${WORKSPACE}/${subdir}/* ${WORKSPACE}/
-  
-   if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
-      ls -lha * 2>&1 | tee -a $envlog
-   fi
 )
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# containers to store the parent and child files
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-PARENT_FILES=("${did}")
-CREATED_FILES=()
-
-
-#+++++++++++++++++++++++++++++++++++++++++
-# create an output directory
-#+++++++++++++++++++++++++++++++++++++++++
-cd ${WORKSPACE}
-export OUTFILES_DIR=${WORKSPACE}
-echo -e "The output files are placed in the directory [$OUTFILES_DIR]\n" 2>&1 | tee -a $envlog
-if [ ${DEBUG_SUBMISSION_SCRIPT} -eq 1 ]; then
-   ls -lhrt ${OUTFILES_DIR} 2>&1 | tee -a $envlog
-fi
 
 
 
 #++++++++++++++++++++++++++++++++++++++++
 # create metadata json file
 #++++++++++++++++++++++++++++++++++++++++
-echo -e "Creating the metadata json file(s) for the output data file(s) [${CREATED_FILES}]" 2>&1 | tee -a $envlog
-cd ${OUTFILES_DIR} 
+create_metadata_file()  
+{
+    echo -e "Creating the metadata json file(s) for the output data file(s) [${CREATED_FILES}]" 2>&1 | tee -a $envlog
 
-export METADATA_EXTRACT=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/scripts/MetadataExtract.py 
-CREATED_FILES_ARRAY=$( IFS=$','; echo "${CREATED_FILES[*]}" )
-PARENT_FILES_ARRAY=$( IFS=$','; echo "${PARENT_FILES[*]}" ) 
-WORKFLOW_ARRAY=$( IFS=$','; echo "${WORKFLOW[*]}" )
+    export METADATA_EXTRACT=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MetadataExtract.py 
 
-echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} --input=\"${CREATED_FILES_ARRAY[@]}\" --parents=\"${PARENT_FILES_ARRAY[@]}\" --workflow=\"${WORKFLOW_ARRAY[@]}\" --tier=\"${DATA_TIER}\" --namespace=\"${NAMESPACE}\"]" 2>&1 | tee -a $envlog
-(
-     source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
-     source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+    CREATED_FILES_ARRAY=$( IFS=$','; echo "${CREATED_FILES[*]}" )
+    PARENT_FILES_ARRAY=$( IFS=$','; echo "${PARENT_FILES[*]}" ) 
+    WORKFLOW_ARRAY=$( IFS=$','; echo "${WORKFLOW[*]}" )
 
-     setup metacat 
-     setup python v3_9_2 
-     setup h5py v3_1_0d -q e20:p392:prof
+    echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} --input=\"${CREATED_FILES_ARRAY[@]}\" --parents=\"${PARENT_FILES_ARRAY[@]}\" --workflow=\"${WORKFLOW_ARRAY[@]}\" --tier=\"${APPLICATION_DATA_TIER}\" --namespace=\"${NAMESPACE}\"]" 2>&1 | tee -a $envlog
+    (
+       source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+       source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 
-     python ${METADATA_EXTRACT} --input="${CREATED_FILES_ARRAY[@]}" --parents="${PARENT_FILES_ARRAY[@]}" --workflow="${WORKFLOW_ARRAY[@]}" --tier="flow-calibration" --namespace="${NAMESPACE}"
-)
+       setup metacat
+       setup python v3_8_3b
+       setup h5py v3_1_0d -q e20:p383b:prof
+       setup root v6_22_08b -q e20:p383b:prof
 
+       python ${METADATA_EXTRACT} --input="${CREATED_FILES_ARRAY[@]}" --parents="${PARENT_FILES_ARRAY[@]}" --workflow="${WORKFLOW_ARRAY[@]}" --tier="${APPLICATION_DATA_TIER}" --namespace="${NAMESPACE}"
+    )
+}
 
 

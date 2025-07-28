@@ -34,7 +34,6 @@ def _HelpMenu() :
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
     parser.add_option("--run", dest="run", type="string", default="run1", help="The run period.")
     parser.add_option("--rse", dest="rse", default=False, action="store_true", help="Outputs go to a rucio storage element")
-    parser.add_option("--production", dest="production", default=False, action="store_true", help="using production (shifter) role")
 
     # h5flow parameters
     parser.add_option("--start_position", dest="startPosition", type=int, default=None, help="start position within source dset (for partial file processing)")
@@ -350,7 +349,7 @@ if __name__ == '__main__' :
       cmdlist.append( f"--env END_POSITION=%d" % opts["endPosition"] )
 
    # set nersc parameters
-   if opts["production"] and opts["nersc"] :
+   if opts["nersc"] :
       if not opts["gpu"] :
          cmdlist.append( "--site US_NERSC-CPU" )
       else :

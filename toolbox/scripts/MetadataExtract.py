@@ -117,7 +117,7 @@ def _EventHelper(name,filename,workflow) :
           return nevts
 
        tree_name = "LArRecoND" if DATA_STREAM == "pandora" else "None"
-       tree  = file.Get(tree_name)
+       tree      = file.Get(tree_name)
 
        if name == "GetFirstEvent" :
           tree.GetEntry(0)
@@ -190,7 +190,7 @@ def _GetParentFiles(workflow,metadata) :
            if data['core.run_type'].find("light")  != -1 : parents.append(key)
         elif workflow.find("charge") != -1 :
            if data['core.run_type'].find("charge") != -1 :  parents.append(key)
-        elif workflow.find("combined") != -1 :  
+        elif workflow.find("combined") != -1 or workflow.find("pandora") != -1 :  
            parents.append(key)
         else :
            sys.exit( "The workflow [%s] is not implemented" % workflow )
