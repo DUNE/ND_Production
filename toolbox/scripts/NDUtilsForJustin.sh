@@ -136,3 +136,32 @@ create_metadata_file()
 }
 
 
+#+++++++++++++++++++++++++++++++++++++++
+# End of justin job running
+#+++++++++++++++++++++++++++++++++++++++
+justin_end_of_job_commands()
+{
+   if [  -f "$INPUT_FILE" ]; then
+      echo -e "\nRemoving the local copy of the input file ${WORKSPACE}/${INPUT_FILE}." 2>&1 | tee -a $envlog
+      rm -f ${WORKSPACE}/${INPUT_FILE}
+   fi
+
+   if [ ${JOBSCRIPT_TEST} -eq 0 ]; then
+      echo -e "Marking the input file(s) [${pfn}] as processed.\n" 2>&1 | tee -a $envlog
+      echo -e "${pfn}" > justin-processed-pfns.txt
+   fi
+
+   echo -e "\n\nThe contents in the ${WORKSPACE} directory:" 2>&1 | tee -a $envlog
+   ls -lha * 2>&1 | tee -a $envlog
+   echo -e "" | tee -a $envlog
+
+   date +"%n%a %b %d %T %Z %Y%n" | tee -a $envlog
+   echo -e "Exit the jobscript.\n\n" 2>&1 | tee -a $envlog
+
+   if [ ${JOBSCRIPT_TEST} -eq 0 ]; then
+      echo -e "Updating jobscript name jobscript_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log\n" 2>&1 | tee -a $envlog
+      mv jobscript.log jobscript_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log
+   fi
+
+}
+

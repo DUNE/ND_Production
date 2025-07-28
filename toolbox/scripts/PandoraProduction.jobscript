@@ -192,43 +192,11 @@ export APPLICATION_DATA_TIER="pandora-reconstruction"
 create_metadata_file
 
 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# remove h5df files that should not be copied to the Rucio storage element or dCache
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-if [  -f "$INPUT_FILE" ]; then
-   echo -e "\nRemoving the local copy of the input file ${WORKSPACE}/${INPUT_FILE}." 2>&1 | tee -a $envlog
-   rm -f ${WORKSPACE}/${INPUT_FILE}
-fi
+#+++++++++++++++++++++++++++++++++++++++
+# End of justin job running
+#+++++++++++++++++++++++++++++++++++++++
+justin_end_of_job_commands
 
-
-#+++++++++++++++++++++++++++++++++++++++++++
-# marking input file as processed
-#+++++++++++++++++++++++++++++++++++++++++++
-if [ ${JOBSCRIPT_TEST} -eq 0 ]; then
-   echo -e "Marking the input file(s) [${pfn}] as processed.\n" 2>&1 | tee -a $envlog
-   echo -e "${pfn}" > justin-processed-pfns.txt
-fi
-
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# checking the contents of the current directory 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo -e "\n\nThe contents in the ${WORKSPACE} directory:" 2>&1 | tee -a $envlog
-ls -lha * 2>&1 | tee -a $envlog
-echo -e "" | tee -a $envlog
-
-
-#+++++++++++++++++++++++++++++++++++++++++
-# end of script
-#+++++++++++++++++++++++++++++++++++++++++
-date +"%n%a %b %d %T %Z %Y%n" | tee -a $envlog
-echo -e "Exit the jobscript.\n\n" 2>&1 | tee -a $envlog
-
-
-if [ ${JOBSCRIPT_TEST} -eq 0 ]; then
-   echo -e "Updating jobscript name jobscript_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log\n" 2>&1 | tee -a $envlog
-   mv jobscript.log jobscript_${JUSTIN_WORKFLOW_ID}.${JUSTIN_STAGE_ID}.${JUSTIN_SUBID}.log
-fi
 
 
 ######################################
