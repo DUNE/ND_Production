@@ -22,16 +22,14 @@ fi
 
 outFile=$tmpOutDir/${outName}.EDEPSIM.hdf5
 
+ARGS="--input_file $inFile --output_file $outFile"
+
 if [[ "$ND_PRODUCTION_KEEP_ALL_DETS" == "1" ]]; then
-    keepAllDets=--keep_all_dets
-else
-    keepAllDets=""
+    ARGS="$ARGS --keep_all_dets"
 fi
 
 if [[ "$ND_PRODUCTION_COSMIC_SIM" == "1" ]]; then
-    isCosmicSim=--is_cosmic_sim
-else
-    isCosmicSim=""
+    ARGS="$ARGS --is_cosmic_sim"
 fi
 
 # After going from ROOT 6.14.06 to 6.28.06, apparently we need to point CPATH to
@@ -39,7 +37,7 @@ fi
 # the container already.)
 export CPATH=$EDEPSIM/include/EDepSim:$CPATH
 
-run ./convert_edepsim_roottoh5.py --input_file "$inFile" --output_file "$outFile" "$keepAllDets" "$isCosmicSim"
+run ./convert_edepsim_roottoh5.py $ARGS
 
 h5OutDir=$outDir/EDEPSIM_H5/$subDir
 mkdir -p "$h5OutDir"
