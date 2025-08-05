@@ -18,7 +18,7 @@ from collections import OrderedDict
 #++++++++++++++++++++++++++++
 PWD  = str(os.environ.get('PWD'))
 USER = str(os.environ.get('USER'))
-SOFTWARE   = str(os.environ.get('SOFTWARE'))
+SOFTWARE   = str(os.environ.get('TWOBYTWO_RELEASE'))
 RUN_PERIOD = str(os.environ.get('RUN_PERIOD'))
 DETECTOR_CONFIG       = str(os.environ.get('DETECTOR_CONFIG'))
 DATA_STREAM           = str(os.environ.get('DATA_STREAM'))
@@ -116,8 +116,11 @@ def _EventHelper(name,filename,workflow) :
        if not file or file.IsZombie() :
           return nevts
 
-       tree_name = "LArRecoND" if DATA_STREAM == "pandora" else "None"
-       tree      = file.Get(tree_name)
+       tree_name = "None"
+       if DATA_TIER == "reco_pandora" :
+          tree_name = "LArRecoND"
+
+       tree = file.Get(tree_name)
 
        if name == "GetFirstEvent" :
           tree.GetEntry(0)
@@ -160,8 +163,16 @@ def _GetLastEventNumber(filename,workflow) :
 # get the application family
 #+++++++++++++++++++++++++++++
 def _GetApplicationFamily() :
-    det = "2x2" if DETECTOR_CONFIG == "proto_nd" else "fsd"
-    return "ndlar_%s_%s" % (det,DATA_TIER)
+    if DATA_TIER == "flow" :
+       return "python_framework"
+    elif DATA_TIER == "reco_pandora" :
+       return "pandora"
+    elif DATA_TIER == "reco_spine" :
+        return "larcv"
+    elif DATA_TIER == "caf" :
+        return "nd_caf_framwork"
+    else :
+        return "None"
 
 
 #+++++++++++++++++++++++++++++++++
@@ -199,6 +210,38 @@ def _GetParentFiles(workflow,metadata) :
 
 
 #+++++++++++++++++++++++++++++++
+# get the data stream
+#+++++++++++++++++++++++++++++++
+def _GetDataStream() :
+    if DETECTOR_CONFIG == "proto_nd" :
+       return "numibeam"
+    elif DETECTOR_CONFIG == "fsd" :
+       return metadata_blocks[0].get('core.data_stream')
+
+    return "None"
+
+
+#+++++++++++++++++++++++++++++++
+# get the run type
+#+++++++++++++++++++++++++++++++
+def _GetRunType() :
+   
+    word = "-"
+    if DETECTOR_CONFIG == "proto_nd" :
+       word = "-2x2-"
+    elif DETECTOR_CONFIG == "fsd" :
+       word = "-fsd-"
+
+    if DATA_STREAM == "combined" :
+       return 'neardet%slar-charge-light' % word
+    elif DATA_STREAM == "calibrated" : 
+       return 'neardet%slar-reco' % word
+
+    return "None"
+
+
+
+#+++++++++++++++++++++++++++++++
 # calculate the file checksum
 #+++++++++++++++++++++++++++++++
 def _GetChecksum(filename) :
@@ -219,8 +262,7 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     
     return_md = {}
     return_md['core.data_tier']   = tier
-    return_md['core.data_stream'] = metadata_blocks[0].get('core.data_stream')
-    return_md['core.start_time']  = -1 if not os.path.exists(filename) else int(os.path.getctime(filename))
+    return_md['core.data_stream'] = _GetDataStream()
     return_md['core.end_time']    = -1 if not os.path.exists(filename) else int(os.path.getmtime(filename))
     return_md['core.file_format'] = filename.split(".")[-1]
     return_md['core.file_type']   = metadata_blocks[0].get('core.file_type')
@@ -236,6 +278,7 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     return_md['dune.config_file']         = _GetConfigFiles(workflow)
     return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW_ID, 'site_name' : JUSTIN_SITE_NAME }
     return_md['dune.output_status']       = "good"
+    return_md['core.run_type']            = _GetRunType()
     return_md['core.application.family']  = _GetApplicationFamily()
     return_md['core.application.name']    = tier
     return_md['core.application.version'] = SOFTWARE
@@ -254,20 +297,13 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     subruns     = list(OrderedDict.fromkeys(tmp))
     return_md['core.runs_subruns'] = subruns
 
-    # get the run_type
-    run_types = list(set([m.get('core.run_type') for m in metadata_blocks]))
-    if len(run_types) == 0 :
-       return_md['core.run_type'] = run_types[0]
-    else :
-       if DATA_STREAM == "combined" and "DETECTOR_CONFIG" == "proto_nd" :
-          return_md['core.run_type'] = 'neardet-2x2-lar-charge-light' 
-
     # get the global subrun number
     if metadata_blocks[0].get('core.data_tier') == "raw" : 
        return_md['dune.mx2x2_global_subrun_numbers'] = _GetGlobalSubrun(metadata_blocks)
     else :
        return_md['dune.mx2x2_global_subrun_numbers'] = metadata_blocks[0].get('dune.mx2x2_global_subrun_numbers')
 
+    # return the metadata block
     return return_md
 
 
