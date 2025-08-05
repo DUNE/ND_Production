@@ -27,9 +27,18 @@ def _HelpMenu() :
     parser.add_option("-j", "--jobscript", dest="jobscript", type="string", default="NDLarFlowProduction.jobscript", help="name of the job processing script [default: %default]")
     parser.add_option("--outdir", dest="outdir", type="string", default="/pnfs/dune/scratch/users/%s/ProductionDataFor2x2"%USER, help="name of the top output directory [default: %default]")
     parser.add_option("--debug", dest="debug", default=False, action="store_true", help="run in debug mode")
-    parser.add_option("--tier", dest="tier", type="string", default="flow", help="the data tier for processing (flow, reco) [default: %default]")
-    parser.add_option("--stream", dest="stream", type="string", default="light", help="the data stream (light, charge, combined, pandora) [default: %default]")
+    parser.add_option("--tier", dest="tier", type="string", default="flow", help="the data tier for processing (flow, reco_pandora, reco_spine, caf) [default: %default]")
+    parser.add_option("--stream", dest="stream", type="string", default="", help="the input data stream (light, charge, combined, calibrated, reco) [default: %default]")
     parser.add_option("--detector", dest="detector", type="string", default="proto_nd", help="the detector configuration (proto_nd, fsd, ndlar) [default: %default]")
+
+    parser.add_option("--run-caf-pandora-spine-mx2", dest="run-caf-pandora-spine-mx2", default=False, action="store_true", help="Make cafs for pandora, spine, and mx2 reco. Input dataset must be pandora.")
+    parser.add_option("--run-caf-pandora", dest="run-caf-pandora", default=False, action="store_true", help="Make cafs for pandora reco only.")
+    parser.add_option("--run-caf-spine", dest="run-caf-spine", default=False, action="store_true", help="Make cafs for spine reco only.")
+    parser.add_option("--run-caf-mx2", dest="run-caf-mx2", default=False, action="store_true", help="Make cafs for mx2 reco only.")
+    parser.add_option("--run-caf-pandora-spine", dest="run-caf-pandora-spine", default=False, action="store_true", help="Make cafs for pandora and spine reco. Input dataset must be pandora.")
+    parser.add_option("--run-caf-pandora-mx2", dest="run-caf-pandora-mx2", default=False, action="store_true", help="Make cafs for pandora and mx2 reco. Input dataset must be pandora.")
+    parser.add_option("--run-caf-spine-mx2", dest="run-caf-spine-mx2", default=False, action="store_true", help="Make cafs for spine and mx2 reco only. Input dataset must be spine")
+
     parser.add_option("--data", dest="data", default=False, action="store_true", help="processing real data")
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
     parser.add_option("--run", dest="run", type="string", default="run1", help="The run period.")
@@ -144,7 +153,6 @@ def _CheckDataset( dataset ) :
     return success
 
 
-
 #======================================================================================================
 # For processing the combined light and charge files, verfied that the correct dataset is deployed
 #======================================================================================================
@@ -177,6 +185,35 @@ def _CheckDatasetForCombinationWorkflow( dataset, detector ) :
        sys.exit( "FATAL::The files in dataset [%s, %d] do not belong to the run_type [%s]. Cannot proceed with combination workflow.\n" % (dataset,nfiles[0],run_type) )
 
     return success
+
+
+#======================================================================================================
+# For processing the reconstructed files via the cafmaker, verfied that the correct dataset is deployed
+#======================================================================================================
+def _CheckDatasetForCafWorkflow( opts ) :
+
+    success = False
+
+    
+    """
+    if opts["run-caf-pandora-spine-mx2"] or opts["run-caf-pandora-spine"] or opts["run-pandora-mx2"] or opts["run-pandora"] :
+    
+       
+
+    elif opts["run-caf-spine-mx2"] or opts["run-caf-spine"] :
+           
+
+    elif opts["run-caf-mx2"] : 
+       run_type = "neardet-2x2-minerva"
+    else :
+       sys.exit("Unable to determine if the correct dataset is deployed for the caf workflow.\n")
+    """
+
+
+
+
+    return success
+
 
 
 #======================================================================================================
@@ -248,16 +285,29 @@ if __name__ == '__main__' :
 
 
    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   # check that the correct dataset is deployed for ndlar + combined workflow
+   # check that the correct dataset is deployed for the ndlar + combined workflow
    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    if opts["tier"] == "flow" and opts["stream"] == "combined" :
-      print( "\tChecking if the dataset for the combination workflow." )
-      log.write( "\tChecking if the dataset for the combination workflow." )
+      print( "\tChecking if the dataset for the ndlar flow charge and light combination workflow." )
+      log.write( "\tChecking if the dataset for the ndlar flow charge and light combination workflow." )
 
       success = _CheckDatasetForCombinationWorkflow( opts['dataset'], opts["detector"] ) 
       if not success :
-         sys.exit( "\nThe incorrect type of dataset is deployed for ndlar_flow stage:combination workflow.\nThe input dataset should consists of light raw data.\n" ) 
+         sys.exit( "\nThe incorrect type of dataset is deployed for the ndlar_flow stage:combination workflow.\nThe input dataset should consists of light raw data.\n" ) 
 
+
+   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   # check that the correct dataset is deployed for the caf workflow
+   #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   """
+   if opts["tier"] == "caf" :
+      print( "\tChecking if the dataset for the caf workflow." )
+      log.write( "\tChecking if the dataset for the caf workflow." )
+
+      success = _CheckDatasetForCafWorkflow( opts )
+      if not success :
+         sys.exit* "\nThe incorrect type of dataset is deployed for the caf workflow.\nPlease see the help menu.\n")
+   """
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # output directory
