@@ -55,9 +55,9 @@ void overlaySinglesIntoExistingSpillsSorted(std::string inFileNameSpills,
   auto geom = (TGeoManager*) inFileSpills->Get("EDepSimGeometry");
   auto sp = (TParameter<double>*) inFileSpills->Get("spillPeriod_s");
   auto event_spill_map = (TMap*) inFileSpills->Get("event_spill_map");
-  auto potps = (TParameter<double>) inFileSpills->Get("pot_per_spill");
-  auto pot1 = (TParameter<double>) inFileSpills->Get("pot1");
-  auto pot2 = (TParameter<double>) inFileSpills->Get("pot2");
+  auto potps = (TParameter<double>*) inFileSpills->Get("pot_per_spill");
+  auto pot1 = (TParameter<double>*) inFileSpills->Get("pot1");
+  auto pot2 = (TParameter<double>*) inFileSpills->Get("pot2");
   inFileSpills->Close();
 
   // Lift all other information from spill file.
@@ -156,7 +156,6 @@ void overlaySinglesIntoExistingSpillsSorted(std::string inFileNameSpills,
       std::string spill_string = spill_id;
       TObjString* event_tobj = new TObjString(event_string.c_str());
       TObjString* spill_tobj = new TObjString(spill_string.c_str());
-      std::cout << event_string << std::endl;
 
       if (event_spill_map->FindObject(event_string.c_str()) == 0)
         event_spill_map->Add(event_tobj, spill_tobj);
@@ -221,5 +220,5 @@ void overlaySinglesIntoExistingSpillsSorted(std::string inFileNameSpills,
 
   outFile->Close();
 
-  delete outFile, sp;
+  delete outFile;
 }
