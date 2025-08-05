@@ -9,6 +9,12 @@
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+#++++++++++++++++++++++++++++++++++++++++
+# the script with common functions
+#++++++++++++++++++++++++++++++++++++++++
+source /cvmfs/dune.opensciencegrid.org/dunend/2x2/releases/${TWOBYTWO_RELEASE}/ndlar_prod_scripts/ND_Production/toolbox/scripts/NDUtilsForJustin.sh
+
+
 #++++++++++++++++++++++++++++++++++++++++++
 # sanity check
 #++++++++++++++++++++++++++++++++++++++++++
@@ -16,12 +22,12 @@ if [[ "${DATA_TIER}" != "flow" ]]; then
    echo -e "This script [$(basename $BASH_SOURCE)] submits ndlar flow jobs. Please see the help menu. The data tier is not defined correctly." 
    exit 0
 fi
- 
 
+ 
 #++++++++++++++++++++++++++++++++++++++++
-# the script with common functions
+# Begin JustIN
 #++++++++++++++++++++++++++++++++++++++++
-source ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/NDUtilsForJustin.sh
+justin_begin_of_job_commands
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++

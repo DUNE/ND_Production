@@ -9,19 +9,24 @@
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+#++++++++++++++++++++++++++++++++++++++++
+# the script with common functions
+#++++++++++++++++++++++++++++++++++++++++
+source /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts//NDUtilsForJustin.sh
+
 #++++++++++++++++++++++++++++++++++++++++++
 # sanity check
 #++++++++++++++++++++++++++++++++++++++++++
-if [[ "${DATA_TIER}" != "reco" ]]; then
+if [[ "${DATA_TIER}" != "reco_pandora" ]]; then
    echo -e "This script [$(basename $BASH_SOURCE)] submits the Pandora reconstruction jobs. Please see the help menu. The data tier is not defined correctly." 
    exit 0
 fi
  
 
 #++++++++++++++++++++++++++++++++++++++++
-# the script with common functions
+# Begin JustIN
 #++++++++++++++++++++++++++++++++++++++++
-source ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/NDUtilsForJustin.sh
+justin_begin_of_job_commands
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -156,6 +161,7 @@ execute_pandora_workflow() {
    
    rm -f MCHierarchy.root
    rm -f EventHierarchy.root
+   rm -f ${FLOW_OUTPUT_FILE}
 
    CREATED_FILES+=("${PANDORA_OUTPUT_DATAFILE}")
 
