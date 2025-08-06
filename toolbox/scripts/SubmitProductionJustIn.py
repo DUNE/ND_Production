@@ -192,25 +192,28 @@ def _CheckDatasetForCombinationWorkflow( dataset, detector ) :
 #======================================================================================================
 def _CheckDatasetForCafWorkflow( opts ) :
 
-    success = False
+    success   = False
+    data_tier = ""
 
-    
-    """
     if opts["run-caf-pandora-spine-mx2"] or opts["run-caf-pandora-spine"] or opts["run-pandora-mx2"] or opts["run-pandora"] :
-    
-       
-
+       data_tier = "pandora-reconstruction"        
     elif opts["run-caf-spine-mx2"] or opts["run-caf-spine"] :
-           
-
+       data_tier = "spine-reconstruction"    
     elif opts["run-caf-mx2"] : 
-       run_type = "neardet-2x2-minerva"
+       data_tier = "dst-reconstructed"
     else :
        sys.exit("Unable to determine if the correct dataset is deployed for the caf workflow.\n")
-    """
 
+    cmd  = "metacat query -s \"files from %s where (core.data_tier=%s)\" | grep -i Files | cut -f2 -d':'" % (dataset,data_tier) 
+    proc = proc.communicate()[0].decode('ascii')
+    pipe   = proc.communicate()[0].decode('ascii') 
+    if proc.returncode != 0 :
+       sys.exit("Failed in sanity check for caf  workflow.\n")
 
-
+    if int(pipe) > 0 :
+       success = True
+    else :
+       sys.exit( "FATAL::This is the incorrect type of dataset to use as input. Please see the help menu. ) 
 
     return success
 
@@ -299,7 +302,6 @@ if __name__ == '__main__' :
    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # check that the correct dataset is deployed for the caf workflow
    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   """
    if opts["tier"] == "caf" :
       print( "\tChecking if the dataset for the caf workflow." )
       log.write( "\tChecking if the dataset for the caf workflow." )
@@ -307,7 +309,7 @@ if __name__ == '__main__' :
       success = _CheckDatasetForCafWorkflow( opts )
       if not success :
          sys.exit* "\nThe incorrect type of dataset is deployed for the caf workflow.\nPlease see the help menu.\n")
-   """
+
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # output directory
