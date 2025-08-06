@@ -12,7 +12,8 @@
 #++++++++++++++++++++++++++++++++++++++++
 # the script with common functions
 #++++++++++++++++++++++++++++++++++++++++
-source /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts//NDUtilsForJustin.sh
+source /cvmfs/dune.opensciencegrid.org/dunend/2x2/releases/${TWOBYTWO_RELEASE}/ndlar_prod_scripts/ND_Production/toolbox/scripts/NDUtilsForJustin.sh
+
 
 #++++++++++++++++++++++++++++++++++++++++++
 # sanity check
