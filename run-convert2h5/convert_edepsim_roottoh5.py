@@ -552,12 +552,6 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                 segment[iHit]["tran_diff"] = 0
                 segment[iHit]["pixel_plane"] = 0
                 segment[iHit]["n_photons"] = 0
-               
-                #pdg = segment[iHit]["pdg_id"]
-                #dE_sec = hitSegment.GetSecondaryDeposit()
-                #dE = hitSegment.GetEnergyDeposit()
-                #if dE_sec > 0:
-                #  print("dE = ",dE,", dE secondary = ", dE_sec,", PDG ",pdg,"    --> diff= ",dE - dE_sec)
 
             segments_list.append(segment)
         trajectories_list.append(trajectories[:n_traj])
