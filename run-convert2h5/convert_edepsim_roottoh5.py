@@ -22,8 +22,8 @@ segments_dtype = np.dtype([("event_id","u4"),("vertex_id", "u8"), ("segment_id",
                            ("y_start", "f4"), ("t_start", "f8"),
                            ("t0_start", "f8"), ("t0_end", "f8"), ("t0", "f8"),
                            ("dx", "f4"), ("long_diff", "f4"),
-                           ("pixel_plane", "i4"), ("t_end", "f8"),
-                           ("dEdx", "f4"), ("dE", "f4"), ("t", "f8"),
+                           ("pixel_plane", "i4"), ("t", "f8"), ("t_end", "f8"),
+                           ("dEdx", "f4"), ("dE", "f4"), ("dE_secondary", "f4"),
                            ("y", "f4"), ("x", "f4"), ("z", "f4"),
                            ("n_photons","f4")], align=True)
 
@@ -33,6 +33,7 @@ trajectories_dtype = np.dtype([("event_id","u4"), ("vertex_id", "u8"),
                                ("xyz_start", "f4", (3,)), ("t_start", "f8"),
                                ("E_end", "f4"), ("pxyz_end", "f4", (3,)),
                                ("xyz_end", "f4", (3,)), ("t_end", "f8"),
+                               ("KE_start", "f4"), ("KE_end","f4"),
                                ("pdg_id", "i4"), ("start_process", "i4"),
                                ("start_subprocess", "i4"), ("end_process", "i4"),
                                ("end_subprocess", "i4"),("dist_travel", "f4")], align=True)
@@ -431,6 +432,8 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                 trajectories[n_traj]["xyz_end"] = (end_pt.GetPosition().X() * edep2cm, end_pt.GetPosition().Y() * edep2cm, end_pt.GetPosition().Z() * edep2cm)
                 trajectories[n_traj]["E_start"] = np.sqrt(np.sum(np.square(p_start)) + mass**2)
                 trajectories[n_traj]["E_end"] = np.sqrt(np.sum(np.square(p_end)) + mass**2)
+                trajectories[n_traj]["KE_start"] = trajectories[n_traj]["E_start"] - mass;
+                trajectories[n_traj]["KE_end"] = trajectories[n_traj]["E_end"] - mass;
                 trajectories[n_traj]["t_start"] = start_pt.GetPosition().T() * edep2us
                 trajectories[n_traj]["t_end"] = end_pt.GetPosition().T() * edep2us
                 trajectories[n_traj]["start_process"] = start_pt.GetProcess()
@@ -531,6 +534,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                 segment[iHit]["t0_end"] = hitSegment.GetStop().T() * edep2us
                 segment[iHit]["t_end"] = 0
                 segment[iHit]["dE"] = hitSegment.GetEnergyDeposit()
+                segment[iHit]["dE_secondary"] = hitSegment.GetSecondaryDeposit()
                 xd = segment[iHit]["x_end"] - segment[iHit]["x_start"]
                 yd = segment[iHit]["y_end"] - segment[iHit]["y_start"]
                 zd = segment[iHit]["z_end"] - segment[iHit]["z_start"]
@@ -548,6 +552,12 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                 segment[iHit]["tran_diff"] = 0
                 segment[iHit]["pixel_plane"] = 0
                 segment[iHit]["n_photons"] = 0
+               
+                #pdg = segment[iHit]["pdg_id"]
+                #dE_sec = hitSegment.GetSecondaryDeposit()
+                #dE = hitSegment.GetEnergyDeposit()
+                #if dE_sec > 0:
+                #  print("dE = ",dE,", dE secondary = ", dE_sec,", PDG ",pdg,"    --> diff= ",dE - dE_sec)
 
             segments_list.append(segment)
         trajectories_list.append(trajectories[:n_traj])
