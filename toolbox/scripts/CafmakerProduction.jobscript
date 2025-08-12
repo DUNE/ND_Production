@@ -1,0 +1,208 @@
+#!/bin/bash
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# 	This script for running the pandora workflow is based on the data production
+# 	development by Matt Kramer (https://github.com/DUNE/2x2_sim/blob/feature_spine_on_data/run-cafmaker)
+# 
+#	Starting on July 1, 2025, please use the software deployed on dune cvmfs repository
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+#++++++++++++++++++++++++++++++++++++++++
+# the script with common functions
+#++++++++++++++++++++++++++++++++++++++++
+source /cvmfs/dune.opensciencegrid.org/dunend/2x2/releases/${TWOBYTWO_RELEASE}/ndlar_prod_scripts/ND_Production/toolbox/scripts/NDUtilsForJustin.sh
+
+
+#++++++++++++++++++++++++++++++++++++++++++
+# sanity check
+#++++++++++++++++++++++++++++++++++++++++++
+if [[ "${DATA_TIER}" != "caf" ]]; then
+   echo -e "This script [$(basename $BASH_SOURCE)] submits the CAF analysis jobs. Please see the help menu. The data tier is not defined correctly." 
+   exit 0
+fi
+
+
+#+++++++++++++++++++++++++++++++++++++++++
+# environment variables
+#+++++++++++++++++++++++++++++++++++++++++
+echo -e "\tThe SPINE JustIN workflow id is [ ${SPINE_WORKFLOW_ID} ]\n" 2>&1 | tee -a $envlog
+echo -e "\tThe Mx2 JustIN workflow id is [ ${MX2_WORKFLOW_ID} ]\n" 2>&1 | tee -a $envlog
+
+
+#++++++++++++++++++++++++++++++++++++++++
+# Begin JustIN
+#++++++++++++++++++++++++++++++++++++++++
+justin_begin_of_job_commands
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# containers to store the parent and child files
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+PARENT_FILES=("${did}")
+MATCHED_FILES=()
+CREATED_FILES=()
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Get the matching files
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+get_matching_files()
+{
+   echo -e "Downloading the matching files for the cafmaker workflow." 2>&1 | tee -a $envlog
+   (
+      source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
+      setup python ${PYTHON_VERSION}
+
+      echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/GetInputList.py --file=${did} ${MATCHING_OPTION} ].\n" 2>&1 | tee -a $envlog 
+      python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/GetInputList.py --file=${did} ${MATCHING_OPTION} 2>&1 | tee -a $envlog
+   )
+  
+   namespace="downloads" 
+   if [ ! -d ${namespace} ]; then
+      echo -e "\tFailed to get the matching ${MATCHED_TYPE} files.\n" 2>&1 | tee -a $envlog
+      exit 0
+   else 
+      cd ${namespace} 
+      for filename in * ;
+      do
+          PARENT_FILES+=("${namespace}:${filename}")
+          MATCHED_FILES+=("${filename}")
+      done 
+   fi
+ 
+   echo -e "\tThe parent files are [${PARENT_FILES[@]}].\n" 2>&1 | tee -a $envlog
+   echo -e "\t\tThe matching files are [${MATCHED_FILES[@]}].\n" 2>&1 | tee -a $envlog
+
+   cd ${WORKSPACE}
+   mv ${namespace}/* ${WORKSPACE}/
+   rm -rf ${namespace}
+}
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++
+# parse the matching minvera file
+#+++++++++++++++++++++++++++++++++++++++++++++
+parse_matching_mx2_file()
+{
+   echo -e "Parse the matching mx2 files using the input file metadata." 2>&1 | tee -a $envlog
+   cd ${WORKSPACE}
+   MX2_FILENAME=`ls *dst*root`
+
+   (
+       source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+       setup python ${PYTHON_VERSION}
+       
+       echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input=file=${did} --minerva-file=${MX2_FILENAME} ].\n" 2>&1 | tee -a $envlog
+       #python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input=file=${did} --minerva-file=${MX2_FILENAME}
+       python /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input=file=${did} --minerva-file=${MX2_FILENAME}
+   ) 
+
+   namespace="matched_mx2"
+   if [ ! -d ${namespace} ]; then
+      echo -e "\tFailed to get the parsed mx2 matching file.\n" 2>&1 | tee -a $envlog
+      exit 0
+   else
+      TMP_ARRAY=("${MATCHED_FILES[@]}")
+      unset MATCHED_FILES
+
+      for filename in "${TMP_ARRAY[@]}" ; 
+      do
+         if [[ "${filename}" != "${MX2_FILENAME}" ]]; then
+            MATCHED_FILES+=("${filename}")
+         fi
+      done
+      
+      cd ${namespace}
+      UPDATED_MX2_FILE=`ls *.root`
+      MATCHED_FILES+=("${UPDATED_MX2_FILE}")      
+
+      cd ${WORKSPACE}
+      mv ${namespace}/* ${WORKSPACE}/
+      rm -rf ${namespace}
+   fi
+
+   echo -e "Completed parsing the matching mx2 files using the input file metadata." 2>&1 | tee -a $envlog
+}
+
+
+#+++++++++++++++++++++++++++++++++++++++++
+# Run the cafmaker workflow
+#+++++++++++++++++++++++++++++++++++++++++
+execute_cafmaker_workflow() 
+{
+   echo -e "Enter executing the caf maker workflow for data stream [${DATA_STREAM}] and input file [${INPUT_FILE}]" 2>&1 | tee -a $envlog
+
+   IFS='-' read -a flist <<< "${INPUT_FILE}"
+
+   TMP_OUTPUT_FILE="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW.ASSOC.0.root"
+   ROOT_OUTPUT_FILE="${TMP_OUTPUT_FILE/.ASSOC.0.root/.ASSOC.root}" 
+
+   
+  
+
+
+ 
+   export FLOW_OUTPUT_FILE="${ROOT_OUTPUT_FILE}"
+   if [ -f ${FLOW_OUTPUT_FILE} ]; then
+      mv ${FLOW_OUTPUT_FILE} ${OUTFILES_DIR}/
+   else 
+      echo -e "FATAL::The file [${FLOW_OUTPUT_FILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
+      exit 1 
+   fi
+
+   cd ${WORKSPACE}
+   echo -e "Exit executing the caf maker workflow for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
+}
+
+
+#++++++++++++++++++++++++++++++++++++++
+# execute the jobs
+#+++++++++++++++++++++++++++++++++++++
+echo -e "\n\n" 2>&1 | tee -a $envlog
+
+if [[ "${RUN_CAF_PANDORA_SPINE_MX2}" == "1" ]]; then 
+   export MATCHED_TYPE="spine and mx2"
+   export MATCHING_OPTION="--spine --mx2 --spine-justin=${SPINE_WORKFLOW_ID} --mx2-justin=${MX2_WORKFLOW_ID} "
+   get_matching_files()
+   parse_matching_mx2_file()
+
+elif [[ "${RUN_CAF_PANDORA_SPINE}" == "1" ]]; then
+     export MATCHED_TYPE="spine"
+     export MATCHING_OPTION="--spine --spine-justin=${SPINE_WORKFLOW_ID} "
+     get_matching_files()
+
+elif [[ "${RUN_CAF_PANDORA_MX2}" == "1" || "${RUN_CAF_SPINE_MX2}" == "1" ]]; then
+     export MATCHED_TYPE="mx2"
+     export MATCHING_OPTION="--mx2  --mx2-justin=${MX2_WORKFLOW_ID} "
+     get_matching_files()
+     parse_matching_mx2_file()
+fi
+
+execute_cafmaker_workflow()
+WORKFLOW+=("cafmaker")
+export NAMESPACE="neardet-2x2-lar"
+export APPLICATION_DATA_TIER="caf-analysis"
+
+
+#++++++++++++++++++++++++++++++++++++++++
+# create metadata json file
+#++++++++++++++++++++++++++++++++++++++++
+create_metadata_file
+
+
+#+++++++++++++++++++++++++++++++++++++++
+# End of justin job running
+#+++++++++++++++++++++++++++++++++++++++
+justin_end_of_job_commands
+
+
+
+######################################
+#
+# END OF RUNNING NDLAr CAFMAKER JOBS
+#
+######################################
+
+exit 0
