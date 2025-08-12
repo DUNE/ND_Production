@@ -13,12 +13,8 @@ topvol=$1; shift
 seed=0
 npoints=1000
 nrays=1000
-# Used for nd_hall_with_lar_tms_sand_TDR_Production_geometry_v_*.gdml and
-# anti_fiducial_nd_hall_with_lar_tms_sand_TDR_Production_geometry_v_*.gdml
-#npoints=20000
-#nrays=20000
-# Used for nd_hall_with_lar_tms_sand_TDR_Production_geometry_v_*.gdml with
-# topvol volArgonCubeDetector75.
+# Used for all: 
+# *_v2025.08.11.gdml with and without topvol volArgonCubeDetector75 specified.
 #npoints=5000
 #nrays=5000
 
