@@ -150,26 +150,42 @@ parse_matching_mx2_file()
 execute_cafmaker_workflow() 
 {
    echo -e "Enter executing the caf maker workflow for data stream [${DATA_STREAM}] and input file [${INPUT_FILE}]" 2>&1 | tee -a $envlog
-
-   IFS='-' read -a flist <<< "${INPUT_FILE}"
-
-   TMP_OUTPUT_FILE="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.FLOW.ASSOC.0.root"
-   ROOT_OUTPUT_FILE="${TMP_OUTPUT_FILE/.ASSOC.0.root/.ASSOC.root}" 
-
-   
-  
-
-
- 
-   export FLOW_OUTPUT_FILE="${ROOT_OUTPUT_FILE}"
-   if [ -f ${FLOW_OUTPUT_FILE} ]; then
-      mv ${FLOW_OUTPUT_FILE} ${OUTFILES_DIR}/
-   else 
-      echo -e "FATAL::The file [${FLOW_OUTPUT_FILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
-      exit 1 
-   fi
-
    cd ${WORKSPACE}
+
+   DATA_FILES_ARRAY=()
+   DATA_FILES_ARRAY+=("${INPUT_FILE}")
+
+   for filename on "${MATCHED_FILES[@]}" ;
+   do 
+       DATA_FILES_ARRAY+=("${filename}")
+   done
+
+
+   (
+       source ${CVMFS_WORKING_DIR}/cafmaker/ND_CAFMaker/ndcaf_setup.sh 
+
+       echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES_ARRAY[@]}" ].\n" 2>&1 | tee -a $envlog
+       #python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES_ARRAY[@]}"
+       python /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES_ARRAY[@]}"
+
+       echo -e "\tRunning the command [ export CAFFCLFILE=`ls *.fcl` ].\n" 2>&1 | tee -a $envlog
+       export CAFFCLFILE=`ls *.fcl`
+
+       echo -e \tRunning the command [ makeCAF --fcl=${CAFFCLFILE} ].\n" 2>&1 | tee -a $envlog
+       makeCAF --fcl=${CAFFCLFILE}
+
+       ncafs=`ls *CAF* | wc -l`
+       if [[ "$ncafs" -le 0 ]]; then
+           echo -e "FATAL::The cafmaker did not produced any caf files. Will not continue." 2>&1 | tee -a $envlog
+           exit 0
+       fi  
+   )
+
+   for filename in *CAF* ;
+   do
+       CREATED_FILES+=("${filename}")
+   done 
+ 
    echo -e "Exit executing the caf maker workflow for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
 }
 
@@ -207,6 +223,20 @@ export APPLICATION_DATA_TIER="caf-analysis"
 # create metadata json file
 #++++++++++++++++++++++++++++++++++++++++
 create_metadata_file
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# remove all download matching files, do not want files to be transfer to rucio storage element
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+for filename in *.root ;
+do 
+    if [[ "${filename}" == *"CAF"* ]]; then
+       continue
+    fi
+
+    echo -e "\tRemoving the filename [${filename}]\n" 2>&1 | tee -a $envlog
+    rm ${filename}
+done   
 
 
 #+++++++++++++++++++++++++++++++++++++++
