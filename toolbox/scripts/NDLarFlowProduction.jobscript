@@ -48,17 +48,11 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
       source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
       setup python ${PYTHON_VERSION}
 
-      echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/GetInputList.py --file=${did} ].\n" 2>&1 | tee -a $envlog 
-      python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/GetInputList.py --file=${did} 2>&1 | tee -a $envlog
+      echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/GetInputList.py --file=${did} --light ].\n" 2>&1 | tee -a $envlog 
+      python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/GetInputList.py --file=${did} --light 2>&1 | tee -a $envlog
    )
   
-   namespace="" 
-   if [[ "${DETECTOR_CONFIG}" == "proto_nd" || "${DETECTOR_CONFIG}" == "fsd" ]]; then
-      namespace="neardet-2x2-lar-light"
-   else 
-      echo -e "FATAL::The detector configuration [${DETECTOR_CONFIG}] is not implemented. Cannot continue.\n" 2>&1 | tee -a $envlog
-      exit 0
-   fi
+   namespace="downloads" 
    if [ ! -d ${namespace} ]; then
       echo -e "\tFailed to get the matching light files.\n" 2>&1 | tee -a $envlog
       exit 0

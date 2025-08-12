@@ -39,6 +39,9 @@ def _HelpMenu() :
     parser.add_option("--run-caf-pandora-mx2", dest="run-caf-pandora-mx2", default=False, action="store_true", help="Make cafs for pandora and mx2 reco. Input dataset must be pandora.")
     parser.add_option("--run-caf-spine-mx2", dest="run-caf-spine-mx2", default=False, action="store_true", help="Make cafs for spine and mx2 reco only. Input dataset must be spine")
 
+    parser.add_option("--spine-workflow-id", dest="spine-workflow-id", default=1, type=string, help="The spine justin workflow id for making cafs. This is required for the options: --run-caf-pandora-spine-mx2, --run-caf-pandora-spin")
+    parser.add_option("--mx2-workflow-id", dest="mx2-workflow-id", default=1, type=string, help="The mx2 justin workflow id for making cafs. This is required for the options: --run-caf-pandora-spine-mx2, --run-caf-pandora-mx2, --run-caf-spine-mx2") 
+
     parser.add_option("--data", dest="data", default=False, action="store_true", help="processing real data")
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
     parser.add_option("--run", dest="run", type="string", default="run1", help="The run period.")
@@ -213,7 +216,7 @@ def _CheckDatasetForCafWorkflow( opts ) :
     if int(pipe) > 0 :
        success = True
     else :
-       sys.exit( "FATAL::This is the incorrect type of dataset to use as input. Please see the help menu. ) 
+       sys.exit( "FATAL::This is the incorrect type of dataset to use as input. Please see the help menu." ) 
 
     return success
 
@@ -308,7 +311,7 @@ if __name__ == '__main__' :
 
       success = _CheckDatasetForCafWorkflow( opts )
       if not success :
-         sys.exit* "\nThe incorrect type of dataset is deployed for the caf workflow.\nPlease see the help menu.\n")
+         sys.exit( "\nThe incorrect type of dataset is deployed for the caf workflow.\nPlease see the help menu.\n")
 
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -399,6 +402,18 @@ if __name__ == '__main__' :
       cmdlist.append( "--env END_POSITION=None" )
    else :
       cmdlist.append( f"--env END_POSITION=%d" % opts["endPosition"] )
+
+   cmdlist.append( "--env RUN_CAF_PANDORA_SPINE_MX2=%d" % (1 if opts["run-caf-pandora-spine-mx2"] else 0) )
+   cmdlist.append( "--env RUN_CAF_PANDORA=%d" % (1 if opts["run-caf-pandora"] else 0) )
+   cmdlist.append( "--env RUN_CAF_PANDORA_SPINE=%d" % (1 if opts["run-caf-pandora-spine"] else 0) )
+   cmdlist.append( "--env RUN_CAF_PANDORA_MX2=%d" % (1 if opts["run-caf-pandora-mx2"] else 0) )
+   cmdlist.append( "--env RUN_CAF_SPINE_MX2=%d" % (1 if opts["run-caf-spine-mx2"] else 0) )
+   cmdlist.append( "--env RUN_CAF_SPINE=%d" % (1 if opts["run-caf-spine"] else 0) )
+   cmdlist.append( "--env RUN_CAF_MX2=%d" % (1 if opts["run-caf-mx2"] else 0) )
+
+   cmdlist.append( "--env SPINE_WORKFLOW_ID=%s" % opts["spine-workflow-id"] )
+   cmdlist.append( "--env MX2_WORKFLOW_ID=%s % opts["mx2-workflow-id"] )
+
 
    # set nersc parameters
    if opts["nersc"] :

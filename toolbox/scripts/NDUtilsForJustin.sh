@@ -30,7 +30,8 @@ export TBB_QUALIFIER="e20"
 export ROOT_VERSION="v6_26_06b"
 export ROOT_QUALIFIER="e20:p3913:prof"
 
-
+export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app
+export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune
 
 #+++++++++++++++++++++++++++++++++++++++
 # Begin of justin job running
