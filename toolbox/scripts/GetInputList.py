@@ -28,7 +28,7 @@ def _CreateMetacatQueryString(global_subrun_list) :
 def _GetFilenames( metacat_query, namespace ) :
     filenames = []
 
-    cmd  = "%s %s metacat query \"%s\"" % (setcmd,envcmd,metacat_query)
+    cmd  = "%s %s metacat query \"%s\"" % (G_SETCMD,G_ENVCMD,metacat_query)
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     stdout, error = proc.communicate() 
 
@@ -50,7 +50,7 @@ def _DownloadFiles( files_to_download ) :
     ndownloads = 0
 
     for lfile in files_to_dowload :
-        cmd   = "%s export RUCIO_ACCOUNT=\"justinreadonly\"; rucio download %s" % (setcmd,lfile)
+        cmd   = "%s export RUCIO_ACCOUNT=\"justinreadonly\"; rucio download %s" % (G_SETCMD,lfile)
         proc  = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         pipe  = proc.communicate()[0].decode('ascii')
         proc.wait()
@@ -181,13 +181,13 @@ if __name__ == '__main__' :
  
    args = parser.parse_args()
 
-   global setcmd
-   global envcmd
+   global G_SETCMD
+   global G_ENVCMD
 
-   setcmd = "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh; setup python v3_9_15; setup metacat; setup rucio;"
-   envcmd = "export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app;export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune;"
+   G_SETCMD = "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh; setup python v3_9_15; setup metacat; setup rucio;"
+   G_ENVCMD = "export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app;export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune;"
 
-   cmd     = "%s %s metacat file show -m -j %s" % (setcmd,envcmd,args.file)
+   cmd     = "%s %s metacat file show -m -j %s" % (G_SETCMD,G_ENVCMD,args.file)
    proc    = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
    stdout, error = proc.communicate()
 

@@ -45,6 +45,22 @@ MATCHED_FILES=()
 CREATED_FILES=()
 
 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# get the file namespace
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+get_namespace()
+{
+   filename=$1
+
+   if [[ "${filename}" == *"dst"* ]]; then
+      echo "neardet-2x2-minerva"
+   elif [[ "${filename}" == *SPINE* ]]; then
+      echo "neardet-2x2-lar"
+   fi
+
+}	
+
+
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Get the matching files
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -67,7 +83,8 @@ get_matching_files()
       cd ${namespace} 
       for filename in * ;
       do
-          PARENT_FILES+=("${namespace}:${filename}")
+          read -r -a file_namespace <<< "$(get_namespace ${filename})"
+	  PARENT_FILES+=("${file_namespace}:${filename}")
           MATCHED_FILES+=("${filename}")
       done 
    fi
@@ -94,9 +111,9 @@ parse_matching_mx2_file()
        source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
        setup python ${PYTHON_VERSION}
        
-       echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input=file=${did} --minerva-file=${MX2_FILENAME} ].\n" 2>&1 | tee -a $envlog
-       #python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input=file=${did} --minerva-file=${MX2_FILENAME}
-       python /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input=file=${did} --minerva-file=${MX2_FILENAME}
+       echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input-file=${did} --minerva-file=${MX2_FILENAME} ].\n" 2>&1 | tee -a $envlog
+       #python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input-file=${did} --minerva-file=${MX2_FILENAME}
+       python /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input-file=${did} --minerva-file=${MX2_FILENAME}
    ) 
 
    namespace="matched_mx2"
