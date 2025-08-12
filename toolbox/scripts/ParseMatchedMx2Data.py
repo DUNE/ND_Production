@@ -71,6 +71,8 @@ def _GetTimestampFromParentChargeFile( infile ) :
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
 # create a slim mx2 matching file for cafmaker
+# this code is based on the software develop by N. Roy
+# https://github.com/DUNE/2x2_sim/blob/feature_spine_on_data/run-cafmaker/match_minerva.cpp
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
 def _CreateParseMx2File( filename, timestamp ) :
 
