@@ -1,166 +1,110 @@
 #!/bin/env python3
 
 import os, sys, string, re, shutil, math, time, subprocess, json
-import sqlite3
+import datetime as dt
+import ROOT 
 
 from argparse import ArgumentParser as ap
 
 
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# create a metacat query string for global subruns 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-def _CreateMetacatQueryString(global_subrun_list) :
-    queryString = ""
-
-    for i, subrun in enumerate(global_subrun_list) :
-       queryString += "dune.mx2x2_global_subrun_numbers[any] == %s" % subrun
-       if i != len(global_suburun_list)-1 :
-          queryString += " and "
-
-    return queryString 
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# get the files via a metacat query
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-def _GetFilenames( metacat_query, namespace ) :
-    filenames = []
-
-    cmd  = "%s %s metacat query \"%s\"" % (setcmd,envcmd,metacat_query)
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# get the file timestamp using the metadata
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+def _GetFileTimestamp( infile ) :
+   
+    cmd  = "%s %s metacat file show -m -j %s" % (setcmd,envcmd,infile)
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    stdout, error = proc.communicate() 
+    stdout, error = proc.communicate()
 
     if proc.returncode != 0 :
        error = error.decode('ascii')
-       print("Error:[ %s ]" % error.strip())
-       sys.exit("Did not find the file for query [%s].\n" % query)
+       sys.exit("Error:[ %s ]" % error.strip())
     else :
-       stdout = stdout[stdout.decode('ascii').find("%s"%namespace):].decode('ascii').strip()
-       filenames.append(stdout)
+       stdout = stdout[stdout.decode('ascii').find("{"):].decode('ascii')
 
-    return filenames
+   info      = json.loads(stdout)
+   metadata  = info['metadata']
+   timestamp = [ float(metadata["core.start_time"]), float(metadata["core.end_time"]) ]
 
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# use rucio to download the files 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-def _DownloadFiles( files_to_download ) :
-    ndownloads = 0
-
-    for lfile in files_to_dowload :
-        cmd   = "%s export RUCIO_ACCOUNT=\"justinreadonly\"; rucio download %s" % (setcmd,lfile)
-        proc  = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        pipe  = proc.communicate()[0].decode('ascii')
-        proc.wait()
-
-        if proc.returncode != 0 :
-           sys.exit( "Cannot download the file [%s].\n" % lfile )
-        else :
-           print( "\t\tSuccessfully download the file [%s]." % lfile )
-           ndownloads += 1
-
-     if ndownloads > 0 :
-        namespace = files_to_download[0].split(":")[0]
-        cmds = "mkdir downloads; mv %s/* downloads;"
-        proc  = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        pipe  = proc.communicate()[0].decode('ascii')
-
-        if proc.returncode != 0 :
-           sys.exit( "Cannot move files." ) 
-     
-     return ndownloads 
+   return timestamp
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# get the mx2 reconstructed files 
+# get the parent charge file
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-def _GetMx2Files(global_subrun_list, workflow_id) :
- 
-    queryString = _CreateMetacatQueryString(global_subrun_list)
- 
-    main_query  = "files with namespace=neardet-2x2-minerva and creator=dunepro and core.data_tier=dst-reconstructed and dune.workflow['workflow_id']=%s and (%s)" % (workflow_id,queryString)
-    mfiles      = _GetFilenames( main_query, "neardet-2x2-minerva" )
-    ndownloads  = _DownloadFiles(mfiles) 
+def _GetTimestampFromParentChargeFile( infile ) :
 
-    return ndownloads
+    cmd  = "%s %s metacat file show -l -j %s" % (setcmd,envcmd,infile)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    stdout, error = proc.communicate()
 
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# get the spine reconstructed files 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-def _GetSpineFiles(global_subrun_list, workflow_id) :
- 
-    queryString = _CreateMetacatQueryString(global_subrun_list)
- 
-    main_query  = "files with namespace=neardet-2x2-lar and creator=dunepro and core.data_tier=spine-reconstruction and dune.workflow['workflow_id']=%s and (%s)" % (workflow_id,queryString)
-    sfiles      = _GetFilenames( main_query, "neardet-2x2-lar" )
-    ndownloads  = _DownloadFiles(sfiles) 
-
-    return ndownloads
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# get the light files - using python interface because
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-def _GetLightFiles(lightInfoCont) :
-
-    lfiles     = []
-    main_query = "files where namespace=neardet-2x2-lar-light and creator=dunepro and core.data_tier=raw"
-
-    for lightInfo in lightInfoCont :
-        if lightInfo[0] == None : continue
-
-        lrun    = int(lightInfo[0])
-        lsubrun = int(lrun*1e5 + int(lightInfo[1]))
-        query   = "%s and core.runs[0]=%d and core.runs_subruns[0]=%d" % (main_query,lrun,lsubrun)
-
-        tmp     = _GetFilenames( query, "neardet-2x2-lar-light" )
-        for t in tmp : lfiles.append(t) 
-         
-    ndownloads = _DownloadFiles(lfiles) 
-    return ndownloads
-
-
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# get the light metadata for the incoming charge file's run and subrun
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-def _GetLightMetadata(run,subrun) :
-
-    filename = ""
-    if run >= 20003 and run <= 20180 :
-       filename = "/cvmfs/dune.opensciencegrid.org/dunend/2x2/databases/fsd_run_db.20241216.sqlite"
-    elif run >= 50005 and run <= 50018 :
-       filename = "/cvmfs/dune.opensciencegrid.org/dunend/2x2/databases/mx2x2runs_v0.2_beta1.sqlite"
+    if proc.returncode != 0 :
+       error = error.decode('ascii')
+       sys.exit("Error:[ %s ]" % error.strip())
     else :
-       print("The run period is not implemented.")
-       return []
+       stdout = stdout[stdout.decode('ascii').find("{"):].decode('ascii')
 
-    try :
-       name    = f'file:{filename}?mode=ro'
-       connect = sqlite3.connect(name, uri=True)
-       cursor  = connect.cursor()
-       query   = "SELECT lrs_run, lrs_subrun FROM All_global_subruns WHERE crs_run=%s and crs_subrun=%s" % (run,subrun) 
-       cursor.execute(query)
-       results = cursor.fetchall()
+   info    = json.loads(stdout)
+   parents = info['parents']
 
-       values = []
-       for result in results :
-           values.append(result)
+   if len(parents) == 0 :
+      sys.exit( "The parent information is not included in the metadata. The file [%s] is a bad file. Can not continue." % infile )
+   else :
+      print("\tExtracting metadata from the file [", infile, "]")
 
-       values = list(set(values))
-
-       connect.close()
-       return values
-
-    except sqlite3.Error as e :
-        pass
-        print("Error connecting to the sqlite database", e)
-      
-    return []
+   if len(parents) == 1 :
+      namespace = parents[0]['namespace']
+      filename  = parents[0]['name']
+      _GetTimestampFromParentChargeFile( "%s:%s" % (namespace,filename) )
     
+   else : 
+      for parent in parents :
+          namespace = parent['namespace']
+          filename  = parent['name']
+ 
+          if namespace == "neardet-2x2-lar-charge" :
+             timestamp = _GetFileTimestamp( "%s:%s" % (namespace,filename) )
+             return timestamp
+
+   return []
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+# create a slim mx2 matching file for cafmaker
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+def _CreateParseMx2File( filename, timestamp ) :
+
+    words    = filename.split("_")
+    words[5] = datetime.datetime.now().strftime("%y%m%d%H%S")
+    name     = "_".join(words) 
+
+    minerva_tree = ROOT.TChain("minerva")
+    minerva_tree.Add(filename)
+   
+    selection   = "ev_gps_time_sec >=%d && ev_gps_time_sec <=%d" % (timestamp[0],timestamp[1])
+    nvalues     = minerva_tree.Draw("Entry$",selection)
+    entry_value = minerva_tree.GetVal(0)
+
+    mfile = ROOT.TFile.Open(name, "RECREATE")
+    parse_minerva_tree = minerva_tree.CloneTree(0)
+
+    for value in range(nvalues) :
+        minerva_tree.GetEntry(int(entry_value[value]))
+        parse_minerva_tree.Fill()
+
+    parse_minerva_tree.AutoSave()
+    parse_minerva_tree.Write() 
+
+    cmds = "mkdir matched_mx2; mv %s matched_mx2/" % name
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    stdout, error = proc.communicate()
+
+    if proc.returncode != 0 :
+       error = error.decode('ascii')
+       sys.exit("Error:[ %s ]" % error.strip())
+ 
+    return True 
+
 
 
 ##########################################################################
@@ -183,57 +127,17 @@ if __name__ == '__main__' :
    setcmd = "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh; setup python v3_9_15; setup metacat; setup rucio;"
    envcmd = "export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app;export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune;"
 
-
-   # get the parent charge file
-
-   # get the start and end timestamp of the parent file
+   # get the timestamp from the parent charge file
+   timestamp = _GetTimestampFromParentChargeFile( args.input-file )
 
    # create a new minerva dst root file
+   success = _CreateParseMx2File(args.minerva-file,timestamp)
+   if not success :
+      sys.exit( "Failed to successful create a parse Mx2 file.")
 
 
+   print( "Exit parsing getting the input list of matching files for the ndlar production jobs\n")
 
-   cmd     = "%s %s metacat file show -m -j %s" % (setcmd,envcmd,args.file)
-   proc    = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-   stdout, error = proc.communicate()
-
-   if proc.returncode != 0 :
-      error = error.decode('ascii')
-      sys.exit("Error:[ %s ]" % error.strip())
-   else :
-      stdout = stdout[stdout.decode('ascii').find("{"):].decode('ascii')
-
-   info = json.loads(stdout)
-   print( "\tThe input file is [%s]" % args.file )
-
-   # get the metadata
-   metadata = info['metadata']
-   downloadFiles = 0
-
-   # get the matching files for a particular input file
-   if args.light :
-      run    = metadata['core.runs'][0]
-      subrun = int(metadata['core.runs_subruns'][0] - run*1e5)
-      lightInfoCont = _GetLightMetadata(run,subrun)
-
-      print( "\t\tThe matching runs/subruns list :", lightInfoCont, "\n" )   
-      downloadFiles = _GetLightFiles(lightInfoCont)
-
-   else :
-      global_subrun_list = metadata['dune.mx2x2_global_subrun_numbers']
-      print( "\t\tThe matching global subrun numbers are :", global_subrun_list, "\n" )
- 
-      if args.spine and not args.mx2 : 
-         downloadFiles = _GetSpineFiles(global_subrun_list,args.spine-justin)
-      elif args.mx2 and not args.spine :
-         downloadFiles = _GetMx2Files(global_subrun_list,args.mx2-justin)
-      elif args.spine and args.mx2 :
-         d1 = _GetSpineFiles(global_subrun_list,args.spine-justin)
-         d2 = _GetMx2Files(global_subrun_list,args.mx2-justin) 
-         downloadFiles = d1 + d2
-   
-
-   print( "Exit getting the input list of matching files." )
-   print( "\tThe number of files is [%d].\n" % downloadFiles ) 
 
 
 
