@@ -84,7 +84,7 @@ get_matching_files()
       for filename in * ;
       do
           read -r -a file_namespace <<< "$(get_namespace ${filename})"
-	  PARENT_FILES+=("${file_namespace}:${filename}")
+          PARENT_FILES+=("${file_namespace}:${filename}")
           MATCHED_FILES+=("${filename}")
       done 
    fi
@@ -180,7 +180,7 @@ execute_cafmaker_workflow()
        echo -e "\tRunning the command [ export CAFFCLFILE=`ls *.fcl` ].\n" 2>&1 | tee -a $envlog
        export CAFFCLFILE=`ls *.fcl`
 
-       echo -e \tRunning the command [ makeCAF --fcl=${CAFFCLFILE} ].\n" 2>&1 | tee -a $envlog
+       echo -e "\tRunning the command [ makeCAF --fcl=${CAFFCLFILE} ].\n" 2>&1 | tee -a $envlog
        makeCAF --fcl=${CAFFCLFILE}
 
        ncafs=`ls *CAF* | wc -l`
