@@ -118,7 +118,6 @@ execute_light_workflow() {
 
    elif [[ "${DATA_STREAM}" == "combined" ]]; then
         echo -e "$(get_range_for_light_workflow)"
-        exit 0
 
         read -r -a LIGHT_EVENT_RANGE <<< "$(get_range_for_light_workflow)"
         echo -e "\t\tFor the light+charge combination workflow, the LIGHT_EVENT_RANGE is [ start is ${LIGHT_EVENT_RANGE[0]} :: end is ${LIGHT_EVENT_RANGE[1]} ]" 2>&1 | tee -a $envlog
