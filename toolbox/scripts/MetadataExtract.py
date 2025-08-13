@@ -27,6 +27,7 @@ LIGHT_CONFIG_FILES    = str(os.environ.get('LIGHT_CONFIG_FILES'))
 CHARGE_CONFIG_FILES   = str(os.environ.get('CHARGE_CONFIG_FILES'))
 COMBINED_CONFIG_FILES = str(os.environ.get('COMBINED_CONFIG_FILES'))
 PANDORA_CONFIG_FILES  = str(os.environ.get('PANDORA_SETTINGS'))
+CAFMAKER_CONFIG_FILES = str(os.environ.get('CAFFCLFILE'))
 JUSTIN_WORKFLOW_ID    = str(os.environ.get('JUSTIN_WORKFLOW_ID'))
 JUSTIN_SITE_NAME      = str(os.environ.get('JUSTIN_SITE_NAME')) 
 

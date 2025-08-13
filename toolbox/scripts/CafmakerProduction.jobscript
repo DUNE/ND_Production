@@ -154,19 +154,28 @@ execute_cafmaker_workflow()
 
    DATA_FILES_ARRAY=()
    DATA_FILES_ARRAY+=("${INPUT_FILE}")
-
    for filename on "${MATCHED_FILES[@]}" ;
    do 
        DATA_FILES_ARRAY+=("${filename}")
    done
+   echo -e "\tThe number of input files are [${#DATA_FILES_ARRAY[@]}]" 2>&1 | tee -a $envlog
+
+   if [[ "${RUN_CAF_MX2}" == "1" ]]; then
+      IFS='_' read -a flist <<< "${INPUT_FILE}"
+      CAF_OUTPUT_FILE="${flist[0]}_${flist[1]}_${flist[2]}_${flist[3]}_${flist[4]}_$(date +'%y%m%d%H%M%S')_CDT.CAF.root"
+   else 
+      IFS='-' read -a flist <<< "${INPUT_FILE}" 
+      CAF_OUTPUT_FILE="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CTDT.CAF.root"
+   fi
+   echo -e "\tThe output caf file name is [${CAF_OUTPUT_FILE}]" 2>&1 | tee -a $envlog
 
 
    (
        source ${CVMFS_WORKING_DIR}/cafmaker/ND_CAFMaker/ndcaf_setup.sh 
 
-       echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES_ARRAY[@]}" ].\n" 2>&1 | tee -a $envlog
-       #python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES_ARRAY[@]}"
-       python /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES_ARRAY[@]}"
+       echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles=${DATA_FILES_ARRAY[@]} --outfile=${CAF_OUTPUT_FILE} ].\n" 2>&1 | tee -a $envlog
+       #python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES_ARRAY[@]}" --outfile=${CAF_OUTPUT_FILE}
+       python /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES_ARRAY[@]}" --outfile=${CAF_OUTPUT_FILE}
 
        echo -e "\tRunning the command [ export CAFFCLFILE=`ls *.fcl` ].\n" 2>&1 | tee -a $envlog
        export CAFFCLFILE=`ls *.fcl`
