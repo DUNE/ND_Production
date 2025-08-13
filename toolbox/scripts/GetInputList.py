@@ -61,16 +61,16 @@ def _DownloadFiles( files_to_download ) :
            print( "\t\tSuccessfully download the file [%s]." % lfile )
            ndownloads += 1
 
-     if ndownloads > 0 :
-        namespace = files_to_download[0].split(":")[0]
-        cmds = "mkdir downloads; mv %s/* downloads;"
-        proc  = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        pipe  = proc.communicate()[0].decode('ascii')
+    if ndownloads > 0 :
+       namespace = files_to_download[0].split(":")[0]
+       cmds = "mkdir downloads; mv %s/* downloads;" % namespace
+       proc = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+       pipe = proc.communicate()[0].decode('ascii')
 
-        if proc.returncode != 0 :
-           sys.exit( "Cannot move files." ) 
+       if proc.returncode != 0 :
+          sys.exit( "Cannot move files." ) 
      
-     return ndownloads 
+    return ndownloads 
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
