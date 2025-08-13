@@ -49,7 +49,7 @@ def _GetFilenames( metacat_query, namespace ) :
 def _DownloadFiles( files_to_download ) :
     ndownloads = 0
 
-    for lfile in files_to_dowload :
+    for lfile in files_to_download :
         cmd   = "%s export RUCIO_ACCOUNT=\"justinreadonly\"; rucio download %s" % (G_SETCMD,lfile)
         proc  = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         pipe  = proc.communicate()[0].decode('ascii')
