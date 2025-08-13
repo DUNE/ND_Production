@@ -412,7 +412,7 @@ if __name__ == '__main__' :
    cmdlist.append( "--env RUN_CAF_MX2=%d" % (1 if opts["run-caf-mx2"] else 0) )
 
    cmdlist.append( "--env SPINE_WORKFLOW_ID=%s" % opts["spine-workflow-id"] )
-   cmdlist.append( "--env MX2_WORKFLOW_ID=%s % opts["mx2-workflow-id"] )
+   cmdlist.append( "--env MX2_WORKFLOW_ID=%s" % opts["mx2-workflow-id"] )
 
 
    # set nersc parameters
