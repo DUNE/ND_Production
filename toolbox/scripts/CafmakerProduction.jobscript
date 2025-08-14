@@ -165,10 +165,9 @@ execute_cafmaker_workflow()
       CAF_OUTPUT_FILE="${flist[0]}_${flist[1]}_${flist[2]}_${flist[3]}_${flist[4]}_$(date +'%y%m%d%H%M%S')_CDT.CAF.root"
    else 
       IFS='-' read -a flist <<< "${INPUT_FILE}" 
-      CAF_OUTPUT_FILE="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CTDT.CAF.root"
+      CAF_OUTPUT_FILE="${flist[0]}-${flist[1]}-$(date +'%Y_%m_%d_%H_%M_%S')_CDT.CAF.root"
    fi
    echo -e "\tThe output caf file name is [${CAF_OUTPUT_FILE}]" 2>&1 | tee -a $envlog
-
 
    (
        source ${CVMFS_WORKING_DIR}/cafmaker/ND_CAFMaker/ndcaf_setup.sh 
@@ -190,10 +189,12 @@ execute_cafmaker_workflow()
        fi  
    )
 
-   for filename in *CAF* ;
-   do
-       CREATED_FILES+=("${filename}")
-   done 
+   if [ ! -f ${CAF_OUTPUT_FILE} ]; then
+      echo -e "FATAL::The file [${CAF_OUTPUT_FILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
+      exit 1
+   fi
+
+   CREATED_FILES+=("${CAF_OUTPUT_FILE}")
  
    echo -e "Exit executing the caf maker workflow for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
 }
@@ -239,12 +240,10 @@ create_metadata_file
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 for filename in *.root ;
 do 
-    if [[ "${filename}" == *"CAF"* ]]; then
-       continue
+    if [[ "${filename}" != *"CAF"* ]]; then
+       echo -e "\tRemoving the filename [${filename}]\n" 2>&1 | tee -a $envlog
+       rm ${filename}
     fi
-
-    echo -e "\tRemoving the filename [${filename}]\n" 2>&1 | tee -a $envlog
-    rm ${filename}
 done   
 
 

@@ -333,9 +333,15 @@ if __name__ == '__main__' :
    # get the parent files metadata
    parent_metadata = {}
    parents = args.parents.split(",")
+
+   print(parents)
+
    for parent in parents :
+       print("parent",parent)
        info = client.get_file(did=parent,with_metadata=True,with_provenance=True,with_datasets=False)
        parent_metadata[parent] = info['metadata']
+
+   sys.exit()
 
    # loop over the input file names
    workflows = args.workflow.split(",")

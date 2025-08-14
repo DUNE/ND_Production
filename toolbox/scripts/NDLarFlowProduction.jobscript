@@ -60,7 +60,7 @@ if [[ "${DATA_STREAM}" == "combined" ]]; then
       cd ${namespace} 
       for filename in * ;
       do
-         PARENT_FILES+=("neardet-2x2-light:${filename}")
+         PARENT_FILES+=("neardet-2x2-lar-light:${filename}")
          MATCHED_LIGHT_FILES+=("${filename}")
       done  
       echo -e "\tThe parent files are [${PARENT_FILES[@]}].\n" 2>&1 | tee -a $envlog
@@ -355,6 +355,7 @@ elif [[ "${DATA_STREAM}" == "combined" ]]; then
    export NAMESPACE="neardet-2x2-lar"
 fi
 
+export APPLICATION_DATA_TIER="flow-calibration"
 
 #++++++++++++++++++++++++++++++++++++++++
 # exit the conda environment
