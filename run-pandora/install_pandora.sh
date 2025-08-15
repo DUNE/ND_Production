@@ -104,7 +104,12 @@ python3 -m venv pandora.venv
 source pandora.venv/bin/activate
 cd h5flow
 pip3 install .
+pip3 install uproot
 deactivate
 
 # Convert GDML geometry file to ROOT for LArRecoND (using cm length units)
 root -l -b -q -e "TGeoManager::LockDefaultUnits(kFALSE); TGeoManager::SetDefaultUnits(TGeoManager::kRootUnits); TGeoManager::Import(\"${ND_PRODUCTION_GEOM}\"); gGeoManager->Export(\"${ND_PRODUCTION_PANDORA_GEOM}\");"
+
+# Pre-compile the conversion macro
+cd $ND_PRODUCTION_PANDORA_BASEDIR
+root -l -b -q -e ".L $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/rootToRootConversion.C+"
