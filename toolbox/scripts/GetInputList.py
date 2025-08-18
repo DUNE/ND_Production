@@ -16,7 +16,7 @@ def _CreateMetacatQueryString(global_subrun_list) :
 
     for i, subrun in enumerate(global_subrun_list) :
        queryString += "dune.mx2x2_global_subrun_numbers[any] == %s" % subrun
-       if i != len(global_suburun_list)-1 :
+       if i != len(global_subrun_list)-1 :
           queryString += " and "
 
     return queryString 
@@ -35,7 +35,7 @@ def _GetFilenames( metacat_query, namespace ) :
     if proc.returncode != 0 :
        error = error.decode('ascii')
        print("Error:[ %s ]" % error.strip())
-       sys.exit("Did not find the file for query [%s].\n" % query)
+       sys.exit("Did not find the file for query [%s].\n" % metacat_query)
     else :
        stdout = stdout[stdout.decode('ascii').find("%s"%namespace):].decode('ascii').strip()
        filenames.append(stdout)
@@ -80,7 +80,7 @@ def _GetMx2Files(global_subrun_list, workflow_id) :
  
     queryString = _CreateMetacatQueryString(global_subrun_list)
  
-    main_query  = "files with namespace=neardet-2x2-minerva and creator=dunepro and core.data_tier=dst-reconstructed and dune.workflow['workflow_id']=%s and (%s)" % (workflow_id,queryString)
+    main_query  = "files where namespace=neardet-2x2-minerva and creator=dunepro and core.data_tier=dst-reconstructed and dune.workflow['workflow_id']=%s and (%s)" % (workflow_id,queryString)
     mfiles      = _GetFilenames( main_query, "neardet-2x2-minerva" )
     ndownloads  = _DownloadFiles(mfiles) 
 
@@ -94,7 +94,7 @@ def _GetSpineFiles(global_subrun_list, workflow_id) :
  
     queryString = _CreateMetacatQueryString(global_subrun_list)
  
-    main_query  = "files with namespace=neardet-2x2-lar and creator=dunepro and core.data_tier=spine-reconstruction and dune.workflow['workflow_id']=%s and (%s)" % (workflow_id,queryString)
+    main_query  = "files where namespace=neardet-2x2-lar and creator=dunepro and core.data_tier=spine-reconstruction and dune.workflow['workflow_id']=%s and (%s)" % (workflow_id,queryString)
     sfiles      = _GetFilenames( main_query, "neardet-2x2-lar" )
     ndownloads  = _DownloadFiles(sfiles) 
 
@@ -175,9 +175,9 @@ if __name__ == '__main__' :
    parser.add_argument('--file', nargs='?', type=str, required=True, help="The file data identifier (DID)")
    parser.add_argument('--light', default=False, action="store_true", help="Retreiving the matching raw light files for an input raw charge file")
    parser.add_argument('--spine', default=False, action="store_true", help="Retreiving the matching spine reconstructed file for an input pandora file")
-   parser.add_argument('--spine-justin', type=str, help='The input justin workflow-id for the spine reconstruction')
+   parser.add_argument('--spine_justin', type=str, help='The input justin workflow-id for the spine reconstruction')
    parser.add_argument('--mx2', default=False, action="store_true", help="Retreiving the matching minerva dst file for an input pandora or spine file")
-   parser.add_argument('--mx2-justin', type=str, help='The input justin workflow-id for the mx2 reconstruction')
+   parser.add_argument('--mx2_justin', type=str, help='The input justin workflow-id for the mx2 reconstruction')
  
    args = parser.parse_args()
 
@@ -218,12 +218,12 @@ if __name__ == '__main__' :
       print( "\t\tThe matching global subrun numbers are :", global_subrun_list, "\n" )
  
       if args.spine and not args.mx2 : 
-         downloadFiles = _GetSpineFiles(global_subrun_list,args.spine-justin)
+         downloadFiles = _GetSpineFiles(global_subrun_list,args.spine_justin)
       elif args.mx2 and not args.spine :
-         downloadFiles = _GetMx2Files(global_subrun_list,args.mx2-justin)
+         downloadFiles = _GetMx2Files(global_subrun_list,args.mx2_justin)
       elif args.spine and args.mx2 :
-         d1 = _GetSpineFiles(global_subrun_list,args.spine-justin)
-         d2 = _GetMx2Files(global_subrun_list,args.mx2-justin) 
+         d1 = _GetSpineFiles(global_subrun_list,args.spine_justin)
+         d2 = _GetMx2Files(global_subrun_list,args.mx2_justin) 
          downloadFiles = d1 + d2
    
 
