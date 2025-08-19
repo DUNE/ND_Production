@@ -39,8 +39,8 @@ def _HelpMenu() :
     parser.add_option("--run-caf-pandora-mx2", dest="run-caf-pandora-mx2", default=False, action="store_true", help="Make cafs for pandora and mx2 reco. Input dataset must be pandora.")
     parser.add_option("--run-caf-spine-mx2", dest="run-caf-spine-mx2", default=False, action="store_true", help="Make cafs for spine and mx2 reco only. Input dataset must be spine")
 
-    parser.add_option("--spine-workflow-id", dest="spine-workflow-id", default=1, type=int, help="The justin workflow id used to produce the spine files. This is required for the options [ run-caf-pandora-spine-mx2, run-caf-pandora-spin ].")
-    parser.add_option("--mx2-workflow-id", dest="mx2-workflow-id", default=772, type=int, help="The mx2 justin workflow id used to produce the mx2 files. This is required for the options [ run-caf-pandora-spine-mx2, run-caf-pandora-mx2, run-caf-spine-mx2 ].") 
+    parser.add_option("--spine-workflow-id", dest="spine-workflow-id", default=1, type=int, help="The justin workflow id [default: %default] used to produce the spine files. This is required for the options [ run-caf-pandora-spine-mx2, run-caf-pandora-spin ].")
+    parser.add_option("--mx2-workflow-id", dest="mx2-workflow-id", default=772, type=int, help="The mx2 justin workflow id [default: %default] used to produce the mx2 files. This is required for the options [ run-caf-pandora-spine-mx2, run-caf-pandora-mx2, run-caf-spine-mx2 ].") 
 
     parser.add_option("--data", dest="data", default=False, action="store_true", help="processing real data")
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
