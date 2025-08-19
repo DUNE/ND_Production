@@ -1,7 +1,7 @@
 #!/bin/env python3
 
 import os, sys, string, re, shutil, math, time, subprocess, json
-import datetime as dt
+import datetime as datetime
 import ROOT 
 
 from argparse import ArgumentParser as ap
@@ -22,11 +22,11 @@ def _GetFileTimestamp( infile ) :
     else :
        stdout = stdout[stdout.decode('ascii').find("{"):].decode('ascii')
 
-   info      = json.loads(stdout)
-   metadata  = info['metadata']
-   timestamp = [ float(metadata["core.start_time"]), float(metadata["core.end_time"]) ]
+    info      = json.loads(stdout)
+    metadata  = info['metadata']
+    timestamp = [ int(metadata["core.start_time"]), int(metadata["core.end_time"]) ]
 
-   return timestamp
+    return timestamp
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -44,30 +44,29 @@ def _GetTimestampFromParentChargeFile( infile ) :
     else :
        stdout = stdout[stdout.decode('ascii').find("{"):].decode('ascii')
 
-   info    = json.loads(stdout)
-   parents = info['parents']
+    info    = json.loads(stdout)
+    parents = info['parents']
 
-   if len(parents) == 0 :
-      sys.exit( "The parent information is not included in the metadata. The file [%s] is a bad file. Can not continue." % infile )
-   else :
-      print("\tExtracting metadata from the file [", infile, "]")
+    if len(parents) == 0 :
+       sys.exit( "The parent information is not included in the metadata. The file [%s] is a bad file. Can not continue." % infile )
+   
+    print("\tExtracting metadata from the file [", infile, "]")
 
-   if len(parents) == 1 :
-      namespace = parents[0]['namespace']
-      filename  = parents[0]['name']
-      _GetTimestampFromParentChargeFile( "%s:%s" % (namespace,filename) )
-    
-   else : 
-      for parent in parents :
-          namespace = parent['namespace']
-          filename  = parent['name']
- 
-          if namespace == "neardet-2x2-lar-charge" :
-             timestamp = _GetFileTimestamp( "%s:%s" % (namespace,filename) )
-             return timestamp
+    timestamp = []
+    for parent in parents :
+        namespace = parent['namespace']
+        filename  = parent['name']
 
-   return []
+        if namespace == "neardet-2x2-lar-charge" :
+           timestamp =  _GetFileTimestamp( "%s:%s" % (namespace,filename) )
 
+    if len(timestamp) == 0 :
+       namespace = parents[0]['namespace']
+       filename  = parents[0]['name']
+       timestamp = _GetTimestampFromParentChargeFile( "%s:%s" % (namespace,filename) )
+     
+    return timestamp
+   
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
 # create a slim mx2 matching file for cafmaker
@@ -82,7 +81,7 @@ def _CreateParseMx2File( filename, timestamp ) :
 
     minerva_tree = ROOT.TChain("minerva")
     minerva_tree.Add(filename)
-   
+  
     selection   = "ev_gps_time_sec >=%d && ev_gps_time_sec <=%d" % (timestamp[0],timestamp[1])
     nvalues     = minerva_tree.Draw("Entry$",selection)
     entry_value = minerva_tree.GetVal(0)
@@ -97,7 +96,7 @@ def _CreateParseMx2File( filename, timestamp ) :
     parse_minerva_tree.AutoSave()
     parse_minerva_tree.Write() 
 
-    cmds = "mkdir matched_mx2; mv %s matched_mx2/" % name
+    cmd  = "mkdir matched_mx2; mv %s matched_mx2/" % name
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     stdout, error = proc.communicate()
 
@@ -118,8 +117,8 @@ if __name__ == '__main__' :
 
    # input arguments
    parser = ap()
-   parser.add_argument('--input-file', type=str, required=True, help="The file data identifier (DID)")
-   parser.add_argument('--minerva-file', type=str, required=True, help="The input mx2 file name")
+   parser.add_argument('--input_file', type=str, required=True, help="The file data identifier (DID)")
+   parser.add_argument('--minerva_file', type=str, required=True, help="The input mx2 file name")
 
    args = parser.parse_args()
 
@@ -130,10 +129,10 @@ if __name__ == '__main__' :
    envcmd = "export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app;export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune;"
 
    # get the timestamp from the parent charge file
-   timestamp = _GetTimestampFromParentChargeFile( args.input-file )
+   timestamp = _GetTimestampFromParentChargeFile( args.input_file )
 
    # create a new minerva dst root file
-   success = _CreateParseMx2File(args.minerva-file,timestamp)
+   success = _CreateParseMx2File(args.minerva_file,timestamp)
    if not success :
       sys.exit( "Failed to successful create a parse Mx2 file.")
 
