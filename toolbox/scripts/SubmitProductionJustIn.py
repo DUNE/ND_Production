@@ -39,8 +39,8 @@ def _HelpMenu() :
     parser.add_option("--run-caf-pandora-mx2", dest="run-caf-pandora-mx2", default=False, action="store_true", help="Make cafs for pandora and mx2 reco. Input dataset must be pandora.")
     parser.add_option("--run-caf-spine-mx2", dest="run-caf-spine-mx2", default=False, action="store_true", help="Make cafs for spine and mx2 reco only. Input dataset must be spine")
 
-    parser.add_option("--spine-workflow-id", dest="spine-workflow-id", default=1, type=int, help="The spine justin workflow id for making cafs. This is required for the options [ run-caf-pandora-spine-mx2, run-caf-pandora-spin ].")
-    parser.add_option("--mx2-workflow-id", dest="mx2-workflow-id", default=1, type=int, help="The mx2 justin workflow id for making cafs. This is required for the options [ run-caf-pandora-spine-mx2, run-caf-pandora-mx2, run-caf-spine-mx2 ].") 
+    parser.add_option("--spine-workflow-id", dest="spine-workflow-id", default=1, type=int, help="The justin workflow id used to produce the spine files. This is required for the options [ run-caf-pandora-spine-mx2, run-caf-pandora-spin ].")
+    parser.add_option("--mx2-workflow-id", dest="mx2-workflow-id", default=772, type=int, help="The mx2 justin workflow id used to produce the mx2 files. This is required for the options [ run-caf-pandora-spine-mx2, run-caf-pandora-mx2, run-caf-spine-mx2 ].") 
 
     parser.add_option("--data", dest="data", default=False, action="store_true", help="processing real data")
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
@@ -198,7 +198,7 @@ def _CheckDatasetForCafWorkflow( opts ) :
     success   = False
     data_tier = ""
 
-    if opts["run-caf-pandora-spine-mx2"] or opts["run-caf-pandora-spine"] or opts["run-pandora-mx2"] or opts["run-pandora"] :
+    if opts["run-caf-pandora-spine-mx2"] or opts["run-caf-pandora-spine"] or opts["run-caf-pandora-mx2"] or opts["run-caf-pandora"] :
        data_tier = "pandora-reconstruction"        
     elif opts["run-caf-spine-mx2"] or opts["run-caf-spine"] :
        data_tier = "spine-reconstruction"    
@@ -207,9 +207,9 @@ def _CheckDatasetForCafWorkflow( opts ) :
     else :
        sys.exit("Unable to determine if the correct dataset is deployed for the caf workflow.\n")
 
-    cmd  = "metacat query -s \"files from %s where (core.data_tier=%s)\" | grep -i Files | cut -f2 -d':'" % (dataset,data_tier) 
-    proc = proc.communicate()[0].decode('ascii')
-    pipe   = proc.communicate()[0].decode('ascii') 
+    cmd  = "metacat query -s \"files from %s where (core.data_tier=%s)\" | grep -i Files | cut -f2 -d':'" % (opts["dataset"],data_tier) 
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True) 
+    pipe = proc.communicate()[0].decode('ascii')
     if proc.returncode != 0 :
        sys.exit("Failed in sanity check for caf  workflow.\n")
 

@@ -110,10 +110,10 @@ parse_matching_mx2_file()
    (
        source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
        setup python ${PYTHON_VERSION}
-       
-       echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input-file=${did} --minerva-file=${MX2_FILENAME} ].\n" 2>&1 | tee -a $envlog
-       #python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input-file=${did} --minerva-file=${MX2_FILENAME}
-       python /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input-file=${did} --minerva-file=${MX2_FILENAME}
+       setup root ${ROOT_VERSION} -q ${ROOT_QUALIFIER}   
+   
+       echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input_file=${did} --minerva_file=${MX2_FILENAME} ].\n" 2>&1 | tee -a $envlog
+       python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/ParseMatchedMx2Data.py --input_file=${did} --minerva_file=${MX2_FILENAME}
    ) 
 
    namespace="matched_mx2"
@@ -152,13 +152,14 @@ execute_cafmaker_workflow()
    echo -e "Enter executing the caf maker workflow for data stream [${DATA_STREAM}] and input file [${INPUT_FILE}]" 2>&1 | tee -a $envlog
    cd ${WORKSPACE}
 
-   DATA_FILES_ARRAY=()
-   DATA_FILES_ARRAY+=("${INPUT_FILE}")
-   for filename on "${MATCHED_FILES[@]}" ;
+   DATA_FILES=""
+   for filename in "${MATCHED_FILES[@]}" ;
    do 
-       DATA_FILES_ARRAY+=("${filename}")
+       DATA_FILES+="${filename}"
+       DATA_FILES+=","
    done
-   echo -e "\tThe number of input files are [${#DATA_FILES_ARRAY[@]}]" 2>&1 | tee -a $envlog
+   DATA_FILES+="${INPUT_FILE}"
+   echo -e "\tThe input files are [${DATA_FILES}]" 2>&1 | tee -a $envlog
 
    if [[ "${RUN_CAF_MX2}" == "1" ]]; then
       IFS='_' read -a flist <<< "${INPUT_FILE}"
@@ -172,21 +173,14 @@ execute_cafmaker_workflow()
    (
        source ${CVMFS_WORKING_DIR}/cafmaker/ND_CAFMaker/ndcaf_setup.sh 
 
-       echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles=${DATA_FILES_ARRAY[@]} --outfile=${CAF_OUTPUT_FILE} ].\n" 2>&1 | tee -a $envlog
-       #python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES_ARRAY[@]}" --outfile=${CAF_OUTPUT_FILE}
-       python /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES_ARRAY[@]}" --outfile=${CAF_OUTPUT_FILE}
+       echo -e "\tRunning the command [ python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles=${DATA_FILES} --outfile=${CAF_OUTPUT_FILE} ].\n" 2>&1 | tee -a $envlog
+       python ${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MakeCafFhiclFile.py --infiles="${DATA_FILES}" --outfile=${CAF_OUTPUT_FILE}
 
        echo -e "\tRunning the command [ export CAFFCLFILE=`ls *.fcl` ].\n" 2>&1 | tee -a $envlog
        export CAFFCLFILE=`ls *.fcl`
 
        echo -e "\tRunning the command [ makeCAF --fcl=${CAFFCLFILE} ].\n" 2>&1 | tee -a $envlog
        makeCAF --fcl=${CAFFCLFILE}
-
-       ncafs=`ls *CAF* | wc -l`
-       if [[ "$ncafs" -le 0 ]]; then
-           echo -e "FATAL::The cafmaker did not produced any caf files. Will not continue." 2>&1 | tee -a $envlog
-           exit 0
-       fi  
    )
 
    if [ ! -f ${CAF_OUTPUT_FILE} ]; then
@@ -194,7 +188,14 @@ execute_cafmaker_workflow()
       exit 1
    fi
 
+   CAF_FLAT_OUTPUT_FILE="${CAF_OUTPUT_FILE/.CAF.root/.CAF.flat.root}"
+   if [ ! -f ${CAF_FLAT_OUTPUT_FILE} ]; then
+      echo -e "FATAL::The file [${CAF_FLAT_OUTPUT_FILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
+      exit 1
+   fi
+
    CREATED_FILES+=("${CAF_OUTPUT_FILE}")
+   CREATED_FILES+=("${CAF_FLAT_OUTPUT_FILE}")
  
    echo -e "Exit executing the caf maker workflow for data stream [${DATA_STREAM}]\n" 2>&1 | tee -a $envlog
 }
@@ -207,24 +208,27 @@ echo -e "\n\n" 2>&1 | tee -a $envlog
 
 if [[ "${RUN_CAF_PANDORA_SPINE_MX2}" == "1" ]]; then 
    export MATCHED_TYPE="spine and mx2"
-   export MATCHING_OPTION="--spine --mx2 --spine-justin=${SPINE_WORKFLOW_ID} --mx2-justin=${MX2_WORKFLOW_ID} "
-   get_matching_files()
-   parse_matching_mx2_file()
+   export MATCHING_OPTION="--spine --mx2 --spine_justin=${SPINE_WORKFLOW_ID} --mx2_justin=${MX2_WORKFLOW_ID}"
+   get_matching_files
+   parse_matching_mx2_file
 
 elif [[ "${RUN_CAF_PANDORA_SPINE}" == "1" ]]; then
      export MATCHED_TYPE="spine"
-     export MATCHING_OPTION="--spine --spine-justin=${SPINE_WORKFLOW_ID} "
-     get_matching_files()
+     export MATCHING_OPTION="--spine --spine_justin=${SPINE_WORKFLOW_ID}"
+     get_matching_files
 
 elif [[ "${RUN_CAF_PANDORA_MX2}" == "1" || "${RUN_CAF_SPINE_MX2}" == "1" ]]; then
      export MATCHED_TYPE="mx2"
-     export MATCHING_OPTION="--mx2  --mx2-justin=${MX2_WORKFLOW_ID} "
-     get_matching_files()
-     parse_matching_mx2_file()
+     export MATCHING_OPTION="--mx2  --mx2_justin=${MX2_WORKFLOW_ID}"
+     get_matching_files
+     parse_matching_mx2_file
 fi
 
-execute_cafmaker_workflow()
+execute_cafmaker_workflow
+
 WORKFLOW+=("cafmaker")
+WORKFLOW+=("cafmaker_flat")
+
 export NAMESPACE="neardet-2x2-lar"
 export APPLICATION_DATA_TIER="caf-analysis"
 
