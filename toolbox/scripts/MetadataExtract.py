@@ -117,21 +117,34 @@ def _EventHelper(name,filename,workflow) :
        if not file or file.IsZombie() :
           return nevts
 
-       tree_name = "None"
        if DATA_TIER == "reco_pandora" :
           tree_name = "LArRecoND"
+          tree = file.Get(tree_name)
 
-       tree = file.Get(tree_name)
+          if name == "GetFirstEvent" :
+             tree.GetEntry(0)
+             evt = tree.event
+          elif name == "GetLastEvent" :
+             n = tree.GetEntries() - 1
+             tree.GetEntry(n)
+             evt = tree.event
+          elif name == "GetEvents" :
+             evt = tree.GetEntries()
 
-       if name == "GetFirstEvent" :
-          tree.GetEntry(0)
-          evt = tree.event
-       elif name == "GetLastEvent" :
-          n = tree.GetEntries() - 1
-          tree.GetEntry(n)
-          evt = tree.event
-       elif name == "GetEvents" :
-          evt = tree.GetEntries()
+       elif DATA_TIER == "caf" :
+          tree = file.cafTree   
+
+          if name == "GetFirstEvent" :
+             evt = tree.GetEntry(0)
+          elif name == "GetLastEvent" :
+             n = tree.GetEntries() - 1
+             evt = tree.GetEntry(n)
+          elif name == "GetEvents" :
+             evt = tree.GetEntries()
+
+       else : 
+          return evt
+
 
     return evt
 
@@ -188,6 +201,8 @@ def _GetConfigFiles(workflow) :
        return COMBINED_CONFIG_FILES
     elif workflow == "pandora" :
        return PANDORA_CONFIG_FILES
+    elif workflow == "cafmaker" or workflow == "cafmaker_flat" :
+       return CAFMAKER_CONFIG_FILES
     else :
        return ""
 
@@ -195,18 +210,10 @@ def _GetConfigFiles(workflow) :
 #+++++++++++++++++++++++++++++++++
 # get the parent file(s)
 #+++++++++++++++++++++++++++++++++
-def _GetParentFiles(workflow,metadata) :
+def _GetParentFiles(metadata) :
     parents = []
     for key, data in metadata.items() :
-        if workflow.find("light") != -1 :
-           if data['core.run_type'].find("light")  != -1 : parents.append(key)
-        elif workflow.find("charge") != -1 :
-           if data['core.run_type'].find("charge") != -1 :  parents.append(key)
-        elif workflow.find("combined") != -1 or workflow.find("pandora") != -1 :  
-           parents.append(key)
-        else :
-           sys.exit( "The workflow [%s] is not implemented" % workflow )
-
+        parents.append(key)
     return parents
 
 
@@ -225,7 +232,7 @@ def _GetDataStream() :
 #+++++++++++++++++++++++++++++++
 # get the run type
 #+++++++++++++++++++++++++++++++
-def _GetRunType() :
+def _GetRunType(workflow) :
    
     word = "-"
     if DETECTOR_CONFIG == "proto_nd" :
@@ -235,8 +242,17 @@ def _GetRunType() :
 
     if DATA_STREAM == "combined" :
        return 'neardet%slar-charge-light' % word
+    elif DATA_STREAM == "light" :
+       return 'neardet%slar-light' % word
+    elif DATA_STREAM == "charge" :
+       return 'neardet%slar-charge' % word
     elif DATA_STREAM == "calibrated" : 
        return 'neardet%slar-reco' % word
+    elif DATA_STREAM == "reco" :
+       if workflow.find("flat") != -1 : 
+           return 'neardet%slar-caf-flat' % word
+       else :
+           return 'neardet%slar-caf' % word
 
     return "None"
 
@@ -262,7 +278,7 @@ def _GetChecksum(filename) :
 def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     
     return_md = {}
-    return_md['core.data_tier']   = tier
+    return_md['core.data_tier']   = "caf-flat-analysis" if workflow == "cafmaker_flat" else tier
     return_md['core.data_stream'] = _GetDataStream()
     return_md['core.end_time']    = -1 if not os.path.exists(filename) else int(os.path.getmtime(filename))
     return_md['core.file_format'] = filename.split(".")[-1]
@@ -279,7 +295,7 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     return_md['dune.config_file']         = _GetConfigFiles(workflow)
     return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW_ID, 'site_name' : JUSTIN_SITE_NAME }
     return_md['dune.output_status']       = "good"
-    return_md['core.run_type']            = _GetRunType()
+    return_md['core.run_type']            = _GetRunType(workflow)
     return_md['core.application.family']  = _GetApplicationFamily()
     return_md['core.application.name']    = tier
     return_md['core.application.version'] = SOFTWARE
@@ -348,7 +364,7 @@ if __name__ == '__main__' :
 
        namespace     = args.namespace
        json_filename = "%s.json" % filename
-       parent_files  = _GetParentFiles(workflows[f].strip(),parent_metadata)
+       parent_files  = _GetParentFiles(parent_metadata)
      
        # set the metadata fields
        metadata_blocks = []
