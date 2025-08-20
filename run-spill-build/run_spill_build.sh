@@ -14,6 +14,8 @@ inBaseDir=$ND_PRODUCTION_OUTDIR_BASE/run-hadd
 nuInDir=$inBaseDir/$ND_PRODUCTION_NU_NAME
 rockInDir=$inBaseDir/$ND_PRODUCTION_ROCK_NAME
 
+[ -z "${ND_PRODUCTION_INDEX_OFFSET}" ] && export ND_PRODUCTION_INDEX_OFFSET=0
+
 if [[ "$ND_PRODUCTION_REUSE_ROCK" == "1" ]]; then
   nNuFiles=$(find $nuInDir/EDEPSIM -type f | wc -l)
   nRockFiles=$(find $rockInDir/EDEPSIM -type f | wc -l)
@@ -22,6 +24,7 @@ if [[ "$ND_PRODUCTION_REUSE_ROCK" == "1" ]]; then
   echo "The rock file reuse rate is $reuseRate"
 
   rockIdx=$((ND_PRODUCTION_INDEX % nRockFiles))
+  rockIdx=$((rockIdx + ND_PRODUCTION_INDEX_OFFSET))
   rockGlobalIdx=$(printf "%07d" "$rockIdx")
 
   rockName=$ND_PRODUCTION_ROCK_NAME.$rockGlobalIdx
