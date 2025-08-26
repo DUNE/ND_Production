@@ -89,7 +89,14 @@ def _GetGlobalSubrun(metadata) :
         # the light file(s) might extend beyond the time period of the charge file
         if config == 'lrs':
             continue
-      
+
+        # HACK: Look up the actual CRS subrun since the metadata currently has subrun=1 everywhere
+        idx = runs_subruns.index(run_subrun)
+        name_in_db = metadata[idx]['name'].replace('.h5', '.hdf5')
+        cmd = "SELECT subrun FROM CRS_summary WHERE filename='%s'" % name_in_db
+        cursor.execute(cmd)
+        sub, = cursor.fetchone()
+
         cmd = "SELECT global_subrun FROM All_global_subruns WHERE %s_run=%d and %s_subrun=%d" % (config,run,config,sub)
         cursor.execute(cmd)
         results = cursor.fetchall()
