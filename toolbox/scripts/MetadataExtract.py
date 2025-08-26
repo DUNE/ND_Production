@@ -318,7 +318,12 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     subrun_list = [m.get('core.runs_subruns') for m in metadata_blocks]
     tmp         = [ n for nums in subrun_list for n in nums ]
     subruns     = list(OrderedDict.fromkeys(tmp))
-    return_md['core.runs_subruns'] = subruns
+    # return_md['core.runs_subruns'] = subruns
+
+    # Setting runs_subruns can lead to confusion, since it isn't obvious whether
+    # we're specifying the charge or the light subruns, or both (in which case,
+    # there's no simple way to distinguish the two). So, just leave it blank?
+    return_md['core.runs_subruns'] = []
 
     # get the global subrun number
     if metadata_blocks[0].get('core.data_tier') == "raw" : 
