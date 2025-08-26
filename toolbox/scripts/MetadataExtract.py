@@ -76,9 +76,9 @@ def _GetGlobalSubrun(metadata) :
         run    = int(run_subrun[0][0])
         sub    = int(int(run_subrun[1][0]) - run*1e5)
 
-        if run_subrun[2] == "neardet-2x2-lar-light" :
+        if run_subrun[2] in ["neardet-2x2-lar-light", "neardet-fsd-lar-light"] :
            config = "lrs"
-        elif run_subrun[2] == "neardet-2x2-lar-charge" :
+        elif run_subrun[2] in ["neardet-2x2-lar-charge", "neardet-fsd-lar-charge"]:
            config = "crs"
         else :
            print("\tThe run_type [%s] is not implemented. Cannot get the metadata." % run_subrun[2])
