@@ -83,6 +83,12 @@ def _GetGlobalSubrun(metadata) :
         else :
            print("\tThe run_type [%s] is not implemented. Cannot get the metadata." % run_subrun[2])
            return []
+
+        # We really only need the global subruns corresponding to the charge
+        # file, since the charge file maps one-to-one to the processed file, and
+        # the light file(s) might extend beyond the time period of the charge file
+        if config == 'lrs':
+            continue
       
         cmd = "SELECT global_subrun FROM All_global_subruns WHERE %s_run=%d and %s_subrun=%d" % (config,run,config,sub)
         cursor.execute(cmd)
