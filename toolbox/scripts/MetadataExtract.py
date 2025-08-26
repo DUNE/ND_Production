@@ -98,7 +98,7 @@ def _GetGlobalSubrun(metadata) :
     connect.close()
 
     global_values = list(OrderedDict.fromkeys(global_values))
-    return global_values
+    return sorted(global_values)
     
 
 #++++++++++++++++++++++++++++
