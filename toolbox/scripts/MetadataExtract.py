@@ -90,7 +90,8 @@ def _GetGlobalSubrun(metadata) :
         if config == 'lrs':
             continue
 
-        # HACK: Look up the actual CRS subrun since the metadata currently has subrun=1 everywhere
+        # HACK: Look up the actual CRS subrun since, for FSD, the metadata
+        # currently has subrun=1 everywhere
         idx = runs_subruns.index(run_subrun)
         name_in_db = metadata[idx]['name'].replace('.hdf5', '.h5')
         cmd = "SELECT subrun FROM CRS_summary WHERE filename='%s'" % name_in_db
@@ -387,6 +388,7 @@ if __name__ == '__main__' :
        # set the metadata fields
        metadata_blocks = []
        for parent_file in parent_files :
+           parent_metadata[parent_file]['name'] = parent_file.split(':')[1] # TMP4HACK
            metadata_blocks.append( parent_metadata[parent_file] )
            metadata['parents'].append( {"did":parent_file} )
 
