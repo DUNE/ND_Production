@@ -92,7 +92,7 @@ def _GetGlobalSubrun(metadata) :
 
         # HACK: Look up the actual CRS subrun since the metadata currently has subrun=1 everywhere
         idx = runs_subruns.index(run_subrun)
-        name_in_db = metadata[idx]['name'].replace('.h5', '.hdf5')
+        name_in_db = metadata[idx]['name'].replace('.hdf5', '.h5')
         cmd = "SELECT subrun FROM CRS_summary WHERE filename='%s'" % name_in_db
         cursor.execute(cmd)
         sub, = cursor.fetchone()
