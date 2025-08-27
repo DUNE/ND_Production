@@ -86,7 +86,7 @@ def gen_metadata(path):
     cmd += f' --workflow {ARGS.workflow} --tier {ARGS.tier}'
     cmd += f' --namespace {ARGS.namespace}'
     print(cmd)
-    # os.system(cmd)
+    os.system(cmd)
 
 
 def main():
