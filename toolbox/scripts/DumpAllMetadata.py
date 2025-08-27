@@ -102,7 +102,7 @@ def main():
         print(f'Queuing: {path}')
         paths.append(path)
 
-    pool.starmap(gen_metadata, paths)
+    pool.map(gen_metadata, paths)
 
 
 if __name__ == '__main__':
