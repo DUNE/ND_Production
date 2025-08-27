@@ -103,3 +103,7 @@ def main():
         paths.append(path)
 
     pool.starmap(gen_metadata, paths)
+
+
+if __name__ == '__main__':
+    main()
