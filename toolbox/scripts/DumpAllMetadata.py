@@ -82,7 +82,7 @@ def set_environ():
 
 def gen_metadata(path):
     parents = get_parents(path)
-    cmd = f'python MetaDataExtract.py --input {path} --parents {parents}'
+    cmd = f'python MetadataExtract.py --input {path} --parents {parents}'
     cmd += f' --workflow {ARGS.workflow} --tier {ARGS.tier}'
     cmd += f' --namespace {ARGS.namespace}'
     print(cmd)
