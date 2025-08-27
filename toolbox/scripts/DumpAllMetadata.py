@@ -60,7 +60,7 @@ def parse_args():
                     default='combined')
     # NB: reco = caf; calibrated = spine/pandora:
     ap.add_argument('--stream', choices=['combined', 'calibrated', 'reco'],
-                    required=True)
+                    default='combined')
     ap.add_argument('--release', help='Software release', required=True)
     ap.add_argument('--namespace', default='neardet-2x2-lar')
     ap.add_argument('--replace', action='store_true',
