@@ -92,7 +92,7 @@ def gen_metadata(path):
 def main():
     parse_args()
     set_environ()
-    pool = Pool(ARGS.nproc)
+    pool = Pool(ARGS.parallel)
     paths = []
 
     for path in Path(ARGS.dir).rglob(f'*.{ARGS.ext}'):
