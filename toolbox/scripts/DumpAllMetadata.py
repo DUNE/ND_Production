@@ -22,7 +22,7 @@ def packet2raw(packet_path):
 
 
 def packet2flow(packet_path):
-    return Path(packet_path).name.replace('.h5', '.hdf5')
+    return Path(packet_path).name.replace('.h5', '.FLOW.hdf5')
 
 
 @lru_cache
