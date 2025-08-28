@@ -17,4 +17,4 @@ export LD_LIBRARY_PATH=/opt/generators/genie/lib:$LD_LIBRARY_PATH
 #     ND_PRODUCTION_INDEX=$i ./run_convert2User.sh "$@" &
 # done
 
-./run_convert2User.sh "$@"
+./run_validation.sh "$@"
