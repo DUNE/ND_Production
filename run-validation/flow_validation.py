@@ -580,7 +580,17 @@ def main(flow_file, charge_only):
             fractions = flow_h5['mc_truth/packet_fraction/data']['fraction']
             summed_fractions = fractions.sum(axis=-1)
             fig, ax = plt.subplots(constrained_layout = True)
-            ax.hist(summed_fractions, bins= np.arange(-0.05, summed_fractions.max(), 0.1))
+            ax.hist(summed_fractions, bins= np.arange(-0.05, 10, 0.1))
+            ax.set_title("Sum of packet fractions in each event, range = [-0.05, 10]")
+            ax.set_yscale('log')
+            ax.set_xlabel("Sum")
+            ax.set_ylabel("Count")
+
+            output.savefig()
+            plt.close()
+
+            fig, ax = plt.subplots(constrained_layout = True)
+            ax.hist(summed_fractions, bins= 50)
             ax.set_title("Sum of packet fractions in each event")
             ax.set_yscale('log')
             ax.set_xlabel("Sum")
