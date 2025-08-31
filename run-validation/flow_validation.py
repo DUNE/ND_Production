@@ -576,12 +576,12 @@ def main(flow_file, charge_only):
 
         # Check the sums of the fraction field for charge deposition. They should add to 1.
         if 'mc_truth' in flow_h5.keys():
-            print("Plotting packet fractions sum for each event")
-            fractions = flow_h5['mc_truth/packet_fraction/data']['fraction']
+            print("Plotting packet fractions sum for each calib hit")
+            fractions = flow_h5['mc_truth/calib_prompt_hit_backtrack/data']['fraction']
             summed_fractions = fractions.sum(axis=-1)
             fig, ax = plt.subplots(constrained_layout = True)
             ax.hist(summed_fractions, bins= np.arange(-0.05, 10, 0.1))
-            ax.set_title("Sum of packet fractions in each event, range = [-0.05, 10]")
+            ax.set_title("Sum of packet fractions for each calib hit, range = [-0.05, 10]")
             ax.set_yscale('log')
             ax.set_xlabel("Sum")
             ax.set_ylabel("Count")
@@ -591,13 +591,26 @@ def main(flow_file, charge_only):
 
             fig, ax = plt.subplots(constrained_layout = True)
             ax.hist(summed_fractions, bins= 50)
-            ax.set_title("Sum of packet fractions in each event")
+            ax.set_title("Sum of packet fractions for each calib hit")
             ax.set_yscale('log')
             ax.set_xlabel("Sum")
             ax.set_ylabel("Count")
 
             output.savefig()
             plt.close() 
+
+            print("Plotting number of backtracked segments per calib hit")
+            bt = flow_h5['/mc_truth/calib_prompt_hit_backtrack/data']
+            n_backtracked = (bt['segment_ids']!=-1).sum(axis=-1)
+
+            fig, ax = plt.subplots(constrained_layout = True)
+            ax.hist(n_backtracked, bins= np.arange(-0.5, n_backtracked.max()+0.5, 1))
+            ax.set_title("Number of backtracked segments in each calib hit")
+            ax.set_xlabel("Number of backtracked segments")
+            ax.set_ylabel("Count")
+
+            output.savefig()
+            plt.close()
 
             print("Plotting comparison of true segment position vs hit position")
             segs = flow_h5['/mc_truth/segments/data']
