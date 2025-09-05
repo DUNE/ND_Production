@@ -21,12 +21,15 @@ def main():
     the_json = json.load(open(args.input_json))
 
     for rec in the_json:
-        dst_files = rec['ND_PRODUCTION_MINERVA_FILES'].split()
-        raw_files = []
-        for dst_file in dst_files:
-            prefix = '_'.join(Path(dst_file).name.split('_')[:5])
-            raw_files.append(mapper[prefix])
-        rec['ND_PRODUCTION_MINERVA_FILES'] = ' '.join(raw_files)
+        try:
+            dst_files = rec['ND_PRODUCTION_MINERVA_FILES'].split()
+            raw_files = []
+            for dst_file in dst_files:
+                prefix = '_'.join(Path(dst_file).name.split('_')[:5])
+                raw_files.append(mapper[prefix])
+            rec['ND_PRODUCTION_MINERVA_FILES'] = ' '.join(raw_files)
+        except KeyError:
+            print(f'Could not find {rec["ND_PRODUCTION_MINERVA_FLES"]}')
 
     json.dump(the_json, open(args.output_json, 'w'), indent=4)
 
