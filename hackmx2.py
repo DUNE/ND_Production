@@ -13,18 +13,18 @@ def main():
     args = ap.parse_args()
 
     mapper = {}
-    for l in open(args.mx2_file_list):
+    for l in open(args.mx2_list_file):
         raw_fname = l.strip()
         prefix = '_'.join(raw_fname.split('_')[:5])
         mapper[prefix] = raw_fname
 
-    the_json = json.read(open(args.input_json))
+    the_json = json.load(open(args.input_json))
 
     for i, rec in the_json:
         dst_files = rec['ND_PRODUCTION_MINERVA_FILES'].split()
         raw_files = []
         for dst_file in dst_files:
-            prefix = '_'.join(dst_File.split('_')[:5])
+            prefix = '_'.join(dst_files.split('_')[:5])
             raw_files.append(mapper[prefix])
         rec['ND_PRODUCTION_MINERVA_FILES'] = ' '.join(raw_files)
 
