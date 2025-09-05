@@ -24,7 +24,7 @@ def main():
         dst_files = rec['ND_PRODUCTION_MINERVA_FILES'].split()
         raw_files = []
         for dst_file in dst_files:
-            prefix = '_'.join(dst_file.split('_')[:5])
+            prefix = '_'.join(Path(dst_file).name.split('_')[:5])
             raw_files.append(mapper[prefix])
         rec['ND_PRODUCTION_MINERVA_FILES'] = ' '.join(raw_files)
 
