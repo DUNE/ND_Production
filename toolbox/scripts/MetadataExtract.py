@@ -408,7 +408,7 @@ if __name__ == '__main__' :
 
        metadata_block = _GetMetadata(metadata_blocks,filename,workflows[f],args.tier)
 
-       metadata['name']      = filename
+       metadata['name']      = os.path.basename(filename)
        metadata['namespace'] = namespace
 
        metadata['creator']   = USER
