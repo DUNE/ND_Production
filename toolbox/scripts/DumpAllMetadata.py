@@ -64,7 +64,7 @@ def caf2flow(path: Path):
 
 @lru_cache
 def read_filelist():
-    "Returns a dict that maps flow filenames to the associated raw data"
+    "Returns a dict that maps raw charge filenames to the associated light/Mx2 data"
     result = {}
     groups = json.load(open(ARGS.filelist))
 
@@ -72,26 +72,23 @@ def read_filelist():
         pktfile = group['ND_PRODUCTION_CHARGE_FILE']
         lfiles = [Path(p).name
                   for p in group['ND_PRODUCTION_LIGHT_FILES'].split()]
-        flowfile = packet2flow(pktfile)
         rawfile = packet2raw(pktfile)
-        result[flowfile] = {'charge': [rawfile],
-                            'light': lfiles}
+        result[rawfile] = {'light': lfiles}
 
         if 'ND_PRODUCTION_MINERVA_FILES' in group:
             mx2files = [Path(p).name
                         for p in group['ND_PRODUCTION_MINERVA_FILES'].split()]
-            result[flowfile]['minerva'] = mx2files
+            result[rawfile]['minerva'] = mx2files
 
     return result
 
 
 def get_parents(path):
     if ARGS.stage == 'flow':
-        rawdata = read_filelist()[path.name]
-        assert len(rawdata['charge']) == 1
-        qfile = rawdata['charge'][0]
+        rawfile = flow2raw(path)
+        rawdata = read_filelist()[rawfile]
         lfiles = rawdata['light']
-        parents = [f'neardet-2x2-lar-charge:{qfile}',
+        parents = [f'neardet-2x2-lar-charge:{rawfile}',
                    *[f'neardet-2x2-lar-light:{lfile}' for lfile in lfiles]]
 
         if 'minerva' in rawdata:
