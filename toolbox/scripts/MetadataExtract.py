@@ -81,6 +81,8 @@ def _GetGlobalSubrun(metadata) :
            config = "lrs"
         elif run_subrun[2] in ["neardet-2x2-lar-charge", "neardet-fsd-lar-charge"]:
            config = "crs"
+        elif run_subrun[2] == 'neardet-2x2-minerva':
+           config = "mx2"
         else :
            print("\tThe run_type [%s] is not implemented. Cannot get the metadata." % run_subrun[2])
            return []
@@ -88,7 +90,7 @@ def _GetGlobalSubrun(metadata) :
         # We really only need the global subruns corresponding to the charge
         # file, since the charge file maps one-to-one to the processed file, and
         # the light file(s) might extend beyond the time period of the charge file
-        if config == 'lrs':
+        if config in ['lrs', 'mx2']:
             continue
 
         # HACK: Look up the actual CRS subrun since, for FSD, the metadata
