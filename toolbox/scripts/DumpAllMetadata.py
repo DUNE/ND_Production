@@ -117,16 +117,9 @@ def parse_args():
     ap.add_argument('--config', choices=['proto_nd', 'fsd'], required=True)
     ap.add_argument('--period', default='run1')
     ap.add_argument('--stage', choices=['flow', 'pandora', 'spine', 'caf', 'caf_flat'])
-    ap.add_argument('--tier', choices=['flow', 'reco_pandora', 'reco_spine', 'caf'],
-                    default='flow')
     # Need to add spine:
-    ap.add_argument('--workflow', choices=['combined', 'pandora', 'cafmaker', 'cafmaker_flat'],
-                    default='combined')
     # NB: reco = caf; calibrated = spine/pandora:
-    ap.add_argument('--stream', choices=['combined', 'calibrated', 'reco'],
-                    default='combined')
     ap.add_argument('--release', help='Software release', required=True)
-    ap.add_argument('--namespace', default='neardet-2x2-lar')
     ap.add_argument('--replace', action='store_true',
                     help='Replace existing metadata')
     ap.add_argument('--parallel', type=int, default=1,
@@ -169,6 +162,13 @@ def get_namespace():
         return 'neardet-2x2-lar'
 
 
+def get_ext():
+    if ARGS.stage in ['flow', 'spine']:
+        return 'hdf5'
+    else:
+        return 'root'
+
+
 def set_environ():
     os.environ.update(
         {'DETECTOR_CONFIG': ARGS.config,
@@ -193,7 +193,7 @@ def main():
     pool = Pool(ARGS.parallel)
     paths = []
 
-    for path in Path(ARGS.dir).rglob(f'*.{ARGS.ext}'):
+    for path in Path(ARGS.dir).rglob(f'*.{get_ext()}'):
         jsonpath = path.with_suffix(path.suffix + '.json')
         if jsonpath.exists() and not ARGS.replace:
             continue
