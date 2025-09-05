@@ -11,9 +11,17 @@ from pathlib import Path
 ARGS = None
 
 
+def strip_exts(filename, n_exts):
+    "Strip `n_exts` extensions from a filename"
+    for i in range(n_exts):
+        filename = Path(filename).stem
+    return filename
+
+
 def flow2raw(flow_path):
-    return Path(flow_path).name.replace('packet-', 'binary-') \
-                               .replace('.FLOW.hdf5', '.hdf5')
+    # Assume our flow file ends in e.g. .v11.FLOW.hdf5
+    filename =  Path(flow_path).name.replace('packet-', 'binary-')
+    return strip_exts(filename, 3) + '.hdf5'
 
 
 def packet2raw(packet_path):
