@@ -78,7 +78,7 @@ def read_filelist():
 
 
 def get_parents(path):
-    if ARGS.tier == 'flow':
+    if ARGS.stage == 'flow':
         rawdata = read_filelist()[path.name]
         assert len(rawdata['charge']) == 1
         qfile = rawdata['charge'][0]
@@ -90,11 +90,11 @@ def get_parents(path):
             parents.extend(f'neardet-2x2-minerva:{mx2file}'
                            for mx2file in rawdata['minerva'])
 
-    elif ARGS.tier in ['reco_pandora', 'reco_spine']:
+    elif ARGS.stage in ['pandora', 'spine']:
         flowfile = reco2flow(path)
         parents = [f'neardet-2x2-lar:{flowfile}']
 
-    elif ARGS.tier == 'caf':
+    elif ARGS.stage in ['caf', 'caf_flat']:
         pandora = caf2pandora(path)
         spine = caf2spine(path)
         parents = [f'neardet-2x2-lar:{pandora}', f'neardet-2x2-lar:{spine}']
