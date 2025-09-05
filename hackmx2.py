@@ -14,7 +14,7 @@ def main():
 
     mapper = {}
     for l in open(args.mx2_file_list):
-        raw_fname = l.strip():
+        raw_fname = l.strip()
         prefix = '_'.join(raw_fname.split('_')[:5])
         mapper[prefix] = raw_fname
 
