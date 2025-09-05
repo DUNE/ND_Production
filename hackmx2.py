@@ -29,7 +29,7 @@ def main():
                 raw_files.append(mapper[prefix])
             rec['ND_PRODUCTION_MINERVA_FILES'] = ' '.join(raw_files)
         except KeyError:
-            print(f'Could not find {rec["ND_PRODUCTION_MINERVA_FLES"]}')
+            print(f'Could not find {rec["ND_PRODUCTION_MINERVA_FILES"]}')
 
     json.dump(the_json, open(args.output_json, 'w'), indent=4)
 
