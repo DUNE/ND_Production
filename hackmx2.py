@@ -20,11 +20,11 @@ def main():
 
     the_json = json.load(open(args.input_json))
 
-    for i, rec in the_json:
+    for rec in the_json:
         dst_files = rec['ND_PRODUCTION_MINERVA_FILES'].split()
         raw_files = []
         for dst_file in dst_files:
-            prefix = '_'.join(dst_files.split('_')[:5])
+            prefix = '_'.join(dst_file.plit('_')[:5])
             raw_files.append(mapper[prefix])
         rec['ND_PRODUCTION_MINERVA_FILES'] = ' '.join(raw_files)
 
