@@ -27,6 +27,7 @@ LIGHT_CONFIG_FILES    = str(os.environ.get('LIGHT_CONFIG_FILES'))
 CHARGE_CONFIG_FILES   = str(os.environ.get('CHARGE_CONFIG_FILES'))
 COMBINED_CONFIG_FILES = str(os.environ.get('COMBINED_CONFIG_FILES'))
 PANDORA_CONFIG_FILES  = str(os.environ.get('PANDORA_SETTINGS'))
+SPINE_CONFIG_FILES    = str(os.environ.get('SPINE_SETTINGS'))
 CAFMAKER_CONFIG_FILES = str(os.environ.get('CAFFCLFILE'))
 JUSTIN_WORKFLOW_ID    = str(os.environ.get('JUSTIN_WORKFLOW_ID'))
 JUSTIN_SITE_NAME      = str(os.environ.get('JUSTIN_SITE_NAME')) 
@@ -116,15 +117,22 @@ def _EventHelper(name,filename,workflow) :
     evt = -1
 
     if filename.find(".hdf5") != -1 :
-       with h5py.File(filename,'r') as f :
-            evts = f['combined/t0/data'] if workflow == "combined" else f['%s/events/data' % workflow]
+        with h5py.File(filename,'r') as f :
+            if DATA_TIER == 'flow':
+                evts = f['combined/t0/data'] if workflow == "combined" else f['%s/events/data' % workflow]
 
-            if name == "GetFirstEvent" :
-               evt = evts[0][0].item()
-            elif name == "GetLastEvent" :
-               evt = evts[-1][0].item()
-            elif name == "GetEvents" :
-               evt = evts.len()
+                if name == "GetFirstEvent" :
+                    evt = evts[0][0].item()
+                elif name == "GetLastEvent" :
+                    evt = evts[-1][0].item()
+                elif name == "GetEvents" :
+                    evt = evts.len()
+
+            elif DATA_TIER == 'spine':
+                if name == "GetFirstEvent":
+                    evt = 0
+                elif name in ["GetLastEvent", "GetEvents"]:
+                    evt = len(f['events'])
 
     elif filename.find(".root") != -1 :
        file = ROOT.TFile.Open(filename, "READ")
@@ -215,6 +223,8 @@ def _GetConfigFiles(workflow) :
        return COMBINED_CONFIG_FILES
     elif workflow == "pandora" :
        return PANDORA_CONFIG_FILES
+    elif workflow == "spine" :
+        return SPINE_CONFIG_FILES
     elif workflow == "cafmaker" or workflow == "cafmaker_flat" :
        return CAFMAKER_CONFIG_FILES
     else :
