@@ -234,7 +234,7 @@ def _GetParentFiles(metadata) :
 #+++++++++++++++++++++++++++++++
 # get the data stream
 #+++++++++++++++++++++++++++++++
-def _GetDataStream() :
+def _GetDataStream(metadata_blocks) :
     if DETECTOR_CONFIG == "proto_nd" :
        return "numibeam"
     elif DETECTOR_CONFIG == "fsd" :
@@ -293,7 +293,7 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     
     return_md = {}
     return_md['core.data_tier']   = "caf-flat-analysis" if workflow == "cafmaker_flat" else tier
-    return_md['core.data_stream'] = _GetDataStream()
+    return_md['core.data_stream'] = _GetDataStream(metadata_blocks)
     return_md['core.end_time']    = -1 if not os.path.exists(filename) else int(os.path.getmtime(filename))
     return_md['core.file_format'] = filename.split(".")[-1]
     return_md['core.file_type']   = metadata_blocks[0].get('core.file_type')
