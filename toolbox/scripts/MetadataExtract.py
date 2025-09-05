@@ -381,6 +381,8 @@ if __name__ == '__main__' :
 
    for parent in parents :
        info = client.get_file(did=parent,with_metadata=True,with_provenance=True,with_datasets=False)
+       if info is None:
+           raise ValueError(f'MetaCat cannot find {parent}')
        parent_metadata[parent] = info['metadata']
 
    # loop over the input file names
