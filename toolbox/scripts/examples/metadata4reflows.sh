@@ -14,7 +14,7 @@ python DumpAllMetadata.py --stage flow --release v1.5.0 --dir $base_2x2/flow --f
 
 python DumpAllMetadata.py --stage pandora --release v01-02-02 --dir $base_2x2/pandora --filelist $filelist_2x2 --config proto_nd --replace --parallel 10
 
-SPINE_SETTINGS=2x2_full_chain_data_240819.cfg python DumpAllMetadata.py --stage spine --release 6a44ceffe56 --dir $base_2x2/spine --filelist $filelist_2x2 --config proto_nd --replace --parallel 10
+SPINE_SETTINGS=2x2_full_chain_data_240819.cfg python DumpAllMetadata.py --stage spine --release 6a44cef --dir $base_2x2/spine --filelist $filelist_2x2 --config proto_nd --replace --parallel 10
 
 python DumpAllMetadata.py --stage caf --release 8ad48f2 --dir $base_2x2/caf --filelist $filelist_2x2 --config proto_nd --replace --parallel 10
 

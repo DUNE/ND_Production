@@ -130,7 +130,7 @@ def _EventHelper(name,filename,workflow) :
                 elif name == "GetEvents" :
                     evt = evts.len()
 
-            elif DATA_TIER == 'spine':
+            elif DATA_TIER == 'reco_spine':
                 if name == "GetFirstEvent":
                     evt = 0
                 elif name in ["GetLastEvent", "GetEvents"]:
