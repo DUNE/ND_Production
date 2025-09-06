@@ -62,6 +62,10 @@ def caf2flow(path: Path):
     return f'{basename}.FLOW.hdf5'
 
 
+def caf2raw(path: Path):
+    return flow2raw(caf2flow(path))
+
+
 @lru_cache
 def read_filelist():
     "Returns a dict that maps raw charge filenames to the associated light/Mx2 data"
@@ -104,7 +108,7 @@ def get_parents(path):
         spine = caf2spine(path)
         parents = [f'neardet-2x2-lar:{pandora}', f'neardet-2x2-lar:{spine}']
 
-        rawdata = read_filelist()[caf2flow(path)]
+        rawdata = read_filelist()[caf2raw(path)]
         if 'minerva' in rawdata:
             parents.extend(f'neardet-2x2-minerva:{mx2file}'
                            for mx2file in rawdata['minerva'])
