@@ -8,7 +8,7 @@ export ND_PRODUCTION_CONTAINER="sim2x2_ndlar011.sif"
 export ND_PRODUCTION_NU_NAME=sand-events
 export ND_PRODUCTION_OUTDIR_BASE=$ND_PRODUCTION_DIR/productions-new-flux
 export ND_PRODUCTION_LOGDIR_BASE=$ND_PRODUCTION_DIR/log-new-flux
-export ND_PRODUCTION_INDEX=0
+export ND_PRODUCTION_INDEX=2
 
 export LD_LIBRARY_PATH=/opt/generators/genie/lib:$LD_LIBRARY_PATH
 

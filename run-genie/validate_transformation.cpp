@@ -1,6 +1,7 @@
 #include "gRooTracker.h"
 #include "TG4Event.h"
 #include <cmath>
+// #include <Vector3D.h>
 // #include <TCanvas.h>
 // #include <TView3D.h>
 // #include <TPolyLine3D.h>
@@ -25,14 +26,22 @@ void validate_transformation(std::string ghep_fname, std::string gtrac_fname){
 
     TVector3* nuMomentum = nullptr;
     TLorentzVector* nuOrigin = nullptr;
+    TVector3* nuDistance = new TVector3();
     double EvtVtx[4];
 
     // input ghep file
-    std::unique_ptr<TFile> ghep_file(TFile::Open(ghep_fname.c_str(), "READ"));
+    std::unique_ptr<TFile> ghep_file(TFile::Open(ghep_fname.c_str(), "UPDATE"));
     // input ghep tree
-    std::unique_ptr<TTree> userNuTree(ghep_file->Get<TTree>("tNuUser"));
+    std::unique_ptr<TTree> userNuTree(ghep_file->Get<TTree>("tNuInfo"));
     userNuTree->SetBranchAddress("userNuMomentum", &nuMomentum);
     userNuTree->SetBranchAddress("userNuOrigin", &nuOrigin);
+
+    TBranch* branchDistance = userNuTree->GetBranch("nuDistance");
+    if (!branchDistance) {
+        branchDistance = userNuTree->Branch("nuDistance", "TVector3", &nuDistance);
+    } else {
+        userNuTree->SetBranchAddress("nuDistance", &nuDistance);
+    }
 
     // input gtrac file
     std::unique_ptr<TFile> gtrac_file(TFile::Open(gtrac_fname.c_str(), "READ"));
@@ -46,37 +55,42 @@ void validate_transformation(std::string ghep_fname, std::string gtrac_fname){
     for (int i = 0; i < userNuTree->GetEntries(); i++){ 
 
         std::cout<<"*****EVENT NR******* "<<i<<std::endl;
-
-        gRooTrk->GetEntry(i);
+        
         userNuTree->GetEntry(i);
+        gRooTrk->GetEntry(i);
 
         // take the distance between neutrino origin (nuOrigin) and neutrino interaction vertex (EvtVtx)
-        double x_nuDistance = EvtVtx[0] - nuOrigin->X();
-        double y_nuDistance = EvtVtx[1] - nuOrigin->Y();
-        double z_nuDistance = EvtVtx[2] - nuOrigin->Z();
-        TVector3 nuDistance(x_nuDistance, y_nuDistance, z_nuDistance);
+        long double x_nuDistance = EvtVtx[0] - nuOrigin->X();
+        long double y_nuDistance = EvtVtx[1] - nuOrigin->Y();
+        long double z_nuDistance = EvtVtx[2] - nuOrigin->Z();
+        *nuDistance = TVector3(x_nuDistance, y_nuDistance, z_nuDistance);
+
+        std::cout<<"X "<<EvtVtx[0]<<" - "<<nuOrigin->X()<<std::endl;
+        std::cout<<"Y "<<EvtVtx[1]<<" - "<<nuOrigin->Y()<<std::endl;
+        std::cout<<"Z "<<EvtVtx[2]<<" - "<<nuOrigin->Z()<<std::endl;
 
         // print the two vectors: distance and momentum
-        std::cout<<"Vector distance: "<<nuDistance<<std::endl;
-        std::cout<<"Momentum: "<<*nuMomentum<<std::endl;
-        std::cout<<"Distance (norm): "<<norm(nuDistance)<<std::endl;
+        // std::cout<<"Vector distance: "<<nuDistance<<std::endl;
+        // std::cout<<"Momentum: "<<*nuMomentum<<std::endl;
+        // std::cout<<"Distance (norm): "<<norm(*nuDistance)<<std::endl;
 
         // compute dot product
-        double product = dotProduct(nuDistance, *nuMomentum);
+        double product = dotProduct(*nuDistance, *nuMomentum);
 
-        double cosine = abs(product / (norm(nuDistance)*norm(*nuMomentum)));
+        double cosine = abs(product / (norm(*nuDistance)*norm(*nuMomentum)));
 
-        std::cout<<"cosine "<<cosine<<std::endl;
+        // std::cout<<"cosine "<<cosine<<std::endl;
 
-        if (cosine >= 0.9) {
-            nr_aligned++;
-            std::cout<<"Ok, the product is: "<<product<<" and the cosine is "<<cosine<<std::endl;
-        }
-        else {
-            std::cout<<"Not aligned! The product is: "<<product<<" and the cosine is "<<cosine<<std::endl;
-            std::cout<<"Theta is "<<acos(cosine)<<std::endl;
-        }
+        // if (cosine >= 0.9) {
+        //     nr_aligned++;
+        //     std::cout<<"Ok, the product is: "<<product<<" and the cosine is "<<cosine<<std::endl;
+        // }
+        // else {
+        //     std::cout<<"Not aligned! The product is: "<<product<<" and the cosine is "<<cosine<<std::endl;
+        //     std::cout<<"Theta is "<<acos(cosine)<<std::endl;
+        // }
 
+        branchDistance->Fill();
 
         // TCanvas *c = new TCanvas("c", "nu TOF", 800, 600);
         // TView *view = TView::CreateView(1);
@@ -109,6 +123,8 @@ void validate_transformation(std::string ghep_fname, std::string gtrac_fname){
 
         // c->SaveAs("nu_tof.root");
     }
+    ghep_file->cd();
+    userNuTree->Write("", TObject::kOverwrite);
 
     std::cout<<"nr aligned "<<nr_aligned<<std::endl;
     std::cout<<"nr not aligned "<<userNuTree->GetEntries() - nr_aligned<<std::endl;

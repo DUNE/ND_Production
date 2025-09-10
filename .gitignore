@@ -26,7 +26,16 @@ containers
 prova.sh
 run-genie/maxpath/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.maxpath.xml
 *.gdml
-dk2nu_files_Sept21/flux/GNuMIFlux.xml
+dk2nu_files_old/flux/GNuMIFlux.xml
 *.xml.gz
 run-genie/XSEC/genie_xsec/v3_04_00/NULL/AR2320i00000-k250-e1000/data/gxspl-NUsmall.xml
 myOverlayWithNuTOF.cpp
+*.err
+*.out
+run-genie/submit.sub
+time
+*.sub
+productions-SAND_opt3_DRIFT1/run-spill-build/sand-events/EDEPSIM_SPILLS/0000000/.nfs000000000f07499800000243
+README_old.md
+run-genie/gRooTracker.h
+productions-new-flux/run-genie/sand-events/GHEP/0000000/rootlogon.C
