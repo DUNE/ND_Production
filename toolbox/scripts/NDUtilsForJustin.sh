@@ -13,6 +13,8 @@ export EXTERNAL_RELEASE="v25.3.0-3"
 export CVMFS_TWOBYTWO_DIR="/cvmfs/dune.opensciencegrid.org/dunend/2x2/"
 export CVMFS_WORKING_DIR="${CVMFS_TWOBYTWO_DIR}/releases/${TWOBYTWO_RELEASE}"
 
+export CVMFS_STASHCACHE_DIR="/cvmfs/dune.osgstorage.org/pnfs/fnal.gov/usr/dune/persistent/stash/"
+
 export HDF5_USE_FILE_LOCKING=FALSE
 export OMP_NUM_THREADS=1
 
@@ -29,6 +31,12 @@ export TBB_QUALIFIER="e20"
 
 export ROOT_VERSION="v6_26_06b"
 export ROOT_QUALIFIER="e20:p3913:prof"
+
+export DUNESW_VERSION="v09_78_01d01"
+export DUNESW_QUALIFIER="e20:prof"
+
+export GENIE_VERSION="v3_06_00c"
+export GENIE_QUALIFIER="e26:prof"
 
 export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app
 export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune
@@ -74,28 +82,28 @@ justin_begin_of_job_commands()
     echo -e "\tThe file physical file name (PFN) is [$pfn]" | tee -a $envlog
     echo -e "\tThe file Rucio storage element (RSE) is [$rse]\n" | tee -a $envlog
 
-
     # Get the input filename
     IFS='/' read -r -a array <<< "$pfn"
     export INPUT_FILE="${array[-1]}"
     echo -e "The input file is ${INPUT_FILE}" 2>&1 | tee -a $envlog
 
     # Copy file to local disk
-    echo -e "Using rucio to download file [$did]" 2>&1 | tee -a $envlog
-    (
-         source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
-         source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+    if [ "${rse}" != "MONTECARLO" ]; then 
+       echo -e "Using rucio to download file [$did]" 2>&1 | tee -a $envlog
+       (
+            source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+            source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 
-         setup python ${PYTHON_VERSION}
-         setup rucio
+            setup python ${PYTHON_VERSION}
+            setup rucio
 
-      	 export RUCIO_ACCOUNT=justinreadonly
+      	    export RUCIO_ACCOUNT=justinreadonly
+            rucio download ${did} --dir ${WORKSPACE}
 
-         rucio download ${did} --dir ${WORKSPACE}
-
-         subdir=`echo $did | cut -f1 -d':'`
-         mv ${WORKSPACE}/${subdir}/* ${WORKSPACE}/
-    ) 
+            subdir=`echo $did | cut -f1 -d':'`
+            mv ${WORKSPACE}/${subdir}/* ${WORKSPACE}/
+       ) 
+    fi
 }
 
 
@@ -106,13 +114,23 @@ create_metadata_file()
 {
     echo -e "Creating the metadata json file(s) for the output data file(s) [${CREATED_FILES}]" 2>&1 | tee -a $envlog
 
+    #export METADATA_EXTRACT=/exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/MetadataExtract.py 
     export METADATA_EXTRACT=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MetadataExtract.py 
 
     CREATED_FILES_ARRAY=$( IFS=$','; echo "${CREATED_FILES[*]}" )
     PARENT_FILES_ARRAY=$( IFS=$','; echo "${PARENT_FILES[*]}" ) 
     WORKFLOW_ARRAY=$( IFS=$','; echo "${WORKFLOW[*]}" )
 
-    echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} --input=\"${CREATED_FILES_ARRAY[@]}\" --parents=\"${PARENT_FILES_ARRAY[@]}\" --workflow=\"${WORKFLOW_ARRAY[@]}\" --tier=\"${APPLICATION_DATA_TIER}\" --namespace=\"${NAMESPACE}\"]" 2>&1 | tee -a $envlog
+    ARGS="--input=${CREATED_FILES_ARRAY[@]} --parents=${PARENT_FILES_ARRAY[@]} --workflow=${WORKFLOW_ARRAY[@]} --tier=${APPLICATION_DATA_TIER} --namespace=${NAMESPACE}"
+    if [[ "$1" == "mc" ]]; then
+       ARGS="--mc --input=${CREATED_FILES_ARRAY[@]} --parents=${PARENT_FILES_ARRAY[@]} --workflow=${WORKFLOW_ARRAY[@]} --tier=${APPLICATION_DATA_TIER} --namespace=${NAMESPACE}"
+
+       if [[ "$2" == "genie" ]]; then
+	  ARGS="--mc --input=${CREATED_FILES_ARRAY[@]} --workflow=${WORKFLOW_ARRAY[@]} --tier=${APPLICATION_DATA_TIER} --namespace=${NAMESPACE}"
+       fi 
+    fi
+
+    echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} ${ARGS}]"  2>&1 | tee -a $envlog
     (
        source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
        source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
@@ -122,7 +140,7 @@ create_metadata_file()
        setup h5py v3_1_0d -q e20:p383b:prof
        setup root v6_22_08b -q e20:p383b:prof
 
-       python ${METADATA_EXTRACT} --input="${CREATED_FILES_ARRAY[@]}" --parents="${PARENT_FILES_ARRAY[@]}" --workflow="${WORKFLOW_ARRAY[@]}" --tier="${APPLICATION_DATA_TIER}" --namespace="${NAMESPACE}"
+       python ${METADATA_EXTRACT} ${ARGS} 
     )
 }
 

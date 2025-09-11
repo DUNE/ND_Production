@@ -20,16 +20,18 @@ def _HelpMenu() :
     parser    = OptionParser( formatter = formatter, usage = usage )
 
     # 2x2 job parameters
-    parser.add_option("-d", "--dataset", dest="dataset", type="string", default=None, help="name of the Metacat dataset [required]")
+    parser.add_option("-d", "--dataset", dest="dataset", type="string", default=None, help="name of the Metacat dataset [not required when running GENIE]")
     parser.add_option("-s", "--software", dest="software", type="string", default="v00_00_01d0", help="software release for processing [default: %default]")
-    parser.add_option("-n", "--nfiles", dest="nfiles", type="int", default=-1, help="the number of files to process in the dataset [default is all files in the dataset]") 
+    parser.add_option("-n", "--nfiles", dest="nfiles", type="int", default=-1, help="the number of files to process in the dataset or generate in a submission job [default is all files in the dataset]") 
     parser.add_option("-e", "--nevts", dest="nevts", type="int", default=-1, help="the number of events to process in the option file [default is all events per file]")
     parser.add_option("-j", "--jobscript", dest="jobscript", type="string", default="NDLarFlowProduction.jobscript", help="name of the job processing script [default: %default]")
     parser.add_option("--outdir", dest="outdir", type="string", default="/pnfs/dune/scratch/users/%s/ProductionDataFor2x2"%USER, help="name of the top output directory [default: %default]")
     parser.add_option("--debug", dest="debug", default=False, action="store_true", help="run in debug mode")
-    parser.add_option("--tier", dest="tier", type="string", default="flow", help="the data tier for processing (flow, reco_pandora, reco_spine, caf) [default: %default]")
-    parser.add_option("--stream", dest="stream", type="string", default="", help="the input data stream (light, charge, combined, calibrated, reco) [default: %default]")
+    parser.add_option("--tier", dest="tier", type="string", default="flow", help="the data tier for processing (genie, edep, spill_build, flow, reco_pandora, reco_spine, caf) [default: %default]")
+    parser.add_option("--stream", dest="stream", type="string", default="", help="the input data stream (montecarlo, light, charge, combined, calibrated, reco) [default: %default]")
     parser.add_option("--detector", dest="detector", type="string", default="proto_nd", help="the detector configuration (proto_nd, fsd, ndlar) [default: %default]")
+   
+    parser.add_option("--campaign", dest="campaign", type="string", default=None, help="name of the data or simulated justIN campaign")
 
     parser.add_option("--run-caf-pandora-spine-mx2", dest="run-caf-pandora-spine-mx2", default=False, action="store_true", help="Make cafs for pandora, spine, and mx2 reco. Input dataset must be pandora.")
     parser.add_option("--run-caf-pandora", dest="run-caf-pandora", default=False, action="store_true", help="Make cafs for pandora reco only.")
@@ -44,8 +46,18 @@ def _HelpMenu() :
 
     parser.add_option("--data", dest="data", default=False, action="store_true", help="processing real data")
     parser.add_option("--mc", dest="mc", default=False, action="store_true", help="processing simulated data")
+    parser.add_option("--genie", dest="genie", default=False, action="store_true", help="generate genie event data")
     parser.add_option("--run", dest="run", type="string", default="run1", help="The run period.")
     parser.add_option("--rse", dest="rse", default=False, action="store_true", help="Outputs go to a rucio storage element")
+
+    parser.add_option("--antinu", dest="antinu", default=False, action="store_true", help="Generate the antineutrino beamline")
+    parser.add_option("--nu", dest="nu", default=False, action="store_true", help="Generate the neutrino beamline")
+    parser.add_option("--rock", dest="rock", default=False, action="store_true", help="Generate rock muons")
+    parser.add_option("--pot", dest="pot", default=19, type=int, help="The power value in the protons per target exposure [default: 1e%default]")
+
+    parser.add_option("--sand-geom", dest="sand-geom", default="sand_straw", type="string", help="The SAND geometry [(sand_drift,sand_straw) default: %default] for generating GENIE events.")
+    parser.add_option("--hadd", dest="hadd", default=10, type=int, help="The number of simulated files to hadd during the spill-build stage.")
+ 
 
     # h5flow parameters
     parser.add_option("--start_position", dest="startPosition", type=int, default=None, help="start position within source dset (for partial file processing)")
@@ -259,9 +271,10 @@ if __name__ == '__main__' :
    opts = _HelpMenu()
  
    if opts['dataset'] == None :
-      log.write( "Please see the help menu. The Metacat dataset is required.\n")
-      log.close()
-      sys.exit("Please see the help menu. The Metacat dataset is required.")
+      if not opts['genie'] :
+         log.write( "Please see the help menu. The Metacat dataset is required.\n")
+         log.close()
+         sys.exit("Please see the help menu. The Metacat dataset is required.")
 
 
    if opts['jobscript'] == None :
@@ -284,10 +297,11 @@ if __name__ == '__main__' :
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # check the validity of the dataset
-   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   success = _CheckDataset( opts['dataset'] )
-   if not success :
-      sys.exit( "\nThis is not a good dataset. Check the quality of the dataset [%s]." % opts['dataset'] )
+   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  
+   if not opts['genie'] :
+      success = _CheckDataset( opts['dataset'] )
+      if not success :
+         sys.exit( "\nThis is not a good dataset. Check the quality of the dataset [%s]." % opts['dataset'] )
 
 
    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -351,17 +365,26 @@ if __name__ == '__main__' :
  
    # get the number of files
    nfiles = opts["nfiles"]
-   files_in_dataset = _GetNFilesInDataset(opts["dataset"]) 
+   files_in_dataset = nfiles
 
-   if nfiles == -1 :
-      nfiles = files_in_dataset 
+   if opts['genie'] :
+      if nfiles == -1 :
+         log.write( "\tPlease set the number of files to create. See help menu.\n" )
+         sys.exit( "\tPlease set the number of files to create. See help menu.\n" )
+   else :
+      files_in_dataset = _GetNFilesInDataset(opts["dataset"]) 
+      if nfiles == -1 :
+         nfiles = files_in_dataset 
    
    log.write( "\tRequest to process files [%d / %d]" % (nfiles,files_in_dataset) )
    print( "\tRequest to process files [%d / %d]" % (nfiles,files_in_dataset) )
    
    
    # set the metacat query 
-   cmdlist.append( "--mql \"files from %s limit %d\"" % (opts["dataset"],nfiles) )
+   if opts['genie'] :
+      cmdlist.append( "--monte-carlo %d" % nfiles )
+   else :
+      cmdlist.append( "--mql \"files from %s limit %d\"" % (opts["dataset"],nfiles) )
 
 
    # get the jobscript
@@ -370,14 +393,17 @@ if __name__ == '__main__' :
 
 
    # determine the data type
-   if opts["data"] and opts["mc"] :
-      sys.exit( "The jobscript can not process both data and simulation, simultaneously" )
-   elif not opts["data"] and not opts["mc"] :
-      sys.exit( "The jobscript needs to know the data type [data (--data) or simulation (--mc)]")
-   elif opts["data"] and not opts["mc"] :
-      cmdlist.append( "--env DATA_TYPE=\"data\"" )
-   elif not opts["data"] and opts["mc"] :
-       cmdlist.append( "--env DATA_TYPE=\"mc\"" )
+   if opts['genie'] :
+      cmdlist.append( "--env DATA_TYPE=\"mc\"" )
+   else :
+      if opts["data"] and opts["mc"] :
+         sys.exit( "The jobscript can not process both data and simulation, simultaneously" )
+      elif not opts["data"] and not opts["mc"] :
+         sys.exit( "The jobscript needs to know the data type [data (--data) or simulation (--mc)]")
+      elif opts["data"] and not opts["mc"] :
+         cmdlist.append( "--env DATA_TYPE=\"data\"" )
+      elif not opts["data"] and opts["mc"] :
+         cmdlist.append( "--env DATA_TYPE=\"mc\"" )
 
 
    # set environment variables
@@ -387,12 +413,13 @@ if __name__ == '__main__' :
    cmdlist.append( "--env TWOBYTWO_RELEASE=\"%s\"" % opts["software"] )
    cmdlist.append( "--env DEBUG_SUBMISSION_SCRIPT=%d" % run_debug_mode )
    cmdlist.append( "--env DATA_TIER=\"%s\"" % opts["tier"] )
-   cmdlist.append( "--env DATA_STREAM=\"%s\"" % opts["stream"] )
+   cmdlist.append( "--env DATA_STREAM=\"%s\"" % (opts["stream"] if not opts["genie"] else "genie") )
    cmdlist.append( "--env DETECTOR_CONFIG=\"%s\"" % opts["detector"] )
    cmdlist.append( "--env NEVENTS=%d" % opts["nevts"] )
    cmdlist.append( "--env JOBSCRIPT_TEST=%d" % run_tests )
    cmdlist.append( "--env USER=%s" % USER )
    cmdlist.append( "--env RUN_PERIOD=%s" % opts["run"] )
+   cmdlist.append( "--env CAMPAIGN_NAME=%s" % opts["campaign"] )
 
    if opts["startPosition"] == None :
       cmdlist.append( "--env START_POSITION=None" )
@@ -414,6 +441,11 @@ if __name__ == '__main__' :
    cmdlist.append( "--env SPINE_WORKFLOW_ID=%d" % opts["spine-workflow-id"] )
    cmdlist.append( "--env MX2_WORKFLOW_ID=%d" % opts["mx2-workflow-id"] )
 
+   cmdlist.append( "--env GENIE_ANTINU=%d" % (1 if opts["antinu"] else 0) )
+   cmdlist.append( "--env GENIE_NU=%d" % (1 if opts["nu"] else 0) )
+   cmdlist.append( "--env GENIE_ROCK=%d" % (1 if opts["rock"] else 0) )
+   cmdlist.append( "--env GENIE_BEAM_EXPOSURE=1E%d" % opts["pot"] )
+   cmdlist.append( "--env SAND_GEOM=%s" % opts["sand-geom"] )
 
    # set nersc parameters
    if opts["nersc"] :
