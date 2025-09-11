@@ -1,0 +1,236 @@
+#!/bin/bash
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# 	This script for running the genie workflow 
+#            It is based on the 2x2 development (https://github.com/DUNE/2x2_sim/blob/feature_spine_on_data/run-genie/run_genie.sh)
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+#++++++++++++++++++++++++++++++++++++++++
+# the script with common functions
+#++++++++++++++++++++++++++++++++++++++++
+#source /exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/NDUtilsForJustin.sh
+source /cvmfs/dune.opensciencegrid.org/dunend/2x2/releases/${TWOBYTWO_RELEASE}/ndlar_prod_scripts/ND_Production/toolbox/scripts/NDUtilsForJustin.sh
+
+
+#++++++++++++++++++++++++++++++++++++++++++
+# sanity check
+#++++++++++++++++++++++++++++++++++++++++++
+if [[ "${DATA_TIER}" != "genie" ]]; then
+   echo -e "This script [$(basename $BASH_SOURCE)] submits the GENIE event generator jobs. Please see the help menu. The data tier is not defined correctly." 
+   exit 0
+fi
+
+
+#++++++++++++++++++++++++++++++++++++++++
+# Begin JustIN
+#++++++++++++++++++++++++++++++++++++++++
+justin_begin_of_job_commands
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# containers to store the generated files
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+CREATED_FILES=()
+WORKFLOW=()
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# get the genie primary input parameters
+#
+#  The seed is based on justIN physical file name
+#  For a monte carlo event, justIN defines the physical file name as a integer with leading zeros
+#  Therefore, the first file will be defined as 
+#  DID_PFN_RSE=monte-carlo-000001-000001 000001 MONTECARLO
+#  This will give a seed=1
+#
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+export USE_MAXPATH=0
+export SEED=$((INPUT_FILE + 0))
+export RUN=$((INPUT_FILE + 0))
+export PRODUCTION_TUNE=AR23_20i_00_000
+export XSEC_FILE=${CVMFS_STASHCACHE_DIR}/Flux/2x2EventGeneration/XSec/numi/genie/v3r4p00/AR2320i00000-k250-e1000/gxspl-NUsmall.xml
+
+if [[ "${DETECTOR_CONFIG}" == "proto_nd" ]]; then
+   
+   if [[ "${GENIE_ANTINU}" == "1" ]]; then
+      export DK2NU_DIR=${CVMFS_STASHCACHE_DIR}/Flux/g4numi/20220409/QGSP_BERT/MediumEnergyNewTarget_OnAxis/antineutrino/flux
+   elif [[ "${GENIE_NU}" == "1" ]]; then
+      export DK2NU_DIR=${CVMFS_STASHCACHE_DIR}/Flux/g4numi/20210920/QGSP_BERT/MediumEnergyNewTarget_OnAxis/neutrino/flux
+   fi
+
+   if [[ "${GENIE_ROCK}" == "1" ]]; then
+      export FLUX_DET_LOCATION="MiniRun5-Rock"
+      export DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/Merged2x2MINERvA_v4/Merged2x2MINERvA_v4_justRock.gdml
+   else 
+      export FLUX_DET_LOCATION="MiniRun5-Nu"
+      export DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/Merged2x2MINERvA_v4/Merged2x2MINERvA_v4_noRock.gdml
+   fi
+
+elif [[ "${DETECTOR_CONFIG}" == "ndlar" ]]; then
+
+   if [[ "${GENIE_ANTINU}" == "1" ]]; then
+      export DK2NU_DIR=${CVMFS_STASHCACHE_DIR}/Flux/g4lbne/v3r5p10/QGSP_BERT/OfficialEngDesignSept2021_OnAxis/antineutrino/flux 
+   elif [[ "${GENIE_NU}" == "1" ]]; then
+      export DK2NU_DIR=${CVMFS_STASHCACHE_DIR}/Flux/g4lbne/v3r5p10/QGSP_BERT/OfficialEngDesignSept2021_OnAxis/neutrino/flux
+   fi
+
+   if [[ "${GENIE_ROCK}" == "1" ]]; then
+      export FLUX_DET_LOCATION="DUNENDROCK"
+      if [[ "${SAND_GEOM}" == "sand_drift" ]]; then
+         export DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/anti_fiducial_nd_hall_with_lar_tms_sand_drift1_v2025.08.11.gdml
+      elif [[ "${SAND_GEOM}" == "sand_straw" ]]; then
+         export DETECTOR_GEOM=${CVMFS_WORKKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/anti_fiducial_nd_hall_with_lar_tms_sand_stt1_v2025.08.11.gdml
+      fi
+
+   else 
+      export FLUX_DET_LOCATION="DUNEND"
+      if [[ "${SAND_GEOM}" == "sand_drift" ]]; then
+     	 export DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/nd_hall_with_lar_tms_sand_drift1_v2025.08.11.gdml
+      elif [[ "${SAND_GEOM}" == "sand_straw" ]]; then
+         export DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/nd_hall_with_lar_tms_sand_stt1_v2025.08.11.gdml
+      fi
+   fi
+
+else
+   echo -e "Cannot determine the parameters for [${DETECTOR_CONFIG}], which is needed for the flux driver. Please see the help menu." 2>&1 | tee -a $envlog
+fi
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# get the flux file based on the seed (run number)
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+INDEX=$((SEED - 1))
+DK2NU_FILES=("$DK2NU_DIR"/*.dk2nu*)
+export DK2NU_FILE=${DK2NU_FILES[${INDEX}]}
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++
+# create an output file
+#+++++++++++++++++++++++++++++++++++++++++++++++++++
+BEAM="NuMI"
+if [[ "${DETECTOR_CONFIG}" == "ndlar" ]]; then
+   BEAM="LBNF"
+fi
+
+HORN="FHC"
+if [[ "${GENIE_ANTINU}" == "1" ]]; then
+    HORN="RHC"
+fi
+
+FLAVOR="nu" 
+if [[ "${GENIE_ANTINU}" == "1" ]]; then
+    FLAVOR="numubar"
+fi
+
+export GENIE_OUTPUT_FILE_BASE="${BEAM}_${HORN}_${FLAVOR}_$(date +'%Y_%m_%d_%H_%M_%S')_${GENIE_VERSION}_${GENIE_BEAM_EXPOSURE}"
+export GENIE_OUTPUT_FILE="${GENIE_OUTPUT_FILE_BASE}.${RUN}.GHEP.root"
+export GTRAC_OUTPUT_FILE="${GENIE_OUTPUT_FILE_BASE}.${RUN}.GTRAC.root"
+
+if [[ "${GENIE_ROCK}" == "1" ]]; then
+   export GENIE_OUTPUT_FILE=${GENIE_OUTPUT_FILE_BASE}_rock.${RUN}.GHEP.root
+   export GTRAC_OUTPUT_FILE=${GENIE_OUTPUT_FILE_BASE}_rock.${RUN}.GTRAC.root
+fi
+
+echo -e "\tThe output GENIE file names are [${GENIE_OUTPUT_FILE}, ${GTRAC_OUTPUT_FILE}]" 2>&1 | tee -a $envlog
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++
+# genie arguments
+#++++++++++++++++++++++++++++++++++++++++++++++
+ARGS_GEVGEN_FNAL=( \
+    -e "$GENIE_BEAM_EXPOSURE" \
+    -f "$DK2NU_FILE,$FLUX_DET_LOCATION" \
+    -g "$DETECTOR_GEOM" \
+    -r "$RUN" \
+    -L cm -D g_cm3 \
+    --cross-sections "$XSEC_FILE" \
+    --tune "$PRODUCTION_TUNE" \
+    --seed "$SEED" \
+    -o "$GENIE_OUTPUT_FILE_BASE" \
+    )
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# get the option primary input parameters
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[ "${USE_MAXPATH}" == 1 ] && ARGS_GEVGEN_FNAL+=( -m "$MAX_PATH_FILE" )
+[ -n "${TOP_VOLUME}" ] && ARGS_GEVGEN_FNAL+=( -t "$TOP_VOLUME" )
+[ -n "${FID_CUT_STRING}" ] && ARGS_GEVGEN_FNAL+=( -F "$FID_CUT_STRING" )
+[ -n "${ZMIN}" ] && ARGS_GEVGEN_FNAL+=( -z "$ZMIN" )
+[ -n "${EVENT_GEN_LIST}" ] && ARGS_GEVGEN_FNAL+=( --event-generator-list "$EVENT_GEN_LIST" )
+
+
+#+++++++++++++++++++++++++++++++++++++++
+# Execute the workflow
+#++++++++++++++++++++++++++++++++++++++++
+(
+    echo -e "Setup the genie software." 2>&1 | tee -a $envlog
+
+    source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+    setup dunesw ${DUNESW_VERSION} -q ${DUNESW_QUALIFIER}
+    export GDK2NUFLUXXML=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/run-genie/flux/GNuMIFlux.xml
+
+    ups active 2>&1 | tee -a $envlog
+
+    echo -e "Executing the genie workflow for data stream [${DATA_STREAM}] and input file [${INPUT_FILE}]" 2>&1 | tee -a $envlog
+    echo -e "\tRunning the genie command [gevgen_fnal ${ARGS_GEVGEN_FNAL[@]}]" 2>&1 | tee -a $envlog
+
+    gevgen_fnal ${ARGS_GEVGEN_FNAL[@]}
+
+    if [ ! -f ${GENIE_OUTPUT_FILE_BASE}.${RUN}.ghep.root ]; then
+       echo -e "FATAL::The file [${GENIE_OUTPUT_FILE_BASE}.${RUN}.ghep.root] does not exist! Will not continue." 2>&1 | tee -a $envlog
+       exit 1
+    else
+       mv ${GENIE_OUTPUT_FILE_BASE}.${RUN}.ghep.root ${GENIE_OUTPUT_FILE}
+    fi 
+
+    echo -e "Converting the native GENIE files to a format easily recognize by ROOT" 2>&1 | tee -a $envlog
+    echo -e "\tRunning the genie command [gntpc -i \"${GENIE_OUTPUT_FILE}\" -f rootracker  -o \"${GTRAC_OUTPUT_FILE}\"]" 2>&1 | tee -a $envlog
+    gntpc -i "${GENIE_OUTPUT_FILE}" -f rootracker  -o "${GTRAC_OUTPUT_FILE}"
+
+    if [ ! -f ${GTRAC_OUTPUT_FILE} ]; then
+       echo -e "FATAL::The file [${GTRAC_OUTPUT_FILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
+       exit 1
+    fi
+)
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++
+# set information needed for metadata
+#++++++++++++++++++++++++++++++++++++++++++++++++
+CREATED_FILES+=("${GENIE_OUTPUT_FILE}")
+CREATED_FILES+=("${GTRAC_OUTPUT_FILE}")
+
+WORKFLOW+=("genie")
+WORKFLOW+=("genie_converter")
+
+export APPLICATION_DATA_TIER="genie-event-generator"
+
+export NAMESPACE="neardet-2x2-lar"
+if [[ "${DETECTOR_CONFIG}" == "ndlar" ]]; then
+   export NAMESPACE="neardet-lar"
+fi
+
+
+#++++++++++++++++++++++++++++++++++++++++
+# create metadata json file
+#++++++++++++++++++++++++++++++++++++++++
+create_metadata_file mc genie
+
+
+#+++++++++++++++++++++++++++++++++++++++
+# End of justin job running
+#+++++++++++++++++++++++++++++++++++++++
+justin_end_of_job_commands
+
+
+
+##############################################
+#
+# END OF RUNNING GENIE PRODUCTION JOBS
+#
+##############################################
+
+exit 0
