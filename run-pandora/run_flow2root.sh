@@ -28,7 +28,7 @@ inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/${ND_PRODUCTION_IN_NAME}/FLOW
 isData=1
 [ "${ND_PRODUCTION_PANDORA_INPUT_FORMAT}" ==  "SPMC" ] && isData=0
 
-# Switch on whether to use prompt of final/merged hits (defauls to final)
+# Switch on whether to use prompt or final/merged hits (defaults to final)
 isFinal=${ND_PRODUCTION_USE_FINAL_HITS:-1}
 
 # Convert input HDF5 file to ROOT
