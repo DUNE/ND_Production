@@ -28,7 +28,7 @@ isFinal=${ND_PRODUCTION_USE_FINAL_HITS:-1}
 
 source $ND_PRODUCTION_PANDORA_INSTALL/pandora.venv/bin/activate
 run python3 $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile $isData $isFinal ${outFile}.firstStep.root
-run root -l -q $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/rootToRootConversion.C+\(true,\"${outFile}.firstStep.root\",\"${outFile}\"\)
+run root -l -q $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/rootToRootConversion.C+\(false,\"${outFile}.firstStep.root\",\"${outFile}\"\)
 rm ${outFile}.firstStep.root
 deactivate
 
