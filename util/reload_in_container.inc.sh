@@ -6,6 +6,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/prelude.inc.sh"
 # (Individual scripts can override this; e.g. larnd-sim by default runs on the
 # host, not in Shifter)
 export ND_PRODUCTION_RUNTIME=${ND_PRODUCTION_RUNTIME:-SHIFTER}
+export ND_PRODUCTION_DIR=${ND_PRODUCTION_DIR:-$(realpath "$PWD"/..)}
 
 if [[ "$ND_PRODUCTION_RUNTIME" == "SHIFTER" ]]; then
     # Reload in Shifter
@@ -17,6 +18,9 @@ if [[ "$ND_PRODUCTION_RUNTIME" == "SHIFTER" ]]; then
 
 elif [[ "$ND_PRODUCTION_RUNTIME" == "SINGULARITY" ]]; then
     # Or reload in Singularity
+    export PATH=$PATH:/cvmfs/oasis.opensciencegrid.org/mis/apptainer/current/bin
+    export APPTAINER_CACHEDIR=${ND_PRODUCTION_APPTAINER_CACHEDIR:-"/tmp/apptainer.$USER"}
+    export APPTAINER_TMPDIR=${ND_PRODUCTION_APPTAINER_TMPDIR:-"/tmp/apptainer.$USER"}
     if [[ "$SINGULARITY_NAME" != "$ND_PRODUCTION_CONTAINER" ]]; then
         singularity exec -B $ND_PRODUCTION_DIR $ND_PRODUCTION_CONTAINER_DIR/$ND_PRODUCTION_CONTAINER /bin/bash "$0" "$@"
         exit
@@ -62,8 +66,13 @@ if [[ "$ND_PRODUCTION_RUNTIME" == "SHIFTER" ]]; then
     export LD_LIBRARY_PATH="$cudadir"/math_libs/12.2/targets/x86_64-linux/lib:"$cudadir"/cuda/12.2/lib64:$LD_LIBRARY_PATH
 elif [[ "$ND_PRODUCTION_RUNTIME" == "SINGULARITY" ]]; then
     # "singularity pull" overwrites /environment
+    SINGULARITY_CONTAINER_ENV="$ND_PRODUCTION_DIR"/admin/container_env."$ND_PRODUCTION_CONTAINER".sh
     set +o errexit
-    source "$ND_PRODUCTION_DIR"/admin/container_env."$ND_PRODUCTION_CONTAINER".sh
+    if [[ -e "$SINGULARITY_CONTAINER_ENV" ]]; then
+        source $SINGULARITY_CONTAINER_ENV
+    elif [[ -e /opt/environment ]]; then
+        source /opt/environment
+    fi
     set -o errexit
 elif [[ "$ND_PRODUCTION_RUNTIME" == "PODMAN-HPC" ]]; then
     # Ideally, we'd just tell podman-hpc to overlay the host's libcudart and
