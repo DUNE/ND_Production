@@ -48,7 +48,7 @@ WORKFLOW=()
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 export USE_MAXPATH=0
 export SEED=$((INPUT_FILE + 0))
-export RUN=$((INPUT_FILE + 0))
+export RUN=$((SEED - 1))
 export GENIE_PRODUCTION_TUNE=AR23_20i_00_000
 export GENIE_XSEC_FILE=${CVMFS_STASHCACHE_DIR}/Flux/2x2EventGeneration/XSec/numi/genie/v3r4p00/AR2320i00000-k250-e1000/gxspl-NUsmall.xml
 
@@ -137,9 +137,9 @@ if [[ "${GENIE_ROCK}" == "1" ]]; then
    TIMESTAMP="Rock_$(date +'%Y_%m_%d_%H_%M_%S')"
 fi
 
-export GENIE_OUTPUT_FILE_BASE="${BEAM}_${HORN}${CHANNEL}${TIMESTAMP}_${GENIE_VERSION}_${GENIE_BEAM_EXPOSURE}"
-export GENIE_OUTPUT_FILE="${GENIE_OUTPUT_FILE_BASE}.${RUN}.GHEP.root"
-export GTRAC_OUTPUT_FILE="${GENIE_OUTPUT_FILE_BASE}.${RUN}.GTRAC.root"
+export GENIE_OUTPUT_FILE_BASE="${BEAM}_${HORN}${CHANNEL}${TIMESTAMP}_${GENIE_VERSION}_${GENIE_BEAM_EXPOSURE}.${INPUT_FILE}"
+export GENIE_OUTPUT_FILE="${GENIE_OUTPUT_FILE_BASE}.GHEP.root"
+export GTRAC_OUTPUT_FILE="${GENIE_OUTPUT_FILE_BASE}.GTRAC.root"
 
 echo -e "\tThe output GENIE file names are [${GENIE_OUTPUT_FILE}, ${GTRAC_OUTPUT_FILE}]" 2>&1 | tee -a $envlog
 
