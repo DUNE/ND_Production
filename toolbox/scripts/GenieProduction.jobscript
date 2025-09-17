@@ -49,8 +49,8 @@ WORKFLOW=()
 export USE_MAXPATH=0
 export SEED=$((INPUT_FILE + 0))
 export RUN=$((INPUT_FILE + 0))
-export PRODUCTION_TUNE=AR23_20i_00_000
-export XSEC_FILE=${CVMFS_STASHCACHE_DIR}/Flux/2x2EventGeneration/XSec/numi/genie/v3r4p00/AR2320i00000-k250-e1000/gxspl-NUsmall.xml
+export GENIE_PRODUCTION_TUNE=AR23_20i_00_000
+export GENIE_XSEC_FILE=${CVMFS_STASHCACHE_DIR}/Flux/2x2EventGeneration/XSec/numi/genie/v3r4p00/AR2320i00000-k250-e1000/gxspl-NUsmall.xml
 
 if [[ "${DETECTOR_CONFIG}" == "proto_nd" ]]; then
    
@@ -62,10 +62,12 @@ if [[ "${DETECTOR_CONFIG}" == "proto_nd" ]]; then
 
    if [[ "${GENIE_ROCK}" == "1" ]]; then
       export FLUX_DET_LOCATION="MiniRun5-Rock"
-      export DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/Merged2x2MINERvA_v4/Merged2x2MINERvA_v4_justRock.gdml
+      export GENIE_DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/Merged2x2MINERvA_v4/Merged2x2MINERvA_v4_justRock.gdml
+      export MAX_PATH_XML_FILE=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/run-genie/maxpath/Merged2x2MINERvA_v4_justRock.AR23_20i_00_000.maxpath.xml
    else 
       export FLUX_DET_LOCATION="MiniRun5-Nu"
-      export DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/Merged2x2MINERvA_v4/Merged2x2MINERvA_v4_noRock.gdml
+      export GENIE_DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/Merged2x2MINERvA_v4/Merged2x2MINERvA_v4_noRock.gdml
+      export MAX_PATH_XML_FILE=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/run-genie/maxpath/Merged2x2MINERvA_v4_noRock.AR23_20i_00_000.maxpath.xml
    fi
 
 elif [[ "${DETECTOR_CONFIG}" == "ndlar" ]]; then
@@ -79,17 +81,21 @@ elif [[ "${DETECTOR_CONFIG}" == "ndlar" ]]; then
    if [[ "${GENIE_ROCK}" == "1" ]]; then
       export FLUX_DET_LOCATION="DUNENDROCK"
       if [[ "${SAND_GEOM}" == "sand_drift" ]]; then
-         export DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/anti_fiducial_nd_hall_with_lar_tms_sand_drift1_v2025.08.11.gdml
+         export GENIE_DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/anti_fiducial_nd_hall_with_lar_tms_sand_drift1_v2025.08.11.gdml
+	 export MAX_PATH_XML_FILE=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/run-genie/maxpath/anti_fiducial_nd_hall_with_lar_tms_sand_drift1_v2025.08.11.AR23_20i_00_000.maxpath.xml
       elif [[ "${SAND_GEOM}" == "sand_straw" ]]; then
-         export DETECTOR_GEOM=${CVMFS_WORKKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/anti_fiducial_nd_hall_with_lar_tms_sand_stt1_v2025.08.11.gdml
+         export GENIE_DETECTOR_GEOM=${CVMFS_WORKKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/anti_fiducial_nd_hall_with_lar_tms_sand_stt1_v2025.08.11.gdml
+	 export MAX_PATH_XML_FILE=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/run-genie/maxpath/anti_fiducial_nd_hall_with_lar_tms_sand_stt1_v2025.08.11.AR23_20i_00_000.maxpath.xml
       fi
 
    else 
       export FLUX_DET_LOCATION="DUNEND"
       if [[ "${SAND_GEOM}" == "sand_drift" ]]; then
-     	 export DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/nd_hall_with_lar_tms_sand_drift1_v2025.08.11.gdml
+     	 export GENIE_DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/nd_hall_with_lar_tms_sand_drift1_v2025.08.11.gdml
+	 export MAX_PATH_XML_FILE=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/run-genie/maxpath/nd_hall_with_lar_tms_sand_drift1_v2025.08.11.AR23_20i_00_000.maxpath.xml
       elif [[ "${SAND_GEOM}" == "sand_straw" ]]; then
-         export DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/nd_hall_with_lar_tms_sand_stt1_v2025.08.11.gdml
+         export GENIE_DETECTOR_GEOM=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/geometry/nd_hall_with_lar_tms_sand_stt1_v2025.08.11.gdml
+	 export MAX_PATH_XML_FILE=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/run-genie/maxpath/nd_hall_with_lar_tms_sand_stt1_v2025.08.11.AR23_20i_00_000.maxpath.xml
       fi
    fi
 
@@ -119,19 +125,21 @@ if [[ "${GENIE_ANTINU}" == "1" ]]; then
     HORN="RHC"
 fi
 
-FLAVOR="nu" 
-if [[ "${GENIE_ANTINU}" == "1" ]]; then
-    FLAVOR="numubar"
+CHANNEL="_"
+if [[ -n "${GENIE_EVENT_GENERATOR_LIST}" ]]; then
+     IFS=',' read -a channels <<< "${GENIE_EVENT_GENERATOR_LIST}"
+     CHANNEL=$( IFS=$'_'; echo "${channels[*]}" )
+     CHANNEL="_${CHANNEL}_"
 fi
 
-export GENIE_OUTPUT_FILE_BASE="${BEAM}_${HORN}_${FLAVOR}_$(date +'%Y_%m_%d_%H_%M_%S')_${GENIE_VERSION}_${GENIE_BEAM_EXPOSURE}"
+TIMESTAMP=$(date +'%Y_%m_%d_%H_%M_%S')
+if [[ "${GENIE_ROCK}" == "1" ]]; then
+   TIMESTAMP="Rock_$(date +'%Y_%m_%d_%H_%M_%S')"
+fi
+
+export GENIE_OUTPUT_FILE_BASE="${BEAM}_${HORN}${CHANNEL}${TIMESTAMP}_${GENIE_VERSION}_${GENIE_BEAM_EXPOSURE}"
 export GENIE_OUTPUT_FILE="${GENIE_OUTPUT_FILE_BASE}.${RUN}.GHEP.root"
 export GTRAC_OUTPUT_FILE="${GENIE_OUTPUT_FILE_BASE}.${RUN}.GTRAC.root"
-
-if [[ "${GENIE_ROCK}" == "1" ]]; then
-   export GENIE_OUTPUT_FILE=${GENIE_OUTPUT_FILE_BASE}_rock.${RUN}.GHEP.root
-   export GTRAC_OUTPUT_FILE=${GENIE_OUTPUT_FILE_BASE}_rock.${RUN}.GTRAC.root
-fi
 
 echo -e "\tThe output GENIE file names are [${GENIE_OUTPUT_FILE}, ${GTRAC_OUTPUT_FILE}]" 2>&1 | tee -a $envlog
 
@@ -142,24 +150,23 @@ echo -e "\tThe output GENIE file names are [${GENIE_OUTPUT_FILE}, ${GTRAC_OUTPUT
 ARGS_GEVGEN_FNAL=( \
     -e "$GENIE_BEAM_EXPOSURE" \
     -f "$DK2NU_FILE,$FLUX_DET_LOCATION" \
-    -g "$DETECTOR_GEOM" \
+    -g "$GENIE_DETECTOR_GEOM" \
     -r "$RUN" \
     -L cm -D g_cm3 \
-    --cross-sections "$XSEC_FILE" \
-    --tune "$PRODUCTION_TUNE" \
+    --cross-sections "$GENIE_XSEC_FILE" \
+    --tune "$GENIE_PRODUCTION_TUNE" \
     --seed "$SEED" \
     -o "$GENIE_OUTPUT_FILE_BASE" \
     )
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# get the option primary input parameters
+# get the optional input parameters
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-[ "${USE_MAXPATH}" == 1 ] && ARGS_GEVGEN_FNAL+=( -m "$MAX_PATH_FILE" )
-[ -n "${TOP_VOLUME}" ] && ARGS_GEVGEN_FNAL+=( -t "$TOP_VOLUME" )
-[ -n "${FID_CUT_STRING}" ] && ARGS_GEVGEN_FNAL+=( -F "$FID_CUT_STRING" )
-[ -n "${ZMIN}" ] && ARGS_GEVGEN_FNAL+=( -z "$ZMIN" )
-[ -n "${EVENT_GEN_LIST}" ] && ARGS_GEVGEN_FNAL+=( --event-generator-list "$EVENT_GEN_LIST" )
+[ "${GENIE_USE_MAX_PATH}" == "1" ] && ARGS_GEVGEN_FNAL+=( -m "$MAX_PATH_XML_FILE" )
+[ -n "${GENIE_TOP_VOLUME}" ] && ARGS_GEVGEN_FNAL+=( -t "$GENIE_TOP_VOLUME" )
+[ -n "${GENIE_ZMIN}" ] && ARGS_GEVGEN_FNAL+=( -z "$GENIE_ZMIN" )
+[ -n "${GENIE_EVENT_GENERATOR_LIST}" ] && ARGS_GEVGEN_FNAL+=( --event-generator-list "$GENIE_EVENT_GENERATOR_LIST" )
 
 
 #+++++++++++++++++++++++++++++++++++++++

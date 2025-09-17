@@ -50,10 +50,16 @@ def _HelpMenu() :
     parser.add_option("--run", dest="run", type="string", default="run1", help="The run period.")
     parser.add_option("--rse", dest="rse", default=False, action="store_true", help="Outputs go to a rucio storage element")
 
-    parser.add_option("--antinu", dest="antinu", default=False, action="store_true", help="Generate the antineutrino beamline")
-    parser.add_option("--nu", dest="nu", default=False, action="store_true", help="Generate the neutrino beamline")
-    parser.add_option("--rock", dest="rock", default=False, action="store_true", help="Generate rock muons")
+    # genie parameters
+    parser.add_option("--antinu", dest="antinu", default=False, action="store_true", help="Generate the antineutrino beamline using GENIE")
+    parser.add_option("--nu", dest="nu", default=False, action="store_true", help="Generate the neutrino beamline using GENIE")
+    parser.add_option("--rock", dest="rock", default=False, action="store_true", help="Generate rock muons using GENIE")
     parser.add_option("--pot", dest="pot", default=19, type=int, help="The power value in the protons per target exposure [default: 1e%default]")
+
+    parser.add_option("--maxpath", dest="maxpath", default=False, action="store_true", help="Set the max path lengths xml file when running GENIE")
+    parser.add_option("--top-volume", dest="top-volume", default="World", type="string", help="Set the top volumes (World:proto_nd or volArgonCubeDetector75:ndlar) when running GENIE")
+    parser.add_option("--zmin", dest="zmin", default=None, type=int, help="Set the minimum Z distance when runnin GENIE")
+    parser.add_option("--generate", dest="generate", default=None, type=str, help="Generate a specific channel(s) using GENIE, where channel names are listed here $GENIE/config/EventGeneratorListAssembler.xml") 
 
     parser.add_option("--sand-geom", dest="sand-geom", default="sand_straw", type="string", help="The SAND geometry [(sand_drift,sand_straw) default: %default] for generating GENIE events.")
     parser.add_option("--hadd", dest="hadd", default=10, type=int, help="The number of simulated files to hadd during the spill-build stage.")
@@ -446,6 +452,16 @@ if __name__ == '__main__' :
    cmdlist.append( "--env GENIE_ROCK=%d" % (1 if opts["rock"] else 0) )
    cmdlist.append( "--env GENIE_BEAM_EXPOSURE=1E%d" % opts["pot"] )
    cmdlist.append( "--env SAND_GEOM=%s" % opts["sand-geom"] )
+   cmdlist.append( "--env GENIE_USE_MAX_PATH=%s" % (1 if opts["maxpath"] else 0) )
+
+   if opts["top-volume"] != None :
+      cmdlist.append( "--env GENIE_TOP_VOLUME=%s" % opts["top-volume"] )
+
+   if opts["zmin"] != None :
+      cmdlist.append( "--env GENIE_ZMIN=%s" % opts["zmin"] )
+
+   if opts["generate"] != None :
+      cmdlist.append( "--env GENIE_EVENT_GENERATOR_LIST=%s" % opts["generate"] )
 
    # set nersc parameters
    if opts["nersc"] :

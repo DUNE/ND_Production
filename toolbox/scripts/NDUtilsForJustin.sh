@@ -116,7 +116,7 @@ create_metadata_file()
 
     #export METADATA_EXTRACT=/exp/dune/app/users/twalton/2x2ProdWorkspace/v1.5.0/ND_Production/toolbox/scripts/MetadataExtract.py 
     export METADATA_EXTRACT=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/toolbox/scripts/MetadataExtract.py 
-
+  
     CREATED_FILES_ARRAY=$( IFS=$','; echo "${CREATED_FILES[*]}" )
     PARENT_FILES_ARRAY=$( IFS=$','; echo "${PARENT_FILES[*]}" ) 
     WORKFLOW_ARRAY=$( IFS=$','; echo "${WORKFLOW[*]}" )

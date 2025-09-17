@@ -24,7 +24,8 @@ RUN_PERIOD = str(os.environ.get('RUN_PERIOD')) if 'RUN_PERIOD' in os.environ els
 DETECTOR_CONFIG       = str(os.environ.get('DETECTOR_CONFIG')) if 'DETECTOR_CONFIG' in os.environ else 'None'
 DATA_STREAM           = str(os.environ.get('DATA_STREAM')) if 'DATA_STREAM' in os.environ else 'None'
 DATA_TIER             = str(os.environ.get('DATA_TIER')) if 'DATA_TIER' in os.environ else 'None'
-GENIE_CONFIG_FILES    = f"{str(os.environ.get('DK2NU_DIR'))},{str(os.environ.get('XSEC_FILE'))}" if 'DK2NU_DIR' and 'XSEC_FILE' in os.environ else 'None'
+GENIE_CONFIG_FILES    = f"{str(os.environ.get('DK2NU_DIR'))},{str(os.environ.get('GENIE_XSEC_FILE'))}" if 'DK2NU_DIR' and 'GENIE_XSEC_FILE' in os.environ else 'None'
+GENIE_CONFIG_FILES    = f"{GENIE_CONFIG_FILES},{str(os.environ.get('MAX_PATH_XML_FILE'))}" if 'MAX_PATH_XML_FILE' in os.environ else GENIE_CONFIG_FILES
 LIGHT_CONFIG_FILES    = str(os.environ.get('LIGHT_CONFIG_FILES')) if 'LIGHT_CONFIG_FILES' in os.environ else 'None'
 CHARGE_CONFIG_FILES   = str(os.environ.get('CHARGE_CONFIG_FILES')) if 'CHARGE_CONFIG_FILES' in os.environ else 'None'
 COMBINED_CONFIG_FILES = str(os.environ.get('COMBINED_CONFIG_FILES')) if 'COMBINED_CONFIG_FILES' in os.environ else 'None'
@@ -302,8 +303,8 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
 
     return_md['core.group']               = "dune"
     return_md['dune.dqc_quality']         = "unknown"
-    return_md['dune.campaign']            = RUN_PERIOD
-    return_md['dune.requestid']           = ""
+    return_md['dune.campaign']            = str(os.environ.get('CAMPAIGN_NAME')) if 'CAMPAIGN_NAME' in os.environ else RUN_PERIOD
+    return_md['dune.requestid']           = str(os.environ.get('REQUEST_ID')) if 'REQUEST_ID' in os.environ else 'None'
     return_md['dune.config_file']         = _GetConfigFiles(workflow)
     return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW_ID, 'site_name' : JUSTIN_SITE_NAME }
     return_md['dune.output_status']       = "good"
@@ -344,18 +345,18 @@ def _GetMCMetadata(workflow) :
 
     return_md = {}
     return_md['dune_mc.name']       = str(os.environ.get('CAMPAIGN_NAME')) if 'CAMPAIGN_NAME' in os.environ else 'None'
-    return_md['dune_mc.generators'] = 'genie'
+    return_md['dune_mc.generators'] = "genie" if DATA_TIER == "genie" else "Unknown"
     return_md['dune.dqc_quality']   = 'good'
 
     if workflow.find("genie") != -1 :
-       return_md['dune_mc.genie_tune']       = str(os.environ.get('PRODUCTION_TUNE')) if 'PRODUCTION_TUNE' in os.environ else 'None'
-       return_md['dune_mc.top_volume']       = str(os.environ.get('TOP_VOLUME')) if 'TOP_VOLUME' else 'None'
-       return_md['dune_mc.geometry_version'] = str(os.environ.get('DETECTOR_GEOM')) if 'DETECTOR_GEOM' else 'None'
+       return_md['dune_mc.genie_tune']       = str(os.environ.get('GENIE_PRODUCTION_TUNE')) if 'GENIE_PRODUCTION_TUNE' in os.environ else 'None'
+       return_md['dune_mc.top_volume']       = str(os.environ.get('GENIE_TOP_VOLUME')) if 'GENIE_TOP_VOLUME' else 'World'
+       return_md['dune_mc.geometry_version'] = str(os.environ.get('GENIE_DETECTOR_GEOM')) if 'GENIE_DETECTOR_GEOM' else 'None'
 
        if str(os.environ.get('GENIE_ANTINU')) == "1" :
-          return_md['dune_mc.nu'] = "numu"
+          return_md['dune_mc.nu'] = "RHC_%s" % ( str(os.environ.get('GENIE_EVENT_GENERATOR_LIST')) if 'GENIE_EVENT_GENERATOR_LIST' in os.environ else 'Nominal' )
        elif str(os.environ.get('GENIE_NU')) == "1" :
-          return_md['dune_mc.nu'] = "numubar"
+          return_md['dune_mc.nu'] = "FHC_%s" % ( str(os.environ.get('GENIE_EVENT_GENERATOR_LIST')) if 'GENIE_EVENT_GENERATOR_LIST' in os.environ else 'Nominal' )
 
        if str(os.environ.get('GENIE_ROCK')) == "1" :
           return_md['dune_mc.rock'] = "True"
