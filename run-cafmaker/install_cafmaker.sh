@@ -15,6 +15,7 @@ cd install
 
 git clone -b main https://github.com/DUNE/ND_CAFMaker.git
 cd ND_CAFMaker
+git checkout e17772a
 
 ./build.sh
 source ndcaf_setup.sh

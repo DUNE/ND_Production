@@ -46,6 +46,9 @@ cd ..
 # install ndlar_flow
 git clone -b develop https://github.com/DUNE/ndlar_flow.git
 cd ndlar_flow
+# note: we're actually installing/running ndlar_flow using the scripts in the
+# ndlar_reflow repo, but let's stick to using ND_Production for recordkeeping
+git checkout v1.5.3
 pip install -e .
 cd scripts/proto_nd_scripts
 ./get_proto_nd_input.sh
