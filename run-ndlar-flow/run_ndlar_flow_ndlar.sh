@@ -49,15 +49,13 @@ cd "$ND_PRODUCTION_INSTALL_DIR"/ndlar_flow
 # ensures that we properly report the failure to the production system.
 set -o errexit
 
-# AB August 6th 2024: Like 2x2, not currently running the final calibration.
-#run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5\
-run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4\
+run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5\
     -i "$inFile" -o "$outFile" $compression
 
-h5flow -c $workflow6 $workflow7\
+run h5flow -c $workflow6 $workflow7\
     -i "$inFile" -o "$outFile" $compression
 
-h5flow -c $workflow8\
+run h5flow -c $workflow8\
     -i "$outFile" -o "$outFile" $compression
 
 mkdir -p "$outDir/FLOW/$subDir"
