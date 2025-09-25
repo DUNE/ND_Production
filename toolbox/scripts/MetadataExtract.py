@@ -22,9 +22,10 @@ USER = str(os.environ.get('USER'))
 SOFTWARE   = str(os.environ.get('TWOBYTWO_RELEASE')) if 'TWOBYTWO_RELEASE' in os.environ else 'None'
 RUN_PERIOD = str(os.environ.get('RUN_PERIOD')) if 'RUN_PERIOD' in os.environ else 'None'
 DETECTOR_CONFIG       = str(os.environ.get('DETECTOR_CONFIG')) if 'DETECTOR_CONFIG' in os.environ else 'None'
+DATA_TYPE             = str(os.environ.get('DATA_TYPE')) if 'DATA_TYPE' in os.environ else 'None'
 DATA_STREAM           = str(os.environ.get('DATA_STREAM')) if 'DATA_STREAM' in os.environ else 'None'
 DATA_TIER             = str(os.environ.get('DATA_TIER')) if 'DATA_TIER' in os.environ else 'None'
-GENIE_CONFIG_FILES    = f"{str(os.environ.get('DK2NU_DIR'))},{str(os.environ.get('GENIE_XSEC_FILE'))}" if 'DK2NU_DIR' and 'GENIE_XSEC_FILE' in os.environ else 'None'
+GENIE_CONFIG_FILES    = f"{str(os.environ.get('DK2NU_FILE'))},{str(os.environ.get('GENIE_XSEC_FILE'))}" if 'DK2NU_FILE' and 'GENIE_XSEC_FILE' in os.environ else 'None'
 GENIE_CONFIG_FILES    = f"{GENIE_CONFIG_FILES},{str(os.environ.get('MAX_PATH_XML_FILE'))}" if 'MAX_PATH_XML_FILE' in os.environ else GENIE_CONFIG_FILES
 LIGHT_CONFIG_FILES    = str(os.environ.get('LIGHT_CONFIG_FILES')) if 'LIGHT_CONFIG_FILES' in os.environ else 'None'
 CHARGE_CONFIG_FILES   = str(os.environ.get('CHARGE_CONFIG_FILES')) if 'CHARGE_CONFIG_FILES' in os.environ else 'None'
@@ -229,10 +230,11 @@ def _GetParentFiles(metadata) :
 #+++++++++++++++++++++++++++++++
 def _GetDataStream() :
     if DETECTOR_CONFIG == "proto_nd" :
-       return "numibeam"
+       return "numi" if DATA_TYPE == 'data' else 'simulation'
     elif DETECTOR_CONFIG == "fsd" :
        return metadata_blocks[0].get('core.data_stream')
-
+    elif DETECTOR_CONFIG == "ndlar" :
+       return "lbnf" if DATA_TYPE == 'data' else 'simulation'
     return "None"
 
 
@@ -249,9 +251,9 @@ def _GetRunType(workflow) :
 
     if DATA_STREAM == "genie" :
        if workflow.find("converter") != -1 :
-          return 'neardet%slar-genie-gtrac' % word
+          return 'neardet%slar-genie-rootracker' % word
        else :
-          return 'neardet%slar-genie-ghep' % word
+          return 'neardet%slar-genie' % word
     elif DATA_STREAM == "combined" :
        return 'neardet%slar-charge-light' % word
     elif DATA_STREAM == "light" :
@@ -328,11 +330,11 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
           return_md[name] = _GetGlobalSubrun(metadata_blocks) if metadata_blocks[0].get('core.data_tier') == "raw" else etadata_blocks[0].get(name)
     else :
        run = int(str(os.environ.get('RUN'))) if 'RUN' in os.environ else -1
-       return_md['core.runs']         =  run
-       return_md['core.runs_subruns'] =  run*100000+1
+       return_md['core.runs']         =  [run]
+       return_md['core.runs_subruns'] =  [run*100000+1]
        
        if DETECTOR_CONFIG == "proto_nd" :
-          return_md['dune.mx2x2_global_subrun_numbers'] = run*100000+1
+          return_md['dune.mx2x2_global_subrun_numbers'] = [run*100000+1]
 
     # return the metadata block
     return return_md

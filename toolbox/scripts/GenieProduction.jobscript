@@ -46,11 +46,17 @@ WORKFLOW=()
 #  This will give a seed=1
 #
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IN=$((10#$INPUT_FILE)) 
+
 export USE_MAXPATH=0
-export SEED=$((INPUT_FILE + 0))
-export RUN=$((SEED - 1))
+
+export SEED=$((IN + 0))
+export RUN=$((IN + 0))
+
 export GENIE_PRODUCTION_TUNE=AR23_20i_00_000
 export GENIE_XSEC_FILE=${CVMFS_STASHCACHE_DIR}/Flux/2x2EventGeneration/XSec/numi/genie/v3r4p00/AR2320i00000-k250-e1000/gxspl-NUsmall.xml
+echo -e "\tseed is [$SEED], and run number is [$RUN]" 2>&1 | tee -a $envlog
+
 
 if [[ "${DETECTOR_CONFIG}" == "proto_nd" ]]; then
    
@@ -107,9 +113,12 @@ fi
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # get the flux file based on the seed (run number)
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-INDEX=$((SEED - 1))
-DK2NU_FILES=("$DK2NU_DIR"/*.dk2nu*)
+DK2NU_FILES=($(ls "$DK2NU_DIR"/*.dk2nu | awk -F '[_]' '{print $4, $0}' | sort -nk1 | awk '{print $2}'))
+NUM_DK2NU_FILES=${#DK2NU_FILES[@]}
+INDEX=$((RUN % NUM_DK2NU_FILES))
+INDEX=$((INDEX - 1))
 export DK2NU_FILE=${DK2NU_FILES[${INDEX}]}
+echo -e "\tUsing the index [${INDEX}] to get the flux file [${DK2NU_FILE}]" 2>&1 | tee -a $envlog
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -169,39 +178,45 @@ ARGS_GEVGEN_FNAL=( \
 [ -n "${GENIE_EVENT_GENERATOR_LIST}" ] && ARGS_GEVGEN_FNAL+=( --event-generator-list "$GENIE_EVENT_GENERATOR_LIST" )
 
 
+
 #+++++++++++++++++++++++++++++++++++++++
 # Execute the workflow
 #++++++++++++++++++++++++++++++++++++++++
+export PASSED_WORKFLOW=1
 (
-    echo -e "Setup the genie software." 2>&1 | tee -a $envlog
+    echo -e "\nSetup the dune software (genie) software [setup dunesw ${DUNESW_VERSION} -q ${DUNESW_QUALIFIER}]." 2>&1 | tee -a $envlog
 
     source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
     setup dunesw ${DUNESW_VERSION} -q ${DUNESW_QUALIFIER}
     export GDK2NUFLUXXML=${CVMFS_WORKING_DIR}/ndlar_prod_scripts/ND_Production/run-genie/flux/GNuMIFlux.xml
 
-    ups active 2>&1 | tee -a $envlog
-
-    echo -e "Executing the genie workflow for data stream [${DATA_STREAM}] and input file [${INPUT_FILE}]" 2>&1 | tee -a $envlog
+    echo -e "\nExecuting the genie workflow for data stream [${DATA_STREAM}] and input file [${INPUT_FILE}]" 2>&1 | tee -a $envlog
     echo -e "\tRunning the genie command [gevgen_fnal ${ARGS_GEVGEN_FNAL[@]}]" 2>&1 | tee -a $envlog
 
     gevgen_fnal ${ARGS_GEVGEN_FNAL[@]}
 
     if [ ! -f ${GENIE_OUTPUT_FILE_BASE}.${RUN}.ghep.root ]; then
+       export PASSED_WORKFLOW=0
        echo -e "FATAL::The file [${GENIE_OUTPUT_FILE_BASE}.${RUN}.ghep.root] does not exist! Will not continue." 2>&1 | tee -a $envlog
        exit 1
     else
        mv ${GENIE_OUTPUT_FILE_BASE}.${RUN}.ghep.root ${GENIE_OUTPUT_FILE}
     fi 
 
-    echo -e "Converting the native GENIE files to a format easily recognize by ROOT" 2>&1 | tee -a $envlog
-    echo -e "\tRunning the genie command [gntpc -i \"${GENIE_OUTPUT_FILE}\" -f rootracker  -o \"${GTRAC_OUTPUT_FILE}\"]" 2>&1 | tee -a $envlog
+    echo -e "\nConverting the native GENIE files to a format easily recognize by ROOT" 2>&1 | tee -a $envlog
+    echo -e "\tRunning the genie command [gntpc -i \"${GENIE_OUTPUT_FILE}\" -f rootracker  -o \"${GTRAC_OUTPUT_FILE}\"]\n\n" 2>&1 | tee -a $envlog
     gntpc -i "${GENIE_OUTPUT_FILE}" -f rootracker  -o "${GTRAC_OUTPUT_FILE}"
 
     if [ ! -f ${GTRAC_OUTPUT_FILE} ]; then
+       export PASSED_WORKFLOW=0
        echo -e "FATAL::The file [${GTRAC_OUTPUT_FILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
        exit 1
     fi
 )
+
+if [[ "${PASSED_WORKFLOW}" == "0" ]]; then
+   exit 1
+fi
 
 
 #++++++++++++++++++++++++++++++++++++++++++++++++

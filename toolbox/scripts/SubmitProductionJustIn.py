@@ -54,10 +54,10 @@ def _HelpMenu() :
     parser.add_option("--antinu", dest="antinu", default=False, action="store_true", help="Generate the antineutrino beamline using GENIE")
     parser.add_option("--nu", dest="nu", default=False, action="store_true", help="Generate the neutrino beamline using GENIE")
     parser.add_option("--rock", dest="rock", default=False, action="store_true", help="Generate rock muons using GENIE")
-    parser.add_option("--pot", dest="pot", default=19, type=int, help="The power value in the protons per target exposure [default: 1e%default]")
+    parser.add_option("--pot", dest="pot", default="1e15", type="string", help="The protons per target exposure for running GENIE [default: %default]")
 
     parser.add_option("--maxpath", dest="maxpath", default=False, action="store_true", help="Set the max path lengths xml file when running GENIE")
-    parser.add_option("--top-volume", dest="top-volume", default="World", type="string", help="Set the top volumes (World:proto_nd or volArgonCubeDetector75:ndlar) when running GENIE")
+    parser.add_option("--top-volume", dest="top-volume", default=None, type="string", help="Set the top volumes (World:proto_nd or volArgonCubeDetector75:ndlar) when running GENIE")
     parser.add_option("--zmin", dest="zmin", default=None, type=int, help="Set the minimum Z distance when runnin GENIE")
     parser.add_option("--generate", dest="generate", default=None, type=str, help="Generate a specific channel(s) using GENIE, where channel names are listed here $GENIE/config/EventGeneratorListAssembler.xml") 
 
@@ -79,6 +79,7 @@ def _HelpMenu() :
     parser.add_option("--nersc", dest="nersc", default=False, action="store_true", help="Submit the job to NERSC facility")
     parser.add_option("--gpu", dest="gpu", default=False, action="store_true", help="The job requires a gpu")
     parser.add_option("--scope", dest="scope", default="usertests", type="string", help="The scope of the justin job [default: %default]")
+    parser.add_option("--fnal", dest="fnal", default=False, action="store_true", help="Submit the job to FermiGrid only")
 
     (opts, args) = parser.parse_args(sys.argv)
     opts = vars(opts)
@@ -450,7 +451,7 @@ if __name__ == '__main__' :
    cmdlist.append( "--env GENIE_ANTINU=%d" % (1 if opts["antinu"] else 0) )
    cmdlist.append( "--env GENIE_NU=%d" % (1 if opts["nu"] else 0) )
    cmdlist.append( "--env GENIE_ROCK=%d" % (1 if opts["rock"] else 0) )
-   cmdlist.append( "--env GENIE_BEAM_EXPOSURE=1E%d" % opts["pot"] )
+   cmdlist.append( "--env GENIE_BEAM_EXPOSURE=%s" % opts["pot"] )
    cmdlist.append( "--env SAND_GEOM=%s" % opts["sand-geom"] )
    cmdlist.append( "--env GENIE_USE_MAX_PATH=%s" % (1 if opts["maxpath"] else 0) )
 
@@ -470,6 +471,9 @@ if __name__ == '__main__' :
       else :
          cmdlist.append( "--site US_NERSC-GPU" )
          cmdlist.append( "--gpu" ) 
+
+   if opts["fnal"] :
+      cmdlist.append( "--site US_FNAL-FermiGrid" )
  
    # other justin parameters
    if not opts["testJobscript"] :
