@@ -29,7 +29,7 @@ def _HelpMenu() :
     parser.add_option("--debug", dest="debug", default=False, action="store_true", help="run in debug mode")
     parser.add_option("--tier", dest="tier", type="string", default="flow", help="the data tier for processing (genie, edep, spill_build, flow, reco_pandora, reco_spine, caf) [default: %default]")
     parser.add_option("--stream", dest="stream", type="string", default="", help="the input data stream (montecarlo, light, charge, combined, calibrated, reco) [default: %default]")
-    parser.add_option("--detector", dest="detector", type="string", default="proto_nd", help="the detector configuration (proto_nd, fsd, ndlar) [default: %default]")
+    parser.add_option("--detector", dest="detector", type="string", default="proto_nd", help="the detector configuration (proto_nd, fsd, dune_nd) [default: %default]")
    
     parser.add_option("--campaign", dest="campaign", type="string", default=None, help="name of the data or simulated justIN campaign")
 
