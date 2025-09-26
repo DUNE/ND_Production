@@ -14,8 +14,27 @@ inBaseDir=$ND_PRODUCTION_OUTDIR_BASE/run-hadd
 nuInDir=$inBaseDir/$ND_PRODUCTION_NU_NAME
 rockInDir=$inBaseDir/$ND_PRODUCTION_ROCK_NAME
 
+[ -z "${ND_PRODUCTION_INDEX_OFFSET}" ] && export ND_PRODUCTION_INDEX_OFFSET=0
+
+if [[ "$ND_PRODUCTION_REUSE_ROCK" == "1" ]]; then
+  nNuFiles=$(find $nuInDir/EDEPSIM -type f | wc -l)
+  nRockFiles=$(find $rockInDir/EDEPSIM -type f | wc -l)
+  reuseRate=$((nNuFiles / nRockFiles))
+  echo "There are $nNuFiles fiducial files and $nRockFiles rock files"
+  echo "The rock file reuse rate is $reuseRate"
+
+  rockIdx=$((ND_PRODUCTION_INDEX % nRockFiles))
+  rockIdx=$((rockIdx + ND_PRODUCTION_INDEX_OFFSET))
+  rockGlobalIdx=$(printf "%07d" "$rockIdx")
+
+  rockName=$ND_PRODUCTION_ROCK_NAME.$rockGlobalIdx
+  rockSubDir=$(printf "%07d" $((rockIdx / 1000 * 1000)))
+else
+  rockSubDir=$subDir
+fi
+
 nuInFile=$nuInDir/EDEPSIM/$subDir/${nuName}.EDEPSIM.root
-rockInFile=$rockInDir/EDEPSIM/$subDir/${rockName}.EDEPSIM.root
+rockInFile=$rockInDir/EDEPSIM/$rockSubDir/${rockName}.EDEPSIM.root
 
 spillFile=$tmpOutDir/${outName}.EDEPSIM_SPILLS.root
 rm -f "$spillFile"
@@ -35,6 +54,7 @@ libpath_remove /opt/generators/edep-sim/install/lib
 
 [ -z "${ND_PRODUCTION_SPILL_POT}" ] && export ND_PRODUCTION_SPILL_POT=5e13
 [ -z "${ND_PRODUCTION_SPILL_PERIOD}" ] && export ND_PRODUCTION_SPILL_PERIOD=1.2
+[ -z "${ND_PRODUCTION_REUSE_ROCK}" ] && export ND_PRODUCTION_REUSE_ROCK=0
 
 if [[ "$ND_PRODUCTION_USE_GHEP_POT" == "1" ]]; then
   # Covering the case that we want to use the GHEP POT but build only
@@ -56,7 +76,7 @@ if [[ "$ND_PRODUCTION_USE_GHEP_POT" == "1" ]]; then
   elif [[ "$ND_PRODUCTION_ROCK_POT" == "0" ]]; then
     echo "ND_PRODUCTION_NU_ROCK is set to zero - spills will be fiducial only."
   else
-    read -r ND_PRODUCTION_ROCK_POT < "$rockInDir"/POT/$subDir/"$rockName".pot
+    read -r ND_PRODUCTION_ROCK_POT < "$rockInDir"/POT/$rockSubDir/"$rockName".pot
   fi
 fi
 
@@ -74,7 +94,7 @@ LIBTG4EVENT_DIR=${LIBTG4EVENT_DIR:-libTG4Event}
 
 run root -l -b -q \
     -e "gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\")" \
-    "overlaySinglesIntoSpillsSorted.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD)"
+    "overlaySinglesIntoSpillsSorted.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_REUSE_ROCK)"
 
 mkdir -p "$outDir/EDEPSIM_SPILLS/$subDir"
 mv "$spillFile" "$outDir/EDEPSIM_SPILLS/$subDir"

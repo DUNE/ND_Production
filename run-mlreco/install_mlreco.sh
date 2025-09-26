@@ -14,12 +14,12 @@ set -o errexit
 # recommended by Jeremy
 unset which
 
-mkdir weights
+mkdir -p weights
 cd weights
 wget https://portal.nersc.gov/project/dune/data/2x2/simulation/mlreco_weights/2x2_240819_snapshot.ckpt
 cd ..
 
-mkdir install
+mkdir -p install
 cd install
 
 # The Ubuntu container doesn't support Python's built-in "venv" module unless we
@@ -60,13 +60,13 @@ cd larpix_readout_parser
 pip install .
 cd ..
 
-git clone -b main https://github.com/larpix/h5flow.git
+git clone -b main https://github.com/DUNE/h5flow.git
 cd h5flow
 pip install .
 cd ..
 
 
-git clone -b v4.1.9 https://github.com/DeepLearnPhysics/flow2supera.git
+git clone -b develop https://github.com/DeepLearnPhysics/flow2supera.git
 ## Don't pip install because e.g. config files are expected to live near
 ## __file__
 # cd flow2supera
@@ -92,7 +92,7 @@ cd ..
 # git clone -b jw_dune_nd_lar https://github.com/chenel/lartpc_mlreco3d.git
 
 #git clone -b v2.9.5 https://github.com/DeepLearnPhysics/lartpc_mlreco3d.git
-git clone -b v0.4.3 https://github.com/DeepLearnPhysics/spine.git
+git clone -b develop https://github.com/DeepLearnPhysics/spine.git
 
 # git clone https://github.com/chenel/dune-nd-lar-reco.git
 # the old yaml.load API has been removed

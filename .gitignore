@@ -14,3 +14,10 @@ slurm-*.out
 *.root
 *.exe
 tmp_bin
+.*.swp
+
+# Ignore dictionary files created by ROOT conversion script
+run-pandora/AutoDict*
+
+# Ignore files downloaded by 'install' script
+run-cafmaker/*sqlite*
