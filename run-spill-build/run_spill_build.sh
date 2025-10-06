@@ -9,8 +9,10 @@ nuName=$ND_PRODUCTION_NU_NAME.$globalIdx
 rockName=$ND_PRODUCTION_ROCK_NAME.$globalIdx
 echo "outName is $outName"
 
-# inBaseDir=$ND_PRODUCTION_OUTDIR_BASE/run-edep-sim
 inBaseDir=$ND_PRODUCTION_OUTDIR_BASE/run-hadd
+if [[ "$ND_PRODUCTION_NO_HADD" == "1" ]]; then
+  inBaseDir=$ND_PRODUCTION_OUTDIR_BASE/run-edep-sim
+fi
 nuInDir=$inBaseDir/$ND_PRODUCTION_NU_NAME
 rockInDir=$inBaseDir/$ND_PRODUCTION_ROCK_NAME
 
