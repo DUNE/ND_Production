@@ -419,6 +419,8 @@ if __name__ == '__main__' :
                metadata_blocks.append( parent_metadata[parent_file] )
                metadata['parents'].append( {"did":parent_file} )
 
+       #sys.exit()
+
        metadata_block = _GetMetadata(metadata_blocks,filename,workflows[f],args.tier)
 
        metadata['name']      = filename

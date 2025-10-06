@@ -182,7 +182,6 @@ ARGS_GEVGEN_FNAL=( \
 #+++++++++++++++++++++++++++++++++++++++
 # Execute the workflow
 #++++++++++++++++++++++++++++++++++++++++
-export PASSED_WORKFLOW=1
 (
     echo -e "\nSetup the dune software (genie) software [setup dunesw ${DUNESW_VERSION} -q ${DUNESW_QUALIFIER}]." 2>&1 | tee -a $envlog
 
@@ -194,11 +193,10 @@ export PASSED_WORKFLOW=1
     echo -e "\t\tThe GDK2NUFLUXXML is [$GDK2NUFLUXXML]" 2>&1 | tee -a $envlog
     echo -e "\tRunning the genie command [gevgen_fnal ${ARGS_GEVGEN_FNAL[@]}]" 2>&1 | tee -a $envlog
 
-    #gevgen_fnal ${ARGS_GEVGEN_FNAL[@]}
+    gevgen_fnal ${ARGS_GEVGEN_FNAL[@]}
 
     if [ ! -f ${GENIE_OUTPUT_FILE_BASE}.${RUN}.ghep.root ]; then
-       export PASSED_WORKFLOW=0
-       echo -e "FATAL::The file [${GENIE_OUTPUT_FILE_BASE}.${RUN}.ghep.root] does not exist! Will not continue." 2>&1 | tee -a $envlog
+       echo -e "\nFATAL::The file [${GENIE_OUTPUT_FILE_BASE}.${RUN}.ghep.root] does not exist! Will not continue." 2>&1 | tee -a $envlog
        exit 1
     else
        mv ${GENIE_OUTPUT_FILE_BASE}.${RUN}.ghep.root ${GENIE_OUTPUT_FILE}
@@ -206,18 +204,14 @@ export PASSED_WORKFLOW=1
 
     echo -e "\nConverting the native GENIE files to a format easily recognize by ROOT" 2>&1 | tee -a $envlog
     echo -e "\tRunning the genie command [gntpc -i \"${GENIE_OUTPUT_FILE}\" -f rootracker  -o \"${GTRAC_OUTPUT_FILE}\"]\n\n" 2>&1 | tee -a $envlog
-    #gntpc -i "${GENIE_OUTPUT_FILE}" -f rootracker  -o "${GTRAC_OUTPUT_FILE}"
-
-    if [ ! -f ${GTRAC_OUTPUT_FILE} ]; then
-       export PASSED_WORKFLOW=0
-       echo -e "FATAL::The file [${GTRAC_OUTPUT_FILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
-       exit 1
-    fi
+    gntpc -i "${GENIE_OUTPUT_FILE}" -f rootracker  -o "${GTRAC_OUTPUT_FILE}"
 )
 
-if [[ "${PASSED_WORKFLOW}" == "0" ]]; then
+if [ ! -f ${GTRAC_OUTPUT_FILE} ]; then
+   echo -e "\nFATAL::The file [${GTRAC_OUTPUT_FILE}] does not exist! Will not continue." 2>&1 | tee -a $envlog
    exit 1
 fi
+
 
 
 #++++++++++++++++++++++++++++++++++++++++++++++++
@@ -231,16 +225,16 @@ WORKFLOW+=("genie_converter")
 
 export APPLICATION_DATA_TIER="genie-event-generator"
 
-export NAMESPACE="neardet-2x2-lar"
+export NAMESPACE="neardet-2x2"
 if [[ "${DETECTOR_CONFIG}" == "dune_nd" ]]; then
-   export NAMESPACE="neardet-lar"
+   export NAMESPACE="neardet"
 fi
 
 
 #++++++++++++++++++++++++++++++++++++++++
 # create metadata json file
 #++++++++++++++++++++++++++++++++++++++++
-#create_metadata_file mc genie
+create_metadata_file mc genie
 
 
 #+++++++++++++++++++++++++++++++++++++++
