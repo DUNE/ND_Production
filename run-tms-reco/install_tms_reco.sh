@@ -3,7 +3,7 @@
 
 rm -rf dune-tms
 
-TAG="NDMicroProd-08-2025"
+TAG="NDMicroProd-08-2025-fix"
 
 ( git clone https://github.com/DUNE/dune-tms.git
   cd dune-tms || exit
