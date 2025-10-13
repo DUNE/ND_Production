@@ -37,11 +37,11 @@ workflow4='yamls/fsd_flow/workflows/charge/prompt_calibration_mc.yaml'
 workflow5='yamls/fsd_flow/workflows/charge/final_calibration_mc.yaml'
 
 # light workflows
-# workflow6='yamls/fsd_flow/workflows/light/light_event_building_mc.yaml'
-# workflow7='yamls/fsd_flow/workflows/light/light_event_reconstruction.yaml'
+workflow6='yamls/fsd_flow/workflows/light/light_event_building_mc.yaml'
+workflow7='yamls/fsd_flow/workflows/light/light_event_reconstruction.yaml'
 
 # charge-light trigger matching
-# workflow8='yamls/fsd_flow/workflows/charge/charge_light_assoc.yaml'
+workflow8='yamls/fsd_flow/workflows/charge/charge_light_assoc.yaml'
 
 cd "$ND_PRODUCTION_INSTALL_DIR"/ndlar_flow
 
@@ -55,11 +55,11 @@ set -o errexit
 run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4\
     -i "$inFile" -o "$outFile" $compression
 
-# run h5flow -c $workflow6 $workflow7\
-    # -i "$inFile" -o "$outFile" $compression
+run h5flow -c $workflow6 $workflow7\
+    -i "$inFile" -o "$outFile" $compression
 
-# run h5flow -c $workflow8\
-    # -i "$outFile" -o "$outFile" $compression
+run h5flow -c $workflow8\
+    -i "$outFile" -o "$outFile" $compression
 
 mkdir -p "$outDir/FLOW/$subDir"
 mv "$outFile" "$outDir/FLOW/$subDir"
