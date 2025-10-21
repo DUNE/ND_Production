@@ -35,7 +35,7 @@ outFile=$tmpOutDir/${outName}.FLOW.hdf5
 if [[ -f "$outDir/FLOW/$subDir/${outName}.FLOW.hdf5" ]]; then
   echo "ALREADY MADE THIS FILE, MOVING ON!"
   exit 0
-else
+fi
 rm -f "$outFile"
 
 if [[ "$ND_PRODUCTION_COMPRESS" != "" ]]; then
