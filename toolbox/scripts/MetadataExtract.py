@@ -122,7 +122,7 @@ def _EventHelper(name,filename,workflow) :
     elif filename.find(".root") != -1 :
        file = ROOT.TFile.Open(filename, "READ")
        if not file or file.IsZombie() :
-          return nevts
+          return evt
  
        values = [tup for tup in tree_map if tup[0] == DATA_TIER]
        tname  = values[0][1]
