@@ -218,10 +218,10 @@
     <position unit="cm" name="CryostatOuterWallhead_pos" x="0.0" y="0.0" z="-224.68439565481242"/>
     <position unit="cm" name="CryostatOuterWallvolCryostatInsulation_CylindricalTubeHead_pos" x="0.0" y="0.0" z="0.0"/>
     <rotation unit="degree" name="CryostatOuterWallvolCryostatInsulation_CylindricalTubeHead_rot" x="0.0" y="0.0" z="0.0"/>
-    <position unit="cm" name="ArgonCubeCryostatvolCryostatOuterWall_CylindricalTubeHead_pos" x="0.0" y="0.0" z="0.0"/>
-    <rotation unit="degree" name="ArgonCubeCryostatvolCryostatOuterWall_CylindricalTubeHead_rot" x="0.0" y="0.0" z="0.0"/>
-    <position unit="cm" name="ArgonCubeCryostatvolTopDisk_pos" x="0.0" y="0.0" z="210.71637"/>
-    <rotation unit="degree" name="ArgonCubeCryostatvolTopDisk_rot" x="0.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="volCryostatOuterWall_CylindricalTubeHead_pos" x="0.0" y="0.0" z="0.0"/>
+    <rotation unit="degree" name="volCryostatOuterWall_CylindricalTubeHead_rot" x="0" y="0" z="0"/>
+    <position unit="cm" name="volTopDisk_pos" x="0.0" y="0.0" z="210.71637"/>
+    <rotation unit="degree" name="volTopDisk_rot" x="0" y="0" z="0"/>
     <rotation unit="degree" name="noRotate" x="0" y="0" z="0"/>
     <rotation unit="degree" name="r90aboutX" x="90" y="0" z="0"/>
     <rotation unit="degree" name="rminus90aboutX" x="-90" y="0" z="0"/>
@@ -1048,9 +1048,8 @@
       <rotationref ref="identity"/>
     </union>
     <tube name="TopDisk" lunit="cm" aunit="radian" rmin="0.0" rmax="85.724985" z="4.44498" startphi="0.0" deltaphi="6.283185307179586"/>
-    <!-- Original world volume boundaries. Increased by a factor of 10 to somehow fix a edep-sim crash. -->
-    <!-- <box name="World" lunit="cm" x="171.44997" y="500.0" z="171.44997"/> -->
-    <box name="World" lunit="cm" x="1714.4997" y="5000.0" z="1714.4997"/>
+    <box name="ArgonCubeCryostat" lunit="cm" x="171.44997" y="171.44997" z="484.0"/>
+    <box name="World" lunit="cm" x="171.44997" y="538.0" z="171.44997"/>
   </solids>
   <structure>
     <volume name="volTPCPCB">
@@ -2094,18 +2093,20 @@
       <materialref ref="SSteel304"/>
       <solidref ref="TopDisk"/>
     </volume>
-    <assembly name="volArgonCubeCryostat">
+    <volume name="volArgonCubeCryostat">
+      <materialref ref="NoGas"/>
+      <solidref ref="ArgonCubeCryostat"/>
       <physvol>
         <volumeref ref="volCryostatOuterWall_CylindricalTubeHead"/>
-        <positionref ref="ArgonCubeCryostatvolCryostatOuterWall_CylindricalTubeHead_pos"/>
-        <rotationref ref="ArgonCubeCryostatvolCryostatOuterWall_CylindricalTubeHead_rot"/>
+        <positionref ref="volCryostatOuterWall_CylindricalTubeHead_pos"/>
+        <rotationref ref="volCryostatOuterWall_CylindricalTubeHead_rot"/>
       </physvol>
       <physvol>
         <volumeref ref="volTopDisk"/>
-        <positionref ref="ArgonCubeCryostatvolTopDisk_pos"/>
-        <rotationref ref="ArgonCubeCryostatvolTopDisk_rot"/>
+        <positionref ref="volTopDisk_pos"/>
+        <rotationref ref="volTopDisk_rot"/>
       </physvol>
-    </assembly>
+    </volume>
     <volume name="volWorld">
       <materialref ref="NoGas"/>
       <solidref ref="World"/>
