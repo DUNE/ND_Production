@@ -99,7 +99,8 @@ double getProductionTime_LBNF() {
 
 }
 
-long double getNuTOF(const bsim::Ancestor& nu_orig,  double const nu_int[4]){ //const EventRecord& event
+// returns the neutrino time of flight
+long double getNuTOF(const bsim::Ancestor& nu_orig,  double const nu_int[4]){ 
 
   // take the neutrino origin in beam coordinate and convert it to user coordinates
   std::unique_ptr<genie::flux::GDk2NuFlux> flux = std::make_unique<genie::flux::GDk2NuFlux>();  
@@ -110,7 +111,7 @@ long double getNuTOF(const bsim::Ancestor& nu_orig,  double const nu_int[4]){ //
   TLorentzVector userNuOrigin(0.,0.,0.,0.);
   flux->Beam2UserPos(beamNuOrigin, userNuOrigin);
 
-  // take the neutrino interaction point (already in user coordinates)
+  // take the neutrino interaction point (already in user coordinates) from gRooTracker
   // TLorentzVector userNuInteraction(event.Vertex()->X(), event.Vertex()->Y(), event.Vertex()->Z(), event.Vertex()->T());
   TLorentzVector userNuInteraction(nu_int[0], nu_int[1], nu_int[2], nu_int[3]);
 
@@ -122,21 +123,22 @@ long double getNuTOF(const bsim::Ancestor& nu_orig,  double const nu_int[4]){ //
 
   long double distance = sqrt(distance_x*distance_x + distance_y*distance_y + distance_z*distance_z);
 
-  std::cout << "Distance " << distance << '\n';
+  // std::cout << "Distance " << distance << '\n';
 
   long double tof = distance / c;
 
-  std::cout << "TOF " << tof << '\n';
+  // std::cout << "TOF " << tof << '\n';
 
   return tof;
 }
 
+// returns the total sum of all the contributions to the interaction time
 long double getInteractionTime_LBNF(const bsim::Ancestor& nu_orig, double const nu_int[4]) { 
-  std::cout << "Production time: " << getProductionTime_LBNF() << '\n';
-  std::cout << "Nu origin time: " << nu_orig.startt << '\n';
+  // std::cout << "Production time: " << getProductionTime_LBNF() << '\n';
+  // std::cout << "Nu origin time: " << nu_orig.startt << '\n';
   long double nu_tof = getNuTOF(nu_orig, nu_int);
-  std::cout << "nu TOF time: " << nu_tof << '\n';
-  long double interactionTime = getProductionTime_LBNF() +  static_cast<long double>(nu_orig.startt) + nu_tof;
+  // std::cout << "nu TOF time: " << nu_tof << '\n';
+  long double interactionTime = getProductionTime_LBNF() + static_cast<long double>(nu_orig.startt) + nu_tof;
 
   return interactionTime;
 }
@@ -145,6 +147,7 @@ long double getInteractionTime_LBNF(const bsim::Ancestor& nu_orig, double const 
 struct TaggedTime {
   long double time;
   int tag;
+  // add evId because we need to keep track of it together with time
   int evId;
   TaggedTime(double time, int tag, int evId) :
     time(time), tag(tag), evId(evId) {}
@@ -154,7 +157,7 @@ struct TaggedTime {
 void overlayWithNuIntTime(std::string inFileName1,
                                     std::string inFileName2,
                                     std::string outFileName,
-                                    std::string ghepFileName, // added
+                                    // std::string ghepFileName, // added
                                     int spillFileId,
                                     double inFile1POT = 1.024E19,
                                     double inFile2POT = 1.024E19,
@@ -184,19 +187,23 @@ void overlayWithNuIntTime(std::string inFileName1,
 
   // ************************get input GHEP files***********
   // get base directory from inFileName1
-  const char* base_dir = std::getenv("ND_PRODUCTION_OUTDIR_BASE");
-  if (base_dir) {
-        std::cout << "BASE DIR: " << base_dir << std::endl;
+  std::string base_dir = std::getenv("ND_PRODUCTION_OUTDIR_BASE");
+  std::string ghep_name = std::getenv("ND_PRODUCTION_NU_NAME");
+
+  if (base_dir.c_str()) {
+        std::cout << "BASE DIR: " << base_dir.c_str() << std::endl;
     } else {
         std::cout << "ND_PRODUCTION_OUTDIR_BASE not set!" << std::endl;
     }
 
-  auto ghepFiles = getGHEPfiles(base_dir, ghepFileName, hadd_factor, spillFileId);
+  auto ghepFiles = getGHEPfiles(base_dir.c_str(), ghep_name.c_str(), hadd_factor, spillFileId);
   std::cout << "GHEP FILES: " << ghepFiles << '\n';
   std::unique_ptr<TChain> ghep_evts_1 = std::make_unique<TChain>("gtree");
   std::for_each(ghepFiles.begin(), ghepFiles.end(), [&](std::string const& fname){
                                                           ghep_evts_1->Add(fname.c_str());
                                                           });
+
+  std::cout << "GENIE ENTRIES " << ghep_evts_1->GetEntries() << '\n';
 // **********************************************************
 
   // get input nu-LAr files
@@ -304,7 +311,7 @@ void overlayWithNuIntTime(std::string inFileName1,
   int evt_it_1 = 0;
   int evt_it_2 = 0;
 
-  for (int spillN = 0; ; ++spillN) {
+  for (int spillN = 0; spillN < 1; ++spillN) {
     std::cout << "SPILL N " << spillN << '\n';
     int Nevts_this_spill_1 = 0;
     if(have_nu_lar) {
@@ -328,8 +335,8 @@ void overlayWithNuIntTime(std::string inFileName1,
     std::vector<TaggedTime> times(Nevts_this_spill);
 
     // loop on the events within a spill, to take into account also the neutrino TOF before reaching SAND:
-    // so for each event I need to get the interaction position (z coordinate) and compute the interaction time
-    // fill a vector with these times, and then sorted
+    // so for each event I need to get the interaction point and compute the interaction time
+    // fill a vector with these times, and then sort it
     int nPrimaryPart = 0;
     int nTrajectories = 0;
     for (int i = 0; i < Nevts_this_spill; ++i){
@@ -345,7 +352,6 @@ void overlayWithNuIntTime(std::string inFileName1,
       gn_tree->GetEntry(evt_it + i);
       ghep_evts_1->GetEntry(evt_it + i);
 
-      // 
       bsim::Dk2Nu* dk2nu_evt = dk2nu_evt_1;
       gRooTracker genie_data(gn_tree);
       TG4Event* edep_evt = is_fidvol ? edep_evt_1 : edep_evt_2;
@@ -384,7 +390,7 @@ void overlayWithNuIntTime(std::string inFileName1,
 
       int& evt_it = is_nu ? evt_it_1 : evt_it_2;
 
-      std::cout<<"evt_it: "<<evt_it<<std::endl;
+      // std::cout<<"evt_it: "<<evt_it<<std::endl;
 
       in_tree->GetEntry(ttime.evId);
       gn_tree->GetEntry(ttime.evId);
@@ -418,12 +424,18 @@ void overlayWithNuIntTime(std::string inFileName1,
       genie_tree_data.EvtNum = edep_evt->EventId;
       genie_tree_data.EvtVtx[3] = event_time;
 
+      int nPrimaryPartThisEvent = 0;
+      for (auto &v : edep_evt->Primaries)
+        nPrimaryPartThisEvent += v.Particles.size();
+      int nTrajectoriesThisEvent = edep_evt->Trajectories.size();
+      int nSecondaryPartThisEvent = nTrajectoriesThisEvent - nPrimaryPartThisEvent;
+
+      auto updateTrackId = [lastPriTrajId, lastSecTrajId, nPrimaryPartThisEvent](int &trkId)
+      { trkId = trkId < nPrimaryPartThisEvent ? lastPriTrajId + trkId : lastSecTrajId + trkId - nPrimaryPartThisEvent; };
+
       // ... interaction vertex
       for (std::vector<TG4PrimaryVertex>::iterator v = edep_evt->Primaries.begin(); v != edep_evt->Primaries.end(); ++v) {
-        //v->Position.T() = event_time;
         old_event_time = v->Position.T();
-        //std::cout<<"OLD EV TIME: "<<old_event_time<<std::endl;
-        //std::cout<<"NEW EV TIME: "<<event_time<<std::endl;
         v->Position.SetT(event_time);
         // TMS reco wants the InteractionNumber to be the entry number of the
         // vertex in DetSimPassThru/gRooTracker. Since, by construction, our
@@ -431,28 +443,36 @@ void overlayWithNuIntTime(std::string inFileName1,
         // trivially set InteractionNumber to be the current entry number.
         // https://github.com/DUNE/2x2_sim/issues/54
         v->InteractionNumber = evt_it_1 + evt_it_2;
+        for (auto &p : v->Particles){
+          // std::cout<<"p0 TRACKID pre update: "<<p.TrackId<<std::endl;
+          updateTrackId(p.TrackId);
+          // std::cout<<"p0 TRACKID post update: "<<p.TrackId<<std::endl;
+        }
       }
 
-      //std::cout<<"EVENT: "<<edep_evt->EventId<<std::endl;
-      //std::cout<<"TIME: "<<edep_evt->Primaries[0].Position.T()<<std::endl;
+
+      std::cout << "This event: " << edep_evt->EventId << " of " << Nevts_this_spill << std::endl;
+      std::cout << "  - Primary particles: " << nPrimaryPartThisEvent << std::endl;
+      std::cout << "  - Secondary particles: " << nSecondaryPartThisEvent << std::endl;
+      std::cout << "  - Trajectories      : " << nTrajectoriesThisEvent << std::endl;
+      std::cout << "  - Last Pri. Part. Id: " << lastPriTrajId << std::endl;
+      std::cout << "  - Last Sec. Part. Id: " << lastSecTrajId << std::endl;
 
       // ... trajectories
-      int tr = 0;
       for (std::vector<TG4Trajectory>::iterator t = edep_evt->Trajectories.begin(); t != edep_evt->Trajectories.end(); ++t) {
-        //std::cout<<"loop trj number "<<tr<<std::endl;
         // loop over all points in the trajectory
-        int pt = 0;
         for (std::vector<TG4TrajectoryPoint>::iterator p = t->Points.begin(); p != t->Points.end(); ++p) {
-          //std::cout<<"loop points number "<<pt<<std::endl;
           double offset = p->Position.T() - old_event_time;
-          //std::cout<<"Position.T() "<<p->Position.T()<<std::endl;
-          //std::cout<<"old_event_time "<<old_event_time<<std::endl;
-          //std::cout<<"OFFSET: "<<offset<<std::endl;
           p->Position.SetT(event_time + offset);
-          // std::cout<<"NEW POS TIME "<<p->Position.T()<<std::endl;
-          pt++;
         }
-        tr++;
+        // std::cout<<"t TRACKID pre update: "<<t->TrackId<<std::endl;
+        updateTrackId(t->TrackId);
+        // std::cout<<"t TRACKID post update: "<<t->TrackId<<std::endl;
+        if (t->ParentId != -1){
+          // std::cout<<"t PARENTID pre update: "<<t->ParentId<<std::endl;
+          updateTrackId(t->ParentId);
+          // std::cout<<"t PARENTID post update: "<<t->ParentId<<std::endl;
+        }
       }
 
       // ... and, finally, energy depositions
@@ -462,8 +482,19 @@ void overlayWithNuIntTime(std::string inFileName1,
           double stop_offset = h->Stop.T() - old_event_time;
           h->Start.SetT(event_time + start_offset);
           h->Stop.SetT(event_time + stop_offset);
+          // std::cout<<"h PRIMARYID pre update: "<<h->PrimaryId<<std::endl;
+          updateTrackId(h->PrimaryId);
+          // std::cout<<"h PRIMARYID post update: "<<h->PrimaryId<<std::endl;
+          for (auto &trkId : h->Contrib){
+            // std::cout<<"h TRACKID pre update: "<<trkId<<std::endl;
+            updateTrackId(trkId);
+            // std::cout<<"h TRACKID post update: "<<trkId<<std::endl;
+          }
         }
       }
+
+      lastPriTrajId += nPrimaryPartThisEvent;
+      lastSecTrajId += nSecondaryPartThisEvent;
 
       new_tree->Fill();
       genie_tree->Fill();
