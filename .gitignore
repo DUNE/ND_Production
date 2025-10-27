@@ -12,6 +12,7 @@ slurm-*.out
 *.h5
 *.hdf5
 *.root
+*.exe
 tmp_bin
 .*.swp
 
@@ -20,19 +21,3 @@ run-pandora/AutoDict*
 
 # Ignore files downloaded by 'install' script
 run-cafmaker/*sqlite*
-
-*.tar.gz
-*.log
-*.root
-*.xml
-*.time
-*.status
-*.gdml
-launch_edep_sim.sh
-submit_run_edep_sim.sub
-launch_genie.sh
-submit_run_genie.sub
-XSEC/
-*.png
-*.pdf
-

@@ -3,21 +3,21 @@
 ARCUBE_CONTAINER_DIR="/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/containers"
 
 # module load singularity
-if [[ -z "$ARCUBE_CONTAINER_DIR" ]]; then
-    echo "Set \$ARCUBE_CONTAINER_DIR to a directory to store singularity container file."
+if [[ -z "$ND_PRODUCTION_CONTAINER_DIR" ]]; then
+    echo "Set \$ND_PRODUCTION_CONTAINER_DIR to a directory to store singularity container file."
     exit 1
 fi
 
-if [[ -d "$ARCUBE_CONTAINER_DIR" ]]
+if [[ -d "$ND_PRODUCTION_CONTAINER_DIR" ]]
 then
-    echo "Found $ARCUBE_CONTAINER_DIR"
+    echo "Found $ND_PRODUCTION_CONTAINER_DIR"
 else
-    echo "Making $ARCUBE_CONTAINER_DIR"
-    mkdir $ARCUBE_CONTAINER_DIR
+    echo "Making $ND_PRODUCTION_CONTAINER_DIR"
+    mkdir $ND_PRODUCTION_CONTAINER_DIR
 fi
 
-export APPTAINER_CACHEDIR=$ARCUBE_CONTAINER_DIR/.apptainer 
-export APPTAINER_TMPDIR=$ARCUBE_CONTAINER_DIR/.apptainer/tmp
+export SINGULARITY_CACHEDIR=$ND_PRODUCTION_CONTAINER_DIR/.singularity
+export SINGULARITY_TMPDIR=$ND_PRODUCTION_CONTAINER_DIR/.singularity/tmp
 
 # edit to pull a different container
 # GENIE
@@ -33,5 +33,5 @@ echo "Container name: ${CONTAINER_NAME}"
 # singularity pull docker://mjkramer/${CONTAINER_NAME}
 apptainer pull docker://mjkramer/${CONTAINER_NAME}
 
-mv ${CONTAINER_NAME//:/_}.sif $ARCUBE_CONTAINER_DIR
+mv ${CONTAINER_NAME//:/_}.sif $ND_PRODUCTION_CONTAINER_DIR
 echo "Finished."

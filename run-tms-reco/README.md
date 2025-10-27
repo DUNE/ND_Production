@@ -8,7 +8,7 @@ Installation and building can be done with a single command.
 shifter --image=fermilab/fnal-wn-sl7:latest --module=cvmfs /bin/bash -- ${PWD}/install_tms_reco.sh
 ```
 
-The command must be executed from the same directory as this README (`ND_Production/run-tms-reco`). It will launch the container and run `install_tms_reco.sh`. This script clones the dune-tms repository, checkout a particular tag of that repository, sets up the necessary environment via cvmfs and calls `make`. It will then exit the container. 
+The command must be executed from the same directory as this README (`ND_Production/run-tms-reco`). It will launch the container and run `install_tms_reco.sh`. This script clones the dune-tms repository, checksout a particular tag of that repository, sets up the necessary environment via cvmfs and calls `make`. It will then exit the container. 
 
 Note that the installation script and job script both assume the following version of `edep-sim`:
 

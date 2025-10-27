@@ -1,6 +1,8 @@
 # ND_Production
 This repository contains auxiliary files for ND simulation production. It is meant as a centralized place for collecting input files to be used for official production passes for the ND software group.
 Examples: geometry gdml files, flux window definitions, macros
+
+For details of **ND Production samples**, please see the [wiki](https://github.com/DUNE/ND_Production/wiki/Production-Samples).
  
 # Organization
 The repository is organized with a dedicated area for geometry gdml files, and then a directory corresponding to each production stage: generator, geant4, detsim, reco, analysis. There is also a dedicated area for grid scripts to facilitate version control of these scripts. Many jobs that run multiple stages in a single submission will require input files from several of these areas.

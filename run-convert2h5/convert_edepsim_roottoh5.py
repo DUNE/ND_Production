@@ -15,27 +15,28 @@ from ROOT import TG4Event, TFile, TMap
 
 # Output array datatypes
 segments_dtype = np.dtype([("event_id","u4"),("vertex_id", "u8"), ("segment_id", "u4"),
-                           ("z_end", "f4"),("traj_id", "u4"), ("file_traj_id", "u4"), ("tran_diff", "f4"),
+                           ("z_end", "f4"),("traj_id", "i4"), ("file_traj_id", "u4"), ("tran_diff", "f4"),
                            ("z_start", "f4"), ("x_end", "f4"),
                            ("y_end", "f4"), ("n_electrons", "u4"),
                            ("pdg_id", "i4"), ("x_start", "f4"),
                            ("y_start", "f4"), ("t_start", "f8"),
                            ("t0_start", "f8"), ("t0_end", "f8"), ("t0", "f8"),
                            ("dx", "f4"), ("long_diff", "f4"),
-                           ("pixel_plane", "i4"), ("t_end", "f8"),
-                           ("dEdx", "f4"), ("dE", "f4"), ("t", "f8"),
+                           ("pixel_plane", "i4"), ("t", "f8"), ("t_end", "f8"),
+                           ("dEdx", "f4"), ("dE", "f4"), ("dE_secondary", "f4"),
                            ("y", "f4"), ("x", "f4"), ("z", "f4"),
                            ("n_photons","f4")], align=True)
 
 trajectories_dtype = np.dtype([("event_id","u4"), ("vertex_id", "u8"),
-                               ("traj_id", "u4"), ("file_traj_id", "u4"), ("parent_id", "i4"), ("primary", "?"),
+                               ("traj_id", "i4"), ("file_traj_id", "u4"), ("parent_id", "i4"), ("primary", "?"),
                                ("E_start", "f4"), ("pxyz_start", "f4", (3,)),
                                ("xyz_start", "f4", (3,)), ("t_start", "f8"),
                                ("E_end", "f4"), ("pxyz_end", "f4", (3,)),
                                ("xyz_end", "f4", (3,)), ("t_end", "f8"),
-                               ("pdg_id", "i4"), ("start_process", "u4"),
-                               ("start_subprocess", "u4"), ("end_process", "u4"),
-                               ("end_subprocess", "u4"),("dist_travel", "f4")], align=True)
+                               ("KE_start", "f4"), ("KE_end","f4"),
+                               ("pdg_id", "i4"), ("start_process", "i4"),
+                               ("start_subprocess", "i4"), ("end_process", "i4"),
+                               ("end_subprocess", "i4"),("dist_travel", "f4")], align=True)
 
 vertices_dtype = np.dtype([("event_id","u4"), ("vertex_id","u8"),
                            ("x_vert","f4"), ("y_vert","f4"), ("z_vert","f4"),
@@ -259,7 +260,7 @@ def updateHDF5File(output_file, trajectories, segments, vertices, genie_s, genie
                 f['mc_hdr'][ngenie_h:] = genie_h
 
 # Read a file and dump it.
-def dump(input_file, output_file, keep_all_dets=False):
+def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
 
     """
     Script to convert edep-sim root output to an h5 file formatted in a way
@@ -308,6 +309,8 @@ def dump(input_file, output_file, keep_all_dets=False):
         # Check that the edep-sim and GENIE trees have the same number of events
         if entries != genie_entries:
             print("Edep-sim tree and GENIE tree number of entries do not match!")
+            print("Edep-sim tree:", entries)
+            print("GENIE tree   :", genie_entries)
             return
 
     segments_list = list()
@@ -318,6 +321,10 @@ def dump(input_file, output_file, keep_all_dets=False):
 
     # For assigning unique-in-file track IDs:
     trackCounter = 0
+    cosmicEvtId = 0
+
+    if is_cosmic_sim:
+        print("Renumbering event IDs to remove gaps for cosmic sim. Vertex ID remains as-is and will match the edep-sim ID.")
 
     for jentry in tqdm(range(entries)):
         #print(jentry,"/",entries)
@@ -340,6 +347,10 @@ def dump(input_file, output_file, keep_all_dets=False):
                 spillCounter += 1
                 lastSpill = spill_it
             t_spill = spillCounter * spillPeriod_s * 1E6 # convert to us
+
+        if is_cosmic_sim:
+            spill_it = (event.RunId * 1E6) + cosmicEvtId
+            cosmicEvtId += 1
 
         #print("event",event.EventId,"in spill",spill_it)
 
@@ -366,9 +377,9 @@ def dump(input_file, output_file, keep_all_dets=False):
             if len(event.SegmentDetectors) == 0:
                 continue
         else:
-            # If ARCUBE_ACTIVE_VOLUME is not set, default to previously hard
+            # If ND_PRODUCTION_ACTIVE_VOLUME is not set, default to previously hard
             # coded containerName.
-            if not any(containerName == os.environ.get("ARCUBE_ACTIVE_VOLUME", "volTPCActive")
+            if not any(containerName == os.environ.get("ND_PRODUCTION_ACTIVE_VOLUME", "volTPCActive")
                        for containerName, _hits in event.SegmentDetectors):
                 continue
 
@@ -421,6 +432,8 @@ def dump(input_file, output_file, keep_all_dets=False):
                 trajectories[n_traj]["xyz_end"] = (end_pt.GetPosition().X() * edep2cm, end_pt.GetPosition().Y() * edep2cm, end_pt.GetPosition().Z() * edep2cm)
                 trajectories[n_traj]["E_start"] = np.sqrt(np.sum(np.square(p_start)) + mass**2)
                 trajectories[n_traj]["E_end"] = np.sqrt(np.sum(np.square(p_end)) + mass**2)
+                trajectories[n_traj]["KE_start"] = trajectories[n_traj]["E_start"] - mass;
+                trajectories[n_traj]["KE_end"] = trajectories[n_traj]["E_end"] - mass;
                 trajectories[n_traj]["t_start"] = start_pt.GetPosition().T() * edep2us
                 trajectories[n_traj]["t_end"] = end_pt.GetPosition().T() * edep2us
                 trajectories[n_traj]["start_process"] = start_pt.GetProcess()
@@ -440,9 +453,9 @@ def dump(input_file, output_file, keep_all_dets=False):
         # Dump the segment containers
         #print("Number of segment containers:", event.SegmentDetectors.size())
         for containerName, hitSegments in event.SegmentDetectors:
-            # If ARCUBE_ACTIVE_VOLUME is not set, default to previously hard
+            # If ND_PRODUCTION_ACTIVE_VOLUME is not set, default to previously hard
             # coded containerName.
-            if (not keep_all_dets) and containerName != os.environ.get("ARCUBE_ACTIVE_VOLUME", "volTPCActive"):
+            if (not keep_all_dets) and containerName != os.environ.get("ND_PRODUCTION_ACTIVE_VOLUME", "volTPCActive"):
                 continue
             segment = np.empty(len(hitSegments), dtype=segments_dtype)
             for iHit, hitSegment in enumerate(hitSegments):
@@ -521,6 +534,7 @@ def dump(input_file, output_file, keep_all_dets=False):
                 segment[iHit]["t0_end"] = hitSegment.GetStop().T() * edep2us
                 segment[iHit]["t_end"] = 0
                 segment[iHit]["dE"] = hitSegment.GetEnergyDeposit()
+                segment[iHit]["dE_secondary"] = hitSegment.GetSecondaryDeposit()
                 xd = segment[iHit]["x_end"] - segment[iHit]["x_start"]
                 yd = segment[iHit]["y_end"] - segment[iHit]["y_start"]
                 zd = segment[iHit]["z_end"] - segment[iHit]["z_start"]
@@ -548,6 +562,7 @@ def dump(input_file, output_file, keep_all_dets=False):
             nu_4mom = np.empty((4,), dtype='f4')
             lep_4mom = np.empty((4,), dtype='f4')
             nu_pdg = 0
+            lep_pdg = 0
             target_pdg = 0
 
             # Create particle stack dataset

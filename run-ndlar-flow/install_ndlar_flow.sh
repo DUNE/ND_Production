@@ -2,7 +2,10 @@
 
 set -o errexit
 
-module load python/3.11
+if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
+    module unload python 2>/dev/null
+    module load python/3.11
+fi
 
 installDir=${1:-.}
 venvName=flow.venv
@@ -35,13 +38,13 @@ pip install --upgrade pip setuptools wheel
 pip install pyyaml-include==1.3.2
 
 # install h5flow
-git clone -b main https://github.com/larpix/h5flow.git
+git clone -b main https://github.com/DUNE/h5flow.git
 cd h5flow
 pip install -e .
 cd ..
 
 # install ndlar_flow
-git clone -b nd-production-v02.00 https://github.com/larpix/ndlar_flow.git
+git clone -b develop https://github.com/DUNE/ndlar_flow.git
 cd ndlar_flow
 pip install -e .
 cd scripts/proto_nd_scripts

@@ -16,7 +16,9 @@ setup() {
 
 ###################################################################################
 
+set +o errexit
 setup
+set -o errexit
 
 # Must go after setup.
 source ../util-nd-prod/init.inc.sh
@@ -40,7 +42,7 @@ echo "and"
 echo "  ${ND_PRODUCTION_TMSRECOREADOUT_OUTFILE}"
 
 
-run ConvertToTMSTree.exe "$inFile"
+run ${PWD}/dune-tms/bin/ConvertToTMSTree.exe "$inFile"
 
 
 tmsRecoOutDir=$outDir/TMSRECO/$subDir

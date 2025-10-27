@@ -114,16 +114,7 @@ def main(sim_file, input_type, det_complex):
         plt.close()
 
         ### Plot number of hit segments per event id
-        event_ids = np.unique(segments['event_id'])
-        n_segments = np.zeros(event_ids.size)
-        current_evt = 0
-        current_id = segments['event_id'][0]
-        for segment in segments:
-            if segment['event_id'] != current_id:
-                current_id = segment['event_id']
-                current_evt += 1
-            n_segments[current_evt] += 1
-
+        _event_ids, n_segments = np.unique(segments['event_id'], return_counts=True)
         plt.hist(n_segments, bins=100)
         plt.xlabel(r'N segments')
         plt.ylabel('Spills')
@@ -461,25 +452,40 @@ def main(sim_file, input_type, det_complex):
         packet_duration = 10
         epsillon = 5
         n_vertices_per_spill = []
+        n_vertices_per_spill_ndlar = []
         while (spill < len(event_id_uniq)):
-            this_vertices_time = vertices_time[vertices_time > spill*spill_duration - epsillon]
-            this_vertices_time = this_vertices_time[this_vertices_time < spill*(spill_duration) + packet_duration + epsillon]
-            n_vertices_per_spill.append(len(this_vertices_time))
-            plt.hist(this_vertices_time, bins=100, range=[spill*spill_duration - epsillon, spill*spill_duration+packet_duration + epsillon])
+            this_vertices = vertex[vertex['t_vert'] > spill*spill_duration - epsillon]
+            this_vertices = this_vertices[this_vertices['t_vert'] < spill*(spill_duration) + packet_duration + epsillon]
+            n_vertices_per_spill.append(len(this_vertices['t_vert']))
+            plt.hist(this_vertices['t_vert'], bins=100, range=[spill*spill_duration - epsillon, spill*spill_duration+packet_duration + epsillon])
             plt.xlabel('Vertex t_vert (us)')
             plt.ylabel(r'N Vertices')
             output.savefig()
+
+            if det_complex == "full":
+                this_vertices = this_vertices[this_vertices['x_vert'] < 350.0]
+                this_vertices = this_vertices[this_vertices['x_vert'] > -350.0]
+                this_vertices = this_vertices[this_vertices['y_vert'] < 124.233]
+                this_vertices = this_vertices[this_vertices['y_vert'] > -218.191]
+                this_vertices = this_vertices[this_vertices['z_vert'] < 918.2441]
+                this_vertices = this_vertices[this_vertices['z_vert'] > 415.7559]
+                n_vertices_per_spill_ndlar.append(len(this_vertices['z_vert']))
+
             plt.close()
             spill += 1
 
         ### Plot the number of vertices per spill.    
-        plt.hist(n_vertices_per_spill, bins=20)
-        plt.title("Total Vertices: "+str(sum(n_vertices_per_spill)))
+        plt.hist(n_vertices_per_spill, range=[0,200], bins=20)
+        if det_complex == "full":
+            plt.title("Total Vertices: "+str(sum(n_vertices_per_spill))+". ("+str(sum(n_vertices_per_spill_ndlar))+" are in NDLAr)")
+            plt.hist(n_vertices_per_spill_ndlar, range=[0,200], bins=20)
+            plt.hist(np.subtract(n_vertices_per_spill, n_vertices_per_spill_ndlar), range=[0,200], bins=20)
+        else:
+            plt.title("Total Vertices: "+str(sum(n_vertices_per_spill))+".")
         plt.xlabel('Number of Vertices per Spill')
         plt.ylabel(r'Spills')
         output.savefig()
         plt.close()
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

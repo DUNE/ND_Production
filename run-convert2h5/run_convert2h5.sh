@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export ARCUBE_CONTAINER=${ARCUBE_CONTAINER:-mjkramer/sim2x2:ndlar011}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-mjkramer/sim2x2:ndlar011}
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
@@ -8,24 +8,28 @@ source ../util/init.inc.sh
 
 # If we're using a container, it's responsible for the Python libraries. With no
 # container, use a venv.
-if [[ "$ARCUBE_RUNTIME" == "NONE" ]]; then
+if [[ "$ND_PRODUCTION_RUNTIME" == "NONE" ]]; then
     source convert.venv/bin/activate
 fi
 
-if [[ -n "$ARCUBE_SPILL_NAME" ]]; then
-    inName=$ARCUBE_SPILL_NAME.$globalIdx
-    inFile=$ARCUBE_OUTDIR_BASE/run-spill-build/${ARCUBE_SPILL_NAME}/EDEPSIM_SPILLS/$subDir/${inName}.EDEPSIM_SPILLS.root
+if [[ -n "$ND_PRODUCTION_SPILL_NAME" ]]; then
+    inName=$ND_PRODUCTION_SPILL_NAME.$globalIdx
+    inFile=$ND_PRODUCTION_OUTDIR_BASE/run-spill-build/${ND_PRODUCTION_SPILL_NAME}/EDEPSIM_SPILLS/$subDir/${inName}.EDEPSIM_SPILLS.root
 else
-    inName=$ARCUBE_SINGLE_NAME.$globalIdx
-    inFile=$ARCUBE_OUTDIR_BASE/run-edep-sim/${ARCUBE_SINGLE_NAME}/EDEPSIM/$subDir/${inName}.EDEPSIM.root
+    inName=$ND_PRODUCTION_SINGLE_NAME.$globalIdx
+    inFile=$ND_PRODUCTION_OUTDIR_BASE/run-edep-sim/${ND_PRODUCTION_SINGLE_NAME}/EDEPSIM/$subDir/${inName}.EDEPSIM.root
 fi
 
 outFile=$tmpOutDir/${outName}.EDEPSIM.hdf5
 
-if [[ "$ARCUBE_KEEP_ALL_DETS" == "1" ]]; then
-    keepAllDets=--keep_all_dets
-else
-    keepAllDets=""
+ARGS="--input_file $inFile --output_file $outFile"
+
+if [[ "$ND_PRODUCTION_KEEP_ALL_DETS" == "1" ]]; then
+    ARGS="$ARGS --keep_all_dets"
+fi
+
+if [[ "$ND_PRODUCTION_COSMIC_SIM" == "1" ]]; then
+    ARGS="$ARGS --is_cosmic_sim"
 fi
 
 # After going from ROOT 6.14.06 to 6.28.06, apparently we need to point CPATH to
@@ -33,7 +37,7 @@ fi
 # the container already.)
 export CPATH=$EDEPSIM/include/EDepSim:$CPATH
 
-run ./convert_edepsim_roottoh5.py --input_file "$inFile" --output_file "$outFile" "$keepAllDets"
+run ./convert_edepsim_roottoh5.py $ARGS
 
 h5OutDir=$outDir/EDEPSIM_H5/$subDir
 mkdir -p "$h5OutDir"

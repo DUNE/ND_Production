@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-export ARCUBE_RUNTIME=SHIFTER
-# export ARCUBE_CONTAINER=deeplearnphysics/larcv2:ub20.04-cuda11.3-cudnn8-pytorch1.10.0-larndsim-2022-11-03
+export ND_PRODUCTION_RUNTIME=SHIFTER
+# export ND_PRODUCTION_CONTAINER=deeplearnphysics/larcv2:ub20.04-cuda11.3-cudnn8-pytorch1.10.0-larndsim-2022-11-03
 ## Above but with venv support:
-# export ARCUBE_CONTAINER=mjkramer/sim2x2:mlreco001
+# export ND_PRODUCTION_CONTAINER=mjkramer/sim2x2:mlreco001
 # This is the one that Francois has actually been using:
-export ARCUBE_CONTAINER=deeplearnphysics/larcv2:ub20.04-cuda11.6-pytorch1.13-larndsim
+export ND_PRODUCTION_CONTAINER=deeplearnphysics/larcv2:ub2204-cu124-torch251-larndsim
 
 source ../util/reload_in_container.inc.sh
 
@@ -14,12 +14,12 @@ set -o errexit
 # recommended by Jeremy
 unset which
 
-mkdir weights
+mkdir -p weights
 cd weights
 wget https://portal.nersc.gov/project/dune/data/2x2/simulation/mlreco_weights/2x2_240819_snapshot.ckpt
 cd ..
 
-mkdir install
+mkdir -p install
 cd install
 
 # The Ubuntu container doesn't support Python's built-in "venv" module unless we
@@ -41,7 +41,7 @@ pip install --upgrade pip setuptools==69 wheel
 # pip install scikit-learn # for flow2supera
 # pip install --upgrade torch_geometric # for mlreco
 
-git clone -b v2_3_0 https://github.com/DeepLearnPhysics/larcv2.git
+git clone -b v2_3_2 https://github.com/DeepLearnPhysics/larcv2.git
 cd larcv2
 source configure.sh
 make -j16
@@ -54,18 +54,19 @@ git submodule update --init     # pybind11
 pip install .
 cd ..
 
-git clone -b nd-production-v02.00 https://github.com/YifanC/larpix_readout_parser.git
+
+git clone https://github.com/YifanC/larpix_readout_parser.git
 cd larpix_readout_parser
 pip install .
 cd ..
 
-git clone -b main https://github.com/larpix/h5flow.git
+git clone -b main https://github.com/DUNE/h5flow.git
 cd h5flow
 pip install .
 cd ..
 
 
-git clone -b v4.1.2 https://github.com/DeepLearnPhysics/flow2supera.git
+git clone -b develop https://github.com/DeepLearnPhysics/flow2supera.git
 ## Don't pip install because e.g. config files are expected to live near
 ## __file__
 # cd flow2supera
@@ -91,9 +92,11 @@ cd ..
 # git clone -b jw_dune_nd_lar https://github.com/chenel/lartpc_mlreco3d.git
 
 #git clone -b v2.9.5 https://github.com/DeepLearnPhysics/lartpc_mlreco3d.git
-git clone -b v0.1.1 https://github.com/DeepLearnPhysics/spine.git
+git clone -b develop https://github.com/DeepLearnPhysics/spine.git
 
 # git clone https://github.com/chenel/dune-nd-lar-reco.git
 # the old yaml.load API has been removed
 # sed -i 's/yaml.load(open(filename))/yaml.load(open(filename), yaml.Loader)/' \
 #     dune-nd-lar-reco/load_helpers.py
+
+git clone -b main https://github.com/DeepLearnPhysics/spine_prod.git

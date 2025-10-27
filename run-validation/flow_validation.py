@@ -38,6 +38,7 @@ def main(flow_file, charge_only):
         hits = flow_h5['/charge/calib_prompt_hits/data']
         final_hits = flow_h5['/charge/calib_final_hits/data']
 
+        print("Making light plots")
         if not charge_only:
            ### Event display
            sipm_hits_data = flow_h5['light/sipm_hits/data']
@@ -118,6 +119,7 @@ def main(flow_file, charge_only):
            plt.close()   
 
 
+        print("Making a 3D plot of all spills")
         # 3D - all spills
         fig = plt.figure(figsize=(10,10))
         ax = fig.add_subplot(projection='3d')
@@ -139,6 +141,7 @@ def main(flow_file, charge_only):
         output.savefig()
         plt.close()
 
+        print("Making 2D plots of all spills")
         # 2D hit projections
         fig = plt.figure(figsize=(10,6))
         gs  = fig.add_gridspec(1,3)
@@ -179,6 +182,7 @@ def main(flow_file, charge_only):
                 
             io_group_count += 1
 
+        print("Making 1D hit distributions plots")
         ### Hit level 1D position distributions
         fig = plt.figure(figsize=(10,10),layout="constrained")
         gs = fig.add_gridspec(2,2)
@@ -207,13 +211,11 @@ def main(flow_file, charge_only):
         output.savefig()
         plt.close()
 
-        # 3D - "event" spills
+        print("Making plot of io_group contributions from each spill")
+        # io_group contribution for each spill
         n_evts = len(flow_h5['charge/events/ref/charge/calib_final_hits/ref_region'])
         io_group_contrib = np.zeros(shape=(n_evts,len(io_groups_uniq)))
         for a in range(n_evts):
-            fig = plt.figure(figsize=(10,10),layout="constrained")
-            ax = fig.add_subplot(projection='3d')
-            ax.set_facecolor('none')
             hit_ref_slice = flow_h5['charge/events/ref/charge/calib_final_hits/ref_region'][a]
             spill_hits = final_hits[hit_ref_slice[0]:hit_ref_slice[1]]
             event_charge = np.sum(spill_hits['Q'])
@@ -227,20 +229,7 @@ def main(flow_file, charge_only):
                 if len(iog_hits) > 0:
                     iog_evt_charge = np.sum(iog_hits['Q'])
                 io_group_contrib[a][int(iog-1)] = float(iog_evt_charge)/float(event_charge)
-            dat = ax.scatter(spill_hits['z'],spill_hits['x'],
-                       spill_hits['y'],c=spill_hits['Q'],
-                       s=1,cmap='viridis',norm=mlp.colors.LogNorm())
-            ax.set_title(f"Hits in charge events",fontsize=24)
-            ax.set_xlabel('z [cm]',fontsize=16)
-            ax.set_ylabel('x [cm]',fontsize=16)
-            ax.set_zlabel('y [cm]',fontsize=16)
-            ##ax.set_xlim([-65.,65])
-            ##ax.set_ylim([-65.,65])
-            ##ax.set_zlim([-65.,65])
-            output.savefig()
-            plt.close()
 
-        # io_group contribution for each spill
         fig = plt.figure(figsize=(10,8))
         ax = fig.add_subplot()
         ax.set_facecolor('none')
@@ -257,6 +246,7 @@ def main(flow_file, charge_only):
         output.savefig()
         plt.close()
 
+        print("Making plot comparing reco event ID vs true event ID")
         # true spill ID vs. reconstructed charge event
         fig = plt.figure(figsize=(10,8))
         ax = fig.add_subplot()
@@ -301,32 +291,36 @@ def main(flow_file, charge_only):
         output.savefig()
         plt.close()
 
-
+        print("Making 3D plot of selected spills")
         # 3D - several individual spills
-        fig = plt.figure(figsize=(10,10),layout="constrained")
-        gs = fig.add_gridspec(3,3)
-        ax = []
-        for a in range(9):
-            hit_ref_slice = flow_h5['charge/events/ref/charge/calib_final_hits/ref_region'][a]
-            spill_hits = final_hits[hit_ref_slice[0]:hit_ref_slice[1]]
-            ax.append(fig.add_subplot(gs[a//3,a%3],projection='3d'))
-            dat = ax[a].scatter(spill_hits['z'],spill_hits['x'],
-                       spill_hits['y'],c=spill_hits['Q'],
-                       s=1,cmap='viridis',norm=mlp.colors.LogNorm())
-            #cb = fig.colorbar(dat, ax=ax[a], label="detected charge",
-            #                  shrink=0.5, location='left', pad = 0.)
-            #cb.ax.yaxis.set_ticks([matplotlib.ticker.FixedLocator([])])
-            ax[a].set_title(f"spill {a+1}",fontsize=12)
-            ax[a].set_xlabel('z [cm]')
-            ax[a].set_ylabel('x [cm]')
-            ax[a].set_zlabel('y [cm]')
-            #ax[a].set_xlim([-65.,65])
-            #ax[a].set_ylim([-65.,65])
-            #ax[a].set_zlim([-65.,65])
-        output.savefig()
-        plt.close()
+        for i in range(int(np.ceil(n_evts/9))):
+            fig = plt.figure(figsize=(10,10),layout="constrained")
+            gs = fig.add_gridspec(3,3)
+            ax = []
+            for a in range(9):
+                if 9*i + a >= n_evts:
+                    break
+                hit_ref_slice = flow_h5['charge/events/ref/charge/calib_final_hits/ref_region'][9*i + a]
+                spill_hits = final_hits[hit_ref_slice[0]:hit_ref_slice[1]]
+                ax.append(fig.add_subplot(gs[a//3,a%3],projection='3d'))
+                dat = ax[a].scatter(spill_hits['z'],spill_hits['x'],
+                           spill_hits['y'],c=spill_hits['Q'],
+                           s=1,cmap='viridis',norm=mlp.colors.LogNorm())
+                #cb = fig.colorbar(dat, ax=ax[a], label="detected charge",
+                #                  shrink=0.5, location='left', pad = 0.)
+                #cb.ax.yaxis.set_ticks([matplotlib.ticker.FixedLocator([])])
+                ax[a].set_title(f"spill {9*i + a + 1}",fontsize=12)
+                ax[a].set_xlabel('z [cm]')
+                ax[a].set_ylabel('x [cm]')
+                ax[a].set_zlabel('y [cm]')
+                #ax[a].set_xlim([-65.,65])
+                #ax[a].set_ylim([-65.,65])
+                #ax[a].set_zlim([-65.,65])
+            output.savefig()
+            plt.close()
 
 
+        print("Making event timing and nhits plot")
         ### charge/event information
         fig = plt.figure(figsize=(10,6))
         gs  = fig.add_gridspec(3,1)
@@ -363,6 +357,7 @@ def main(flow_file, charge_only):
         sync_packet_mask = packets['packet_type'] == 4
         other_packet_mask= ~(data_packet_mask | trig_packet_mask | sync_packet_mask)
 
+        print ("Plotting time structure of packets")
         ### Plot time structure of packets: 
         plt.clf()
         plt.plot(packets['timestamp'][data_packet_mask],packet_index[data_packet_mask],'o',label='data packets',linestyle='None')
@@ -416,6 +411,7 @@ def main(flow_file, charge_only):
         output.savefig()
         plt.close()
 
+        print("Plotting comparisons of prompt vs final hits")
         # comparisons of prompt hits and final hits
         # currently correspondes to comparisons before and after merging multi-hits
         fig = plt.figure(figsize=(10,8),layout='constrained')
@@ -580,17 +576,69 @@ def main(flow_file, charge_only):
 
         # Check the sums of the fraction field for charge deposition. They should add to 1.
         if 'mc_truth' in flow_h5.keys():
-            fractions = flow_h5['mc_truth/packet_fraction/data']['fraction']
+            print("Plotting packet fractions sum for each calib hit")
+            fractions = flow_h5['mc_truth/calib_prompt_hit_backtrack/data']['fraction']
             summed_fractions = fractions.sum(axis=-1)
             fig, ax = plt.subplots(constrained_layout = True)
-            ax.hist(summed_fractions, bins= np.arange(-0.05, summed_fractions.max(), 0.1))
-            ax.set_title("Sum of packet fractions in each event")
+            ax.hist(summed_fractions, bins= np.arange(-0.05, 10, 0.1))
+            ax.set_title("Sum of packet fractions for each calib hit, range = [-0.05, 10]")
+            ax.set_yscale('log')
+            ax.set_xlabel("Sum")
+            ax.set_ylabel("Count")
+
+            output.savefig()
+            plt.close()
+
+            fig, ax = plt.subplots(constrained_layout = True)
+            ax.hist(summed_fractions, bins= 50)
+            ax.set_title("Sum of packet fractions for each calib hit")
             ax.set_yscale('log')
             ax.set_xlabel("Sum")
             ax.set_ylabel("Count")
 
             output.savefig()
             plt.close() 
+
+            print("Plotting number of backtracked segments per calib hit")
+            bt = flow_h5['/mc_truth/calib_prompt_hit_backtrack/data']
+            n_backtracked = (bt['segment_ids']!=-1).sum(axis=-1)
+
+            fig, ax = plt.subplots(constrained_layout = True)
+            ax.hist(n_backtracked, bins= np.arange(-0.5, n_backtracked.max()+0.5, 1))
+            ax.set_title("Number of backtracked segments in each calib hit")
+            ax.set_xlabel("Number of backtracked segments")
+            ax.set_ylabel("Count")
+
+            output.savefig()
+            plt.close()
+
+            print("Plotting comparison of true segment position vs hit position")
+            segs = flow_h5['/mc_truth/segments/data']
+            bt = flow_h5['/mc_truth/calib_prompt_hit_backtrack/data']
+
+            bt_ids = bt['segment_ids'][:,0]
+            bt_mask = bt_ids != -1
+            hits = hits[bt_mask]
+            bt = bt[bt_mask]
+            bt_ids = bt_ids[bt_mask]
+
+            seg_ids = segs['segment_id']
+            min_seg_id = seg_ids.min()
+            nkeys = seg_ids.max() - min_seg_id + 1
+            seg_id2idx = np.full(nkeys, -1)
+            for idx, seg_id in enumerate(seg_ids):
+                seg_id2idx[seg_id - min_seg_id] = idx 
+
+            for field in ['x', 'y', 'z']:
+                fig, ax = plt.subplots(constrained_layout = True)
+                x_true = segs[field][seg_id2idx[bt_ids - min_seg_id]]
+                x_hits = hits[field]
+                ax.hist(x_true - x_hits, bins=100)
+                ax.set_yscale('linear')
+                ax.set_xlabel(f'$\Delta${field} [cm]')
+                ax.set_title("True backtracked segment position - Reco hit position: {}".format(field))
+                output.savefig()
+                plt.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

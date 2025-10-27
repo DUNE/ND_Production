@@ -58,7 +58,8 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
                                     double inFile1POT = 1.024E19,
                                     double inFile2POT = 1.024E19,
                                     double spillPOT = 5E13,
-                                    double spillPeriod_s = 1.2) {
+                                    double spillPeriod_s = 1.2, 
+                                    int reuseRock = 0) {
 
   // Maximum number of interactions that can be simulated in
   // one spill in "N Interaction" mode. Choice of this number
@@ -143,9 +144,20 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
 
   unsigned int N_evts_2 = 0;
   double evts_per_spill_2 = 0.;
+  std::vector<int> evt_it_2_sequence;
   if(have_nu_rock) {
     N_evts_2 = edep_evts_2->GetEntries();
     evts_per_spill_2 = ((double)N_evts_2)/(inFile2POT/spillPOT);
+    // Create a vector of sequential integers with length equal to the number
+    // of entries in the rock tree to act as rock tree entry indices.
+    for (int idx = 0; idx < N_evts_2; idx++) evt_it_2_sequence.push_back(idx);
+
+    // Now shuffle it with the spillFileId for a seed for reproducibility if we
+    // are reusing rock.
+    if (reuseRock) {
+      std::mt19937 g(spillFileId);
+      std::shuffle(evt_it_2_sequence.begin(), evt_it_2_sequence.end(), g);
+    }
   }
 
   std::cout << "File: " << inFileName1 << std::endl;
@@ -206,8 +218,8 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
       TTree* gn_tree = is_nu ? genie_evts_1 : genie_evts_2;
 
       int& evt_it = is_nu ? evt_it_1 : evt_it_2;
-      in_tree->GetEntry(evt_it);
-      gn_tree->GetEntry(evt_it);
+      in_tree->GetEntry(is_nu ? evt_it : evt_it_2_sequence.at(evt_it));
+      gn_tree->GetEntry(is_nu ? evt_it : evt_it_2_sequence.at(evt_it));
 
       TG4Event* edep_evt = is_nu ? edep_evt_1 : edep_evt_2;
       // out_branch->ResetAddress();
@@ -289,6 +301,14 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
   event_spill_map->Write("event_spill_map", 1);
   auto p = new TParameter<double>("spillPeriod_s", spillPeriod_s);
   p->Write();
+  auto potps = new TParameter<double>("pot_per_spill", is_n_int_mode ? -1 : spillPOT);
+  potps->Write();
+  const auto inFile1POT_used = N_evts_1 ? (inFile1POT * evt_it_1 / N_evts_1) : 0;
+  auto pot1 = new TParameter<double>("pot1", inFile1POT_used);
+  pot1->Write();
+  const auto inFile2POT_used = N_evts_2 ? (inFile2POT * evt_it_2 / N_evts_2) : 0;
+  auto pot2 = new TParameter<double>("pot2", inFile2POT_used);
+  pot2->Write();
 
   outFile->mkdir("DetSimPassThru");
   outFile->cd("DetSimPassThru");
