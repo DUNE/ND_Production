@@ -13,3 +13,26 @@ slurm-*.out
 *.hdf5
 *.root
 tmp_bin
+.*.swp
+
+# Ignore dictionary files created by ROOT conversion script
+run-pandora/AutoDict*
+
+# Ignore files downloaded by 'install' script
+run-cafmaker/*sqlite*
+
+*.tar.gz
+*.log
+*.root
+*.xml
+*.time
+*.status
+*.gdml
+launch_edep_sim.sh
+submit_run_edep_sim.sub
+launch_genie.sh
+submit_run_genie.sub
+XSEC/
+*.png
+*.pdf
+
