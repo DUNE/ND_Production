@@ -28,4 +28,4 @@ output                  = $(ClusterId).$(Process).$(Item).out
 error                   = $(ClusterId).$(Process).$(Item).err
 should_transfer_files   = Yes
 when_to_transfer_output = ON_EXIT
-queue from seq 0 9 |
+queue 0

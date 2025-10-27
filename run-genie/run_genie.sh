@@ -4,16 +4,17 @@ export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-mjkramer/sim2x2:genie_
 
 source /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/setup-genie.sh
 
+# cd $ND_PRODUCTION_DIR/admin
+# ./install_everything.sh
 cd $PWD
 
-export ARCUBE_INDEX=${1}
+export ND_PRODUCTION_INDEX=${1}
 
-# se si simula sulla grid il source va commentato perchè non serve (in quanto carico già l'immagine nel submit.sub), 
-# altrimenti va scommentato
+# if I run on the cluster I need to comment this source because it is not needed, since I load the image in the submit file, 
+# otherwise this source is needed
 # source ../util/reload_in_container.inc.sh
 
-# serve fare questo source perchè anche se lanciando il job io ci metto già il container, 
-# quel container non ha le variabili d'ambiente, perchè sono state sovrascritte, per cui devo rifare il source
+# we need this source because inside the container we don't have the environment variables, because the environment file gets overwritten somewhere 
 source ../admin/container_env.sim2x2_genie_edep.3_04_00.20230912.sif.sh
 source ../util/init.inc.sh
 
@@ -24,25 +25,28 @@ dk2nuFile=${dk2nuAll[$dk2nuIdx]}
 echo "dk2nuIdx is $dk2nuIdx"
 echo "dk2nuFile is $dk2nuFile"
 
-# echo "sono prima di max path" &>> ./std_out.log
 export GXMLPATH=$PWD/flux            # contains GNuMIFlux.xml
 maxPathFile=$PWD/maxpath/$(basename "$ND_PRODUCTION_GEOM" .gdml).$ND_PRODUCTION_TUNE.maxpath.xml
 [ -n "${ND_PRODUCTION_MAX_PATH_FILE}" ] && maxPathFile=$PWD/$ND_PRODUCTION_MAX_PATH_FILE
 
-# maxPathFile=$PWD/maxpath/$(basename "$ARCUBE_GEOM" .gdml).maxpath.xml
+echo "1 maxpath is $maxPathFile"
 
-# echo "$LINENO"
-
-if [ ! -f "$maxPathFile" ]; then
-    # Since I have no maxpath file already present, I need to convert gdml in root and then produce maxpath from the root file
-    echo "TGeoManager::SetVerboseLevel(0); TGeoManager::Import(\"/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/geometry-sand/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.gdml\"); TFile f(\"/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/geometry-sand/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.root\",\"RECREATE\"); gGeoManager->Write(\"geo\"); f.Close();" | root -l -b
-    # Evaluate max path lengths from ROOT geometry file
-    gmxpl -f /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/geometry-sand/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.root -L cm -D g_cm3 -o /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/maxpath/EC_yoke_corrected_1212_dev_SAND_complete_opt3_DRIFT1.maxpath.xml -seed 21304 --message-thresholds /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/Messenger.xml  &> ${ARCUBE_LOGDIR_BASE}/gmxpl.log
-fi
+# if [ ! -f "$maxPathFile" ]; then
+#     # Since I have no maxpath file already present, I need to convert gdml in root and then produce maxpath from the root file
+#     echo "TGeoManager::SetVerboseLevel(0); TGeoManager::Import(\"/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$ND_PRODUCTION_GEOM\"); TFile f(\"/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root\",\"RECREATE\"); gGeoManager->Write(\"geo\"); f.Close();" | root -l -b
+#     echo "dopo import"
+#     # Evaluate max path lengths from ROOT geometry file
+#     echo $(basename $ND_PRODUCTION_GEOM .gdml)
+#     echo "/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root"
+#     gmxpl -f /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root -L cm -D g_cm3 --tune $ND_PRODUCTION_TUNE -t $ND_PRODUCTION_TOP_VOLUME -o /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/maxpath/$(basename $ND_PRODUCTION_GEOM .gdml).maxpath.xml -seed 21304 --message-thresholds /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/Messenger.xml  &> ${ND_PRODUCTION_LOGDIR_BASE}/gmxpl.log
+# fi
 
 # echo "$LINENO" &>> ./std_out.log
 
 # echo "maxpathfile is $maxPathFile"
+=========
+maxPathFile=$PWD/maxpath/$(basename "$ND_PRODUCTION_GEOM" .gdml).$ND_PRODUCTION_TUNE.maxpath.xml
+>>>>>>>>> Temporary merge branch 2
 USE_MAXPATH=1
 
 if [ ! -f "$maxPathFile" ]; then
@@ -52,8 +56,6 @@ if [ ! -f "$maxPathFile" ]; then
     echo ""
     USE_MAXPATH=0
 fi
-
-# echo "$LINENO" &>> ./std_out.log
 
 genieOutPrefix=$tmpOutDir/$outName
 
@@ -81,7 +83,7 @@ args_gevgen_fnal=( \
     --tune "$ND_PRODUCTION_TUNE" \
     --seed "$seed" \
     -o "$genieOutPrefix" \
-    -t "$ARCUBE_TOP_VOLUME" \
+    -t "$ND_PRODUCTION_TOP_VOLUME" \
     -message-thresholds /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/Messenger.xml \
     )
 
@@ -99,8 +101,6 @@ mv genie-mcjob-"$runNo".status "$statDir/$outName.status"
 popd
 rmdir "$tmpDir"
 
-# echo "$LINENO" &>> ./std_out.log
-
 # use consistent naming convention w/ rest of sim chain
 mv "$genieOutPrefix"."$runNo".ghep.root "$genieOutPrefix".GHEP.root
 
@@ -110,5 +110,3 @@ run gntpc -i "$genieOutPrefix".GHEP.root -f rootracker \
 mkdir -p "$outDir/GHEP/$subDir"  "$outDir/GTRAC/$subDir"
 mv "$genieOutPrefix.GHEP.root" "$outDir/GHEP/$subDir"
 mv "$genieOutPrefix.GTRAC.root" "$outDir/GTRAC/$subDir"
-
-cd $ND_PRODUCTION

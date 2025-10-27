@@ -7,6 +7,7 @@ source ../util/init.inc.sh
 
 nuName=$ND_PRODUCTION_NU_NAME.$globalIdx
 rockName=$ND_PRODUCTION_ROCK_NAME.$globalIdx
+ghepNuName=$ND_PRODUCTION_GHEP_NU_NAME.$globalIdx # even if I think it's not necessary because ND_PRODUCTION_GHEP_NU_NAME would be the same of ND_PRODUCTION_NU_NAME
 echo "outName is $outName"
 
 inBaseDir=$ND_PRODUCTION_OUTDIR_BASE/run-hadd
@@ -35,8 +36,36 @@ else
   rockSubDir=$subDir
 fi
 
+[ -z "${ND_PRODUCTION_INDEX_OFFSET}" ] && export ND_PRODUCTION_INDEX_OFFSET=0
+
+if [[ "$ND_PRODUCTION_REUSE_ROCK" == "1" ]]; then
+  nNuFiles=$(find $nuInDir/EDEPSIM -type f | wc -l)
+  nRockFiles=$(find $rockInDir/EDEPSIM -type f | wc -l)
+  reuseRate=$((nNuFiles / nRockFiles))
+  echo "There are $nNuFiles fiducial files and $nRockFiles rock files"
+  echo "The rock file reuse rate is $reuseRate"
+
+  rockIdx=$((ND_PRODUCTION_INDEX % nRockFiles))
+  rockIdx=$((rockIdx + ND_PRODUCTION_INDEX_OFFSET))
+  rockGlobalIdx=$(printf "%07d" "$rockIdx")
+
+  rockName=$ND_PRODUCTION_ROCK_NAME.$rockGlobalIdx
+  rockSubDir=$(printf "%07d" $((rockIdx / 1000 * 1000)))
+else
+  rockSubDir=$subDir
+fi
+
+ghepDir=$ND_PRODUCTION_OUTDIR_BASE/run-genie/
+# ghepFile=$ghepDir/$ND_PRODUCTION_NU_NAME/GHEP/$subDir/${ghepNuName}.GHEP.root
+ghepFile=$ND_PRODUCTION_NU_NAME
 nuInFile=$nuInDir/EDEPSIM/$subDir/${nuName}.EDEPSIM.root
 rockInFile=$rockInDir/EDEPSIM/$rockSubDir/${rockName}.EDEPSIM.root
+
+export GXMLPATH=$ND_PRODUCTION_DIR/run-genie/flux
+
+echo "gxml path is $GXMLPATH"
+echo "genie dir is $GENIE"
+echo "LD LIB PATH is $LD_LIBRARY_PATH"
 
 spillFile=$tmpOutDir/${outName}.EDEPSIM_SPILLS.root
 rm -f "$spillFile"
@@ -95,8 +124,23 @@ fi
 LIBTG4EVENT_DIR=${LIBTG4EVENT_DIR:-libTG4Event}
 
 run root -l -b -q \
-    -e "gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\")" \
-    "overlaySinglesIntoSpillsSorted.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_REUSE_ROCK)"
+     -e  "gSystem->Load(\"libPhysics.so\"); \
+          gSystem->Load(\"libEG.so\"); \
+          gSystem->Load(\"/opt/generators/genie/lib/libGFwMsg-3.04.00.so\"); \
+          gSystem->Load(\"/opt/generators/genie/lib/libGFwReg-3.04.00.so\"); \
+          gSystem->Load(\"/opt/generators/genie/lib/libGFwParDat-3.04.00.so\"); \
+          gSystem->Load(\"/opt/generators/genie/lib/libGFwAlg-3.04.00.so\"); \
+          gSystem->Load(\"/opt/generators/genie/lib/libGFwUtl-3.04.00.so\"); \
+          gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\"); " \
+    "/opt/generators/dk2nu/scripts/load_dk2nu.C(true,true)" \
+    "overlayWithNuIntTime.cpp(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", \"$ghepFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR)"
+    # "overlaySinglesIntoSpillsSorted.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD)"
 
+# run root -l -b -q \
+#      -e  "gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\")" \
+#     "overlaySinglesIntoSpillsSorted.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_REUSE_ROCK)"
+    
 mkdir -p "$outDir/EDEPSIM_SPILLS/$subDir"
 mv "$spillFile" "$outDir/EDEPSIM_SPILLS/$subDir"
+
+

@@ -27,6 +27,7 @@ echo "runNo is $runNo"
 # Default to the root of the ND_Production directory (but ideally this should be set to
 # somewhere on $SCRATCH)
 ND_PRODUCTION_OUTDIR_BASE="${ND_PRODUCTION_OUTDIR_BASE:-$PWD/..}"
+# echo "$PWD"
 mkdir -p "$ND_PRODUCTION_OUTDIR_BASE"
 ND_PRODUCTION_OUTDIR_BASE=$(realpath "$ND_PRODUCTION_OUTDIR_BASE")
 export ND_PRODUCTION_OUTDIR_BASE
@@ -61,48 +62,48 @@ logFile=$logDir/$outName.log
 timeFile=$timeDir/$outName.time
 
 # to download time I need to download wget, if not already present,
-if [ ! $(command -v wget) ]; then
-  yum install -y wget
-fi
+# if [ ! $(command -v wget) ]; then
+#   yum install -y wget
+# fi
 
 # if GNU time is already present in /usr/tmp
 timeProg=time
-# if not present there, we include the one present in /PWD/tmp_bin
+# if not present there, we include the one present in /$PWD/tmp_bin
 # HACK in case we forget to include GNU time in a container
-[[ ! -e "$timeProg" ]] && timeProg=$ND_PRODUCTION/tmp_bin/time
+[[ ! -e "$timeProg" ]] && timeProg=$ND_PRODUCTION_DIR/tmp_bin/time
 
 # if time is not installed, then install in this way
-if [ ! -e "$timeProg" ]; then
-  TMP_BIN="$ND_PRODUCTION/tmp_bin"
+if [ ! -f "$timeProg" ]; then
+  TMP_BIN="$ND_PRODUCTION_DIR/tmp_bin"
 
   if [ ! -d "$TMP_BIN" ]; then
       mkdir - p "$TMP_BIN" || { echo "Failed to create $TMP_BIN"; exit 1; }
   fi
 
   echo "pwd is $PWD"
-  echo "ND_Production is $ND_PRODUCTION"
+  echo "ND_Production is $ND_PRODUCTION_DIR"
 
   # if [ -z "$TWOBYTWO_SIM" ]; then
   #   echo "Error: TWOBYTWO_SIM is not set" 
   #   exit 1
   # fi
   
-  cd "$ND_PRODUCTION/tmp_bin" # || { echo "Failed to cd into $ND_PRODUCTION/tmp_bin"; exit 1; }
+  cd "$ND_PRODUCTION_DIR/tmp_bin" # || { echo "Failed to cd into $ND_PRODUCTION/tmp_bin"; exit 1; }
 
   wget -q https://portal.nersc.gov/project/dune/data/2x2/people/mkramer/bin/time || {
     echo "Download failed"
     exit 1
     } 
-    timeProg=$ND_PRODUCTION/tmp_bin/time
+    timeProg=$ND_PRODUCTION_DIR/tmp_bin/time
 
     if [ ! -x $timeProg ]; then
       chmod +x "$timeProg"
     fi
 fi
 
-echo "pwd after tmp_bin is $PWD"
-cd $PWD
-echo "************pwd after second cd is $PWD"
+# echo "pwd after tmp_bin is $PWD"
+# cd $PWD
+# echo "************pwd after second cd is $PWD"
 
 run() {
     echo RUNNING "$@" | tee -a "$logFile"
