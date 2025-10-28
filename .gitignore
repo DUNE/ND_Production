@@ -61,3 +61,4 @@ productions-SAND_opt3_DRIFT1/run-spill-build/sand-events/EDEPSIM_SPILLS/0000000/
 README_old.md
 run-genie/gRooTracker.h
 productions-new-flux/run-genie/sand-events/GHEP/0000000/rootlogon.C
+productions-new-flux/run-edep-sim/sand-events/EDEPSIM/0000000/rootlogon.C

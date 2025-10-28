@@ -2,20 +2,9 @@
 
 export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-mjkramer/sim2x2:genie_edep.3_04_00.20230912}
 
-source /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/setup-genie.sh
-
-# cd $ND_PRODUCTION_DIR/admin
-# ./install_everything.sh
-cd $PWD
-
-export ND_PRODUCTION_INDEX=${1}
-
 # if I run on the cluster I need to comment this source because it is not needed, since I load the image in the submit file, 
 # otherwise this source is needed
-# source ../util/reload_in_container.inc.sh
-
-# we need this source because inside the container we don't have the environment variables, because the environment file gets overwritten somewhere 
-source ../admin/container_env.sim2x2_genie_edep.3_04_00.20230912.sif.sh
+source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 dk2nuAll=("$ND_PRODUCTION_DK2NU_DIR"/*.dk2nu*)
@@ -41,12 +30,8 @@ echo "1 maxpath is $maxPathFile"
 #     gmxpl -f /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root -L cm -D g_cm3 --tune $ND_PRODUCTION_TUNE -t $ND_PRODUCTION_TOP_VOLUME -o /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/maxpath/$(basename $ND_PRODUCTION_GEOM .gdml).maxpath.xml -seed 21304 --message-thresholds /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/Messenger.xml  &> ${ND_PRODUCTION_LOGDIR_BASE}/gmxpl.log
 # fi
 
-# echo "$LINENO" &>> ./std_out.log
-
 # echo "maxpathfile is $maxPathFile"
-=========
 maxPathFile=$PWD/maxpath/$(basename "$ND_PRODUCTION_GEOM" .gdml).$ND_PRODUCTION_TUNE.maxpath.xml
->>>>>>>>> Temporary merge branch 2
 USE_MAXPATH=1
 
 if [ ! -f "$maxPathFile" ]; then

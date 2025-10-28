@@ -2,13 +2,7 @@
 
 export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-mjkramer/sim2x2:ndlar011}
 
-source /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/setup-edepsim.sh
-
-cd $PWD
-
-export ND_PRODUCTION_INDEX=${1}
-
-# source ../util/reload_in_container.inc.sh
+source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 simulation=${ND_PRODUCTION_SIM:-GENIE}
@@ -46,5 +40,3 @@ run edep-sim -C -g "$ND_PRODUCTION_GEOM_EDEP" -o "$edepRootFile" -e "$nEvents" \
 
 mkdir -p "$outDir/EDEPSIM/$subDir"
 mv "$edepRootFile" "$outDir/EDEPSIM/$subDir"
-
-# cd $WORKING_DIR

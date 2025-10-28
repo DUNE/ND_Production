@@ -18,25 +18,14 @@
 //   (1) The EventId for rock events starts from -1 and counts backward.
 //
 //   (2) The timing information is edited to impose the timing microstructure of
-//       the numi/lbnf beamline, as well as the "macrostructure" (spill period).
+//       the numi/lbnf beamline, the neutrino parent time of flight, the neutrino time of flight 
+//       and the "macrostructure" (spill period).
+//   
+//   (3) The TrackId follows the edep-sim convention: first all primaries, and all the primaries
+//       trajectories; then the secondaries, and the secondaries trajectories
 
-long double c = 0.299792458; // [m/ns]
-long double conversionTo_ns = 1.E9; 
-
-// overload << for vectors
-template <typename T>
-std::ostream& operator<<(std::ostream& os, std::vector<T> const& c)
-{
-  os << "{ ";
-  std::copy(
-            std::begin(c),
-            std::end(c),
-            std::ostream_iterator<T>{os, "\n"}
-            );
-  os << '}';
-
-  return os;
-}
+const long double conversionTo_ns = 1.E9; 
+const long double c = TMath::C() // [m/s]
 
 // *************************************READ GHEP FILES************************************************
 // We need to read GHEP files, hence we need these two methods
@@ -99,6 +88,10 @@ double getProductionTime_LBNF() {
 
 }
 
+long double getNuParentTOF(const bsim::Ancestor& nu_orig){
+  return static_cast<long double>(nu_orig.startt);
+}
+
 // returns the neutrino time of flight
 long double getNuTOF(const bsim::Ancestor& nu_orig,  double const nu_int[4]){ 
 
@@ -108,39 +101,34 @@ long double getNuTOF(const bsim::Ancestor& nu_orig,  double const nu_int[4]){
   flux->LoadConfig("DUNEND");
   //conversion
   TLorentzVector beamNuOrigin(nu_orig.startx, nu_orig.starty, nu_orig.startz, nu_orig.startt);
-  TLorentzVector userNuOrigin(0.,0.,0.,0.);
+  TLorentzVector userNuOrigin;
   flux->Beam2UserPos(beamNuOrigin, userNuOrigin);
 
   // take the neutrino interaction point (already in user coordinates) from gRooTracker
-  // TLorentzVector userNuInteraction(event.Vertex()->X(), event.Vertex()->Y(), event.Vertex()->Z(), event.Vertex()->T());
   TLorentzVector userNuInteraction(nu_int[0], nu_int[1], nu_int[2], nu_int[3]);
 
   // compute the nu tof
-  long double distance_x = userNuInteraction.X() - userNuOrigin.X();
-  long double distance_y = userNuInteraction.Y() - userNuOrigin.Y();
-  long double distance_z = userNuInteraction.Z() - userNuOrigin.Z();
-  //TVector3 distance_vector = TVector3(distance_x, distance_y, distance_z);
+  TLorentzVector distance_4v = userNuInteraction - userNuOrigin;
+  // long double distance_x = userNuInteraction.X() - userNuOrigin.X();
+  // long double distance_y = userNuInteraction.Y() - userNuOrigin.Y();
+  // long double distance_z = userNuInteraction.Z() - userNuOrigin.Z();
 
-  long double distance = sqrt(distance_x*distance_x + distance_y*distance_y + distance_z*distance_z);
+  long double distance = distance_4v.Vect().Mag();
 
-  // std::cout << "Distance " << distance << '\n';
-
-  long double tof = distance / c;
-
-  // std::cout << "TOF " << tof << '\n';
+  const long double c_ns = c / conversionTo_ns;
+  long double tof = distance / c_ns;
 
   return tof;
 }
 
 // returns the total sum of all the contributions to the interaction time
 long double getInteractionTime_LBNF(const bsim::Ancestor& nu_orig, double const nu_int[4]) { 
-  // std::cout << "Production time: " << getProductionTime_LBNF() << '\n';
-  // std::cout << "Nu origin time: " << nu_orig.startt << '\n';
-  long double nu_tof = getNuTOF(nu_orig, nu_int);
-  // std::cout << "nu TOF time: " << nu_tof << '\n';
-  long double interactionTime = getProductionTime_LBNF() + static_cast<long double>(nu_orig.startt) + nu_tof;
 
-  return interactionTime;
+  long double nu_production_time = getProductionTime_LBNF();
+  long double nu_parent_tof = getNuParentTOF(nu_orig);
+  long double nu_tof = getNuTOF(nu_orig, nu_int);
+
+  return nu_production_time + nu_parent_tof + nu_tof;
 }
 // ******************************************************************************************************
 
@@ -154,7 +142,7 @@ struct TaggedTime {
   TaggedTime() : time(0), tag(0), evId(0) {}
 };
 
-void overlayWithNuIntTime(std::string inFileName1,
+void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
                                     std::string inFileName2,
                                     std::string outFileName,
                                     // std::string ghepFileName, // added

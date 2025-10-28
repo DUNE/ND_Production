@@ -133,7 +133,7 @@ run root -l -b -q \
           gSystem->Load(\"/opt/generators/genie/lib/libGFwUtl-3.04.00.so\"); \
           gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\"); " \
     "/opt/generators/dk2nu/scripts/load_dk2nu.C(true,true)" \
-    "overlayWithNuIntTime.cpp(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", \"$ghepFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR)"
+    "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", \"$ghepFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR)"
     # "overlaySinglesIntoSpillsSorted.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD)"
 
 # run root -l -b -q \
