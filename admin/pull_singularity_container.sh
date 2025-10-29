@@ -18,7 +18,7 @@ export SINGULARITY_CACHEDIR=$ND_PRODUCTION_CONTAINER_DIR/.singularity
 export SINGULARITY_TMPDIR=$ND_PRODUCTION_CONTAINER_DIR/.singularity/tmp
 
 # edit to pull a different container
-# CONTAINER_NAME='sim2x2:genie_edep.LFG_testing.20230228.v2'
+CONTAINER_NAME='sim2x2:genie_edep.LFG_testing.20230228.v2'
 
 mkdir -p $SINGULARITY_TMPDIR
 

@@ -66,9 +66,7 @@ timeProg=/usr/bin/time
 
 run() {
     echo RUNNING "$@" | tee -a "$logFile"
-    # echo RUNNING "$@" &> "$logFile"
     time "$timeProg" --append -f "$1 %P %M %E" -o "$timeFile" "$@" 2>&1 | tee -a "$logFile"
-    # time "$timeProg" --append -f "$1 %P %M %E" -o "$timeFile" "$@" 2>&1 &> "$logFile"
 
 }
 

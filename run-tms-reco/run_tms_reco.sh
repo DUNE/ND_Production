@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source ../util/reload_in_container.inc.sh
+
 # Setup environment.
 setup() {
   source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
