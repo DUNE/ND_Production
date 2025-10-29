@@ -24,12 +24,27 @@
 //   (3) The TrackId follows the edep-sim convention: first all primaries, and all the primaries
 //       trajectories; then the secondaries, and the secondaries trajectories
 
-const long double conversionTo_ns = 1.E9; 
-const long double c = TMath::C() // [m/s]
+constexpr long double conversionTo_ns = 1.E9; 
+constexpr long double c = TMath::C(); // [m/s]
+
+// overload << for vectors
+// template <typename T>
+// std::ostream& operator<<(std::ostream& os, std::vector<T> const& c)
+// {
+//   os << "{ ";
+//   std::copy(
+//             std::begin(c),
+//             std::end(c),
+//             std::ostream_iterator<T>{os, "\n"}
+//             );
+//   os << '}';
+
+//   return os;
+// }
 
 // *************************************READ GHEP FILES************************************************
 // We need to read GHEP files, hence we need these two methods
-std::string getPath(std::string const& base_dir, std::string const& step, std::string const& ghep_fname, std::string const& ftype, std::string const& ext, int file_id){
+std::string getPath(std::string const& base_outdir, std::string const& step, std::string const& ghep_fname, std::string const& ftype, std::string const& ext, int file_id){
   int subdir_num = (file_id / 1000) *1000;
   std::ostringstream oss;
   oss << std::setw(7) << std::setfill('0') << subdir_num;
@@ -43,7 +58,7 @@ std::string getPath(std::string const& base_dir, std::string const& step, std::s
   oss_fileid << std::setw(7) << std::setfill('0') << file_id;
   std::string fileid_str = oss_fileid.str();
 
-  std::string path = base_dir + "/" + step + "/" + ghep_fname + "/" + ftype + "/" + subdir +
+  std::string path = base_outdir + "/" + step + "/" + ghep_fname + "/" + ftype + "/" + subdir +
                       "/" + ghep_fname + "." + fileid_str + "." + ftype2 + "." + ext;
 
   if (!std::ifstream(path)) { // in the original function there is std::filesystem::exists but it doesn't work since this script uses c++14 by default when calling ROOT
@@ -54,10 +69,10 @@ std::string getPath(std::string const& base_dir, std::string const& step, std::s
   return path;
 }
 
-std::vector<std::string> getGHEPfiles(std::string const& base_dir,  std::string const& ghep_fname, int const& hadd_factor,  int const& file_id) {
+std::vector<std::string> getGHEPfiles(std::string const& base_outdir,  std::string const& ghep_fname, int const& hadd_factor,  int const& file_id) {
   std::vector<std::string> ghep_files;
   for (int ghep_id = file_id * hadd_factor; ghep_id < (file_id + 1) * hadd_factor; ++ghep_id) {
-    std::string path = getPath(base_dir, "run-genie", ghep_fname, "GHEP", "root", ghep_id);
+    std::string path = getPath(base_outdir, "run-genie", ghep_fname, "GHEP", "root", ghep_id);
     ghep_files.push_back(path);
   }
   return ghep_files;
@@ -109,9 +124,6 @@ long double getNuTOF(const bsim::Ancestor& nu_orig,  double const nu_int[4]){
 
   // compute the nu tof
   TLorentzVector distance_4v = userNuInteraction - userNuOrigin;
-  // long double distance_x = userNuInteraction.X() - userNuOrigin.X();
-  // long double distance_y = userNuInteraction.Y() - userNuOrigin.Y();
-  // long double distance_z = userNuInteraction.Z() - userNuOrigin.Z();
 
   long double distance = distance_4v.Vect().Mag();
 
@@ -151,7 +163,8 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
                                     double inFile2POT = 1.024E19,
                                     double spillPOT = 5E13,
                                     long double spillPeriod_s = 1.2,
-                                    int hadd_factor = 10) { // added
+                                    int hadd_factor = 10, // added
+                                    int reuseRock = 0) { 
 
   // Maximum number of interactions that can be simulated in
   // one spill in "N Interaction" mode. Choice of this number
@@ -175,23 +188,21 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
 
   // ************************get input GHEP files***********
   // get base directory from inFileName1
-  std::string base_dir = std::getenv("ND_PRODUCTION_OUTDIR_BASE");
+  std::string base_outdir = std::getenv("ND_PRODUCTION_OUTDIR_BASE");
   std::string ghep_name = std::getenv("ND_PRODUCTION_NU_NAME");
 
-  if (base_dir.c_str()) {
-        std::cout << "BASE DIR: " << base_dir.c_str() << std::endl;
+  if (base_outdir.c_str()) {
+        std::cout << "BASE DIR: " << base_outdir.c_str() << std::endl;
     } else {
         std::cout << "ND_PRODUCTION_OUTDIR_BASE not set!" << std::endl;
     }
 
-  auto ghepFiles = getGHEPfiles(base_dir.c_str(), ghep_name.c_str(), hadd_factor, spillFileId);
-  std::cout << "GHEP FILES: " << ghepFiles << '\n';
+  auto ghepFiles = getGHEPfiles(base_outdir.c_str(), ghep_name.c_str(), hadd_factor, spillFileId);
   std::unique_ptr<TChain> ghep_evts_1 = std::make_unique<TChain>("gtree");
   std::for_each(ghepFiles.begin(), ghepFiles.end(), [&](std::string const& fname){
                                                           ghep_evts_1->Add(fname.c_str());
                                                           });
 
-  std::cout << "GENIE ENTRIES " << ghep_evts_1->GetEntries() << '\n';
 // **********************************************************
 
   // get input nu-LAr files
@@ -257,31 +268,30 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
 
   unsigned int N_evts_2 = 0;
   double evts_per_spill_2 = 0.;
+  std::vector<int> evt_it_2_sequence;
   if(have_nu_rock) {
     N_evts_2 = edep_evts_2->GetEntries();
     evts_per_spill_2 = ((double)N_evts_2)/(inFile2POT/spillPOT);
+    // Create a vector of sequential integers with length equal to the number
+    // of entries in the rock tree to act as rock tree entry indices.
+    for (int idx = 0; idx < N_evts_2; idx++) evt_it_2_sequence.push_back(idx);
+
+    // Now shuffle it with the spillFileId for a seed for reproducibility if we
+    // are reusing rock.
+    if (reuseRock) {
+      std::mt19937 g(spillFileId);
+      std::shuffle(evt_it_2_sequence.begin(), evt_it_2_sequence.end(), g);
+    }
   }
 
-  // std::cout << "File: " << inFileName1 << std::endl;
-  // std::cout << "    Number of spills: "<< (is_n_int_mode ? 
-  //   std::floor((double)N_evts_1/evts_per_spill_1) : inFile1POT/spillPOT) << std::endl;
-  // std::cout << "    Events per spill: "<< evts_per_spill_1 << std::endl;
+  std::cout << "File: " << inFileName1 << std::endl;
+  std::cout << "    Number of spills: "<< (is_n_int_mode ? 
+    std::floor((double)N_evts_1/evts_per_spill_1) : inFile1POT/spillPOT) << std::endl;
+  std::cout << "    Events per spill: "<< evts_per_spill_1 << std::endl;
 
-  // std::cout << "File: " << inFileName2 << std::endl;
-  // std::cout << "    Number of spills: "<< inFile2POT/spillPOT << std::endl;
-  // std::cout << "    Events per spill: "<< evts_per_spill_2 << std::endl;
-
-  std::ofstream ofs("spills_info.txt");
-  if (ofs.is_open()){
-    ofs << "File: " << inFileName1 << std::endl;
-    ofs << "    Number of spills: "<< (is_n_int_mode ? 
-      std::floor((double)N_evts_1/evts_per_spill_1) : inFile1POT/spillPOT) << std::endl;
-    ofs << "    Events per spill: "<< evts_per_spill_1 << std::endl;
-
-    ofs << "File: " << inFileName2 << std::endl;
-    ofs << "    Number of spills: "<< inFile2POT/spillPOT << std::endl;
-    ofs << "    Events per spill: "<< evts_per_spill_2 << std::endl;
-  }
+  std::cout << "File: " << inFileName2 << std::endl;
+  std::cout << "    Number of spills: "<< inFile2POT/spillPOT << std::endl;
+  std::cout << "    Events per spill: "<< evts_per_spill_2 << std::endl;
 
   // **********get dk2nu branch******
   bsim::Dk2Nu* dk2nu_evt_1 = nullptr;
@@ -299,7 +309,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
   int evt_it_1 = 0;
   int evt_it_2 = 0;
 
-  for (int spillN = 0; spillN < 1; ++spillN) {
+  for (int spillN = 0; ; ++spillN) {
     std::cout << "SPILL N " << spillN << '\n';
     int Nevts_this_spill_1 = 0;
     if(have_nu_lar) {
@@ -334,8 +344,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
 
       TTree* in_tree = is_fidvol ? edep_evts_1 : edep_evts_2;
       TTree* gn_tree = is_fidvol ? genie_evts_1 : genie_evts_2;
-      // std::unique_ptr<TTree> ghep_tree;
-      // std::swap(&ghep_tree, &ghep_evts_1);
+      
       in_tree->GetEntry(evt_it + i);
       gn_tree->GetEntry(evt_it + i);
       ghep_evts_1->GetEntry(evt_it + i);
@@ -377,8 +386,6 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
       TTree* gn_tree = is_nu ? genie_evts_1 : genie_evts_2;
 
       int& evt_it = is_nu ? evt_it_1 : evt_it_2;
-
-      // std::cout<<"evt_it: "<<evt_it<<std::endl;
 
       in_tree->GetEntry(ttime.evId);
       gn_tree->GetEntry(ttime.evId);
@@ -432,12 +439,9 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
         // https://github.com/DUNE/2x2_sim/issues/54
         v->InteractionNumber = evt_it_1 + evt_it_2;
         for (auto &p : v->Particles){
-          // std::cout<<"p0 TRACKID pre update: "<<p.TrackId<<std::endl;
           updateTrackId(p.TrackId);
-          // std::cout<<"p0 TRACKID post update: "<<p.TrackId<<std::endl;
         }
       }
-
 
       std::cout << "This event: " << edep_evt->EventId << " of " << Nevts_this_spill << std::endl;
       std::cout << "  - Primary particles: " << nPrimaryPartThisEvent << std::endl;
@@ -453,13 +457,9 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
           double offset = p->Position.T() - old_event_time;
           p->Position.SetT(event_time + offset);
         }
-        // std::cout<<"t TRACKID pre update: "<<t->TrackId<<std::endl;
         updateTrackId(t->TrackId);
-        // std::cout<<"t TRACKID post update: "<<t->TrackId<<std::endl;
         if (t->ParentId != -1){
-          // std::cout<<"t PARENTID pre update: "<<t->ParentId<<std::endl;
           updateTrackId(t->ParentId);
-          // std::cout<<"t PARENTID post update: "<<t->ParentId<<std::endl;
         }
       }
 
@@ -470,13 +470,9 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
           double stop_offset = h->Stop.T() - old_event_time;
           h->Start.SetT(event_time + start_offset);
           h->Stop.SetT(event_time + stop_offset);
-          // std::cout<<"h PRIMARYID pre update: "<<h->PrimaryId<<std::endl;
           updateTrackId(h->PrimaryId);
-          // std::cout<<"h PRIMARYID post update: "<<h->PrimaryId<<std::endl;
           for (auto &trkId : h->Contrib){
-            // std::cout<<"h TRACKID pre update: "<<trkId<<std::endl;
             updateTrackId(trkId);
-            // std::cout<<"h TRACKID post update: "<<trkId<<std::endl;
           }
         }
       }
@@ -503,6 +499,14 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
   event_spill_map->Write("event_spill_map", 1);
   auto p = new TParameter<double>("spillPeriod_s", spillPeriod_s);
   p->Write();
+  auto potps = new TParameter<double>("pot_per_spill", is_n_int_mode ? -1 : spillPOT);
+  potps->Write();
+  const auto inFile1POT_used = N_evts_1 ? (inFile1POT * evt_it_1 / N_evts_1) : 0;
+  auto pot1 = new TParameter<double>("pot1", inFile1POT_used);
+  pot1->Write();
+  const auto inFile2POT_used = N_evts_2 ? (inFile2POT * evt_it_2 / N_evts_2) : 0;
+  auto pot2 = new TParameter<double>("pot2", inFile2POT_used);
+  pot2->Write();
 
   outFile->mkdir("DetSimPassThru");
   outFile->cd("DetSimPassThru");

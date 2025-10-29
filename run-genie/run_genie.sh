@@ -69,7 +69,6 @@ args_gevgen_fnal=( \
     --seed "$seed" \
     -o "$genieOutPrefix" \
     -t "$ND_PRODUCTION_TOP_VOLUME" \
-    -message-thresholds /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/Messenger.xml \
     )
 
 [ "${USE_MAXPATH}" == 1 ] && args_gevgen_fnal+=( -m "$maxPathFile" )

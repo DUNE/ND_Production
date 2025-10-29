@@ -1,1 +1,0 @@
-/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/productions-new-flux/run-genie/sand-events/GHEP/0000000/rootlogon.C

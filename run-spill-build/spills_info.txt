@@ -1,0 +1,6 @@
+File: /storage/gpfs_data/neutrino/users/gsantoni/ND_Production_main/workspace/output/productions-new-flux/run-hadd/sand-events/EDEPSIM/0000000/sand-events.0000000.EDEPSIM.root
+    Number of spills: 200
+    Events per spill: 64.02
+File: /storage/gpfs_data/neutrino/users/gsantoni/ND_Production_main/workspace/output/productions-new-flux/run-hadd/rock-events/EDEPSIM/0000000/rock-events.0000000.EDEPSIM.root
+    Number of spills: 0
+    Events per spill: 0

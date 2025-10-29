@@ -1,1 +1,0 @@
-/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/rootlogon.C
