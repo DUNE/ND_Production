@@ -7,7 +7,6 @@ source ../util/init.inc.sh
 
 nuName=$ND_PRODUCTION_NU_NAME.$globalIdx
 rockName=$ND_PRODUCTION_ROCK_NAME.$globalIdx
-# ghepNuName=$ND_PRODUCTION_GHEP_NU_NAME.$globalIdx # even if I think it's not necessary because ND_PRODUCTION_GHEP_NU_NAME would be the same of ND_PRODUCTION_NU_NAME
 echo "outName is $outName"
 
 inBaseDir=$ND_PRODUCTION_OUTDIR_BASE/run-hadd
@@ -36,15 +35,10 @@ else
   rockSubDir=$subDir
 fi
 
-# ghepDir=$ND_PRODUCTION_OUTDIR_BASE/run-genie/
 nuInFile=$nuInDir/EDEPSIM/$subDir/${nuName}.EDEPSIM.root
 rockInFile=$rockInDir/EDEPSIM/$rockSubDir/${rockName}.EDEPSIM.root
 
 export GXMLPATH=$ND_PRODUCTION_DIR/run-genie/flux
-
-echo "gxml path is $GXMLPATH"
-echo "genie dir is $GENIE"
-echo "LD LIB PATH is $LD_LIBRARY_PATH"
 
 spillFile=$tmpOutDir/${outName}.EDEPSIM_SPILLS.root
 rm -f "$spillFile"
@@ -116,5 +110,3 @@ run root -l -b -q \
 
 mkdir -p "$outDir/EDEPSIM_SPILLS/$subDir"
 mv "$spillFile" "$outDir/EDEPSIM_SPILLS/$subDir"
-
-

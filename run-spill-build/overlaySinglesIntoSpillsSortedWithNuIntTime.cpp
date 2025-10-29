@@ -27,21 +27,6 @@
 constexpr long double conversionTo_ns = 1.E9; 
 constexpr long double c = TMath::C(); // [m/s]
 
-// overload << for vectors
-// template <typename T>
-// std::ostream& operator<<(std::ostream& os, std::vector<T> const& c)
-// {
-//   os << "{ ";
-//   std::copy(
-//             std::begin(c),
-//             std::end(c),
-//             std::ostream_iterator<T>{os, "\n"}
-//             );
-//   os << '}';
-
-//   return os;
-// }
-
 // *************************************READ GHEP FILES************************************************
 // We need to read GHEP files, hence we need these two methods
 std::string getPath(std::string const& base_outdir, std::string const& step, std::string const& ghep_fname, std::string const& ftype, std::string const& ext, int file_id){
