@@ -26,7 +26,6 @@ echo "Pulling container... this will take O(1 hour)..."
 echo "Container name: ${CONTAINER_NAME}"
 
 singularity pull docker://mjkramer/${CONTAINER_NAME}
-# apptainer pull docker://mjkramer/${CONTAINER_NAME}
 
 mv ${CONTAINER_NAME//:/_}.sif $ND_PRODUCTION_CONTAINER_DIR
 echo "Finished."

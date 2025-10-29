@@ -21,7 +21,7 @@ setup
 set -o errexit
 
 # Must go after setup.
-source ../util-nd-prod/init.inc.sh
+source ../util/init.inc.sh
 
 
 inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-spill-build/$ND_PRODUCTION_SPILL_NAME
