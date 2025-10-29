@@ -15,23 +15,7 @@ echo "dk2nuFile is $dk2nuFile"
 export GXMLPATH=$PWD/flux            # contains GNuMIFlux.xml
 maxPathFile=$PWD/maxpath/$(basename "$ND_PRODUCTION_GEOM" .gdml).$ND_PRODUCTION_TUNE.maxpath.xml
 [ -n "${ND_PRODUCTION_MAX_PATH_FILE}" ] && maxPathFile=$PWD/$ND_PRODUCTION_MAX_PATH_FILE
-
-echo "1 maxpath is $maxPathFile"
-
-# if [ ! -f "$maxPathFile" ]; then
-#     # Since I have no maxpath file already present, I need to convert gdml in root and then produce maxpath from the root file
-#     echo "TGeoManager::SetVerboseLevel(0); TGeoManager::Import(\"/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$ND_PRODUCTION_GEOM\"); TFile f(\"/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root\",\"RECREATE\"); gGeoManager->Write(\"geo\"); f.Close();" | root -l -b
-#     echo "dopo import"
-#     # Evaluate max path lengths from ROOT geometry file
-#     echo $(basename $ND_PRODUCTION_GEOM .gdml)
-#     echo "/storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root"
-#     gmxpl -f /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/$(basename $ND_PRODUCTION_GEOM .gdml).root -L cm -D g_cm3 --tune $ND_PRODUCTION_TUNE -t $ND_PRODUCTION_TOP_VOLUME -o /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/maxpath/$(basename $ND_PRODUCTION_GEOM .gdml).maxpath.xml -seed 21304 --message-thresholds /storage/gpfs_data/neutrino/users/gsantoni/ND_Production/run-genie/Messenger.xml  &> ${ND_PRODUCTION_LOGDIR_BASE}/gmxpl.log
-# fi
-
-# echo "maxpathfile is $maxPathFile"
-maxPathFile=$PWD/maxpath/$(basename "$ND_PRODUCTION_GEOM" .gdml).$ND_PRODUCTION_TUNE.maxpath.xml
 USE_MAXPATH=1
-
 if [ ! -f "$maxPathFile" ]; then
     echo ""
     echo "WARNING!!! .maxpath.xml file not found. Is this what you intended???"
