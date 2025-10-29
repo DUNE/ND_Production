@@ -2,8 +2,6 @@
 
 export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-mjkramer/sim2x2:genie_edep.3_04_00.20230912}
 
-# if I run on the cluster I need to comment this source because it is not needed, since I load the image in the submit file, 
-# otherwise this source is needed
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
