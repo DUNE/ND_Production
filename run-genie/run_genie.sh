@@ -50,7 +50,6 @@ args_gevgen_fnal=( \
     --tune "$ND_PRODUCTION_TUNE" \
     --seed "$seed" \
     -o "$genieOutPrefix" \
-    -t "$ND_PRODUCTION_TOP_VOLUME" \
     )
 
 [ "${USE_MAXPATH}" == 1 ] && args_gevgen_fnal+=( -m "$maxPathFile" )
