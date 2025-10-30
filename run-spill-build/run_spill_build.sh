@@ -99,11 +99,11 @@ LIBTG4EVENT_DIR=${LIBTG4EVENT_DIR:-libTG4Event}
 run root -l -b -q \
      -e  "gSystem->Load(\"libPhysics.so\"); \
           gSystem->Load(\"libEG.so\"); \
-          gSystem->Load(\"/opt/generators/genie/lib/libGFwMsg-3.04.00.so\"); \
-          gSystem->Load(\"/opt/generators/genie/lib/libGFwReg-3.04.00.so\"); \
-          gSystem->Load(\"/opt/generators/genie/lib/libGFwParDat-3.04.00.so\"); \
-          gSystem->Load(\"/opt/generators/genie/lib/libGFwAlg-3.04.00.so\"); \
-          gSystem->Load(\"/opt/generators/genie/lib/libGFwUtl-3.04.00.so\"); \
+          gSystem->Load(\"/opt/generators/genie/lib/libGFwMsg.so\"); \
+          gSystem->Load(\"/opt/generators/genie/lib/libGFwReg.so\"); \
+          gSystem->Load(\"/opt/generators/genie/lib/libGFwParDat.so\"); \
+          gSystem->Load(\"/opt/generators/genie/lib/libGFwAlg.so\"); \
+          gSystem->Load(\"/opt/generators/genie/lib/libGFwUtl.so\"); \
           gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\"); " \
     "/opt/generators/dk2nu/scripts/load_dk2nu.C(true,true)" \
     "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR, $ND_PRODUCTION_REUSE_ROCK)"

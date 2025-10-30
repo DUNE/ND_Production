@@ -35,18 +35,14 @@ std::string getPath(std::string const& base_outdir, std::string const& step, std
   oss << std::setw(7) << std::setfill('0') << subdir_num;
   std::string subdir = oss.str();
 
-  std::string ftype2 = ftype;
-  if (ftype == "DST") ftype2 = "dst";
-  else if (ftype == "MLRECO_ANALYSIS") ftype2 = "SPINE";
- 
   std::ostringstream oss_fileid;
   oss_fileid << std::setw(7) << std::setfill('0') << file_id;
   std::string fileid_str = oss_fileid.str();
 
   std::string path = base_outdir + "/" + step + "/" + ghep_fname + "/" + ftype + "/" + subdir +
-                      "/" + ghep_fname + "." + fileid_str + "." + ftype2 + "." + ext;
+                      "/" + ghep_fname + "." + fileid_str + "." + ftype + "." + ext;
 
-  if (!std::ifstream(path)) { // in the original function there is std::filesystem::exists but it doesn't work since this script uses c++14 by default when calling ROOT
+  if (!std::ifstream(path)) { 
       std::cerr << "WHERE THE HECKING HECK IS " << path << std::endl;
       throw std::runtime_error("Path does not exist: " + path);
   }
@@ -54,7 +50,7 @@ std::string getPath(std::string const& base_outdir, std::string const& step, std
   return path;
 }
 
-std::vector<std::string> getGHEPfiles(std::string const& base_outdir,  std::string const& ghep_fname, int const& hadd_factor,  int const& file_id) {
+std::vector<std::string> getGHEPfiles(std::string const& base_outdir,  std::string const& ghep_fname, int const& hadd_factor,  int file_id) {
   std::vector<std::string> ghep_files;
   for (int ghep_id = file_id * hadd_factor; ghep_id < (file_id + 1) * hadd_factor; ++ghep_id) {
     std::string path = getPath(base_outdir, "run-genie", ghep_fname, "GHEP", "root", ghep_id);
