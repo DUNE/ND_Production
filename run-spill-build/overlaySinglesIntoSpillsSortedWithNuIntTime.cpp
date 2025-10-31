@@ -100,24 +100,24 @@ long double getNuCreationTime(const bsim::Dk2Nu& dk2nu_event){
   return static_cast<long double>(nu.startt);
 }
 
-// returns the neutrino time of flight
-long double getNuTOF(const bsim::Dk2Nu& dk2nu_event,  double const nu_int[4]){ 
+// This function returns the neutrino time of flight
+long double getNuTOF(const bsim::Dk2Nu& dk2nu_event, const TG4Event& edep_event){ 
   
-  auto nu = dk2nu_event.ancestor[dk2nu_event.ancestor.size()-1];
+  auto nu_orig = dk2nu_event.ancestor[dk2nu_event.ancestor.size()-1];
+  auto nu_int = edep_event.Primaries[0].Position;
 
   // Neutrino origin in beam coordinates
-  TLorentzVector beamNuOrigin(nu.startx, nu.starty, nu.startz, nu.startt);
+  TLorentzVector beamNuOrigin(nu_orig.startx, nu_orig.starty, nu_orig.startz, nu_orig.startt);
   // Neutrino origin in user coordinates
   TLorentzVector userNuOrigin;
   // Neutrino interaction point in user coordinates
-  TLorentzVector userNuInteraction(nu_int[0], nu_int[1], nu_int[2], nu_int[3]);
+  TLorentzVector userNuInteraction(nu_int.X(), nu_int.Y(), nu_int.Z(), nu_int.T());
   
   // Conversion using GDk2NuFlux tools
   genie::flux::GDk2NuFlux flux;
-  // std::unique_ptr<genie::flux::GDk2NuFlux> flux = std::make_unique<genie::flux::GDk2NuFlux>();  
-  //read the GNuMIFlux.xml configuration
+  // read the GNuMIFlux.xml configuration
   flux.LoadConfig("DUNEND");
-  //conversion
+  // conversion
   flux.Beam2UserPos(beamNuOrigin, userNuOrigin);
 
   // compute the nu tof
@@ -126,12 +126,12 @@ long double getNuTOF(const bsim::Dk2Nu& dk2nu_event,  double const nu_int[4]){
   return tof;
 }
 
-// returns the total sum of all the contributions to the interaction time
-long double getInteractionTime_LBNF(const bsim::Dk2Nu& dk2nu_event, double const nu_int[4]) { 
+// This function returns the total sum of all the contributions to the interaction time
+long double getInteractionTime_LBNF(const bsim::Dk2Nu& dk2nu_event, const TG4Event& edep_event) { 
 
   long double nu_production_time = getLBNFProtonTime();
   long double nu_parent_tof = getNuCreationTime(dk2nu_event);
-  long double nu_tof = getNuTOF(dk2nu_event, nu_int);
+  long double nu_tof = getNuTOF(dk2nu_event, edep_event);
 
   return nu_production_time + nu_parent_tof + nu_tof;
 }
@@ -342,15 +342,12 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
       ghep_evts_1->GetEntry(evt_it + i);
 
       bsim::Dk2Nu* dk2nu_evt = dk2nu_evt_1;
-      gRooTracker genie_data(gn_tree);
       TG4Event* edep_evt = is_fidvol ? edep_evt_1 : edep_evt_2;
 
       // I am considering just 1 primary vertex!!
       assert(edep_evt->Primaries.size() != 0u && "Multiple interaction vertices in the same event not supported!!");
 
-      auto vertex = genie_data.EvtVtx;
-      times[i] = TaggedTime(getInteractionTime_LBNF(*dk2nu_evt, vertex), 1, evt_it + i);
-      std::cout<< "time " << times[i].time <<'\n';
+      times[i] = TaggedTime(getInteractionTime_LBNF(*dk2nu_evt, *edep_evt), 1, evt_it + i);
       auto v = edep_evt->Primaries[0];
       nPrimaryPart += v.Particles.size();
       nTrajectories += edep_evt->Trajectories.size();
