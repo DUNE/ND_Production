@@ -5,11 +5,11 @@
 // containing single neutrino interactions (from some flux) in the
 // event tree and overlay these events into full spills.
 //
-// The macro can build LAr only spills (setting inFile2POT to 0),
-// rock only spills (setting inFile1POT to 0) or LAr + rock spills
+// The macro can build detector only spills (setting inFile2POT to 0),
+// rock only spills (setting inFile1POT to 0) or detector + rock spills
 // (setting both inFile1POT and inFile2POT to be greater than 0).
 //
-// When building LAr only spills one can run in "N Interaction" mode
+// When building detector only spills one can run in "N Interaction" mode
 // by specifying a number less than or equal to 10000 as spillPOT. Useful,
 // for example, for studying single neutrino spills.
 //
@@ -18,14 +18,14 @@
 //   (1) The EventId for rock events starts from -1 and counts backward.
 //
 //   (2) The timing information is edited to impose the timing microstructure of
-//       the numi/lbnf beamline, the neutrino parent time of flight, the neutrino time of flight 
+//       the LBNF beamline, the neutrino parent time of flight, the neutrino time of flight 
 //       and the "macrostructure" (spill period).
 //   
 //   (3) The TrackId follows the edep-sim convention: first all primaries, and all the primaries
 //       trajectories; then the secondaries, and the secondaries trajectories
 
 constexpr long double conversionTo_ns = 1.E9; 
-constexpr long double c = TMath::C(); // [m/s]
+constexpr long double c = TMath::C() / conversionTo_ns; // [m/ns]
 
 // *************************************READ GHEP FILES************************************************
 // We need to read GHEP files, hence we need these two methods
@@ -63,8 +63,8 @@ std::vector<std::string> getGHEPfiles(std::string const& base_outdir,  std::stri
 
 // *************************************GET NEUTRINO INTERACTION TIME*********************************
 // returns a random time for a neutrino interaction to take place within
-// a LBNF/NuMI spill, given the beam's micro timing structure
-double getProductionTime_LBNF() {
+// a LBNF spill, given the beam's micro timing structure
+double getLBNFProtonTime() {
 
   // time unit is nanoseconds
   double t;
@@ -84,42 +84,54 @@ double getProductionTime_LBNF() {
 
 }
 
-long double getNuParentTOF(const bsim::Ancestor& nu_orig){
-  return static_cast<long double>(nu_orig.startt);
+// This function returns the neutrino's creation time relative to a specific reference frame. Assumptions and reference system definition:
+//
+// - GENIE/GHEP files contain `dk2nu` information, which includes the 4-position (space-time coordinates) of the neutrino's ancestor at the moment of creation.
+// - The spatial reference frame is defined as follows:
+//     - Origin: Center of the upstream face of the neutrino target.
+//     - Z-axis: Aligned with the neutrino beam direction.
+//     - Y-axis: Vertical, pointing upward.
+//     - X-axis: Completes a right-handed coordinate system.
+// - The time origin is defined as the moment when the parent beam proton crosses z = -360 cm.
+//
+// Therefore, this function computes the neutrino's creation time with respect to that time origin.
+long double getNuCreationTime(const bsim::Dk2Nu& dk2nu_event){
+  auto nu = dk2nu_event.ancestor[dk2nu_event.ancestor.size()-1];
+  return static_cast<long double>(nu.startt);
 }
 
 // returns the neutrino time of flight
-long double getNuTOF(const bsim::Ancestor& nu_orig,  double const nu_int[4]){ 
+long double getNuTOF(const bsim::Dk2Nu& dk2nu_event,  double const nu_int[4]){ 
+  
+  auto nu = dk2nu_event.ancestor[dk2nu_event.ancestor.size()-1];
 
-  // take the neutrino origin in beam coordinate and convert it to user coordinates
-  std::unique_ptr<genie::flux::GDk2NuFlux> flux = std::make_unique<genie::flux::GDk2NuFlux>();  
-  //read the GNuMIFlux.xml configuration
-  flux->LoadConfig("DUNEND");
-  //conversion
-  TLorentzVector beamNuOrigin(nu_orig.startx, nu_orig.starty, nu_orig.startz, nu_orig.startt);
+  // Neutrino origin in beam coordinates
+  TLorentzVector beamNuOrigin(nu.startx, nu.starty, nu.startz, nu.startt);
+  // Neutrino origin in user coordinates
   TLorentzVector userNuOrigin;
-  flux->Beam2UserPos(beamNuOrigin, userNuOrigin);
-
-  // take the neutrino interaction point (already in user coordinates) from gRooTracker
+  // Neutrino interaction point in user coordinates
   TLorentzVector userNuInteraction(nu_int[0], nu_int[1], nu_int[2], nu_int[3]);
+  
+  // Conversion using GDk2NuFlux tools
+  genie::flux::GDk2NuFlux flux;
+  // std::unique_ptr<genie::flux::GDk2NuFlux> flux = std::make_unique<genie::flux::GDk2NuFlux>();  
+  //read the GNuMIFlux.xml configuration
+  flux.LoadConfig("DUNEND");
+  //conversion
+  flux.Beam2UserPos(beamNuOrigin, userNuOrigin);
 
   // compute the nu tof
-  TLorentzVector distance_4v = userNuInteraction - userNuOrigin;
-
-  long double distance = distance_4v.Vect().Mag();
-
-  const long double c_ns = c / conversionTo_ns;
-  long double tof = distance / c_ns;
+  long double tof = (userNuInteraction - userNuOrigin).Vect().Mag() / c;
 
   return tof;
 }
 
 // returns the total sum of all the contributions to the interaction time
-long double getInteractionTime_LBNF(const bsim::Ancestor& nu_orig, double const nu_int[4]) { 
+long double getInteractionTime_LBNF(const bsim::Dk2Nu& dk2nu_event, double const nu_int[4]) { 
 
-  long double nu_production_time = getProductionTime_LBNF();
-  long double nu_parent_tof = getNuParentTOF(nu_orig);
-  long double nu_tof = getNuTOF(nu_orig, nu_int);
+  long double nu_production_time = getLBNFProtonTime();
+  long double nu_parent_tof = getNuCreationTime(dk2nu_event);
+  long double nu_tof = getNuTOF(dk2nu_event, nu_int);
 
   return nu_production_time + nu_parent_tof + nu_tof;
 }
@@ -138,7 +150,6 @@ struct TaggedTime {
 void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
                                     std::string inFileName2,
                                     std::string outFileName,
-                                    // std::string ghepFileName, // added
                                     int spillFileId,
                                     double inFile1POT = 1.024E19,
                                     double inFile2POT = 1.024E19,
@@ -150,20 +161,20 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
   // Maximum number of interactions that can be simulated in
   // one spill in "N Interaction" mode. Choice of this number
   // here is somewhat arbitrary, seemed like a very safe
-  // upper limit on the number of nu-LAr events we'd want to 
+  // upper limit on the number of nu-det events we'd want to 
   // simulate ever in a single spill (for stress testing).
   int n_int_max = 10000;
-  // Check that we are considering, nu-LAr only, nu-rock only or both.
+  // Check that we are considering, nu-det only, nu-rock only or both.
   if (inFile1POT==0. && inFile2POT==0.) {
-    throw std::invalid_argument("nu-LAr POT and nu-rock POT cannot both be zero!");
+    throw std::invalid_argument("nu-det POT and nu-rock POT cannot both be zero!");
   }
-  // "N Interaction" mode only supported in nu-LAr mode.
+  // "N Interaction" mode only supported in nu-det mode.
   else if (spillPOT <= (double)n_int_max && inFile2POT>0.) {
     throw std::invalid_argument("N Interaction mode does not support nu-rock POT input");
   }
 
   // Useful bools for keeping track of event types being considered.
-  bool have_nu_lar = false;
+  bool have_nu_det = false;
   bool have_nu_rock = false;
   bool is_n_int_mode = false;
 
@@ -186,13 +197,13 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
 
 // **********************************************************
 
-  // get input nu-LAr files
+  // get input nu-det files
   TChain* edep_evts_1 = new TChain("EDepSimEvents");
   TChain* genie_evts_1 = new TChain("DetSimPassThru/gRooTracker");
   if(inFile1POT > 0.) {
     edep_evts_1->Add(inFileName1.c_str());
     genie_evts_1->Add(inFileName1.c_str());
-    have_nu_lar = true;
+    have_nu_det = true;
     if(spillPOT <= (double)n_int_max) is_n_int_mode = true;
   }
   gRooTracker genie_evts_1_data(genie_evts_1);
@@ -208,24 +219,24 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
   gRooTracker genie_evts_2_data(genie_evts_2);
 
   // Dump some useful information about the running mode.
-  if(have_nu_lar && !have_nu_rock){
-    std::cout << "nu-rock file POT stated to be zero, spills will be LAr only" << std::endl;
+  if(have_nu_det && !have_nu_rock){
+    std::cout << "nu-rock file POT stated to be zero, spills will be detector only" << std::endl;
     if(is_n_int_mode) {
       std::cout << "Running in N Interaction mode with " << spillPOT << " interactions per spill" << std::endl;
     }
   }
-  else if(!have_nu_lar && have_nu_rock){
-    std::cout << "nu-LAr file POT stated to be zero, spills will be rock only" << std::endl;
+  else if(!have_nu_det && have_nu_rock){
+    std::cout << "nu-det file POT stated to be zero, spills will be rock only" << std::endl;
   }
-  else if(have_nu_lar && have_nu_rock){
-    std::cout << "nu-LAr and nu-rock file POTs stated to be non-zero, spills will be LAr+rock" << std::endl;
+  else if(have_nu_det && have_nu_rock){
+    std::cout << "nu-det and nu-rock file POTs stated to be non-zero, spills will be det+rock" << std::endl;
   }
 
   // make output file
   TFile* outFile = new TFile(outFileName.c_str(),"RECREATE");
   TTree* new_tree;
   TTree* genie_tree;
-  if(have_nu_lar) {
+  if(have_nu_det) {
     new_tree = edep_evts_1->CloneTree(0);
     genie_tree = genie_evts_1->CloneTree(0);
   }
@@ -239,7 +250,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
   // determine events per spill
   unsigned int N_evts_1 = 0;
   double evts_per_spill_1 = 0.;
-  if(have_nu_lar) {
+  if(have_nu_det) {
     N_evts_1 = edep_evts_1->GetEntries();
     evts_per_spill_1 = ((double)N_evts_1)/(inFile1POT/spillPOT);
     if (is_n_int_mode) {
@@ -280,7 +291,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
   // ********************************
 
   TG4Event* edep_evt_1 = NULL;
-  if(have_nu_lar) edep_evts_1->SetBranchAddress("Event",&edep_evt_1);
+  if(have_nu_det) edep_evts_1->SetBranchAddress("Event",&edep_evt_1);
 
   TG4Event* edep_evt_2 = NULL;
   if(have_nu_rock) edep_evts_2->SetBranchAddress("Event",&edep_evt_2);
@@ -293,7 +304,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
   for (int spillN = 0; ; ++spillN) {
     std::cout << "SPILL N " << spillN << '\n';
     int Nevts_this_spill_1 = 0;
-    if(have_nu_lar) {
+    if(have_nu_det) {
       Nevts_this_spill_1 = gRandom->Poisson(evts_per_spill_1);
       // In N Interaction mode, fixed number of events 
       // per spill.
@@ -337,9 +348,8 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
       // I am considering just 1 primary vertex!!
       assert(edep_evt->Primaries.size() != 0u && "Multiple interaction vertices in the same event not supported!!");
 
-      auto ancestor = dk2nu_evt->ancestor;
       auto vertex = genie_data.EvtVtx;
-      times[i] = TaggedTime(getInteractionTime_LBNF(ancestor[ancestor.size()-1], vertex), 1, evt_it + i);
+      times[i] = TaggedTime(getInteractionTime_LBNF(*dk2nu_evt, vertex), 1, evt_it + i);
       std::cout<< "time " << times[i].time <<'\n';
       auto v = edep_evt->Primaries[0];
       nPrimaryPart += v.Particles.size();
@@ -470,8 +480,8 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
   new_tree->SetName("EDepSimEvents");
   genie_tree->SetName("gRooTracker");
 
-  // Pass on the geometry from the nu-LAr file by default.
-  auto inFileForGeom = new TFile(have_nu_lar ? inFileName1.c_str() : inFileName2.c_str());
+  // Pass on the geometry from the nu-det file by default.
+  auto inFileForGeom = new TFile(have_nu_det ? inFileName1.c_str() : inFileName2.c_str());
   auto geom = (TGeoManager*) inFileForGeom->Get("EDepSimGeometry");
 
   outFile->cd();
