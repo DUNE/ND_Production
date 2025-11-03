@@ -38,10 +38,10 @@ workflow5='yamls/fsd_flow/workflows/charge/final_calibration_mc.yaml'
 
 # light workflows
 workflow6='yamls/fsd_flow/workflows/light/light_event_building_mc.yaml'
-workflow7='yamls/fsd_flow/workflows/light/light_event_reconstruction.yaml'
+workflow7='yamls/fsd_flow/workflows/light/light_event_reconstruction_mc.yaml'
 
 # charge-light trigger matching
-workflow8='yamls/fsd_flow/workflows/charge/charge_light_assoc.yaml'
+workflow8='yamls/fsd_flow/workflows/charge/charge_light_assoc_mc.yaml'
 
 cd "$ND_PRODUCTION_INSTALL_DIR"/ndlar_flow
 
