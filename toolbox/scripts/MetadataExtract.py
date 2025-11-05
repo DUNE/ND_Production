@@ -103,10 +103,11 @@ def _GetGlobalSubrun(metadata) :
 #++++++++++++++++++++++++++++
 # event helper function
 #+++++++++++++++++++++++++++
-def _EventHelper(name,filename,workflow) :
-    evt = -1
+def _EventHelper(name,filename,workflow,delete=False) :
+    if DATA_TIER == "" : return -1
 
-    tree_map = [ ("genie", "gtree"), ("reco_pandora","LArRecoND"), ("caf","caftree") ]
+    evt = -1
+    tree_map = [ ("genie", "gtree"), ("spill_builder", "EDepSimEvents"), ("reco_pandora","LArRecoND"), ("caf","caftree") ]
 
     if filename.find(".hdf5") != -1 :
        with h5py.File(filename,'r') as f :
@@ -119,70 +120,90 @@ def _EventHelper(name,filename,workflow) :
             elif name == "GetEvents" :
                evt = evts.len()
 
+
     elif filename.find(".root") != -1 :
-       file = ROOT.TFile.Open(filename, "READ")
-       if not file or file.IsZombie() :
-          return nevts
- 
-       values = [tup for tup in tree_map if tup[0] == DATA_TIER]
-       tname  = values[0][1]
-    
-       if DATA_TIER == "genie" :
-          tname = "gRooTracker" if filename.find("GTRAC") != -1 else "gtree"
-          tree  = file.Get(tname)  
-          evt   = 1 if name == "GetFirstEvent" else tree.GetEntries()
-       elif DATA_TIER == "reco_pandora" :
-            tree = file.Get(tname)  
-            if name == "GetFirstEvent" :
-               tree.GetEntry(0)
-               evt = tree.event
-            elif name == "GetLastEvent" :
-               tree.GetEntry( tree.GetEntries() - 1 )
-               evt = tree.event
-            elif name == "GetEvents" :
-               evt = tree.GetEntries()
-       elif DATA_TIER == "caf" :
-            tree = file.cafTree   
-            if name == "GetFirstEvent" :
-               evt = tree.GetEntry(0)
-            elif name == "GetLastEvent" :
-               evt = tree.GetEntry( tree.GetEntries() - 1 )
-            elif name == "GetEvents" :
-               evt = tree.GetEntries()
+       with ROOT.TFile(filename, "READ") as file :
+
+            values = [tup for tup in tree_map if tup[0] == DATA_TIER]
+            tname  = "gRooTracker" if filename.find("GTRAC") != 1 else values[0][1]
+
+            if DATA_TIER.find("spill_builder") != -1  :
+               if os.path.exists("%s/%s.so" % (tname,tname)) :
+                  ROOT.gSystem.Load("%s/%s.so" % (tname,tname))
+               else :
+                  file.MakeProject(tname,"*", "RECREATE++")
+
+               events = file.Get(tname)
+               total  = events.GetEntries()
+
+               if name == "GetEvents" : evt = total
+               else :
+                    for e, entry in enumerate(events) :
+                        event = entry.Event
+                        if (e == 0 and name == "GetFirstEvent") or (e == total-1 and name == "GetLastEvent") :
+                           evt   = event.EventId
+                           break
+               if delete : shutil.rmtree(tname)
+
+            elif DATA_TIER.find("genie") != -1 :
+                 tree  = file.Get(tname)
+                 evt   = 1 if name == "GetFirstEvent" else tree.GetEntries()
+            elif DATA_TIER == "reco_pandora" :
+                 tree = file.Get(tname)
+                 if name == "GetFirstEvent" :
+                    tree.GetEntry(0)
+                    evt = tree.event
+                 elif name == "GetLastEvent" :
+                    tree.GetEntry( tree.GetEntries() - 1 )
+                    evt = tree.event
+                 elif name == "GetEvents" :
+                    evt = tree.GetEntries()
+            elif DATA_TIER == "caf" :
+                 tree = file.cafTree
+                 if name == "GetFirstEvent" :
+                    evt = tree.GetEntry(0)
+                 elif name == "GetLastEvent" :
+                    evt = tree.GetEntry( tree.GetEntries() - 1 )
+                 elif name == "GetEvents" :
+                    evt = tree.GetEntries()
 
     return evt
 
-   
+
+
 #++++++++++++++++++++++++++++
 # get the number of events
 #++++++++++++++++++++++++++++
-def _GetNumberOfEvents(filename,workflow) :
+def _GetNumberOfEvents(filename,workflow,delete=False) :
     name = "GetEvents"
-    return _EventHelper(name,filename,workflow)
+    return _EventHelper(name,filename,workflow,delete) 
 
 
 #++++++++++++++++++++++++++++
-# get the first event number 
+# get the first event number
 #++++++++++++++++++++++++++++
-def _GetFirstEventNumber(filename,workflow) :
+def _GetFirstEventNumber(filename,workflow,delete=False) :
     name = "GetFirstEvent"
-    return _EventHelper(name,filename,workflow)
+    return _EventHelper(name,filename,workflow,delete)
 
 
 #++++++++++++++++++++++++++++
-# get the first event number 
+# get the first event number
 #++++++++++++++++++++++++++++
-def _GetLastEventNumber(filename,workflow) :
+def _GetLastEventNumber(filename,workflow,delete=False) :
     name = "GetLastEvent"
-    return _EventHelper(name,filename,workflow)
+    return _EventHelper(name,filename,workflow,delete)
 
 
+   
 #+++++++++++++++++++++++++++++
 # get the application family
 #+++++++++++++++++++++++++++++
 def _GetApplicationFamily() :
-    if DATA_TIER == "genie" :
+    if DATA_TIER.find("genie") != -1 :
        return "genie"
+    elif DATA_TIER.find("spill_builder") != -1 : 
+       return "root_tg4event_standalone"
     elif DATA_TIER == "flow" :
        return "python_framework"
     elif DATA_TIER == "reco_pandora" :
@@ -230,45 +251,13 @@ def _GetParentFiles(metadata) :
 #+++++++++++++++++++++++++++++++
 def _GetDataStream() :
     if DETECTOR_CONFIG == "proto_nd" :
-       return "numi" if DATA_TYPE == 'data' else 'simulation'
+       return "numibeam" if DATA_TYPE == 'data' else _GetSimulationFlavor() 
     elif DETECTOR_CONFIG == "fsd" :
-       return metadata_blocks[0].get('core.data_stream')
-    elif DETECTOR_CONFIG == "ndlar" :
-       return "lbnf" if DATA_TYPE == 'data' else 'simulation'
+       return metadata_blocks[0].get('core.data_stream') if DATA_TYPE == 'data' else "cosmics"
+    elif DETECTOR_CONFIG == "dunend" :
+       return "lbnfbeam" if DATA_TYPE == 'data' else _GetSimulationFlavor() 
     return "None"
 
-
-#+++++++++++++++++++++++++++++++
-# get the run type
-#+++++++++++++++++++++++++++++++
-def _GetRunType(workflow) :
-   
-    word = "-"
-    if DETECTOR_CONFIG == "proto_nd" :
-       word = "-2x2-"
-    elif DETECTOR_CONFIG == "fsd" :
-       word = "-fsd-"
-
-    if DATA_STREAM == "genie" :
-       if workflow.find("converter") != -1 :
-          return 'neardet%slar-genie-rootracker' % word
-       else :
-          return 'neardet%slar-genie' % word
-    elif DATA_STREAM == "combined" :
-       return 'neardet%slar-charge-light' % word
-    elif DATA_STREAM == "light" :
-       return 'neardet%slar-light' % word
-    elif DATA_STREAM == "charge" :
-       return 'neardet%slar-charge' % word
-    elif DATA_STREAM == "calibrated" : 
-       return 'neardet%slar-reco' % word
-    elif DATA_STREAM == "reco" :
-       if workflow.find("flat") != -1 : 
-           return 'neardet%slar-caf-flat' % word
-       else :
-           return 'neardet%slar-caf' % word
-
-    return "None"
 
 
 
@@ -284,6 +273,21 @@ def _GetChecksum(filename) :
     stdout, error = proc.communicate()
     stdout = stdout.decode("ascii").strip()
     return stdout
+
+
+
+#++++++++++++++++++++++++++++++++++
+# get the flavor of simulation
+#++++++++++++++++++++++++++++++++++
+def _GetSimulationFlavor() :
+   if 'GENIE_ANTINU' in os.environ :
+       if str(os.environ.get('GENIE_ANTINU')) == "1" : return "antineutrino"
+   
+   if 'GENIE_NU' in os.environ :
+      if str(os.environ.get('GENIE_NU')) == "1" : return "neutrino"
+
+   return "simulation"
+
 
 
 #+++++++++++++++++++++++
@@ -310,7 +314,6 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     return_md['dune.config_file']         = _GetConfigFiles(workflow)
     return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW_ID, 'site_name' : JUSTIN_SITE_NAME }
     return_md['dune.output_status']       = "good"
-    return_md['core.run_type']            = _GetRunType(workflow)
     return_md['core.application.family']  = _GetApplicationFamily()
     return_md['core.application.name']    = tier
     return_md['core.application.version'] = SOFTWARE
@@ -347,7 +350,7 @@ def _GetMCMetadata(workflow) :
 
     return_md = {}
     return_md['dune_mc.name']       = str(os.environ.get('CAMPAIGN_NAME')) if 'CAMPAIGN_NAME' in os.environ else 'None'
-    return_md['dune_mc.generators'] = "genie" if DATA_TIER == "genie" else "Unknown"
+    return_md['dune_mc.generators'] = "genie" if DATA_TIER.find("genie") != -1  else "Unknown"
     return_md['dune.dqc_quality']   = 'good'
 
     if workflow.find("genie") != -1 :
@@ -419,7 +422,6 @@ if __name__ == '__main__' :
                metadata_blocks.append( parent_metadata[parent_file] )
                metadata['parents'].append( {"did":parent_file} )
 
-       #sys.exit()
 
        metadata_block = _GetMetadata(metadata_blocks,filename,workflows[f],args.tier)
 
@@ -429,6 +431,9 @@ if __name__ == '__main__' :
        metadata['creator']   = USER
        metadata['size']      = "" if not os.path.exists(filename) else os.path.getsize(filename)
        metadata['metadata']  = metadata_block
+
+       #Due to declad configuration, run type must be the namespace
+       metadata['metadata']['core.run_type'] = namespace
 
        if args.mc :
           mc_metadata_block = _GetMCMetadata(workflows[f])
