@@ -205,7 +205,7 @@ def _GetApplicationFamily() :
     elif DATA_TIER.find("spill_builder") != -1 : 
        return "root_tg4event_standalone"
     elif DATA_TIER == "flow" :
-       return "python_framework"
+       return "python_h5flow_framework"
     elif DATA_TIER == "reco_pandora" :
        return "pandora"
     elif DATA_TIER == "reco_spine" :
@@ -316,7 +316,7 @@ def _GetMetadata(metadata_blocks,filename,namespace,workflow,tier) :
     return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW_ID, 'site_name' : JUSTIN_SITE_NAME }
     return_md['dune.output_status']       = "good"
     return_md['core.application.family']  = _GetApplicationFamily()
-    return_md['core.application.name']    = tier
+    return_md['core.application.name']    = str(os.environ.get('APPLICATION_NAME')) if 'APPLICATION_NAME' in os.environ else tier
     return_md['core.application.version'] = SOFTWARE
     return_md['retention.status']         = 'active'
     return_md['retention.class']          = 'physics'
