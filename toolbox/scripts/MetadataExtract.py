@@ -293,7 +293,7 @@ def _GetSimulationFlavor() :
 #+++++++++++++++++++++++
 # get the metadata 
 #+++++++++++++++++++++++
-def _GetMetadata(metadata_blocks,filename,workflow,tier) :
+def _GetMetadata(metadata_blocks,filename,namespace,workflow,tier) :
     
     return_md = {}
     return_md['core.data_tier']   = "caf-flat-analysis" if workflow == "cafmaker_flat" else tier
@@ -301,7 +301,7 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
     return_md['core.start_time']  = -1 if not os.path.exists(filename) else int(os.path.getctime(filename))
     return_md['core.end_time']    = -1 if not os.path.exists(filename) else int(os.path.getmtime(filename))
     return_md['core.file_format'] = filename.split(".")[-1]
-    return_md['core.file_type']   = "montecarlo" if len(metadata_blocks) == 0 else metadata_blocks[0].get('core.file_type')
+    return_md['core.file_type']   = "mc" if len(metadata_blocks) == 0 else metadata_blocks[0].get('core.file_type')
 
     return_md['core.events']              = -1 if not os.path.exists(filename) else _GetNumberOfEvents(filename,workflow)
     return_md['core.last_event_number']   = -1 if not os.path.exists(filename) else _GetLastEventNumber(filename,workflow)
@@ -339,6 +339,16 @@ def _GetMetadata(metadata_blocks,filename,workflow,tier) :
        
        if DETECTOR_CONFIG == "proto_nd" :
           return_md['dune.mx2x2_global_subrun_numbers'] = [run*100000+1]
+
+
+    # assign the data to a dataset
+    if 'DATASET_NAME' in os.environ :
+        return_md['dune.dataset_name'] = "%s:%s" % (namespace,str(os.environ.get('DATASET_NAME')))
+    else :
+        run = return_md['core.runs'][0]
+        return_md['dune.dataset_name'] = "%s:%s_%s_%s" % (namespace,DETECTOR_CONFIG,DATA_TYPE,run)
+
+
 
     # return the metadata block
     return return_md
@@ -424,7 +434,7 @@ if __name__ == '__main__' :
                metadata['parents'].append( {"did":parent_file} )
 
 
-       metadata_block = _GetMetadata(metadata_blocks,filename,workflows[f],args.tier)
+       metadata_block = _GetMetadata(metadata_blocks,filename,namespace,workflows[f],args.tier)
 
        metadata['name']      = filename
        metadata['namespace'] = namespace
@@ -439,6 +449,7 @@ if __name__ == '__main__' :
        if args.mc :
           mc_metadata_block = _GetMCMetadata(workflows[f])
           metadata['metadata'].update(mc_metadata_block)
+
 
        # set the checksum
        checksum = _GetChecksum(filename)
