@@ -7,6 +7,7 @@ import h5py
 import argparse
 from pathlib import Path
 from matplotlib.backends.backend_pdf import PdfPages
+from tqdm import tqdm
 
 from validation_utils import rasterize_plots, print_contents, defplot
 rasterize_plots()
@@ -99,6 +100,7 @@ def plot_sum_hits(flow_h5: h5py.File, output: PdfPages):
     plt.close()
 
 
+# SLOW
 @defplot('all spills (3D)')
 def plot_all_spills_3d(flow_h5: h5py.File, output: PdfPages):
     hits = flow_h5['/charge/calib_prompt_hits/data']
@@ -134,7 +136,7 @@ def plot_all_spills_2d(flow_h5: h5py.File, output: PdfPages):
 
     io_group_count = 1
     io_groups_uniq = set(hits['io_group'])
-    for iog in io_groups_uniq:
+    for iog in tqdm(io_groups_uniq):
         iog_mask = hits['io_group'] == iog
         iog_hits = hits[iog_mask]
         ax1.scatter(iog_hits['z'],iog_hits['y'],s=0.5,alpha=0.1,label='IO Group '+str(iog))
@@ -197,13 +199,14 @@ def plot_1d_hit_distributions(flow_h5: h5py.File, output: PdfPages):
     plt.close()
 
 
+# SLOW
 @defplot('IO group contributions to each spill')
 def plot_io_group_contribs(flow_h5: h5py.File, output: PdfPages):
     final_hits = flow_h5[f'charge/calib_{FINAL}_hits/data']
     n_evts = len(flow_h5[f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region'])
     io_groups_uniq = set(final_hits['io_group'])
     io_group_contrib = np.zeros(shape=(n_evts,len(io_groups_uniq)))
-    for a in range(n_evts):
+    for a in tqdm(range(n_evts)):
         hit_ref_slice = flow_h5[f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region'][a]
         spill_hits = final_hits[hit_ref_slice[0]:hit_ref_slice[1]]
         event_charge = np.sum(spill_hits['Q'])
@@ -222,7 +225,7 @@ def plot_io_group_contribs(flow_h5: h5py.File, output: PdfPages):
     ax = fig.add_subplot()
     ax.set_facecolor('none')
     bottom = np.zeros(n_evts)
-    for iog in io_groups_uniq:
+    for iog in tqdm(io_groups_uniq):
         iog_cont = (io_group_contrib[:,int(iog-1):iog]).flatten()
         ax.bar(range(n_evts), iog_cont, bottom=bottom, label='IO Group '+str(iog), width=1.0)
         bottom += iog_cont
@@ -257,7 +260,7 @@ def plot_reco_vs_true_event_id(flow_h5: h5py.File, output: PdfPages):
 
     true_ids = []
     reco_ids = []
-    for c_evt in flow_evts['id']:
+    for c_evt in tqdm(flow_evts['id']):
         hit_ref_slice = flow_evt_to_hit[c_evt]
         hts = final_hits[hit_ref_slice[0]:hit_ref_slice[1]]
         hts_bt = hits_bt[hit_ref_slice[0]:hit_ref_slice[1]]
@@ -287,7 +290,7 @@ def plot_reco_vs_true_event_id(flow_h5: h5py.File, output: PdfPages):
 def plot_selected_spills_3d(flow_h5: h5py.File, output: PdfPages):
     n_evts = len(flow_h5[f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region'])
     final_hits = flow_h5[f'/charge/calib_{FINAL}_hits/data']
-    for i in range(int(np.ceil(n_evts/9))):
+    for i in tqdm(range(int(np.ceil(n_evts/9)))):
         fig = plt.figure(figsize=(10,10),layout="constrained")
         gs = fig.add_gridspec(3,3)
         ax = []
@@ -469,7 +472,7 @@ def plot_hits_per_io_group(flow_h5: h5py.File, output: PdfPages):
     packets_hits_ref = flow_h5['charge/calib_prompt_hits/ref/charge/packets/ref']
     packets_hits = packets[:][packets_hits_ref[:,1]]
     hits = flow_h5['charge/calib_prompt_hits/data']
-    final_hits = flow_h5['charge/calib_final_hits/data']
+    final_hits = flow_h5[f'charge/calib_{FINAL}_hits/data']
     io_groups_uniq = set(packets['io_group'])
 
     fig = plt.figure(figsize=(10,8), layout='constrained')
@@ -529,7 +532,7 @@ def plot_hits_per_io_channel(flow_h5: h5py.File, output: PdfPages):
     packets_hits_ref = flow_h5['charge/calib_prompt_hits/ref/charge/packets/ref']
     packets_hits = packets[:][packets_hits_ref[:,1]]
     hits = flow_h5['charge/calib_prompt_hits/data']
-    final_hits = flow_h5['charge/calib_final_hits/data']
+    final_hits = flow_h5[f'charge/calib_{FINAL}_hits/data']
 
     fig = plt.figure(figsize=(10,8), layout='constrained')
     gs = fig.add_gridspec(2,1)
@@ -642,7 +645,7 @@ def plot_true_vs_hit_positions(flow_h5: h5py.File, output: PdfPages):
     min_seg_id = seg_ids.min()
     nkeys = seg_ids.max() - min_seg_id + 1
     seg_id2idx = np.full(nkeys, -1)
-    for idx, seg_id in enumerate(seg_ids):
+    for idx, seg_id in tqdm(enumerate(seg_ids)):
         seg_id2idx[seg_id - min_seg_id] = idx
 
     for field in ['x', 'y', 'z']:
@@ -666,12 +669,12 @@ def main(flow_file, charge_only):
 
     with PdfPages(output_pdf_name) as output:
         if not charge_only:
-            print("Making light plots")
+            print("Making light plots\n")
             plot_sipm_hits(flow_h5, output)
             plot_sum_hits(flow_h5, output)
             print()
 
-        print('Making charge plots')
+        print('Making charge plots\n')
 
         plot_all_spills_3d(flow_h5, output)
         plot_all_spills_2d(flow_h5, output)
