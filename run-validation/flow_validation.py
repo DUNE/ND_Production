@@ -40,7 +40,7 @@ def plot_sipm_hits(flow_h5: h5py.File, output: PdfPages):
     unique_y, ycounts = np.unique(y_coordinates, return_counts=True)
     unique_z, zcounts = np.unique(z_coordinates, return_counts=True)
 
-    plt.figure(figsize=(10, 6))
+    plt.figure()
     plt.bar(unique_x, xcounts)
     plt.xlabel('X-coordinate')
     plt.ylabel('Counts')
@@ -49,7 +49,7 @@ def plot_sipm_hits(flow_h5: h5py.File, output: PdfPages):
     output.savefig()
     plt.close()
 
-    plt.figure(figsize=(10, 6))
+    plt.figure()
     plt.bar(unique_y, ycounts)
     plt.xlabel('Y-coordinate')
     plt.ylabel('Counts')
@@ -58,7 +58,7 @@ def plot_sipm_hits(flow_h5: h5py.File, output: PdfPages):
     output.savefig()
     plt.close()
 
-    plt.figure(figsize=(10, 6))
+    plt.figure()
     plt.bar(unique_z, zcounts)
     plt.xlabel('Z-coordinate')
     plt.ylabel('Counts')
@@ -68,7 +68,7 @@ def plot_sipm_hits(flow_h5: h5py.File, output: PdfPages):
     plt.close()
 
     # Plot scatter plot for channel IDs versus maximum values
-    plt.figure(figsize=(10, 6))
+    plt.figure()
     plt.scatter(channel_ids, max_values, marker='.', color='blue')
     plt.xlabel('Channel ID')
     plt.ylabel('Maximum Value')
@@ -87,7 +87,7 @@ def plot_sum_hits(flow_h5: h5py.File, output: PdfPages):
     unique_tpc, counts_tpc = np.unique(tpc_values, return_counts=True)
     unique_det, counts_det = np.unique(det_values, return_counts=True)
 
-    plt.figure(figsize=(8, 6))
+    plt.figure()
     plt.bar(unique_tpc, counts_tpc, color='purple')
     plt.xlabel('tpc_values')
     plt.ylabel('Counts')
@@ -96,7 +96,7 @@ def plot_sum_hits(flow_h5: h5py.File, output: PdfPages):
     output.savefig()
     plt.close()
 
-    plt.figure(figsize=(8, 6))
+    plt.figure()
     plt.bar(unique_det, counts_det, color='purple')
     plt.xlabel('det_values')
     plt.ylabel('Counts')
@@ -110,7 +110,7 @@ def plot_sum_hits(flow_h5: h5py.File, output: PdfPages):
 @defplot('all spills (3D)')
 def plot_all_spills_3d(flow_h5: h5py.File, output: PdfPages):
     hits = load(flow_h5, '/charge/calib_prompt_hits/data')
-    fig = plt.figure(figsize=(10,10))
+    fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     ax.set_facecolor('none')
     fig.tight_layout()
@@ -138,7 +138,7 @@ def plot_all_spills_3d(flow_h5: h5py.File, output: PdfPages):
 @defplot('all spills (2D)')
 def plot_all_spills_2d(flow_h5: h5py.File, output: PdfPages):
     hits = load(flow_h5, '/charge/calib_prompt_hits/data')
-    fig = plt.figure(figsize=(10,6))
+    fig = plt.figure()
     gs  = fig.add_gridspec(1,3)
     ax1 = fig.add_subplot(gs[0,0],aspect=1.0)
     ax2 = fig.add_subplot(gs[0,1],aspect=1.0)
@@ -170,7 +170,7 @@ def plot_all_spills_2d(flow_h5: h5py.File, output: PdfPages):
             output.savefig()
             plt.close()
 
-            fig = plt.figure(figsize=(10,6))
+            fig = plt.figure()
             gs  = fig.add_gridspec(1,3)
             ax1 = fig.add_subplot(gs[0,0],aspect=1.0)
             ax2 = fig.add_subplot(gs[0,1],aspect=1.0)
@@ -184,7 +184,7 @@ def plot_1d_hit_distributions(flow_h5: h5py.File, output: PdfPages, yscale='log'
     hits = load(flow_h5, '/charge/calib_prompt_hits/data')
     io_groups = set(hits['io_group'])
     iog_masks = {iog: hits['io_group'] == iog for iog in io_groups}
-    fig = plt.figure(figsize=(10,10),layout="constrained")
+    fig = plt.figure(layout="constrained")
     gs = fig.add_gridspec(2,2)
 
     ax = {
@@ -240,7 +240,7 @@ def plot_io_group_contribs(flow_h5: h5py.File, output: PdfPages):
                 iog_evt_charge = np.sum(iog_hits['Q'])
             io_group_contrib[a][int(iog-1)] = float(iog_evt_charge)/float(event_charge)
 
-    fig = plt.figure(figsize=(10,8))
+    fig = plt.figure()
     ax = fig.add_subplot()
     ax.set_facecolor('none')
     bottom = np.zeros(n_evts)
@@ -261,7 +261,7 @@ def plot_io_group_contribs(flow_h5: h5py.File, output: PdfPages):
 def plot_reco_vs_true_event_id(flow_h5: h5py.File, output: PdfPages):
     print("Making plot comparing reco event ID vs true event ID")
     # true spill ID vs. reconstructed charge event
-    fig = plt.figure(figsize=(10,8))
+    fig = plt.figure()
     ax = fig.add_subplot()
     flow_evt_to_hit = load(flow_h5, f'/charge/events/ref/charge/calib_{FINAL}_hits/ref_region')
     flow_evts = load(flow_h5, '/charge/events/data')
@@ -310,7 +310,7 @@ def plot_selected_spills_3d(flow_h5: h5py.File, output: PdfPages):
     n_evts = len(load(flow_h5, f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region'))
     final_hits = load(flow_h5, f'/charge/calib_{FINAL}_hits/data')
     for i in tqdm(range(int(np.ceil(n_evts/9)))):
-        fig = plt.figure(figsize=(10,10),layout="constrained")
+        fig = plt.figure(layout="constrained")
         gs = fig.add_gridspec(3,3)
         ax = []
         for a in range(9):
@@ -338,7 +338,7 @@ def plot_selected_spills_3d(flow_h5: h5py.File, output: PdfPages):
 
 @defplot('event timing and nhits')
 def plot_event_timing_and_nhits(flow_h5: h5py.File, output: PdfPages):
-    fig = plt.figure(figsize=(10,6))
+    fig = plt.figure()
     gs  = fig.add_gridspec(3,1)
     # share x-axis = event id
     ax1 = fig.add_subplot(gs[0,0])
@@ -430,7 +430,7 @@ def plot_packet_time_structure(flow_h5: h5py.File, output: PdfPages):
 
 @defplot('comparisons of prompt vs final hits')
 def plot_prompt_vs_final_hits(flow_h5: h5py.File, output: PdfPages):
-    fig = plt.figure(figsize=(10,8),layout='constrained')
+    fig = plt.figure(layout='constrained')
     gs = fig.add_gridspec(2,3)
     ax1 = fig.add_subplot(gs[0,0])
     ax2 = fig.add_subplot(gs[0,1])
@@ -494,7 +494,7 @@ def plot_hits_per_io_group(flow_h5: h5py.File, output: PdfPages):
     final_hits = load(flow_h5, f'charge/calib_{FINAL}_hits/data')
     io_groups_uniq = set(packets['io_group'])
 
-    fig = plt.figure(figsize=(10,8), layout='constrained')
+    fig = plt.figure(layout='constrained')
     if FINAL == 'final':
         gs = fig.add_gridspec(2,1)
         ax1 = fig.add_subplot(gs[0,0])
@@ -560,7 +560,7 @@ def plot_hits_per_io_channel(flow_h5: h5py.File, output: PdfPages):
     hits = load(flow_h5, 'charge/calib_prompt_hits/data')
     final_hits = load(flow_h5, f'charge/calib_{FINAL}_hits/data')
 
-    fig = plt.figure(figsize=(10,8), layout='constrained')
+    fig = plt.figure(layout='constrained')
     if FINAL == 'final':
         gs = fig.add_gridspec(2,1)
         ax1 = fig.add_subplot(gs[0,0])
