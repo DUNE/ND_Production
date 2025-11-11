@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from functools import cache
 import matplotlib as mlp
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,9 +19,14 @@ RESET_PERIOD = 1.0e7 # units = ticks
 FINAL = 'prompt'
 
 
+@cache
+def load(flow_h5: h5py.File, dset: str):
+    return flow_h5[dset][:]
+
+
 @defplot('SiPM hits')
 def plot_sipm_hits(flow_h5: h5py.File, output: PdfPages):
-    sipm_hits_data = flow_h5['light/sipm_hits/data']
+    sipm_hits_data = load(flow_h5, 'light/sipm_hits/data')
 
     # Extracting channel IDs and maximum values
     channel_ids = sipm_hits_data['chan'][:]
@@ -38,7 +44,7 @@ def plot_sipm_hits(flow_h5: h5py.File, output: PdfPages):
     plt.bar(unique_x, xcounts)
     plt.xlabel('X-coordinate')
     plt.ylabel('Counts')
-    plt.title('X-coordinate')
+    plt.title('SiPM hits: X-coordinate')
     plt.grid(True)
     output.savefig()
     plt.close()
@@ -47,7 +53,7 @@ def plot_sipm_hits(flow_h5: h5py.File, output: PdfPages):
     plt.bar(unique_y, ycounts)
     plt.xlabel('Y-coordinate')
     plt.ylabel('Counts')
-    plt.title('Y-coordinate')
+    plt.title('SiPM hits: Y-coordinate')
     plt.grid(True)
     output.savefig()
     plt.close()
@@ -56,7 +62,7 @@ def plot_sipm_hits(flow_h5: h5py.File, output: PdfPages):
     plt.bar(unique_z, zcounts)
     plt.xlabel('Z-coordinate')
     plt.ylabel('Counts')
-    plt.title('Z-coordinate')
+    plt.title('SiPM hits: Z-coordinate')
     plt.grid(True)
     output.savefig()
     plt.close()
@@ -66,7 +72,7 @@ def plot_sipm_hits(flow_h5: h5py.File, output: PdfPages):
     plt.scatter(channel_ids, max_values, marker='.', color='blue')
     plt.xlabel('Channel ID')
     plt.ylabel('Maximum Value')
-    plt.title('Maximum Values vs. Channel IDs')
+    plt.title('SiPM hits: Max Values vs. Channel IDs')
     plt.grid(True)
     plt.xlim(0, 60)
     output.savefig()
@@ -75,7 +81,7 @@ def plot_sipm_hits(flow_h5: h5py.File, output: PdfPages):
 
 @defplot('sum hits')
 def plot_sum_hits(flow_h5: h5py.File, output: PdfPages):
-    sum_hits_data = flow_h5['light/sum_hits/data']
+    sum_hits_data = load(flow_h5, 'light/sum_hits/data')
     tpc_values = sum_hits_data['tpc'][:]
     det_values = sum_hits_data['det'][:]
     unique_tpc, counts_tpc = np.unique(tpc_values, return_counts=True)
@@ -85,7 +91,7 @@ def plot_sum_hits(flow_h5: h5py.File, output: PdfPages):
     plt.bar(unique_tpc, counts_tpc, color='purple')
     plt.xlabel('tpc_values')
     plt.ylabel('Counts')
-    plt.title(f'Histogram of TPC index')
+    plt.title(f'Summed SiPM hits: TPC index')
     plt.grid(True)
     output.savefig()
     plt.close()
@@ -94,26 +100,32 @@ def plot_sum_hits(flow_h5: h5py.File, output: PdfPages):
     plt.bar(unique_det, counts_det, color='purple')
     plt.xlabel('det_values')
     plt.ylabel('Counts')
-    plt.title(f'Histogram of detector index')
+    plt.title(f'Summed SiPM hits: Detector index')
     plt.grid(True)
     output.savefig()
     plt.close()
 
 
+@defplot('calibrated charge hits')
+def plot_charge_hits(flow_h5: h5py.File, output: PdfPages):
+    pass
+
 # SLOW
 @defplot('all spills (3D)')
 def plot_all_spills_3d(flow_h5: h5py.File, output: PdfPages):
-    hits = flow_h5['/charge/calib_prompt_hits/data']
+    hits = load(flow_h5, '/charge/calib_prompt_hits/data')
     fig = plt.figure(figsize=(10,10))
     ax = fig.add_subplot(projection='3d')
     ax.set_facecolor('none')
     fig.tight_layout()
+    print('scatter')
     dat = ax.scatter(hits['z'],hits['x'],
                 hits['y'],c=hits['Q'],
                 s=1,cmap='viridis',norm=mlp.colors.LogNorm())
                 #norm=mpl.colors.LogNorm())#, cmap='Greys')
+    print('scatted')
     fig.colorbar(dat,ax=ax,label="detected charge",shrink=0.5)
-    ax.set_title("charge hits",fontsize=20)
+    ax.set_title("Charge hits (3D)",fontsize=20)
     ax.set_xlabel('z [cm]')
     ax.set_ylabel('x [cm]')
     ax.set_zlabel('y [cm]')
@@ -121,13 +133,15 @@ def plot_all_spills_3d(flow_h5: h5py.File, output: PdfPages):
     #ax.set_ylim([-65.,65])
     #ax.set_zlim([-65.,65])
     del ax, fig
+    print('savin')
     output.savefig()
+    print('saved')
     plt.close()
 
 
 @defplot('all spills (2D)')
 def plot_all_spills_2d(flow_h5: h5py.File, output: PdfPages):
-    hits = flow_h5['/charge/calib_prompt_hits/data']
+    hits = load(flow_h5, '/charge/calib_prompt_hits/data')
     fig = plt.figure(figsize=(10,6))
     gs  = fig.add_gridspec(1,3)
     ax1 = fig.add_subplot(gs[0,0],aspect=1.0)
@@ -155,6 +169,7 @@ def plot_all_spills_2d(flow_h5: h5py.File, output: PdfPages):
             leg = fig.legend(bbox_to_anchor=(0.2, 0.8), loc='lower left', ncols=4, markerscale=10.,fontsize=13)
             for lh in leg.legend_handles:
                 lh.set_alpha(1)
+            fig.suptitle('Charge hits (2D)')
             plt.tight_layout()
             output.savefig()
             plt.close()
@@ -170,7 +185,7 @@ def plot_all_spills_2d(flow_h5: h5py.File, output: PdfPages):
 
 @defplot('1D hit distributions')
 def plot_1d_hit_distributions(flow_h5: h5py.File, output: PdfPages):
-    hits = flow_h5['/charge/calib_prompt_hits/data']
+    hits = load(flow_h5, '/charge/calib_prompt_hits/data')
     fig = plt.figure(figsize=(10,10),layout="constrained")
     gs = fig.add_gridspec(2,2)
     ax_x = fig.add_subplot(gs[0,0])
@@ -202,12 +217,12 @@ def plot_1d_hit_distributions(flow_h5: h5py.File, output: PdfPages):
 # SLOW
 @defplot('IO group contributions to each spill')
 def plot_io_group_contribs(flow_h5: h5py.File, output: PdfPages):
-    final_hits = flow_h5[f'charge/calib_{FINAL}_hits/data']
-    n_evts = len(flow_h5[f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region'])
+    final_hits = load(flow_h5, f'charge/calib_{FINAL}_hits/data')
+    n_evts = len(load(flow_h5, f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region'))
     io_groups_uniq = set(final_hits['io_group'])
     io_group_contrib = np.zeros(shape=(n_evts,len(io_groups_uniq)))
     for a in tqdm(range(n_evts)):
-        hit_ref_slice = flow_h5[f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region'][a]
+        hit_ref_slice = load(flow_h5, f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region')[a]
         spill_hits = final_hits[hit_ref_slice[0]:hit_ref_slice[1]]
         event_charge = np.sum(spill_hits['Q'])
         if event_charge==0:
@@ -244,11 +259,11 @@ def plot_reco_vs_true_event_id(flow_h5: h5py.File, output: PdfPages):
     # true spill ID vs. reconstructed charge event
     fig = plt.figure(figsize=(10,8))
     ax = fig.add_subplot()
-    flow_evt_to_hit = flow_h5[f'/charge/events/ref/charge/calib_{FINAL}_hits/ref_region']
-    flow_evts = flow_h5['/charge/events/data']
-    final_hits = flow_h5[f'/charge/calib_{FINAL}_hits/data']
-    hits_bt = flow_h5[f'/mc_truth/calib_{FINAL}_hit_backtrack/data']
-    segments = flow_h5['mc_truth/segments/data']
+    flow_evt_to_hit = load(flow_h5, f'/charge/events/ref/charge/calib_{FINAL}_hits/ref_region')
+    flow_evts = load(flow_h5, '/charge/events/data')
+    final_hits = load(flow_h5, f'/charge/calib_{FINAL}_hits/data')
+    hits_bt = load(flow_h5, f'/mc_truth/calib_{FINAL}_hit_backtrack/data')
+    segments = load(flow_h5, 'mc_truth/segments/data')
 
     # Construct a lookup array from segment ID to segment index :`(
     min_segment_id = np.min(segments['segment_id'])
@@ -288,8 +303,8 @@ def plot_reco_vs_true_event_id(flow_h5: h5py.File, output: PdfPages):
 
 @defplot('selected spills (3D)')
 def plot_selected_spills_3d(flow_h5: h5py.File, output: PdfPages):
-    n_evts = len(flow_h5[f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region'])
-    final_hits = flow_h5[f'/charge/calib_{FINAL}_hits/data']
+    n_evts = len(load(flow_h5, f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region'))
+    final_hits = load(flow_h5, f'/charge/calib_{FINAL}_hits/data')
     for i in tqdm(range(int(np.ceil(n_evts/9)))):
         fig = plt.figure(figsize=(10,10),layout="constrained")
         gs = fig.add_gridspec(3,3)
@@ -297,7 +312,7 @@ def plot_selected_spills_3d(flow_h5: h5py.File, output: PdfPages):
         for a in range(9):
             if 9*i + a >= n_evts:
                 break
-            hit_ref_slice = flow_h5[f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region'][9*i + a]
+            hit_ref_slice = load(flow_h5, f'charge/events/ref/charge/calib_{FINAL}_hits/ref_region')[9*i + a]
             spill_hits = final_hits[hit_ref_slice[0]:hit_ref_slice[1]]
             ax.append(fig.add_subplot(gs[a//3,a%3],projection='3d'))
             dat = ax[a].scatter(spill_hits['z'],spill_hits['x'],
@@ -326,7 +341,7 @@ def plot_event_timing_and_nhits(flow_h5: h5py.File, output: PdfPages):
     ax2 = fig.add_subplot(gs[1,0],sharex=ax1)
     ax3 = fig.add_subplot(gs[2,0],sharex=ax1)
     fig.subplots_adjust(left=0.075,bottom=0.075,wspace=None, hspace=0.)
-    event_data = flow_h5['charge/events/data']
+    event_data = load(flow_h5, 'charge/events/data')
     ax1.plot(event_data['id'],event_data['unix_ts'],linestyle='None',marker='o',ms=3)
     ax1.set_ylim([0,500])
     ax1.set_ylabel('unix_ts',fontsize=18)
@@ -348,7 +363,7 @@ def plot_event_timing_and_nhits(flow_h5: h5py.File, output: PdfPages):
 @defplot('time structure of packets')
 def plot_packet_time_structure(flow_h5: h5py.File, output: PdfPages):
     # get the packet data, references to calib_prompt_hits, and create some masks:
-    packets = flow_h5['/charge/packets/data']
+    packets = load(flow_h5, '/charge/packets/data')
     packet_index = np.array(list(range(0,len(packets))))
     data_packet_mask = packets['packet_type'] == 0
     trig_packet_mask = packets['packet_type'] == 7
@@ -420,38 +435,38 @@ def plot_prompt_vs_final_hits(flow_h5: h5py.File, output: PdfPages):
     ax5 = fig.add_subplot(gs[1,1])
     ax6 = fig.add_subplot(gs[1,2])
 
-    ax1.hist(flow_h5['charge/calib_prompt_hits/data']['x'],bins=100,alpha=0.5,label='prompt hits')
-    ax1.hist(flow_h5[f'charge/calib_{FINAL}_hits/data']['x'],bins=100,alpha=0.5,label='merged hits')
+    ax1.hist(load(flow_h5, 'charge/calib_prompt_hits/data')['x'],bins=100,alpha=0.5,label='prompt hits')
+    ax1.hist(load(flow_h5, f'charge/calib_{FINAL}_hits/data')['x'],bins=100,alpha=0.5,label='merged hits')
     ax1.set_xlabel('x [cm]')
     ax1.set_ylabel('N hits')
     #ax1.legend()
 
-    ax2.hist(flow_h5['charge/calib_prompt_hits/data']['y'],bins=100,alpha=0.5,label='prompt hits')
-    ax2.hist(flow_h5[f'charge/calib_{FINAL}_hits/data']['y'],bins=100,alpha=0.5,label='merged hits')
+    ax2.hist(load(flow_h5, 'charge/calib_prompt_hits/data')['y'],bins=100,alpha=0.5,label='prompt hits')
+    ax2.hist(load(flow_h5, f'charge/calib_{FINAL}_hits/data')['y'],bins=100,alpha=0.5,label='merged hits')
     ax2.set_xlabel('y [cm]')
     ax2.set_ylabel('N hits')
     ax2.legend()
 
-    ax3.hist(flow_h5['charge/calib_prompt_hits/data']['z'],bins=100,alpha=0.5,label='prompt hits')
-    ax3.hist(flow_h5[f'charge/calib_{FINAL}_hits/data']['z'],bins=100,alpha=0.5,label='merged hits')
+    ax3.hist(load(flow_h5, 'charge/calib_prompt_hits/data')['z'],bins=100,alpha=0.5,label='prompt hits')
+    ax3.hist(load(flow_h5, f'charge/calib_{FINAL}_hits/data')['z'],bins=100,alpha=0.5,label='merged hits')
     ax3.set_xlabel('z [cm]')
     ax3.set_ylabel('N hits')
     #ax3.legend()
 
-    ax4.hist(flow_h5['charge/calib_prompt_hits/data']['x'],weights=flow_h5['charge/calib_prompt_hits/data']['E'],bins=100,alpha=0.5,label='prompt hits')
-    ax4.hist(flow_h5[f'charge/calib_{FINAL}_hits/data']['x'],weights=flow_h5[f'charge/calib_{FINAL}_hits/data']['E'],bins=100,alpha=0.5,label='merged hits')
+    ax4.hist(load(flow_h5, 'charge/calib_prompt_hits/data')['x'],weights=load(flow_h5, 'charge/calib_prompt_hits/data')['E'],bins=100,alpha=0.5,label='prompt hits')
+    ax4.hist(load(flow_h5, f'charge/calib_{FINAL}_hits/data')['x'],weights=load(flow_h5, f'charge/calib_{FINAL}_hits/data')['E'],bins=100,alpha=0.5,label='merged hits')
     ax4.set_xlabel('x [cm]')
     ax4.set_ylabel('Energy [MeV]')
     #ax4.legend()
 
-    ax5.hist(flow_h5['charge/calib_prompt_hits/data']['y'],weights=flow_h5['charge/calib_prompt_hits/data']['E'],bins=100,alpha=0.5,label='prompt hits')
-    ax5.hist(flow_h5[f'charge/calib_{FINAL}_hits/data']['y'],weights=flow_h5[f'charge/calib_{FINAL}_hits/data']['E'],bins=100,alpha=0.5,label='merged hits')
+    ax5.hist(load(flow_h5, 'charge/calib_prompt_hits/data')['y'],weights=load(flow_h5, 'charge/calib_prompt_hits/data')['E'],bins=100,alpha=0.5,label='prompt hits')
+    ax5.hist(load(flow_h5, f'charge/calib_{FINAL}_hits/data')['y'],weights=load(flow_h5, f'charge/calib_{FINAL}_hits/data')['E'],bins=100,alpha=0.5,label='merged hits')
     ax5.set_xlabel('y [cm]')
     ax5.set_ylabel('Energy [MeV]')
     #ax5.legend()
 
-    ax6.hist(flow_h5['charge/calib_prompt_hits/data']['z'],weights=flow_h5['charge/calib_prompt_hits/data']['E'],bins=100,alpha=0.5,label='prompt hits')
-    ax6.hist(flow_h5[f'charge/calib_{FINAL}_hits/data']['z'],weights=flow_h5[f'charge/calib_{FINAL}_hits/data']['E'],bins=100,alpha=0.5,label='merged hits')
+    ax6.hist(load(flow_h5, 'charge/calib_prompt_hits/data')['z'],weights=load(flow_h5, 'charge/calib_prompt_hits/data')['E'],bins=100,alpha=0.5,label='prompt hits')
+    ax6.hist(load(flow_h5, f'charge/calib_{FINAL}_hits/data')['z'],weights=load(flow_h5, f'charge/calib_{FINAL}_hits/data')['E'],bins=100,alpha=0.5,label='merged hits')
     ax6.set_xlabel('z [cm]')
     ax6.set_ylabel('Energy [MeV]')
     #ax6.legend()
@@ -459,8 +474,8 @@ def plot_prompt_vs_final_hits(flow_h5: h5py.File, output: PdfPages):
     output.savefig()
     plt.close()
 
-    #ax4.hist(flow_h5['charge/calib_prompt_hits/data']['ts_pps'],bins=100,alpha=0.5,label='prompt hits')
-    #ax4.hist(flow_h5[f'charge/calib_{FINAL}_hits/data']['ts_pps'],bins=100,alpha=0.5,label='merged hits')
+    #ax4.hist(load(flow_h5, 'charge/calib_prompt_hits/data')['ts_pps'],bins=100,alpha=0.5,label='prompt hits')
+    #ax4.hist(load(flow_h5, f'charge/calib_{FINAL}_hits/data')['ts_pps'],bins=100,alpha=0.5,label='merged hits')
     #ax4.set_xlabel('ts_pps [ticks = 0.1 us]')
     #ax4.set_ylabel('N hits')
     #ax4.legend()
@@ -468,11 +483,11 @@ def plot_prompt_vs_final_hits(flow_h5: h5py.File, output: PdfPages):
 
 @defplot('hits per IO group')
 def plot_hits_per_io_group(flow_h5: h5py.File, output: PdfPages):
-    packets = flow_h5['/charge/packets/data']
-    packets_hits_ref = flow_h5['charge/calib_prompt_hits/ref/charge/packets/ref']
+    packets = load(flow_h5, '/charge/packets/data')
+    packets_hits_ref = load(flow_h5, 'charge/calib_prompt_hits/ref/charge/packets/ref')
     packets_hits = packets[:][packets_hits_ref[:,1]]
-    hits = flow_h5['charge/calib_prompt_hits/data']
-    final_hits = flow_h5[f'charge/calib_{FINAL}_hits/data']
+    hits = load(flow_h5, 'charge/calib_prompt_hits/data')
+    final_hits = load(flow_h5, f'charge/calib_{FINAL}_hits/data')
     io_groups_uniq = set(packets['io_group'])
 
     fig = plt.figure(figsize=(10,8), layout='constrained')
@@ -528,11 +543,11 @@ def plot_hits_per_io_group(flow_h5: h5py.File, output: PdfPages):
 
 @defplot('hits per IO channel')
 def plot_hits_per_io_channel(flow_h5: h5py.File, output: PdfPages):
-    packets = flow_h5['/charge/packets/data']
-    packets_hits_ref = flow_h5['charge/calib_prompt_hits/ref/charge/packets/ref']
+    packets = load(flow_h5, '/charge/packets/data')
+    packets_hits_ref = load(flow_h5, 'charge/calib_prompt_hits/ref/charge/packets/ref')
     packets_hits = packets[:][packets_hits_ref[:,1]]
-    hits = flow_h5['charge/calib_prompt_hits/data']
-    final_hits = flow_h5[f'charge/calib_{FINAL}_hits/data']
+    hits = load(flow_h5, 'charge/calib_prompt_hits/data')
+    final_hits = load(flow_h5, f'charge/calib_{FINAL}_hits/data')
 
     fig = plt.figure(figsize=(10,8), layout='constrained')
     gs = fig.add_gridspec(2,1)
@@ -591,7 +606,7 @@ def plot_hits_per_io_channel(flow_h5: h5py.File, output: PdfPages):
 @defplot('packet fractions sum for each calib hit')
 def plot_packet_fractions_sum(flow_h5: h5py.File, output: PdfPages):
     print("Plotting packet fractions sum for each calib hit")
-    fractions = flow_h5['mc_truth/calib_prompt_hit_backtrack/data']['fraction']
+    fractions = load(flow_h5, 'mc_truth/calib_prompt_hit_backtrack/data')['fraction']
     summed_fractions = fractions.sum(axis=-1)
     fig, ax = plt.subplots(constrained_layout = True)
     ax.hist(summed_fractions, bins= np.arange(-0.05, 10, 0.1))
@@ -616,7 +631,7 @@ def plot_packet_fractions_sum(flow_h5: h5py.File, output: PdfPages):
 
 @defplot('number of backtracked segments per calib hit')
 def plot_num_backtracked_segments(flow_h5: h5py.File, output: PdfPages):
-    bt = flow_h5['/mc_truth/calib_prompt_hit_backtrack/data']
+    bt = load(flow_h5, '/mc_truth/calib_prompt_hit_backtrack/data')
     n_backtracked = (bt['segment_ids']!=-1).sum(axis=-1)
 
     fig, ax = plt.subplots(constrained_layout = True)
@@ -631,9 +646,9 @@ def plot_num_backtracked_segments(flow_h5: h5py.File, output: PdfPages):
 
 @defplot('true segment positions vs hit positions')
 def plot_true_vs_hit_positions(flow_h5: h5py.File, output: PdfPages):
-    segs = flow_h5['/mc_truth/segments/data']
-    bt = flow_h5['/mc_truth/calib_prompt_hit_backtrack/data']
-    hits = flow_h5['/charge/calib_prompt_hits/data']
+    segs = load(flow_h5, '/mc_truth/segments/data')
+    bt = load(flow_h5, '/mc_truth/calib_prompt_hit_backtrack/data')
+    hits = load(flow_h5, '/charge/calib_prompt_hits/data')
 
     bt_ids = bt['segment_ids'][:,0]
     bt_mask = bt_ids != -1
@@ -665,7 +680,7 @@ def main(flow_file, charge_only):
     print_contents(flow_h5)
 
     plt.rcParams["figure.figsize"] = (10,8)
-    output_pdf_name = Path(flow_file).stem + '_validations.pdf'
+    output_pdf_name = Path(flow_file).stem + '.validations.pdf'
 
     with PdfPages(output_pdf_name) as output:
         if not charge_only:
