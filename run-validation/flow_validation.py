@@ -106,10 +106,6 @@ def plot_sum_hits(flow_h5: h5py.File, output: PdfPages):
     plt.close()
 
 
-@defplot('calibrated charge hits')
-def plot_charge_hits(flow_h5: h5py.File, output: PdfPages):
-    pass
-
 # SLOW
 @defplot('all spills (3D)')
 def plot_all_spills_3d(flow_h5: h5py.File, output: PdfPages):
@@ -184,32 +180,40 @@ def plot_all_spills_2d(flow_h5: h5py.File, output: PdfPages):
 
 
 @defplot('1D hit distributions')
-def plot_1d_hit_distributions(flow_h5: h5py.File, output: PdfPages):
+def plot_1d_hit_distributions(flow_h5: h5py.File, output: PdfPages, yscale='log'):
     hits = load(flow_h5, '/charge/calib_prompt_hits/data')
+    io_groups = set(hits['io_group'])
+    iog_masks = {iog: hits['io_group'] == iog for iog in io_groups}
     fig = plt.figure(figsize=(10,10),layout="constrained")
     gs = fig.add_gridspec(2,2)
-    ax_x = fig.add_subplot(gs[0,0])
-    ax_y = fig.add_subplot(gs[0,1])
-    ax_z = fig.add_subplot(gs[1,0])
-    #fig.title('/charge/calib_prompt_hits/data')
 
-    ax_z.hist(hits['z'],bins=298) # assuming hits at min/max z, each bin is approx 1 pixel = 0.434 cm
-    ax_z.set_xlabel('z [cm]',fontsize=16)
-    ax_z.set_ylabel('number of hits per bin',fontsize=16)
-    ax_z.set_yscale('log')
-    ax_z.set_ylim([1,2e3])
+    ax = {
+        'x': fig.add_subplot(gs[0,0]),
+        'y': fig.add_subplot(gs[0,1]),
+        'z': fig.add_subplot(gs[1,0]),
+        'Q': fig.add_subplot(gs[1,1]),
+    }
 
-    ax_y.hist(hits['y'],bins=287) # assuming hits at min/max y, each bin is approx 1 pixel = 0.434 cm
-    ax_y.set_xlabel('y [cm]',fontsize=16)
-    ax_y.set_ylabel('number of hits per bin',fontsize=16)
-    ax_y.set_yscale('log')
-    ax_y.set_ylim([1,2e3])
+    # FIXME: Hardcoded FSD values
+    bins4linear = {
+        'x': np.linspace(-100, 100, 101),
+        'y': np.linspace(-150, 150, 151),
+        'z': np.linspace(-50, 50, 101),
+        'Q': np.linspace(0, 100, 51)
+    }
 
-    ax_x.hist(hits['x'],bins=256) # assuming hits at min/max x, each bin is approx 0.5 cm
-    ax_x.set_xlabel('x [cm]',fontsize=16)
-    ax_x.set_ylabel('number of hits per bin',fontsize=16)
-    ax_x.set_yscale('log')
-    ax_x.set_ylim([1,2e3])
+    for qty in ['x', 'y', 'z', 'Q']:
+        bins = 50 if yscale == 'log' else bins4linear[qty]
+        for iog in io_groups:
+            ax[qty].hist(hits[qty][iog_masks[iog]], bins=bins, label=f'iog {iog}',
+                         alpha=0.5)
+        units = 'ke' if qty == 'Q' else 'cm'
+        ax[qty].set_xlabel(f'{qty} [{units}]')
+        ax[qty].set_ylabel('hits')
+        ax[qty].set_yscale(yscale)
+        ax[qty].legend()
+
+    fig.suptitle(f'1D hit distributions ({yscale} scale)')
     output.savefig()
     plt.close()
 
@@ -247,7 +251,7 @@ def plot_io_group_contribs(flow_h5: h5py.File, output: PdfPages):
     #ax.legend(ncols=4,fontsize=13)
     ax.set_xlabel('charge event number',fontsize=18)
     ax.set_ylabel('io_group contribution',fontsize=18)
-    #ax.set_ylim([-0.1,1.5])
+    ax.set_ylim([-0.1,1.5])
     del ax, fig
     output.savefig()
     plt.close()
@@ -343,16 +347,16 @@ def plot_event_timing_and_nhits(flow_h5: h5py.File, output: PdfPages):
     fig.subplots_adjust(left=0.075,bottom=0.075,wspace=None, hspace=0.)
     event_data = load(flow_h5, 'charge/events/data')
     ax1.plot(event_data['id'],event_data['unix_ts'],linestyle='None',marker='o',ms=3)
-    ax1.set_ylim([0,500])
-    ax1.set_ylabel('unix_ts',fontsize=18)
-    ax1.set_title('charge/events/data',fontsize=18)
+    # ax1.set_ylim([0,500])
+    ax1.set_ylabel('unix_ts')
+    ax1.set_title('charge/events/data')
     ax1.grid()
     ax2.plot(event_data['id'],event_data['ts_start'],linestyle='None',marker='o',ms=3)
-    ax2.set_ylabel('ts_start',fontsize=18)
+    ax2.set_ylabel('ts_start')
     ax2.grid()
     ax3.plot(event_data['id'],event_data['nhit'],linestyle='None',marker='o',ms=3)
-    ax3.set_ylabel('nhit',fontsize=18)
-    ax3.set_xlabel('event ID',fontsize=18)
+    ax3.set_ylabel('nhit')
+    ax3.set_xlabel('event ID')
     ax3.grid()
     ax1.tick_params(labelbottom=False)
     ax2.tick_params(labelbottom=False)
@@ -491,52 +495,59 @@ def plot_hits_per_io_group(flow_h5: h5py.File, output: PdfPages):
     io_groups_uniq = set(packets['io_group'])
 
     fig = plt.figure(figsize=(10,8), layout='constrained')
-    gs = fig.add_gridspec(2,1)
-    ax1 = fig.add_subplot(gs[0,0])
-    ax2 = fig.add_subplot(gs[1,0])
+    if FINAL == 'final':
+        gs = fig.add_gridspec(2,1)
+        ax1 = fig.add_subplot(gs[0,0])
+        ax2 = fig.add_subplot(gs[1,0])
+    else:
+        ax1 = fig.add_subplot()
 
+    iogmin, iogmax = min(io_groups_uniq), max(io_groups_uniq)
+    bins = np.linspace(iogmin-0.5, iogmax+0.5, iogmax-iogmin+2)
     # Histograms of io_group in hits and packet datasets
     ax1.set_ylim(0,30000)
     ax1.hist(packets_hits['io_group'],
-                label="packets", bins=len(io_groups_uniq), range=(1, len(io_groups_uniq)+1),
+                label="packets", bins=bins,
                 alpha=1.0, color='#377eb8',
                 edgecolor='#377eb8', linestyle='-')
     ax1.hist(hits['io_group'],
-                label="calib_prompt_hits", bins=len(io_groups_uniq), range=(1, len(io_groups_uniq)+1),
+                label="calib_prompt_hits", bins=bins,
                 alpha=1.0, color='#ff7f00',
                 edgecolor='#ff7f00', linestyle='-',
                 linewidth=1.5,fill=False)
-    ax1.hist(final_hits['io_group'],
-                label="calib_{FINAL}_hits", bins=len(io_groups_uniq), range=(1, len(io_groups_uniq)+1),
-                alpha=0.8, color='#4daf4a',
-                edgecolor='#4daf4a', linestyle='--',
-                linewidth=1.5,fill=False)
+    if FINAL == 'final':
+        ax1.hist(final_hits['io_group'],
+                 label="calib_{FINAL}_hits", bins=bins,
+                 alpha=0.8, color='#4daf4a',
+                 edgecolor='#4daf4a', linestyle='--',
+                 linewidth=1.5,fill=False)
     ax1.set_title("Hits per IO Group Distribution in Different Datasets")
     ax1.set_xlabel("IO Group")
     ax1.set_ylabel("Hits / IO Group")
     ax1.legend()
 
-    p_iog, p_iog_bins = np.histogram(hits['io_group'], bins=len(io_groups_uniq), range=(1, len(io_groups_uniq)+1),)
-    f_iog, f_iog_bins = np.histogram(final_hits['io_group'], bins=len(io_groups_uniq), range=(1, len(io_groups_uniq)+1),)
-    iog_resid = 100*(p_iog - f_iog)/p_iog
-    mean_iog_resid = np.mean(iog_resid)
-    final_prompt_resid = 100*(len(hits['io_group']) - len(final_hits['io_group']))/len(hits['io_group'])
+    if FINAL == 'final':
+        p_iog, p_iog_bins = np.histogram(hits['io_group'], bins=bins)
+        f_iog, f_iog_bins = np.histogram(final_hits['io_group'], bins=bins)
+        iog_resid = 100*(p_iog - f_iog)/p_iog
+        mean_iog_resid = np.mean(iog_resid)
+        final_prompt_resid = 100*(len(hits['io_group']) - len(final_hits['io_group']))/len(hits['io_group'])
 
-    ax2.set_ylim(0,np.max(iog_resid)+10)
-    ax2.plot(np.arange(len(io_groups_uniq)+1)+1, np.ones(len(io_groups_uniq)+1)*mean_iog_resid, \
-                linestyle='--', color='blue', \
-                label="Mean % Decr. over IO Groups ("+str(round(mean_iog_resid, 1))+"%)")
-    ax2.plot(np.arange(len(io_groups_uniq)+1)+1, np.ones(len(io_groups_uniq)+1)*final_prompt_resid, \
-                linestyle='--', color='black', \
-                label="Total % Decr. Prompt to Final Hits ("+str(round(final_prompt_resid, 1))+"%)")
-    ax2.hist(np.arange(len(io_groups_uniq))+1, weights=iog_resid, bins=len(io_groups_uniq), range=(1, len(io_groups_uniq)+1),
-            alpha=1.0, color='#f781bf',
-            edgecolor='#f781bf', linestyle='-',
-            linewidth=1.5)
-    ax2.set_title("Percent Decrease in Hits per IO Group from Prompt to Final Hits")
-    ax2.set_xlabel("IO Group")
-    ax2.set_ylabel("Percent Decrease in Hits / IO Group")
-    ax2.legend()
+        ax2.set_ylim(0,np.max(iog_resid)+10)
+        ax2.plot(np.arange(len(io_groups_uniq)+1)+1, np.ones(len(io_groups_uniq)+1)*mean_iog_resid, \
+                    linestyle='--', color='blue', \
+                    label="Mean % Decr. over IO Groups ("+str(round(mean_iog_resid, 1))+"%)")
+        ax2.plot(np.arange(len(io_groups_uniq)+1)+1, np.ones(len(io_groups_uniq)+1)*final_prompt_resid, \
+                    linestyle='--', color='black', \
+                    label="Total % Decr. Prompt to Final Hits ("+str(round(final_prompt_resid, 1))+"%)")
+        ax2.hist(np.arange(len(io_groups_uniq))+1, weights=iog_resid, bins=bins,
+                alpha=1.0, color='#f781bf',
+                edgecolor='#f781bf', linestyle='-',
+                linewidth=1.5)
+        ax2.set_title("Percent Decrease in Hits per IO Group from Prompt to Final Hits")
+        ax2.set_xlabel("IO Group")
+        ax2.set_ylabel("Percent Decrease in Hits / IO Group")
+        ax2.legend()
 
     output.savefig()
     plt.close()
@@ -550,39 +561,45 @@ def plot_hits_per_io_channel(flow_h5: h5py.File, output: PdfPages):
     final_hits = load(flow_h5, f'charge/calib_{FINAL}_hits/data')
 
     fig = plt.figure(figsize=(10,8), layout='constrained')
-    gs = fig.add_gridspec(2,1)
-    ax1 = fig.add_subplot(gs[0,0])
-    ax2 = fig.add_subplot(gs[1,0])
+    if FINAL == 'final':
+        gs = fig.add_gridspec(2,1)
+        ax1 = fig.add_subplot(gs[0,0])
+        ax2 = fig.add_subplot(gs[1,0])
+    else:
+        ax1 = fig.add_subplot()
 
     # Histograms of io_channel in hits datasets
     io_channel_uniq = set(packets_hits['io_channel'])
+    chmin, chmax = min(io_channel_uniq), max(io_channel_uniq)
+    bins = np.linspace(chmin-0.5, chmax+0.5, chmax-chmin+2)
     ax1.set_ylim(0,12000)
     ax1.hist(packets_hits['io_channel'],
-                label="packets", bins=len(io_channel_uniq), range=(1, len(io_channel_uniq)+1),
+                label="packets", bins=bins,
                 alpha=1.0, color='#377eb8',
                 edgecolor='#377eb8', linestyle='-')
     ax1.hist(hits['io_channel'],
-                label="calib_prompt_hits", bins=len(io_channel_uniq), range=(1, len(io_channel_uniq)+1),
+                label="calib_prompt_hits", bins=bins,
                 alpha=1.0, color='#ff7f00',
                 edgecolor='#ff7f00', linestyle='-',
                 linewidth=1.5,fill=False)
-    ax1.hist(final_hits['io_channel'],
-                label="calib_{FINAL}_hits", bins=len(io_channel_uniq), range=(1, len(io_channel_uniq)+1),
-                alpha=0.8, color='#4daf4a',
-                edgecolor='#4daf4a', linestyle='--',
-                linewidth=1.5,fill=False)
+    if FINAL == 'final':
+        ax1.hist(final_hits['io_channel'],
+                 label="calib_{FINAL}_hits", bins=bins,
+                 alpha=0.8, color='#4daf4a',
+                 edgecolor='#4daf4a', linestyle='--',
+                 linewidth=1.5,fill=False)
     ax1.set_title("Hits per IO Channel Distribution in Different Datasets")
     ax1.set_xlabel("IO Channel")
     ax1.set_ylabel("Hits / IO Channel")
     ax1.legend()
 
-    p_io_channel, p_io_channel_bins = np.histogram(hits['io_channel'], bins=len(io_channel_uniq), range=(1, len(io_channel_uniq)+1))
-    f_io_channel, f_io_channel_bins = np.histogram(final_hits['io_channel'], bins=len(io_channel_uniq), range=(1, len(io_channel_uniq)+1))
-    io_channel_resid = 100* (p_io_channel - f_io_channel)/p_io_channel
-    mean_io_channel_resid = np.mean(io_channel_resid)
-    final_prompt_resid = 100*(len(hits['io_group']) - len(final_hits['io_group']))/len(hits['io_group'])
-
     if FINAL == 'final':
+        p_io_channel, p_io_channel_bins = np.histogram(hits['io_channel'], bins=bins)
+        f_io_channel, f_io_channel_bins = np.histogram(final_hits['io_channel'], bins=bins)
+        io_channel_resid = 100* (p_io_channel - f_io_channel)/p_io_channel
+        mean_io_channel_resid = np.mean(io_channel_resid)
+        final_prompt_resid = 100*(len(hits['io_group']) - len(final_hits['io_group']))/len(hits['io_group'])
+
         ax2.set_ylim(0,np.max(io_channel_resid)+10)
         ax2.plot(np.arange(len(io_channel_uniq)+1)+1, np.ones(len(io_channel_uniq)+1)*mean_io_channel_resid, \
                 linestyle='--', color='blue', \
@@ -590,7 +607,7 @@ def plot_hits_per_io_channel(flow_h5: h5py.File, output: PdfPages):
         ax2.plot(np.arange(len(io_channel_uniq)+1)+1, np.ones(len(io_channel_uniq)+1)*final_prompt_resid, \
                 linestyle='--', color='black', \
                 label="Total % Decr. Prompt to Final Hits ("+str(round(final_prompt_resid, 1))+"%)")
-        ax2.hist(np.arange(len(io_channel_uniq))+1, weights=io_channel_resid, bins=len(io_channel_uniq), range=(1, len(io_channel_uniq)+1),
+        ax2.hist(np.arange(len(io_channel_uniq))+1, weights=io_channel_resid, bins=bins,
                 alpha=1.0, color='#f781bf',
                 edgecolor='#f781bf', linestyle='-',
                 linewidth=1.5)
@@ -599,8 +616,8 @@ def plot_hits_per_io_channel(flow_h5: h5py.File, output: PdfPages):
         ax2.set_ylabel("Percent Decrease in Hits / IO Channel")
         ax2.legend()
 
-        output.savefig()
-        plt.close()
+    output.savefig()
+    plt.close()
 
 
 @defplot('packet fractions sum for each calib hit')
@@ -691,17 +708,18 @@ def main(flow_file, charge_only):
 
         print('Making charge plots\n')
 
-        plot_all_spills_3d(flow_h5, output)
+        # plot_all_spills_3d(flow_h5, output)
         plot_all_spills_2d(flow_h5, output)
-        plot_1d_hit_distributions(flow_h5, output)
-        plot_io_group_contribs(flow_h5, output)
+        plot_1d_hit_distributions(flow_h5, output, 'log')
+        plot_1d_hit_distributions(flow_h5, output, 'linear')
+        # plot_io_group_contribs(flow_h5, output) # SLOW
 
         if 'mc_truth' in flow_h5.keys():
             plot_reco_vs_true_event_id(flow_h5, output)
             plot_selected_spills_3d(flow_h5, output)
 
         plot_event_timing_and_nhits(flow_h5, output)
-        plot_packet_time_structure(flow_h5, output)
+        # plot_packet_time_structure(flow_h5, output) # slow
         plot_prompt_vs_final_hits(flow_h5, output)
         plot_hits_per_io_group(flow_h5, output)
         plot_hits_per_io_channel(flow_h5, output)
