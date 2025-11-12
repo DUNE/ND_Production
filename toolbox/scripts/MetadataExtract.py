@@ -33,6 +33,8 @@ CHARGE_CONFIG_FILES   = str(os.environ.get('CHARGE_CONFIG_FILES')) if 'CHARGE_CO
 COMBINED_CONFIG_FILES = str(os.environ.get('COMBINED_CONFIG_FILES')) if 'COMBINED_CONFIG_FILES' in os.environ else 'None'
 PANDORA_CONFIG_FILES  = str(os.environ.get('PANDORA_SETTINGS')) if 'PANDORA_SETTINGS' in os.environ else 'None'
 CAFMAKER_CONFIG_FILES = str(os.environ.get('CAFFCLFILE')) if 'CAFFCLFILE' in os.environ else 'None'
+CAMPAIGN_NAME         = str(os.environ.get('CAMPAIGN_NAME')) if 'CAMPAIGN_NAME' in os.environ else RUN_PERIOD
+GENERATOR             = str(os.environ.get('GENERATOR')) if 'GENERATOR' in os.environ else 'None'
 JUSTIN_WORKFLOW_ID    = str(os.environ.get('JUSTIN_WORKFLOW_ID')) if 'JUSTIN_WORKFLOW_ID' in os.environ else 'None'
 JUSTIN_SITE_NAME      = str(os.environ.get('JUSTIN_SITE_NAME')) if 'JUSTIN_SITE_NAME' in os.environ else 'None'
 
@@ -130,11 +132,13 @@ def _EventHelperGenie(filename) :
     first = last = total = -1
     tname= "gRooTracker" if filename.find("GTRAC") != 1 else gtree
 
-    with ROOT.TFile(filename, "READ") as file :
-         tree  = file.Get(tname)
-         first = 1 
-         last  = tree.GetEntries() - 1
-         total = tree.GetEntries()
+    file  = ROOT.TFile(filename, "READ") 
+    tree  = file.Get(tname)
+    first = 1 
+    last  = tree.GetEntries() - 1
+    total = tree.GetEntries()
+
+    file.Close()
 
     return int(first), int(last), int(total)
 
@@ -147,18 +151,18 @@ def _EventHelperEdepSim(filename) :
 
     first = last = total = -1
  
-    with ROOT.TFile(filename, "READ") as file :
-         file.MakeProject('EDepSimEvents',"*", "RECREATE++")
+    file  = ROOT.TFile(filename, "READ") 
+    file.MakeProject('EDepSimEvents',"*", "RECREATE++")
 
-         events = file.Get(tname)
-         total  = events.GetEntries()
+    events = file.Get('EDepSimEvents')
+    total  = events.GetEntries()
 
-         for e, entry in enumerate(events) :
-             event = entry.Event
-             if e == 0 : first = event.EventId
-             elif e == total-1 : last = event.EventId
+    for e, entry in enumerate(events) :
+        event = entry.Event
+        if e == 0 : first = event.EventId
+        elif e == total-1 : last = event.EventId
 
- 
+    file.Close()
     shutil.rmtree('EDepSimEvents')
 
     return int(first), int(last), int(total)
@@ -171,13 +175,14 @@ def _EventHelperEdepSim(filename) :
 def _EventHelperCaf(filename) :
 
     first = last = total = -1
- 
-    with ROOT.TFile(filename, "READ") as file :
+  
+    file  = ROOT.TFile(filename, "READ") 
+    tree  = file.cafTree
+    total = tree.GetEntries()
+    last  = total - 1
+    first = tree.GetEntry(0)
 
-         tree  = file.cafTree
-         total = tree.GetEntries()
-         last  = total - 1
-         first = tree.GetEntry(0)
+    file.Close()
 
     return int(first), int(last), int(total)
 
@@ -188,22 +193,19 @@ def _EventHelperCaf(filename) :
 def _EventHelperTree(filename,treename) :
 
     first = last = total = -1
- 
-    with ROOT.TFile(filename, "READ") as file :
 
-        tree = file.Get(treename)
+    file  = ROOT.TFile(filename, "READ") 
+    tree = file.Get(treename)
         
-        tree.GetEntry(0)
-        first = tree.event
+    tree.GetEntry(0)
+    first = tree.event
 
-        total = tree.GetEntries()
+    total = tree.GetEntries()
 
-        tree.GetEntry( total - 1 )
-        last  = tree.event
-
+    tree.GetEntry( total - 1 )
+    last  = tree.event
 
     return int(first), int(last), int(total)
-
 
 
 
@@ -220,10 +222,10 @@ def _EventHelper(filename,workflow) :
        if DATA_TIER.find("genie") != -1 :
           return _EventHelperGenie(filename)
 
-       elif DATA_TIER == "edep_sim" or DATA_TIER.find("spill_builder") != -1 :
+       elif DATA_TIER == "edep-sim" or DATA_TIER.find("spill-builder") != -1 :
           return _EventHelperEdepSim(filename) 
 
-       elif DATA_TIER == "reco_pandora" :
+       elif DATA_TIER == "reco-pandora" :
           treename = "LArRecoND"
           return _EventHelperTree(filename,treename)           
 
@@ -240,13 +242,15 @@ def _EventHelper(filename,workflow) :
 def _GetApplicationFamily() :
     if DATA_TIER.find("genie") != -1 :
        return "genie"
-    elif DATA_TIER.find("spill_builder") != -1 or DATA_TIER.find("convert2h5") != -1 : 
+    elif DATA_TIER == "edep-sim" :
+       return 'geant4_edep_sim'
+    elif DATA_TIER.find("spill-builder") != -1 or DATA_TIER.find("convert2h5") != -1 : 
        return "root_tg4event_standalone"
     elif DATA_TIER == "flow" :
        return "python_h5flow_framework"
-    elif DATA_TIER == "reco_pandora" :
+    elif DATA_TIER == "reco-pandora" :
        return "pandora"
-    elif DATA_TIER == "reco_spine" :
+    elif DATA_TIER == "reco-spine" :
         return "larcv"
     elif DATA_TIER == "caf" :
         return "nd_caf_framwork"
@@ -348,7 +352,7 @@ def _GetMetadata(metadata_blocks,filename,workflow) :
     return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW_ID, 'site_name' : JUSTIN_SITE_NAME }
     return_md['dune.output_status']       = "good"
     return_md['core.application.family']  = _GetApplicationFamily()
-    return_md['core.application.name']    = str(os.environ.get('APPLICATION_NAME')) if 'APPLICATION_NAME' in os.environ else tier
+    return_md['core.application.name']    = str(os.environ.get('APPLICATION_NAME')) if 'APPLICATION_NAME' in os.environ else ""
     return_md['core.application.version'] = SOFTWARE
     return_md['retention.status']         = 'active'
     return_md['retention.class']          = 'physics'
@@ -393,24 +397,22 @@ def _GetMCMetadata(workflow) :
 
     return_md = {}
     return_md['dune_mc.name']       = str(os.environ.get('CAMPAIGN_NAME')) if 'CAMPAIGN_NAME' in os.environ else 'None'
-    return_md['dune_mc.generators'] = "genie" if DATA_TIER.find("genie") != -1  else "Unknown"
+    return_md['dune_mc.generators'] = "genie" 
     return_md['dune.dqc_quality']   = 'good'
 
-    if workflow.find("genie") != -1 :
-       return_md['dune_mc.genie_tune']       = str(os.environ.get('GENIE_PRODUCTION_TUNE')) if 'GENIE_PRODUCTION_TUNE' in os.environ else 'None'
-       return_md['dune_mc.top_volume']       = str(os.environ.get('GENIE_TOP_VOLUME')) if 'GENIE_TOP_VOLUME' else 'World'
-       return_md['dune_mc.geometry_version'] = str(os.environ.get('GENIE_DETECTOR_GEOM')) if 'GENIE_DETECTOR_GEOM' else 'None'
+    return_md['dune_mc.genie_tune']       = str(os.environ.get('GENIE_PRODUCTION_TUNE')) if 'GENIE_PRODUCTION_TUNE' in os.environ else 'None'
+    return_md['dune_mc.top_volume']       = str(os.environ.get('GENIE_TOP_VOLUME')) if 'GENIE_TOP_VOLUME' else 'World'
+    return_md['dune_mc.geometry_version'] = str(os.environ.get('GENIE_DETECTOR_GEOM')) if 'GENIE_DETECTOR_GEOM' else 'None'
 
-       if str(os.environ.get('GENIE_ANTINU')) == "1" :
-          return_md['dune_mc.nu'] = "RHC_%s" % ( str(os.environ.get('GENIE_EVENT_GENERATOR_LIST')) if 'GENIE_EVENT_GENERATOR_LIST' in os.environ else 'Nominal' )
-       elif str(os.environ.get('GENIE_NU')) == "1" :
-          return_md['dune_mc.nu'] = "FHC_%s" % ( str(os.environ.get('GENIE_EVENT_GENERATOR_LIST')) if 'GENIE_EVENT_GENERATOR_LIST' in os.environ else 'Nominal' )
+    if str(os.environ.get('GENIE_ANTINU')) == "1" :
+       return_md['dune_mc.nu'] = "RHC_%s" % ( str(os.environ.get('GENIE_EVENT_GENERATOR_LIST')) if 'GENIE_EVENT_GENERATOR_LIST' in os.environ else 'Nominal' )
+    elif str(os.environ.get('GENIE_NU')) == "1" :
+       return_md['dune_mc.nu'] = "FHC_%s" % ( str(os.environ.get('GENIE_EVENT_GENERATOR_LIST')) if 'GENIE_EVENT_GENERATOR_LIST' in os.environ else 'Nominal' )
 
-       if str(os.environ.get('GENIE_ROCK')) == "1" :
-          return_md['dune_mc.rock'] = "True"
-       else :
-          return_md['dune_mc.rock'] = "False"
-
+    if str(os.environ.get('GENIE_ROCK')) == "1" :
+       return_md['dune_mc.rock'] = "True"
+    else :
+       return_md['dune_mc.rock'] = "False"
 
 
     return return_md
@@ -468,7 +470,7 @@ if __name__ == '__main__' :
               metadata['parents'].append( {"did":parent_file} )
 
 
-       file_oject = Path(filename)
+       file_object    = Path(filename)
        metadata_block = _GetMetadata(metadata_blocks,filename,workflows[f])
 
        metadata['name']      = filename

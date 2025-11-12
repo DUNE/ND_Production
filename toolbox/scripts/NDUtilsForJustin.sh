@@ -121,12 +121,12 @@ create_metadata_file()
     PARENT_FILES_ARRAY=$( IFS=$','; echo "${PARENT_FILES[*]}" ) 
     WORKFLOW_ARRAY=$( IFS=$','; echo "${WORKFLOW[*]}" )
 
-    ARGS="--input=${CREATED_FILES_ARRAY[@]} --parents=${PARENT_FILES_ARRAY[@]} --workflow=${WORKFLOW_ARRAY[@]} --tier=${APPLICATION_DATA_TIER} --namespace=${NAMESPACE}"
+    ARGS="--input=${CREATED_FILES_ARRAY[@]} --parents=${PARENT_FILES_ARRAY[@]} --workflow=${WORKFLOW_ARRAY[@]} --namespace=${NAMESPACE}"
     if [[ "$1" == "mc" ]]; then
-       ARGS="--mc --input=${CREATED_FILES_ARRAY[@]} --parents=${PARENT_FILES_ARRAY[@]} --workflow=${WORKFLOW_ARRAY[@]} --tier=${APPLICATION_DATA_TIER} --namespace=${NAMESPACE}"
+       ARGS="--mc --input=${CREATED_FILES_ARRAY[@]} --parents=${PARENT_FILES_ARRAY[@]} --workflow=${WORKFLOW_ARRAY[@]} --namespace=${NAMESPACE}"
 
        if [[ "$2" == "genie" ]]; then
-	  ARGS="--mc --input=${CREATED_FILES_ARRAY[@]} --workflow=${WORKFLOW_ARRAY[@]} --tier=${APPLICATION_DATA_TIER} --namespace=${NAMESPACE}"
+	  ARGS="--mc --input=${CREATED_FILES_ARRAY[@]} --workflow=${WORKFLOW_ARRAY[@]} --namespace=${NAMESPACE}"
        fi 
     fi
 
