@@ -6,6 +6,7 @@ import datetime as dt
 import sqlite3
 import h5py
 
+import numpy as np
 import ROOT # change to uproot with a ups or spack product is available
 
 from pathlib import Path
@@ -100,109 +101,146 @@ def _GetGlobalSubrun(metadata) :
     return global_values
     
 
-#++++++++++++++++++++++++++++
-# event helper function
-#+++++++++++++++++++++++++++
-def _EventHelper(name,filename,workflow,delete=False) :
-    if DATA_TIER == "" : return -1
 
-    evt = -1
-    tree_map = [ ("genie", "gtree"), ("spill_builder", "EDepSimEvents"), ("reco_pandora","LArRecoND"), ("caf","caftree") ]
+#+++++++++++++++++++++++++++++++++++++++++++++
+# event helper function for hdf5 files
+#+++++++++++++++++++++++++++++++++++++++++++++
+def _EventHelperHdf5(filenmame,workflow) :
+
+    dataset = '%s/events/data' % workflow
+    if workflow == "combined" :
+       dataset = 'combined/t0/data'
+
+    first = last = total = -1
+
+    with h5py.File(filename,'r') as f :
+         evts  = f[dataset]
+         first = evts[0][0].item()
+         last  = evts[-1][0].item()
+         total = evts.len()
+
+    return int(first), int(last), int(total)
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+# event helper function for genie files
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+def _EventHelperGenie(filename) :
+
+    first = last = total = -1
+    tname= "gRooTracker" if filename.find("GTRAC") != 1 else gtree
+
+    with ROOT.TFile(filename, "READ") as file :
+         tree  = file.Get(tname)
+         first = 1 
+         last  = tree.GetEntries() - 1
+         total = tree.GetEntries()
+
+    return int(first), int(last), int(total)
+
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+# event helper function for edep-sim based files
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+def _EventHelperEdepSim(filename) :
+
+    first = last = total = -1
+ 
+    with ROOT.TFile(filename, "READ") as file :
+         file.MakeProject('EDepSimEvents',"*", "RECREATE++")
+
+         events = file.Get(tname)
+         total  = events.GetEntries()
+
+         for e, entry in enumerate(events) :
+             event = entry.Event
+             if e == 0 : first = event.EventId
+             elif e == total-1 : last = event.EventId
+
+ 
+    shutil.rmtree('EDepSimEvents')
+
+    return int(first), int(last), int(total)
+
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+# event helper function for cafmaker files
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+def _EventHelperCaf(filename) :
+
+    first = last = total = -1
+ 
+    with ROOT.TFile(filename, "READ") as file :
+
+         tree  = file.cafTree
+         total = tree.GetEntries()
+         last  = total - 1
+         first = tree.GetEntry(0)
+
+    return int(first), int(last), int(total)
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+# event helper function event trees
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+def _EventHelperTree(filename,treename) :
+
+    first = last = total = -1
+ 
+    with ROOT.TFile(filename, "READ") as file :
+
+        tree = file.Get(treename)
+        
+        tree.GetEntry(0)
+        first = tree.event
+
+        total = tree.GetEntries()
+
+        tree.GetEntry( total - 1 )
+        last  = tree.event
+
+
+    return int(first), int(last), int(total)
+
+
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+# event helper function 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+def _EventHelper(filename,workflow) :
+    if DATA_TIER == "" : return -1, -1, -1
 
     if filename.find(".hdf5") != -1 :
-       with h5py.File(filename,'r') as f :
-            evts = f['combined/t0/data'] if workflow == "combined" else f['%s/events/data' % workflow]
-
-            if name == "GetFirstEvent" :
-               evt = evts[0][0].item()
-            elif name == "GetLastEvent" :
-               evt = evts[-1][0].item()
-            elif name == "GetEvents" :
-               evt = evts.len()
-
+       return _EventHelperHdf5(filename,workflow)
 
     elif filename.find(".root") != -1 :
-       with ROOT.TFile(filename, "READ") as file :
+       if DATA_TIER.find("genie") != -1 :
+          return _EventHelperGenie(filename)
 
-            values = [tup for tup in tree_map if tup[0] == DATA_TIER]
-            tname  = "gRooTracker" if filename.find("GTRAC") != 1 else values[0][1]
+       elif DATA_TIER == "edep_sim" or DATA_TIER.find("spill_builder") != -1 :
+          return _EventHelperEdepSim(filename) 
 
-            if DATA_TIER.find("spill_builder") != -1  :
-               if os.path.exists("%s/%s.so" % (tname,tname)) :
-                  ROOT.gSystem.Load("%s/%s.so" % (tname,tname))
-               else :
-                  file.MakeProject(tname,"*", "RECREATE++")
+       elif DATA_TIER == "reco_pandora" :
+          treename = "LArRecoND"
+          return _EventHelperTree(filename,treename)           
 
-               events = file.Get(tname)
-               total  = events.GetEntries()
+       elif DATA_TIER == "caf" :
+          return _EventHelperCaf(filename)
 
-               if name == "GetEvents" : evt = total
-               else :
-                    for e, entry in enumerate(events) :
-                        event = entry.Event
-                        if (e == 0 and name == "GetFirstEvent") or (e == total-1 and name == "GetLastEvent") :
-                           evt   = event.EventId
-                           break
-               if delete : shutil.rmtree(tname)
-
-            elif DATA_TIER.find("genie") != -1 :
-                 tree  = file.Get(tname)
-                 evt   = 1 if name == "GetFirstEvent" else tree.GetEntries()
-            elif DATA_TIER == "reco_pandora" :
-                 tree = file.Get(tname)
-                 if name == "GetFirstEvent" :
-                    tree.GetEntry(0)
-                    evt = tree.event
-                 elif name == "GetLastEvent" :
-                    tree.GetEntry( tree.GetEntries() - 1 )
-                    evt = tree.event
-                 elif name == "GetEvents" :
-                    evt = tree.GetEntries()
-            elif DATA_TIER == "caf" :
-                 tree = file.cafTree
-                 if name == "GetFirstEvent" :
-                    evt = tree.GetEntry(0)
-                 elif name == "GetLastEvent" :
-                    evt = tree.GetEntry( tree.GetEntries() - 1 )
-                 elif name == "GetEvents" :
-                    evt = tree.GetEntries()
-
-    return evt
+    return -1, -1, -1
 
 
 
-#++++++++++++++++++++++++++++
-# get the number of events
-#++++++++++++++++++++++++++++
-def _GetNumberOfEvents(filename,workflow,delete=False) :
-    name = "GetEvents"
-    return _EventHelper(name,filename,workflow,delete) 
-
-
-#++++++++++++++++++++++++++++
-# get the first event number
-#++++++++++++++++++++++++++++
-def _GetFirstEventNumber(filename,workflow,delete=False) :
-    name = "GetFirstEvent"
-    return _EventHelper(name,filename,workflow,delete)
-
-
-#++++++++++++++++++++++++++++
-# get the first event number
-#++++++++++++++++++++++++++++
-def _GetLastEventNumber(filename,workflow,delete=False) :
-    name = "GetLastEvent"
-    return _EventHelper(name,filename,workflow,delete)
-
-
-   
 #+++++++++++++++++++++++++++++
 # get the application family
 #+++++++++++++++++++++++++++++
 def _GetApplicationFamily() :
     if DATA_TIER.find("genie") != -1 :
        return "genie"
-    elif DATA_TIER.find("spill_builder") != -1 : 
+    elif DATA_TIER.find("spill_builder") != -1 or DATA_TIER.find("convert2h5") != -1 : 
        return "root_tg4event_standalone"
     elif DATA_TIER == "flow" :
        return "python_h5flow_framework"
@@ -235,15 +273,6 @@ def _GetConfigFiles(workflow) :
     else :
        return ""
 
-
-#+++++++++++++++++++++++++++++++++
-# get the parent file(s)
-#+++++++++++++++++++++++++++++++++
-def _GetParentFiles(metadata) :
-    parents = []
-    for key, data in metadata.items() :
-        parents.append(key)
-    return parents
 
 
 #+++++++++++++++++++++++++++++++
@@ -293,19 +322,22 @@ def _GetSimulationFlavor() :
 #+++++++++++++++++++++++
 # get the metadata 
 #+++++++++++++++++++++++
-def _GetMetadata(metadata_blocks,filename,namespace,workflow,tier) :
-    
-    return_md = {}
-    return_md['core.data_tier']   = "caf-flat-analysis" if workflow == "cafmaker_flat" else tier
+def _GetMetadata(metadata_blocks,filename,workflow) :
+
+    event_stats = _EventHelper(filename,workflow)
+
+    return_md   = {}
+
+    return_md['core.data_tier']   = "caf-flat-analysis" if workflow == "cafmaker_flat" else DATA_TIER
     return_md['core.data_stream'] = _GetDataStream()
     return_md['core.start_time']  = -1 if not os.path.exists(filename) else int(os.path.getctime(filename))
     return_md['core.end_time']    = -1 if not os.path.exists(filename) else int(os.path.getmtime(filename))
     return_md['core.file_format'] = filename.split(".")[-1]
     return_md['core.file_type']   = "mc" if len(metadata_blocks) == 0 else metadata_blocks[0].get('core.file_type')
 
-    return_md['core.events']              = -1 if not os.path.exists(filename) else _GetNumberOfEvents(filename,workflow)
-    return_md['core.last_event_number']   = -1 if not os.path.exists(filename) else _GetLastEventNumber(filename,workflow)
-    return_md['core.first_event_number']  = -1 if not os.path.exists(filename) else _GetFirstEventNumber(filename,workflow)
+    return_md['core.events']              = event_stats[2]
+    return_md['core.last_event_number']   = event_stats[1]
+    return_md['core.first_event_number']  = event_stats[0]
     return_md['core.file_content_status'] = "good"
 
     return_md['core.group']               = "dune"
@@ -343,10 +375,10 @@ def _GetMetadata(metadata_blocks,filename,namespace,workflow,tier) :
 
     # assign the data to a dataset
     if 'DATASET_NAME' in os.environ :
-        return_md['dune.dataset_name'] = "%s:%s" % (namespace,str(os.environ.get('DATASET_NAME')))
+        return_md['dune.dataset_name'] = "%s:%s" % (NAMESPACE,str(os.environ.get('DATASET_NAME')))
     else :
         run = return_md['core.runs'][0]
-        return_md['dune.dataset_name'] = "%s:%s_%s_%s" % (namespace,DETECTOR_CONFIG,DATA_TYPE,run)
+        return_md['dune.dataset_name'] = "%s:%s_%s_%s" % (NAMESPACE,DETECTOR_CONFIG,DATA_TYPE,run)
 
 
 
@@ -389,18 +421,23 @@ def _GetMCMetadata(workflow) :
 ##########################################################################
 if __name__ == '__main__' :
 
-   print( "Enter creating the metadata json file(s) for the 2x2 production jobs\n" )
+   print( "Enter creating the metadata json file(s) for the DUNE Near Detector and ND Prototypes production jobs\n" )
 
    # input arguments
    parser = ap()
    parser.add_argument('--input', nargs='?', type=str, required=True, help='Create metadata for the input list of file(s)')
    parser.add_argument('--parents', nargs='?', type=str,  help='The parent file(s) of the input list of file(s)')
    parser.add_argument('--workflow', nargs='?', type=str, required=True, help='The workflow which should correspond to the input list of file(s)')
-   parser.add_argument('--tier', type=str, required=True, help='The input data tier')
    parser.add_argument('--namespace', type=str, required=True, help='The namespace for the data tier')
    parser.add_argument('--mc', action='store_true', help='Is the input simulated data?')
 
    args = parser.parse_args()
+
+
+   # global variables
+   global NAMESPACE
+   NAMESPACE = args.namespace
+
 
    # get the metacat client
    client = _GetMetacatClient()
@@ -413,6 +450,7 @@ if __name__ == '__main__' :
        info = client.get_file(did=parent,with_metadata=True,with_provenance=True,with_datasets=False)
        parent_metadata[parent] = info['metadata']
 
+
    # loop over the input file names
    workflows = args.workflow.split(",")
    filenames = args.input.split(",")
@@ -420,31 +458,28 @@ if __name__ == '__main__' :
    for f, filename in enumerate(filenames) :
 
        metadata = {}
-       metadata['parents'] = []
-
-       namespace     = args.namespace
-       json_filename = "%s.json" % filename
-
        metadata_blocks = []
-   
-       if len(parents) != 0 :
-           parent_files  = _GetParentFiles(parent_metadata)
-           for parent_file in parent_files :
-               metadata_blocks.append( parent_metadata[parent_file] )
-               metadata['parents'].append( {"did":parent_file} )
+
+       if parent_metadata :
+          metadata_blocks.extend( list(map(lambda x: parent_metadata[x[0]], parent_metadata.items())) )
+          parent_files = list(map(lambda k: k, parent_metadata.keys()))
+          metadata['parents'] = []
+          for parent_file in parent_files :
+              metadata['parents'].append( {"did":parent_file} )
 
 
-       metadata_block = _GetMetadata(metadata_blocks,filename,namespace,workflows[f],args.tier)
+       file_oject = Path(filename)
+       metadata_block = _GetMetadata(metadata_blocks,filename,workflows[f])
 
        metadata['name']      = filename
-       metadata['namespace'] = namespace
+       metadata['namespace'] = NAMESPACE
 
        metadata['creator']   = USER
-       metadata['size']      = "" if not os.path.exists(filename) else os.path.getsize(filename)
+       metadata['size']      = "" if not file_object.exists() else file_object.stat().st_size
        metadata['metadata']  = metadata_block
 
        #Due to declad configuration, run type must be the namespace
-       metadata['metadata']['core.run_type'] = namespace
+       metadata['metadata']['core.run_type'] = NAMESPACE
 
        if args.mc :
           mc_metadata_block = _GetMCMetadata(workflows[f])
@@ -459,10 +494,13 @@ if __name__ == '__main__' :
        json_object = json.dumps(metadata,indent=2)
 
        # write to the json file
+       json_filename = "%s.json" % filename
+
        with open(json_filename,"w") as jsonfile :
             jsonfile.write(json_object)
 
-   print( "Exit creating the metadata file for the 2x2 production jobs\n" )
+
+   print( "Exit creating the metadata file for the DUNE Near Detector and ND Prototypes production jobs\n" )
 
 
 
