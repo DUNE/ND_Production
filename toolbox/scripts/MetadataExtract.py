@@ -264,9 +264,10 @@ def _GetParentFiles(metadata) :
 # get the data stream
 #+++++++++++++++++++++++++++++++
 def _GetDataStream(metadata_blocks) :
-    if DETECTOR_CONFIG == "proto_nd" :
+    if DETECTOR_CONFIG == "proto_nd" and RUN_PERIOD == "run1":
        return "numibeam"
-    elif DETECTOR_CONFIG == "fsd" :
+    # elif DETECTOR_CONFIG == "fsd" :
+    else:
        return metadata_blocks[0].get('core.data_stream')
 
     return "None"
@@ -284,7 +285,7 @@ def _GetRunType(workflow) :
        word = "-fsd-"
 
     if DATA_STREAM == "combined" :
-       return 'neardet%slar-charge-light' % word
+       return 'neardet%slar' % word
     elif DATA_STREAM == "light" :
        return 'neardet%slar-light' % word
     elif DATA_STREAM == "charge" :
