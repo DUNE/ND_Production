@@ -708,18 +708,18 @@ def main(flow_file, charge_only):
 
         print('Making charge plots\n')
 
-        # plot_all_spills_3d(flow_h5, output)
+        plot_all_spills_3d(flow_h5, output)
         plot_all_spills_2d(flow_h5, output)
         plot_1d_hit_distributions(flow_h5, output, 'log')
         plot_1d_hit_distributions(flow_h5, output, 'linear')
-        # plot_io_group_contribs(flow_h5, output) # SLOW
+        plot_io_group_contribs(flow_h5, output) # SLOW
 
         if 'mc_truth' in flow_h5.keys():
             plot_reco_vs_true_event_id(flow_h5, output)
             plot_selected_spills_3d(flow_h5, output)
 
         plot_event_timing_and_nhits(flow_h5, output)
-        # plot_packet_time_structure(flow_h5, output) # slow
+        plot_packet_time_structure(flow_h5, output) # slow
         plot_prompt_vs_final_hits(flow_h5, output)
         plot_hits_per_io_group(flow_h5, output)
         plot_hits_per_io_channel(flow_h5, output)
