@@ -207,9 +207,10 @@ def main():
         if jsonpath.exists() and not ARGS.replace:
             continue
         print(f'Queuing: {path}')
-        paths.append(path)
+        gen_metadata(path)
+        # paths.append(path)
 
-    pool.map(gen_metadata, paths)
+    # pool.map(gen_metadata, paths)
 
 
 if __name__ == '__main__':
