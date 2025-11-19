@@ -423,7 +423,7 @@ if __name__ == '__main__' :
        for parent_file in parent_files :
            parent_metadata[parent_file]['name'] = parent_file.split(':')[1] # TMP4HACK
            metadata_blocks.append( parent_metadata[parent_file] )
-           scope = parents[f].split(':')[0]
+           scope = parent_file.split(':')[0]
            metadata['parents'].append( {"did": f"{scope}:{parent_name[parent_file]}"} )
 
        metadata_block = _GetMetadata(metadata_blocks,filename,workflows[f],args.tier)
