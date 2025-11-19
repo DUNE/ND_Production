@@ -1,12 +1,14 @@
 #!/bin/env python
 
+import pickle
+
 import os, sys, string, re, shutil, math, time, subprocess, json
 import datetime as dt
 
 import sqlite3
 import h5py
 
-import ROOT # change to uproot with a ups or spack product is available
+# import ROOT # change to uproot with a ups or spack product is available
 
 from argparse import ArgumentParser as ap
 from metacat.webapi import MetaCatClient
@@ -32,13 +34,26 @@ CAFMAKER_CONFIG_FILES = str(os.environ.get('CAFFCLFILE'))
 JUSTIN_WORKFLOW_ID    = str(os.environ.get('JUSTIN_WORKFLOW_ID'))
 JUSTIN_SITE_NAME      = str(os.environ.get('JUSTIN_SITE_NAME')) 
 
+class FakeMetacat:
+    def __init__(self, pkl_path: str):
+        with open(pkl_path, 'rb') as f:
+            self.pkl = pickle.load(f)
+
+    def get_file(self, did: str, **kw):
+        scope, fname = did.split(':')
+        if scope == 'neardet-2x2-lar-light':
+            fname = fname.replace('mpd_run_data', 'mpd_run_run2data')
+        return self.pkl[scope][fname]
+
+
 #+++++++++++++++++++++++++++++++++
 # get the metacat client
 #+++++++++++++++++++++++++++++++++
 def _GetMetacatClient() :
-    client = MetaCatClient(server_url='https://metacat.fnal.gov:9443/dune_meta_prod/app',
-                           auth_server_url='https://metacat.fnal.gov:8143/auth/dune',
-                           timeout=30)
+    # client = MetaCatClient(server_url='https://metacat.fnal.gov:9443/dune_meta_prod/app',
+    #                        auth_server_url='https://metacat.fnal.gov:8143/auth/dune',
+    #                        timeout=30)
+    client = FakeMetacat('fake_metacat.pkl')
     return client
 
 
@@ -56,6 +71,8 @@ def _GetGlobalSubrun(metadata) :
        else :
           print("The detector configuration [%s] is unknown." % DETECTOR_CONFIG)
           return []
+    elif RUN_PERIOD == "run2" and DETECTOR_CONFIG == "proto_nd":
+        filename = "/dvs_ro/cfs/cdirs/dune/www/data/2x2/DB/RunsDB/history/run2/2x2runs_run2.2025_11_19_01_02_15_UTC.sqlite"
     else :
        print("The run period [%s] is not implemented." % RUN_PERIOD)
        return []
