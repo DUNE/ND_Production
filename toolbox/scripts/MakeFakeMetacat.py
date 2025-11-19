@@ -21,7 +21,7 @@ def main():
     for p in Path(args.charge_dir).rglob('*.json'):
         with open(p) as f:
             md = json.load(f)
-        fname = p.parent / p.stem.with_suffix('.hdf5')
+        fname = p.parent / (p.stem+'.hdf5')
         md['name'] = fname
         tbl[fname] = md
 
