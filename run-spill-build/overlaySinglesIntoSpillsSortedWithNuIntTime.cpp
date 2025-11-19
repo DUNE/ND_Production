@@ -15,7 +15,7 @@
 //
 // The output will have two changes with respect to the input:
 //
-//   (1) The EventId for rock events starts from -1 and counts backward.
+//   (1) The EventId for rock events is set by ND_PRODUCTION_RUN_OFFSET.
 //
 //   (2) The timing information is edited to impose the timing microstructure of
 //       the LBNF beamline, the neutrino parent time of flight, the neutrino time of flight 
@@ -101,22 +101,18 @@ long double getNuCreationTime(const bsim::Dk2Nu& dk2nu_event){
 }
 
 // This function returns the neutrino time of flight
-long double getNuTOF(const bsim::Dk2Nu& dk2nu_event, const TG4Event& edep_event){ 
+long double getNuTOF(const bsim::Dk2Nu& dk2nu_event, const gRooTracker& genie_event, const genie::flux::GDk2NuFlux& flux){ 
   
   auto nu_orig = dk2nu_event.ancestor[dk2nu_event.ancestor.size()-1];
-  auto nu_int = edep_event.Primaries[0].Position;
+  auto nu_int = genie_event.EvtVtx;
 
   // Neutrino origin in beam coordinates
   TLorentzVector beamNuOrigin(nu_orig.startx, nu_orig.starty, nu_orig.startz, nu_orig.startt);
   // Neutrino origin in user coordinates
   TLorentzVector userNuOrigin;
   // Neutrino interaction point in user coordinates
-  TLorentzVector userNuInteraction(nu_int.X(), nu_int.Y(), nu_int.Z(), nu_int.T());
-  
-  // Conversion using GDk2NuFlux tools
-  genie::flux::GDk2NuFlux flux;
-  // read the GNuMIFlux.xml configuration
-  flux.LoadConfig("DUNEND");
+  TLorentzVector userNuInteraction(nu_int[0], nu_int[1], nu_int[2], nu_int[3]);
+
   // conversion
   flux.Beam2UserPos(beamNuOrigin, userNuOrigin);
 
@@ -127,11 +123,11 @@ long double getNuTOF(const bsim::Dk2Nu& dk2nu_event, const TG4Event& edep_event)
 }
 
 // This function returns the total sum of all the contributions to the interaction time
-long double getInteractionTime_LBNF(const bsim::Dk2Nu& dk2nu_event, const TG4Event& edep_event) { 
+long double getInteractionTime_LBNF(const bsim::Dk2Nu& dk2nu_event, const gRooTracker& genie_event, const genie::flux::GDk2NuFlux& flux) { 
 
   long double nu_production_time = getLBNFProtonTime();
   long double nu_parent_tof = getNuCreationTime(dk2nu_event);
-  long double nu_tof = getNuTOF(dk2nu_event, edep_event);
+  long double nu_tof = getNuTOF(dk2nu_event, genie_event, flux);
 
   return nu_production_time + nu_parent_tof + nu_tof;
 }
@@ -140,23 +136,33 @@ long double getInteractionTime_LBNF(const bsim::Dk2Nu& dk2nu_event, const TG4Eve
 struct TaggedTime {
   long double time;
   int tag;
-  // add evId because we need to keep track of it together with time
-  int evId;
+  int evId; // add evId because we need to keep track of it together with time
   TaggedTime(double time, int tag, int evId) :
     time(time), tag(tag), evId(evId) {}
   TaggedTime() : time(0), tag(0), evId(0) {}
 };
 
-void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
-                                    std::string inFileName2,
-                                    std::string outFileName,
-                                    int spillFileId,
-                                    double inFile1POT = 1.024E19,
-                                    double inFile2POT = 1.024E19,
-                                    double spillPOT = 5E13,
-                                    long double spillPeriod_s = 1.2,
-                                    int hadd_factor = 10, // added
-                                    int reuseRock = 0) { 
+void overlaySinglesIntoSpillsSortedWithNuIntTime(
+                                    std::string inFileName1,            // first edep filepath, usually fiducial events file
+                                    std::string inFileName2,            // second edep filepath, usually anti-fiducial + rock events file
+                                    std::string ghepName1,              // first ghep filename, set by ND_PRODUCTION_NU_NAME
+                                    std::string ghepName2,              // second ghep filename, set by ND_PRODUCTION_ROCK_NAME
+                                    std::string prodBaseDir,            // production base dir
+                                    std::string outFileName,            // output edep file
+                                    int spillFileId,                    // file id
+                                    double inFile1POT = 1.024E19,       // #POT first edep file
+                                    double inFile2POT = 1.024E19,       // #POT second edep file
+                                    double spillPOT = 5E13,             // #POT per spill
+                                    long double spillPeriod_s = 1.2,    // spill period
+                                    int hadd_factor = 10,               // number of GHEP files merged together with hadd, set by ND_PRODUCTION_HADD_FACTOR
+                                    int reuseRock = 0,                  // 0: not reuse rock, 1: reuse rock
+                                    std::string det_location = "DUNEND" // detector location in GNuMIFlux file, needed for the coord system conversion
+                                  ) { 
+
+  // Tools from GDk2NuFlux used for reference frame conversion 
+  genie::flux::GDk2NuFlux flux;
+  // read the GNuMIFlux.xml configuration
+  flux.LoadConfig(det_location.c_str());
 
   // Maximum number of interactions that can be simulated in
   // one spill in "N Interaction" mode. Choice of this number
@@ -179,20 +185,16 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
   bool is_n_int_mode = false;
 
   // ************************get input GHEP files***********
-  // get base directory from inFileName1
-  std::string base_outdir = std::getenv("ND_PRODUCTION_OUTDIR_BASE");
-  std::string ghep_name = std::getenv("ND_PRODUCTION_NU_NAME");
-
-  if (base_outdir.c_str()) {
-        std::cout << "BASE DIR: " << base_outdir.c_str() << std::endl;
-    } else {
-        std::cout << "ND_PRODUCTION_OUTDIR_BASE not set!" << std::endl;
-    }
-
-  auto ghepFiles = getGHEPfiles(base_outdir.c_str(), ghep_name.c_str(), hadd_factor, spillFileId);
-  std::unique_ptr<TChain> ghep_evts_1 = std::make_unique<TChain>("gtree");
-  std::for_each(ghepFiles.begin(), ghepFiles.end(), [&](std::string const& fname){
+  auto ghepFiles_1 = getGHEPfiles(prodBaseDir.c_str(), ghepName1.c_str(), hadd_factor, spillFileId);
+  TChain* ghep_evts_1 = new TChain("gtree");
+  std::for_each(ghepFiles_1.begin(), ghepFiles_1.end(), [&](std::string const& fname){
                                                           ghep_evts_1->Add(fname.c_str());
+                                                          });
+
+  auto ghepFiles_2 = getGHEPfiles(prodBaseDir.c_str(), ghepName2.c_str(), hadd_factor, spillFileId);
+  TChain* ghep_evts_2 = new TChain("gtree");
+  std::for_each(ghepFiles_2.begin(), ghepFiles_2.end(), [&](std::string const& fname){
+                                                          ghep_evts_2->Add(fname.c_str());
                                                           });
 
 // **********************************************************
@@ -286,8 +288,11 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
   std::cout << "    Events per spill: "<< evts_per_spill_2 << std::endl;
 
   // **********get dk2nu branch******
-  bsim::Dk2Nu* dk2nu_evt_1 = nullptr;
+  bsim::Dk2Nu* dk2nu_evt_1 = nullptr; 
+  bsim::Dk2Nu* dk2nu_evt_2 = nullptr; 
+
   ghep_evts_1->SetBranchAddress("dk2nu",&dk2nu_evt_1);
+  ghep_evts_2->SetBranchAddress("dk2nu",&dk2nu_evt_2);
   // ********************************
 
   TG4Event* edep_evt_1 = NULL;
@@ -331,23 +336,34 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(std::string inFileName1,
     int nTrajectories = 0;
     for (int i = 0; i < Nevts_this_spill; ++i){
       std::cout << "EVENT " << i << '\n';
-      bool is_fidvol = i < Nevts_this_spill_1;
-      int& evt_it = is_fidvol ? evt_it_1 : evt_it_2;
+      bool is_nu = i < Nevts_this_spill_1;
+      int& evt_it = is_nu ? evt_it_1 : evt_it_2;
 
-      TTree* in_tree = is_fidvol ? edep_evts_1 : edep_evts_2;
-      TTree* gn_tree = is_fidvol ? genie_evts_1 : genie_evts_2;
+      if (is_nu) {std::cout << "FIDUCIALE " << '\n';}
+      else {std::cout << "ROCCIA " << '\n';
+      }
+
+      TTree* in_tree = is_nu ? edep_evts_1 : edep_evts_2;
+      TTree* gn_tree = is_nu ? genie_evts_1 : genie_evts_2;
+      TTree* ghep_tree = is_nu ? ghep_evts_1 : ghep_evts_2;
+
+      std::cout << "EVT IT " << evt_it << '\n';
+      std::cout << "Sto prendendo la entry: " << (is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1)) << '\n';
       
-      in_tree->GetEntry(evt_it + i);
-      gn_tree->GetEntry(evt_it + i);
-      ghep_evts_1->GetEntry(evt_it + i);
+      in_tree->GetEntry(is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1));
+      gn_tree->GetEntry(is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1));
+      ghep_tree->GetEntry(is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1));
 
-      bsim::Dk2Nu* dk2nu_evt = dk2nu_evt_1;
-      TG4Event* edep_evt = is_fidvol ? edep_evt_1 : edep_evt_2;
+      bsim::Dk2Nu* dk2nu_evt = is_nu ? dk2nu_evt_1 : dk2nu_evt_2;
+      TG4Event* edep_evt = is_nu ? edep_evt_1 : edep_evt_2;
+      gRooTracker genie_evt = is_nu ? genie_evts_1_data : genie_evts_2_data; 
+
+      std::cout << "EDEP ID " << edep_evt->EventId << '\n';
 
       // I am considering just 1 primary vertex!!
       assert(edep_evt->Primaries.size() != 0u && "Multiple interaction vertices in the same event not supported!!");
 
-      times[i] = TaggedTime(getInteractionTime_LBNF(*dk2nu_evt, *edep_evt), 1, evt_it + i);
+      times[i] = TaggedTime(getInteractionTime_LBNF(*dk2nu_evt, genie_evt, flux), is_nu ? 1 : 2, is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1));
       auto v = edep_evt->Primaries[0];
       nPrimaryPart += v.Particles.size();
       nTrajectories += edep_evt->Trajectories.size();

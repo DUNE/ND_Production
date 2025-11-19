@@ -108,7 +108,7 @@ run root -l -b -q \
           gSystem->Load(\"$LIBGENIE_DIR/libGFwUtl.so\"); \
           gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\"); " \
     "/opt/generators/dk2nu/scripts/load_dk2nu.C(true,true)" \
-    "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR, $ND_PRODUCTION_REUSE_ROCK)"
+    "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$nuInFile\", \"$rockInFile\", \"$ND_PRODUCTION_NU_NAME\", \"$ND_PRODUCTION_ROCK_NAME\", \"$ND_PRODUCTION_OUTDIR_BASE\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR, $ND_PRODUCTION_REUSE_ROCK, \"$ND_PRODUCTION_DET_LOCATION\")"
 
 mkdir -p "$outDir/EDEPSIM_SPILLS/$subDir"
 mv "$spillFile" "$outDir/EDEPSIM_SPILLS/$subDir"
