@@ -419,7 +419,7 @@ if __name__ == '__main__' :
        # set the metadata fields
        metadata_blocks = []
        for parent_file in parent_files :
-           name_in_metadata = parent_metadata[parent_file['name']]
+           name_in_metadata = parent_metadata[parent_file]['name']
            parent_metadata[parent_file]['name'] = parent_file.split(':')[1] # TMP4HACK
            metadata_blocks.append( parent_metadata[parent_file] )
            metadata['parents'].append( {"did":name_in_metadata} )
