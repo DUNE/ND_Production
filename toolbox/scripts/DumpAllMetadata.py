@@ -74,6 +74,8 @@ def read_filelist():
 
     for group in groups:
         pktfile = group['ND_PRODUCTION_CHARGE_FILE']
+        if not pktfile:
+            continue
         lfiles = [Path(p).name
                   for p in group['ND_PRODUCTION_LIGHT_FILES'].split()]
         rawfile = packet2raw(pktfile)
