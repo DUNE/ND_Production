@@ -396,6 +396,7 @@ if __name__ == '__main__' :
 
    # get the parent files metadata
    parent_metadata = {}
+   parent_name = {}
    parents = args.parents.split(",")
 
    for parent in parents :
@@ -403,6 +404,7 @@ if __name__ == '__main__' :
        if info is None:
            raise ValueError(f'MetaCat cannot find {parent}')
        parent_metadata[parent] = info['metadata']
+       parent_name[parent] = info['name']
 
    # loop over the input file names
    workflows = args.workflow.split(",")
@@ -419,10 +421,10 @@ if __name__ == '__main__' :
        # set the metadata fields
        metadata_blocks = []
        for parent_file in parent_files :
-           name_in_metadata = parent_metadata[parent_file]['name']
            parent_metadata[parent_file]['name'] = parent_file.split(':')[1] # TMP4HACK
            metadata_blocks.append( parent_metadata[parent_file] )
-           metadata['parents'].append( {"did":name_in_metadata} )
+           scope = parents[f].split(':')[0]
+           metadata['parents'].append( {"did": f"{scope}:{parent_name[parent_file]}"} )
 
        metadata_block = _GetMetadata(metadata_blocks,filename,workflows[f],args.tier)
 
