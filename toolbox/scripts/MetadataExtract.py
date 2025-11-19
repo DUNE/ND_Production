@@ -11,7 +11,7 @@ import h5py
 # import ROOT # change to uproot with a ups or spack product is available
 
 from argparse import ArgumentParser as ap
-from metacat.webapi import MetaCatClient
+# from metacat.webapi import MetaCatClient
 
 from collections import OrderedDict
 
