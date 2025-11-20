@@ -346,9 +346,6 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       TTree* in_tree = is_nu ? edep_evts_1 : edep_evts_2;
       TTree* gn_tree = is_nu ? genie_evts_1 : genie_evts_2;
       TTree* ghep_tree = is_nu ? ghep_evts_1 : ghep_evts_2;
-
-      std::cout << "EVT IT " << evt_it << '\n';
-      std::cout << "Sto prendendo la entry: " << (is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1)) << '\n';
       
       in_tree->GetEntry(is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1));
       gn_tree->GetEntry(is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1));
@@ -356,9 +353,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
 
       bsim::Dk2Nu* dk2nu_evt = is_nu ? dk2nu_evt_1 : dk2nu_evt_2;
       TG4Event* edep_evt = is_nu ? edep_evt_1 : edep_evt_2;
-      gRooTracker genie_evt = is_nu ? genie_evts_1_data : genie_evts_2_data; 
-
-      std::cout << "EDEP ID " << edep_evt->EventId << '\n';
+      gRooTracker genie_evt = is_nu ? genie_evts_1_data : genie_evts_2_data;
 
       // I am considering just 1 primary vertex!!
       assert(edep_evt->Primaries.size() != 0u && "Multiple interaction vertices in the same event not supported!!");
