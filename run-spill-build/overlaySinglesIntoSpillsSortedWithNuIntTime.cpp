@@ -511,7 +511,9 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   outFile->cd("DetSimPassThru");
   genie_tree->Write();
 
-  outFile->Close();
   inFileForGeom->Close();
+  delete inFileForGeom;
+  delete event_spill_map;
+  outFile->Close();
   delete outFile;
 }
