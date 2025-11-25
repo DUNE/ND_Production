@@ -307,7 +307,6 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   int evt_it_2 = 0;
 
   for (int spillN = 0; ; ++spillN) {
-    std::cout << "SPILL N " << spillN << '\n';
     int Nevts_this_spill_1 = 0;
     if(have_nu_det) {
       Nevts_this_spill_1 = gRandom->Poisson(evts_per_spill_1);
@@ -335,13 +334,8 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
     int nPrimaryPart = 0;
     int nTrajectories = 0;
     for (int i = 0; i < Nevts_this_spill; ++i){
-      std::cout << "EVENT " << i << '\n';
       bool is_nu = i < Nevts_this_spill_1;
       int& evt_it = is_nu ? evt_it_1 : evt_it_2;
-
-      if (is_nu) {std::cout << "FIDUCIALE " << '\n';}
-      else {std::cout << "ROCCIA " << '\n';
-      }
 
       TTree* in_tree = is_nu ? edep_evts_1 : edep_evts_2;
       TTree* gn_tree = is_nu ? genie_evts_1 : genie_evts_2;
