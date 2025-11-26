@@ -5,17 +5,17 @@
 // containing single neutrino interactions (from some flux) in the
 // event tree and overlay these events into full spills.
 //
-// The macro can build detector only spills (setting inFile2POT to 0),
-// rock only spills (setting inFile1POT to 0) or detector + rock spills
-// (setting both inFile1POT and inFile2POT to be greater than 0).
+// The macro can build signal only spills (setting inFileBkgPOT to 0),
+// bkg only spills (setting inFileSignalPOT to 0) or signal + bkg spills
+// (setting both inFileSignalPOT and inFileBkgPOT to be greater than 0).
 //
-// When building detector only spills one can run in "N Interaction" mode
+// When building signal only spills one can run in "N Interaction" mode
 // by specifying a number less than or equal to 10000 as spillPOT. Useful,
 // for example, for studying single neutrino spills.
 //
 // The output will have two changes with respect to the input:
 //
-//   (1) The EventId for rock events is set by ND_PRODUCTION_RUN_OFFSET.
+//   (1) The EventId for bkg events is set by ND_PRODUCTION_RUN_OFFSET.
 //
 //   (2) The timing information is edited to impose the timing microstructure of
 //       the LBNF beamline, the neutrino parent time of flight, the neutrino time of flight 
@@ -122,7 +122,7 @@ long double getNuTOF(const bsim::Dk2Nu& dk2nu_event, const gRooTracker& genie_ev
   return tof;
 }
 
-// This function returns the total sum of all the contributions to the interaction time
+// This function returns the total sum of all the contributions to the interaction time (in nanoseconds)
 long double getInteractionTime_LBNF(const bsim::Dk2Nu& dk2nu_event, const gRooTracker& genie_event, const genie::flux::GDk2NuFlux& flux) { 
 
   long double nu_production_time = getLBNFProtonTime();
@@ -135,23 +135,23 @@ long double getInteractionTime_LBNF(const bsim::Dk2Nu& dk2nu_event, const gRooTr
 
 struct TaggedTime {
   long double time;
-  int tag;
-  int evId; // add evId because we need to keep track of it together with time
+  bool tag;
+  int evId; // added evId because we need to keep track of it together with time
   TaggedTime(double time, int tag, int evId) :
     time(time), tag(tag), evId(evId) {}
   TaggedTime() : time(0), tag(0), evId(0) {}
 };
 
 void overlaySinglesIntoSpillsSortedWithNuIntTime(
-                                    std::string inFileName1,            // first edep filepath, usually fiducial events file
-                                    std::string inFileName2,            // second edep filepath, usually anti-fiducial + rock events file
-                                    std::string ghepName1,              // first ghep filename, set by ND_PRODUCTION_NU_NAME
-                                    std::string ghepName2,              // second ghep filename, set by ND_PRODUCTION_ROCK_NAME
+                                    std::string inFileNameSignal,       // first edep filepath, usually fiducial events file
+                                    std::string inFileNameBkg,          // second edep filepath, usually anti-fiducial + rock events file
+                                    std::string ghepNameSignal,         // first ghep filename, set by ND_PRODUCTION_NU_NAME
+                                    std::string ghepNameBkg,            // second ghep filename, set by ND_PRODUCTION_ROCK_NAME
                                     std::string prodBaseDir,            // production base dir
                                     std::string outFileName,            // output edep file
                                     int spillFileId,                    // file id
-                                    double inFile1POT = 1.024E19,       // #POT first edep file
-                                    double inFile2POT = 1.024E19,       // #POT second edep file
+                                    double inFileSignalPOT = 1.024E19,  // #POT first edep file, set by ND_PRODUCTION_NU_POT or ND_PRODUCTION_USE_GHEP_POT
+                                    double inFileBkgPOT = 1.024E19,     // #POT second edep file, set by ND_PRODUCTION_ROCK_POT or ND_PRODUCTION_USE_GHEP_POT
                                     double spillPOT = 5E13,             // #POT per spill
                                     long double spillPeriod_s = 1.2,    // spill period
                                     int hadd_factor = 10,               // number of GHEP files merged together with hadd, set by ND_PRODUCTION_HADD_FACTOR
@@ -167,192 +167,189 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   // Maximum number of interactions that can be simulated in
   // one spill in "N Interaction" mode. Choice of this number
   // here is somewhat arbitrary, seemed like a very safe
-  // upper limit on the number of nu-det events we'd want to 
+  // upper limit on the number of nu-signal events we'd want to 
   // simulate ever in a single spill (for stress testing).
   int n_int_max = 10000;
-  // Check that we are considering, nu-det only, nu-rock only or both.
-  if (inFile1POT==0. && inFile2POT==0.) {
-    throw std::invalid_argument("nu-det POT and nu-rock POT cannot both be zero!");
+  // Check that we are considering, nu-signal only, nu-bkg only or both.
+  if (inFileSignalPOT==0. && inFileBkgPOT==0.) {
+    throw std::invalid_argument("nu-signal POT and nu-bkg POT cannot both be zero!");
   }
-  // "N Interaction" mode only supported in nu-det mode.
-  else if (spillPOT <= (double)n_int_max && inFile2POT>0.) {
-    throw std::invalid_argument("N Interaction mode does not support nu-rock POT input");
+  // "N Interaction" mode only supported in nu-signal mode.
+  else if (spillPOT <= (double)n_int_max && inFileBkgPOT>0.) {
+    throw std::invalid_argument("N Interaction mode does not support nu-bkg POT input");
   }
 
   // Useful bools for keeping track of event types being considered.
-  bool have_nu_det = false;
-  bool have_nu_rock = false;
+  bool have_nu_signal = false;
+  bool have_nu_bkg = false;
   bool is_n_int_mode = false;
 
-  // ************************get input GHEP files***********
-  auto ghepFiles_1 = getGHEPfiles(prodBaseDir.c_str(), ghepName1.c_str(), hadd_factor, spillFileId);
-  TChain* ghep_evts_1 = new TChain("gtree");
-  std::for_each(ghepFiles_1.begin(), ghepFiles_1.end(), [&](std::string const& fname){
-                                                          ghep_evts_1->Add(fname.c_str());
-                                                          });
 
-  auto ghepFiles_2 = getGHEPfiles(prodBaseDir.c_str(), ghepName2.c_str(), hadd_factor, spillFileId);
-  TChain* ghep_evts_2 = new TChain("gtree");
-  std::for_each(ghepFiles_2.begin(), ghepFiles_2.end(), [&](std::string const& fname){
-                                                          ghep_evts_2->Add(fname.c_str());
-                                                          });
-
-// **********************************************************
-
-  // get input nu-det files
-  TChain* edep_evts_1 = new TChain("EDepSimEvents");
-  TChain* genie_evts_1 = new TChain("DetSimPassThru/gRooTracker");
-  if(inFile1POT > 0.) {
-    edep_evts_1->Add(inFileName1.c_str());
-    genie_evts_1->Add(inFileName1.c_str());
-    have_nu_det = true;
+  // get input nu-signal GHEP and EDEPSIM (with edep and genie trees) files 
+  auto ghepFilesSignal = getGHEPfiles(prodBaseDir.c_str(), ghepNameSignal.c_str(), hadd_factor, spillFileId);
+  TChain* ghep_evts_signal = new TChain("gtree");
+  TChain* edep_evts_signal = new TChain("EDepSimEvents");
+  TChain* genie_evts_signal = new TChain("DetSimPassThru/gRooTracker");
+  if(inFileSignalPOT > 0.) {
+    edep_evts_signal->Add(inFileNameSignal.c_str());
+    genie_evts_signal->Add(inFileNameSignal.c_str());
+    std::for_each(ghepFilesSignal.begin(), ghepFilesSignal.end(), [&](std::string const& fname){
+      ghep_evts_signal->Add(fname.c_str());
+    });
+    have_nu_signal = true;
     if(spillPOT <= (double)n_int_max) is_n_int_mode = true;
   }
-  gRooTracker genie_evts_1_data(genie_evts_1);
-
-  // get input nu-rock files
-  TChain* edep_evts_2 = new TChain("EDepSimEvents");
-  TChain* genie_evts_2 = new TChain("DetSimPassThru/gRooTracker");
-  if(inFile2POT > 0.) {
-    edep_evts_2->Add(inFileName2.c_str());
-    genie_evts_2->Add(inFileName2.c_str());
-    have_nu_rock = true;
+  gRooTracker genie_evts_signal_data(genie_evts_signal);
+  
+  // get input nu-bkg GHEP and EDEPSIM (with edep and genie trees) files
+  auto ghepFilesBkg = getGHEPfiles(prodBaseDir.c_str(), ghepNameBkg.c_str(), hadd_factor, spillFileId);
+  TChain* ghep_evts_bkg = new TChain("gtree");
+  TChain* edep_evts_bkg = new TChain("EDepSimEvents");
+  TChain* genie_evts_bkg = new TChain("DetSimPassThru/gRooTracker");
+  if(inFileBkgPOT > 0.) {
+    edep_evts_bkg->Add(inFileNameBkg.c_str());
+    genie_evts_bkg->Add(inFileNameBkg.c_str());
+    std::for_each(ghepFilesBkg.begin(), ghepFilesBkg.end(), [&](std::string const& fname){
+      ghep_evts_bkg->Add(fname.c_str());
+    });
+    have_nu_bkg = true;
   }
-  gRooTracker genie_evts_2_data(genie_evts_2);
+  gRooTracker genie_evts_bkg_data(genie_evts_bkg);
 
   // Dump some useful information about the running mode.
-  if(have_nu_det && !have_nu_rock){
-    std::cout << "nu-rock file POT stated to be zero, spills will be detector only" << std::endl;
+  if(have_nu_signal && !have_nu_bkg){
+    std::cout << "nu-bkg file POT stated to be zero, spills will be signal only" << std::endl;
     if(is_n_int_mode) {
       std::cout << "Running in N Interaction mode with " << spillPOT << " interactions per spill" << std::endl;
     }
   }
-  else if(!have_nu_det && have_nu_rock){
-    std::cout << "nu-det file POT stated to be zero, spills will be rock only" << std::endl;
+  else if(!have_nu_signal && have_nu_bkg){
+    std::cout << "nu-signal file POT stated to be zero, spills will be bkg only" << std::endl;
   }
-  else if(have_nu_det && have_nu_rock){
-    std::cout << "nu-det and nu-rock file POTs stated to be non-zero, spills will be det+rock" << std::endl;
+  else if(have_nu_signal && have_nu_bkg){
+    std::cout << "nu-signal and nu-bkg file POTs stated to be non-zero, spills will be signal+bkg" << std::endl;
   }
 
   // make output file
   TFile* outFile = new TFile(outFileName.c_str(),"RECREATE");
   TTree* new_tree;
   TTree* genie_tree;
-  if(have_nu_det) {
-    new_tree = edep_evts_1->CloneTree(0);
-    genie_tree = genie_evts_1->CloneTree(0);
+  if(have_nu_signal) {
+    new_tree = edep_evts_signal->CloneTree(0);
+    genie_tree = genie_evts_signal->CloneTree(0);
   }
   else {
-    new_tree = edep_evts_2->CloneTree(0);
-    genie_tree = genie_evts_2->CloneTree(0);
+    new_tree = edep_evts_bkg->CloneTree(0);
+    genie_tree = genie_evts_bkg->CloneTree(0);
   }
   gRooTracker genie_tree_data(genie_tree);
   TBranch* out_branch = new_tree->GetBranch("Event");
 
   // determine events per spill
-  unsigned int N_evts_1 = 0;
-  double evts_per_spill_1 = 0.;
-  if(have_nu_det) {
-    N_evts_1 = edep_evts_1->GetEntries();
-    evts_per_spill_1 = ((double)N_evts_1)/(inFile1POT/spillPOT);
+  unsigned int N_evts_signal = 0;
+  double evts_per_spill_signal = 0.;
+  if(have_nu_signal) {
+    N_evts_signal = edep_evts_signal->GetEntries();
+    evts_per_spill_signal = ((double)N_evts_signal)/(inFileSignalPOT/spillPOT);
     if (is_n_int_mode) {
-      evts_per_spill_1 = spillPOT;
+      evts_per_spill_signal = spillPOT;
     }
   }
 
-  unsigned int N_evts_2 = 0;
-  double evts_per_spill_2 = 0.;
-  std::vector<int> evt_it_2_sequence;
-  if(have_nu_rock) {
-    N_evts_2 = edep_evts_2->GetEntries();
-    evts_per_spill_2 = ((double)N_evts_2)/(inFile2POT/spillPOT);
+  unsigned int N_evts_bkg = 0;
+  double evts_per_spill_bkg = 0.;
+  std::vector<int> evt_it_bkg_sequence;
+  if(have_nu_bkg) {
+    N_evts_bkg = edep_evts_bkg->GetEntries();
+    evts_per_spill_bkg = ((double)N_evts_bkg)/(inFileBkgPOT/spillPOT);
     // Create a vector of sequential integers with length equal to the number
-    // of entries in the rock tree to act as rock tree entry indices.
-    for (int idx = 0; idx < N_evts_2; idx++) evt_it_2_sequence.push_back(idx);
+    // of entries in the bkg tree to act as bkg tree entry indices.
+    for (int idx = 0; idx < N_evts_bkg; idx++) evt_it_bkg_sequence.push_back(idx);
 
     // Now shuffle it with the spillFileId for a seed for reproducibility if we
-    // are reusing rock.
+    // are reusing bkg.
     if (reuseRock) {
       std::mt19937 g(spillFileId);
-      std::shuffle(evt_it_2_sequence.begin(), evt_it_2_sequence.end(), g);
+      std::shuffle(evt_it_bkg_sequence.begin(), evt_it_bkg_sequence.end(), g);
     }
   }
 
-  std::cout << "File: " << inFileName1 << std::endl;
+  std::cout << "File: " << inFileNameSignal << std::endl;
   std::cout << "    Number of spills: "<< (is_n_int_mode ? 
-    std::floor((double)N_evts_1/evts_per_spill_1) : inFile1POT/spillPOT) << std::endl;
-  std::cout << "    Events per spill: "<< evts_per_spill_1 << std::endl;
+    std::floor((double)N_evts_signal/evts_per_spill_signal) : inFileSignalPOT/spillPOT) << std::endl;
+  std::cout << "    Events per spill: "<< evts_per_spill_signal << std::endl;
 
-  std::cout << "File: " << inFileName2 << std::endl;
-  std::cout << "    Number of spills: "<< inFile2POT/spillPOT << std::endl;
-  std::cout << "    Events per spill: "<< evts_per_spill_2 << std::endl;
+  std::cout << "File: " << inFileNameBkg << std::endl;
+  std::cout << "    Number of spills: "<< inFileBkgPOT/spillPOT << std::endl;
+  std::cout << "    Events per spill: "<< evts_per_spill_bkg << std::endl;
 
-  // **********get dk2nu branch******
-  bsim::Dk2Nu* dk2nu_evt_1 = nullptr; 
-  bsim::Dk2Nu* dk2nu_evt_2 = nullptr; 
+  bsim::Dk2Nu* dk2nu_evt = nullptr;
+  TG4Event* edep_evt = nullptr;
+  if(have_nu_signal) {
+    ghep_evts_signal->SetBranchAddress("dk2nu",&dk2nu_evt);
+    edep_evts_signal->SetBranchAddress("Event",&edep_evt);
+  }
+  if(have_nu_bkg) {
+    ghep_evts_bkg->SetBranchAddress("dk2nu",&dk2nu_evt);
+    edep_evts_bkg->SetBranchAddress("Event",&edep_evt);
+  }
 
-  ghep_evts_1->SetBranchAddress("dk2nu",&dk2nu_evt_1);
-  ghep_evts_2->SetBranchAddress("dk2nu",&dk2nu_evt_2);
-  // ********************************
+  TMap* event_spill_map = new TMap(N_evts_signal+N_evts_bkg);
 
-  TG4Event* edep_evt_1 = NULL;
-  if(have_nu_det) edep_evts_1->SetBranchAddress("Event",&edep_evt_1);
-
-  TG4Event* edep_evt_2 = NULL;
-  if(have_nu_rock) edep_evts_2->SetBranchAddress("Event",&edep_evt_2);
-
-  TMap* event_spill_map = new TMap(N_evts_1+N_evts_2);
-
-  int evt_it_1 = 0;
-  int evt_it_2 = 0;
+  int evt_it_signal = 0;
+  int evt_it_bkg = 0;
 
   for (int spillN = 0; ; ++spillN) {
-    int Nevts_this_spill_1 = 0;
-    if(have_nu_det) {
-      Nevts_this_spill_1 = gRandom->Poisson(evts_per_spill_1);
+    int Nevts_this_spill_signal = 0;
+    if(have_nu_signal) {
+      Nevts_this_spill_signal = gRandom->Poisson(evts_per_spill_signal);
       // In N Interaction mode, fixed number of events 
       // per spill.
-      if(is_n_int_mode) Nevts_this_spill_1 = spillPOT;
+      if(is_n_int_mode) Nevts_this_spill_signal = spillPOT;
     }
-    int Nevts_this_spill_2 = 0;
-    if(have_nu_rock) {
-      Nevts_this_spill_2 = gRandom->Poisson(evts_per_spill_2);
+    int Nevts_this_spill_bkg = 0;
+    if(have_nu_bkg) {
+      Nevts_this_spill_bkg = gRandom->Poisson(evts_per_spill_bkg);
     }
 
-    if (evt_it_1 + Nevts_this_spill_1 > N_evts_1 ||
-        evt_it_2 + Nevts_this_spill_2 > N_evts_2)
+    if (evt_it_signal + Nevts_this_spill_signal > N_evts_signal ||
+        evt_it_bkg + Nevts_this_spill_bkg > N_evts_bkg)
       break;
 
     std::cout << "working on spill # " << spillN << std::endl;
 
-    int Nevts_this_spill = Nevts_this_spill_1 + Nevts_this_spill_2;
+    int Nevts_this_spill = Nevts_this_spill_signal + Nevts_this_spill_bkg;
     std::vector<TaggedTime> times(Nevts_this_spill);
 
-    // loop on the events within a spill, to take into account also the neutrino TOF before reaching SAND:
-    // so for each event I need to get the interaction point and compute the interaction time
-    // fill a vector with these times, and then sort it
+    // loop on the events within a spill, to take into account also the neutrino TOF before reaching the detector:
+    // so for each event I need to compute the interaction time
+    // then fill a vector with these times, and sort it
     int nPrimaryPart = 0;
     int nTrajectories = 0;
     for (int i = 0; i < Nevts_this_spill; ++i){
-      bool is_nu = i < Nevts_this_spill_1;
-      int& evt_it = is_nu ? evt_it_1 : evt_it_2;
-
-      TTree* in_tree = is_nu ? edep_evts_1 : edep_evts_2;
-      TTree* gn_tree = is_nu ? genie_evts_1 : genie_evts_2;
-      TTree* ghep_tree = is_nu ? ghep_evts_1 : ghep_evts_2;
+      // consider as signal events the first Nevts_this_spill_signal events
+      bool is_nu = i < Nevts_this_spill_signal;
       
-      in_tree->GetEntry(is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1));
-      gn_tree->GetEntry(is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1));
-      ghep_tree->GetEntry(is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1));
+      int& evt_it = is_nu ? evt_it_signal : evt_it_bkg;
 
-      bsim::Dk2Nu* dk2nu_evt = is_nu ? dk2nu_evt_1 : dk2nu_evt_2;
-      TG4Event* edep_evt = is_nu ? edep_evt_1 : edep_evt_2;
-      gRooTracker genie_evt = is_nu ? genie_evts_1_data : genie_evts_2_data;
+      TTree* in_tree = is_nu ? edep_evts_signal : edep_evts_bkg;
+      TTree* gn_tree = is_nu ? genie_evts_signal : genie_evts_bkg;
+      TTree* ghep_tree = is_nu ? ghep_evts_signal : ghep_evts_bkg;
+
+      auto entry = is_nu ? evt_it + i : evt_it_bkg_sequence.at(evt_it + i - Nevts_this_spill_signal);
+      in_tree->GetEntry(entry);
+      gn_tree->GetEntry(entry);
+      ghep_tree->GetEntry(entry);
+
+      gRooTracker genie_evt = is_nu ? genie_evts_signal_data : genie_evts_bkg_data;
 
       // I am considering just 1 primary vertex!!
       assert(edep_evt->Primaries.size() != 0u && "Multiple interaction vertices in the same event not supported!!");
 
-      times[i] = TaggedTime(getInteractionTime_LBNF(*dk2nu_evt, genie_evt, flux), is_nu ? 1 : 2, is_nu ? evt_it + i : evt_it_2_sequence.at(evt_it + i - Nevts_this_spill_1));
+      times[i] = TaggedTime(getInteractionTime_LBNF(*dk2nu_evt, genie_evt, flux), is_nu, is_nu ? evt_it + i : evt_it_bkg_sequence.at(evt_it + i - Nevts_this_spill_signal));
+
+      // needed to count the the number of primary particles and trajectories, 
+      // (referred to point (3) at the beginning)
       auto v = edep_evt->Primaries[0];
       nPrimaryPart += v.Particles.size();
       nTrajectories += edep_evt->Trajectories.size();
@@ -369,21 +366,20 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
     int lastPriTrajId = 0;
     int lastSecTrajId = nPrimaryPart;
 
-    // loop on times vector: different from ND-LAr version!
-    // they associate first time with first event
-    // instead we do: first time -> corresponding event 
+    // loop on times vector: different from overlaySingleIntoSpillsSorted.cpp!
+    // there first time is associated with first event
+    // instead here: first time -> corresponding event 
     for (const auto& ttime : times) {
-      bool is_nu = ttime.tag == 1;
+      bool is_nu = ttime.tag;
 
-      TTree* in_tree = is_nu ? edep_evts_1 : edep_evts_2;
-      TTree* gn_tree = is_nu ? genie_evts_1 : genie_evts_2;
+      TTree* in_tree = is_nu ? edep_evts_signal : edep_evts_bkg;
+      TTree* gn_tree = is_nu ? genie_evts_signal : genie_evts_bkg;
 
-      int& evt_it = is_nu ? evt_it_1 : evt_it_2;
+      int& evt_it = is_nu ? evt_it_signal : evt_it_bkg;
 
       in_tree->GetEntry(ttime.evId);
       gn_tree->GetEntry(ttime.evId);
 
-      TG4Event* edep_evt = is_nu ? edep_evt_1 : edep_evt_2;
       // out_branch->ResetAddress();
       out_branch->SetAddress(&edep_evt); // why the &? what is meaning of life
       // new_tree->SetBranchAddress("Event", &edep_evt);
@@ -407,7 +403,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       double event_time = ttime.time + conversionTo_ns*spillPeriod_s*spillN;
       double old_event_time = 0.;
 
-      gRooTracker& genie_evts_data = is_nu ? genie_evts_1_data : genie_evts_2_data;
+      gRooTracker& genie_evts_data = is_nu ? genie_evts_signal_data : genie_evts_bkg_data;
       genie_tree_data.CopyFrom(genie_evts_data);
       genie_tree_data.EvtNum = edep_evt->EventId;
       genie_tree_data.EvtVtx[3] = event_time;
@@ -418,30 +414,23 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       int nTrajectoriesThisEvent = edep_evt->Trajectories.size();
       int nSecondaryPartThisEvent = nTrajectoriesThisEvent - nPrimaryPartThisEvent;
 
+      // function to update the TrackId as explained in the point (3) at the beginning
       auto updateTrackId = [lastPriTrajId, lastSecTrajId, nPrimaryPartThisEvent](int &trkId)
       { trkId = trkId < nPrimaryPartThisEvent ? lastPriTrajId + trkId : lastSecTrajId + trkId - nPrimaryPartThisEvent; };
 
       // ... interaction vertex
-      for (std::vector<TG4PrimaryVertex>::iterator v = edep_evt->Primaries.begin(); v != edep_evt->Primaries.end(); ++v) {
-        old_event_time = v->Position.T();
-        v->Position.SetT(event_time);
-        // TMS reco wants the InteractionNumber to be the entry number of the
-        // vertex in DetSimPassThru/gRooTracker. Since, by construction, our
-        // EDepSimEvents and gRooTracker trees are aligned one-to-one, we just
-        // trivially set InteractionNumber to be the current entry number.
-        // https://github.com/DUNE/2x2_sim/issues/54
-        v->InteractionNumber = evt_it_1 + evt_it_2;
-        for (auto &p : v->Particles){
-          updateTrackId(p.TrackId);
-        }
+      old_event_time = v->Position.T();
+      v->Position.SetT(event_time);
+      // TMS reco wants the InteractionNumber to be the entry number of the
+      // vertex in DetSimPassThru/gRooTracker. Since, by construction, our
+      // EDepSimEvents and gRooTracker trees are aligned one-to-one, we just
+      // trivially set InteractionNumber to be the current entry number.
+      // https://github.com/DUNE/2x2_sim/issues/54
+      v->InteractionNumber = evt_it_signal + evt_it_bkg;
+      for (auto &p : v->Particles){
+        updateTrackId(p.TrackId);
       }
 
-      std::cout << "This event: " << edep_evt->EventId << " of " << Nevts_this_spill << std::endl;
-      std::cout << "  - Primary particles: " << nPrimaryPartThisEvent << std::endl;
-      std::cout << "  - Secondary particles: " << nSecondaryPartThisEvent << std::endl;
-      std::cout << "  - Trajectories      : " << nTrajectoriesThisEvent << std::endl;
-      std::cout << "  - Last Pri. Part. Id: " << lastPriTrajId << std::endl;
-      std::cout << "  - Last Sec. Part. Id: " << lastSecTrajId << std::endl;
 
       // ... trajectories
       for (std::vector<TG4Trajectory>::iterator t = edep_evt->Trajectories.begin(); t != edep_evt->Trajectories.end(); ++t) {
@@ -482,8 +471,8 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   new_tree->SetName("EDepSimEvents");
   genie_tree->SetName("gRooTracker");
 
-  // Pass on the geometry from the nu-det file by default.
-  auto inFileForGeom = new TFile(have_nu_det ? inFileName1.c_str() : inFileName2.c_str());
+  // Pass on the geometry from the nu-signal file by default.
+  auto inFileForGeom = new TFile(have_nu_signal ? inFileNameSignal.c_str() : inFileNameBkg.c_str());
   auto geom = (TGeoManager*) inFileForGeom->Get("EDepSimGeometry");
 
   outFile->cd();
@@ -494,12 +483,12 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   p->Write();
   auto potps = new TParameter<double>("pot_per_spill", is_n_int_mode ? -1 : spillPOT);
   potps->Write();
-  const auto inFile1POT_used = N_evts_1 ? (inFile1POT * evt_it_1 / N_evts_1) : 0;
-  auto pot1 = new TParameter<double>("pot1", inFile1POT_used);
-  pot1->Write();
-  const auto inFile2POT_used = N_evts_2 ? (inFile2POT * evt_it_2 / N_evts_2) : 0;
-  auto pot2 = new TParameter<double>("pot2", inFile2POT_used);
-  pot2->Write();
+  const auto inFileSignalPOT_used = N_evts_signal ? (inFileSignalPOT * evt_it_signal / N_evts_signal) : 0;
+  auto potSignal = new TParameter<double>("potSignal", inFileSignalPOT_used);
+  potSignal->Write();
+  const auto inFileBkgPOT_used = N_evts_bkg ? (inFileBkgPOT * evt_it_bkg / N_evts_bkg) : 0;
+  auto potBkg = new TParameter<double>("potBkg", inFileBkgPOT_used);
+  potBkg->Write();
 
   outFile->mkdir("DetSimPassThru");
   outFile->cd("DetSimPassThru");
