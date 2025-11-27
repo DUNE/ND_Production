@@ -343,13 +343,11 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
 
       gRooTracker& genie_evt = is_nu ? genie_evts_signal_data : genie_evts_bkg_data;
 
-      // I am considering just 1 primary vertex!!
-      assert(edep_evt->Primaries.size() != 0u && "Multiple interaction vertices in the same event not supported!!");
-
       times[i] = TaggedTime(getInteractionTime_LBNF(*dk2nu_evt, genie_evt, flux), is_nu, is_nu ? evt_it + i : evt_it_bkg_sequence.at(evt_it + i - Nevts_this_spill_signal));
 
       // needed to count the the number of primary particles and trajectories, 
-      // (referred to point (3) at the beginning)
+      // (referred to point (3) at the beginning). We select just the first entry since
+      // we have always 1 interaction vertex
       auto v = edep_evt->Primaries[0];
       nPrimaryPart += v.Particles.size();
       nTrajectories += edep_evt->Trajectories.size();
@@ -380,9 +378,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       in_tree->GetEntry(ttime.evId);
       gn_tree->GetEntry(ttime.evId);
 
-      // out_branch->ResetAddress();
-      out_branch->SetAddress(&edep_evt); // why the &? what is meaning of life
-      // new_tree->SetBranchAddress("Event", &edep_evt);
+      out_branch->SetAddress(&edep_evt);
 
       int globalSpillId = int(1E3)*spillFileId + spillN;
 
@@ -403,14 +399,14 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       double event_time = ttime.time + conversionTo_ns*spillPeriod_s*spillN;
       double old_event_time = 0.;
 
-      gRooTracker& genie_evts_data = is_nu ? genie_evts_signal_data : genie_evts_bkg_data;
-      genie_tree_data.CopyFrom(genie_evts_data);
+      gRooTracker& genie_evt = is_nu ? genie_evts_signal_data : genie_evts_bkg_data;
+      genie_tree_data.CopyFrom(genie_evt);
       genie_tree_data.EvtNum = edep_evt->EventId;
       genie_tree_data.EvtVtx[3] = event_time;
 
+      // count the number of primaries, secondaries and trajectories
       int nPrimaryPartThisEvent = 0;
-      for (auto &v : edep_evt->Primaries)
-        nPrimaryPartThisEvent += v.Particles.size();
+      nPrimaryPartThisEvent += edep_evt->Primaries[0].Particles.size();
       int nTrajectoriesThisEvent = edep_evt->Trajectories.size();
       int nSecondaryPartThisEvent = nTrajectoriesThisEvent - nPrimaryPartThisEvent;
 
@@ -418,6 +414,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       auto updateTrackId = [lastPriTrajId, lastSecTrajId, nPrimaryPartThisEvent](int &trkId)
       { trkId = trkId < nPrimaryPartThisEvent ? lastPriTrajId + trkId : lastSecTrajId + trkId - nPrimaryPartThisEvent; };
 
+      // assign the correct time to the vertex, the trajectories and the energy depositions
       // ... interaction vertex
       auto v = edep_evt->Primaries[0];
       old_event_time = v.Position.T();
