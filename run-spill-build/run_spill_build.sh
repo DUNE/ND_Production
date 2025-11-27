@@ -98,15 +98,18 @@ LIBTG4EVENT_DIR=${LIBTG4EVENT_DIR:-libTG4Event}
 
 LIBGENIE_DIR=$(echo "$LD_LIBRARY_PATH" | tr ':' '\n' | grep -i genie | head -n 1)
 
+
 run root -l -b -q \
-     -e  "gSystem->Load(\"libPhysics.so\"); \
+     -e  "gSystem->AddDynamicPath(\"$LIBTG4EVENT_DIR\"); \
+          gSystem->AddDynamicPath(\"$LIBGENIE_DIR\"); \
+          gSystem->Load(\"libPhysics.so\"); \
           gSystem->Load(\"libEG.so\"); \
-          gSystem->Load(\"$LIBGENIE_DIR/libGFwMsg.so\"); \
-          gSystem->Load(\"$LIBGENIE_DIR/libGFwReg.so\"); \
-          gSystem->Load(\"$LIBGENIE_DIR/libGFwParDat.so\"); \
-          gSystem->Load(\"$LIBGENIE_DIR/libGFwAlg.so\"); \
-          gSystem->Load(\"$LIBGENIE_DIR/libGFwUtl.so\"); \
-          gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\"); " \
+          gSystem->Load(\"libTG4Event.so\"); \
+          gSystem->Load(\"libGFwMsg.so\"); \
+          gSystem->Load(\"libGFwReg.so\"); \
+          gSystem->Load(\"libGFwParDat.so\"); \
+          gSystem->Load(\"libGFwAlg.so\"); \
+          gSystem->Load(\"libGFwUtl.so\"); " \
     "/opt/generators/dk2nu/scripts/load_dk2nu.C(true,true)" \
     "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$nuInFile\", \"$rockInFile\", \"$ND_PRODUCTION_NU_NAME\", \"$ND_PRODUCTION_ROCK_NAME\", \"$ND_PRODUCTION_OUTDIR_BASE\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR, $ND_PRODUCTION_REUSE_ROCK, \"$ND_PRODUCTION_DET_LOCATION\")"
 

@@ -341,7 +341,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       gn_tree->GetEntry(entry);
       ghep_tree->GetEntry(entry);
 
-      gRooTracker genie_evt = is_nu ? genie_evts_signal_data : genie_evts_bkg_data;
+      gRooTracker& genie_evt = is_nu ? genie_evts_signal_data : genie_evts_bkg_data;
 
       // I am considering just 1 primary vertex!!
       assert(edep_evt->Primaries.size() != 0u && "Multiple interaction vertices in the same event not supported!!");
