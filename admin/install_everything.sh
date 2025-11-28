@@ -4,11 +4,6 @@
 
 detector=$1
 
-# we don't need it i think
-# pushd run-corsika
-# ./install_corsika.sh
-# popd
-
 echo "Installation of common tools"
 
 # If using the ND_PRODUCTION_USE_GHEP_POT option, need to install a single
