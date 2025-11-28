@@ -186,11 +186,11 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
 
 
   // get input nu-signal GHEP and EDEPSIM (with edep and genie trees) files 
-  auto ghepFilesSignal = getGHEPfiles(prodBaseDir.c_str(), ghepNameSignal.c_str(), hadd_factor, spillFileId);
   TChain* ghep_evts_signal = new TChain("gtree");
   TChain* edep_evts_signal = new TChain("EDepSimEvents");
   TChain* genie_evts_signal = new TChain("DetSimPassThru/gRooTracker");
   if(inFileSignalPOT > 0.) {
+    auto ghepFilesSignal = getGHEPfiles(prodBaseDir.c_str(), ghepNameSignal.c_str(), hadd_factor, spillFileId);
     edep_evts_signal->Add(inFileNameSignal.c_str());
     genie_evts_signal->Add(inFileNameSignal.c_str());
     std::for_each(ghepFilesSignal.begin(), ghepFilesSignal.end(), [&](std::string const& fname){
@@ -202,11 +202,11 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   gRooTracker genie_evts_signal_data(genie_evts_signal);
   
   // get input nu-bkg GHEP and EDEPSIM (with edep and genie trees) files
-  auto ghepFilesBkg = getGHEPfiles(prodBaseDir.c_str(), ghepNameBkg.c_str(), hadd_factor, spillFileId);
   TChain* ghep_evts_bkg = new TChain("gtree");
   TChain* edep_evts_bkg = new TChain("EDepSimEvents");
   TChain* genie_evts_bkg = new TChain("DetSimPassThru/gRooTracker");
   if(inFileBkgPOT > 0.) {
+    auto ghepFilesBkg = getGHEPfiles(prodBaseDir.c_str(), ghepNameBkg.c_str(), hadd_factor, spillFileId);
     edep_evts_bkg->Add(inFileNameBkg.c_str());
     genie_evts_bkg->Add(inFileNameBkg.c_str());
     std::for_each(ghepFilesBkg.begin(), ghepFilesBkg.end(), [&](std::string const& fname){
