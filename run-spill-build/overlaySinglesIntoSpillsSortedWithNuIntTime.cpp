@@ -27,8 +27,9 @@
 constexpr long double conversionTo_ns = 1.E9; 
 constexpr long double c = TMath::C() / conversionTo_ns; // [m/ns]
 
-// *************************************READ GHEP FILES************************************************
-// We need to read GHEP files, hence we need these two methods
+// The following two methods are inspired by the ones present in run-cafmaker
+// Needed to read GHEP files to take into account the "misalignment" 
+// between GHEP files and EDEPSIM file due to the hadd step
 std::string getPath(std::string const& base_outdir, std::string const& step, std::string const& ghep_fname, std::string const& ftype, std::string const& ext, int file_id){
   int subdir_num = (file_id / 1000) *1000;
   std::ostringstream oss;
@@ -58,11 +59,11 @@ std::vector<std::string> getGHEPfiles(std::string const& base_outdir,  std::stri
   }
   return ghep_files;
 }
-// ***************************************************************************************************
 
 
-// *************************************GET NEUTRINO INTERACTION TIME*********************************
-// returns a random time for a neutrino interaction to take place within
+// Get neutrino interaction time, with the following 4 methods:
+
+// This function returns a random time for a neutrino interaction to take place within
 // a LBNF spill, given the beam's micro timing structure
 double getLBNFProtonTime() {
 
