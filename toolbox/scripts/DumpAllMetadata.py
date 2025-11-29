@@ -30,7 +30,7 @@ def packet2raw(packet_path):
 
 
 def packet2flow(packet_path):
-    return Path(packet_path).name.replace('.h5', '.FLOW_v0.hdf5')
+    return Path(packet_path).name.replace('.h5', '.FLOW_v7.hdf5')
 
 
 def reco2flow(path: Path):
