@@ -50,10 +50,10 @@ class FakeMetacat:
 # get the metacat client
 #+++++++++++++++++++++++++++++++++
 def _GetMetacatClient() :
-    # client = MetaCatClient(server_url='https://metacat.fnal.gov:9443/dune_meta_prod/app',
-    #                        auth_server_url='https://metacat.fnal.gov:8143/auth/dune',
-    #                        timeout=30)
-    client = FakeMetacat('fake_metacat.pkl')
+    client = MetaCatClient(server_url='https://metacat.fnal.gov:9443/dune_meta_prod/app',
+                           auth_server_url='https://metacat.fnal.gov:8143/auth/dune',
+                           timeout=30)
+    # client = FakeMetacat('fake_metacat.pkl')
     return client
 
 
