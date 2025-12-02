@@ -127,10 +127,10 @@ long double getNuTOF(const bsim::Dk2Nu& dk2nu_event, const gRooTracker& genie_ev
 long double getInteractionTime_LBNF(const bsim::Dk2Nu& dk2nu_event, const gRooTracker& genie_event, const genie::flux::GDk2NuFlux& flux) { 
 
   long double nu_production_time = getLBNFProtonTime();
-  long double nu_parent_tof = getNuCreationTime(dk2nu_event);
+  long double nu_creation_time = getNuCreationTime(dk2nu_event);
   long double nu_tof = getNuTOF(dk2nu_event, genie_event, flux);
 
-  return nu_production_time + nu_parent_tof + nu_tof;
+  return nu_production_time + nu_creation_time + nu_tof;
 }
 // ******************************************************************************************************
 
@@ -417,7 +417,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
 
       // assign the correct time to the vertex, the trajectories and the energy depositions
       // ... interaction vertex
-      auto v = edep_evt->Primaries[0];
+      auto& v = edep_evt->Primaries[0];
       old_event_time = v.Position.T();
       v.Position.SetT(event_time);
       // TMS reco wants the InteractionNumber to be the entry number of the
