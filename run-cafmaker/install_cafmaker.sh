@@ -13,7 +13,7 @@ cd install
 git clone -b v4.10.0 https://github.com/DUNE/ND_CAFMaker.git
 cd ND_CAFMaker
 
-./build.sh
+./build_deps.sh
 source ndcaf_setup.sh
 make -j8
 

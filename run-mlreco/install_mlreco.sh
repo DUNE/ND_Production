@@ -51,6 +51,7 @@ git clone -b v1.8.0 https://github.com/DeepLearnPhysics/SuperaAtomic.git
 
 cd SuperaAtomic
 git submodule update --init     # pybind11
+pip install scikit-build
 pip install .
 cd ..
 
