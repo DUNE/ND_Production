@@ -15,15 +15,15 @@ source ../util/init.data.inc.sh
 # Prevent excessive memory use
 export OMP_NUM_THREADS=1
 outName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5)
-outFile=${tmpOutDir}/${outName}.CAF.root
-flatOutFile=${tmpOutDir}/${outName}.CAF.flat.root
+outFile=${tmpOutDir}/${outName}.CAF$ND_PRODUCTION_FILE_TAG.root
+flatOutFile=${tmpOutDir}/${outName}.CAF$ND_PRODUCTION_FILE_TAG.flat.root
 
 tmpDir=$(mktemp -d)
 
 cfgFile="$tmpDir/cafmaker.cfg"
 
-spinePath=${ND_PRODUCTION_SPINE_DIR_BASE}/${relDir}/$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).MLRECO_SPINE.hdf5
-pandoraPath=${ND_PRODUCTION_PANDORA_DIR_BASE}/${relDir}/LAR_RECO_ND/$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).LAR_RECO_ND.root
+spinePath=${ND_PRODUCTION_SPINE_DIR_BASE}/${relDir}/$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).MLRECO_SPINE$ND_PRODUCTION_FILE_TAG.hdf5
+pandoraPath=${ND_PRODUCTION_PANDORA_DIR_BASE}/${relDir}/LAR_RECO_ND/$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).LAR_RECO_ND$ND_PRODUCTION_FILE_TAG.root
 
 # Compulsory arguments regardless of use case.
 args_gen_cafmaker_cfg=( \

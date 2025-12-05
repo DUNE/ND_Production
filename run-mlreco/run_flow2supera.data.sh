@@ -7,10 +7,10 @@ source load_mlreco.inc.sh
 
 [ -z "$ND_PRODUCTION_FLOW2SUPERA_CONFIG" ] && export ND_PRODUCTION_FLOW2SUPERA_CONFIG="2x2_data"
 
-outName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).LARCV.root
+outName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).LARCV$ND_PRODUCTION_FILE_TAG.root
 outFile=${tmpOutDir}/${outName}
 
-inName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).FLOW.hdf5
+inName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).FLOW$ND_PRODUCTION_FILE_TAG.hdf5
 inFile=${ND_PRODUCTION_FLOW_DIR_BASE}/${relDir}/${inName}
 
 config=$ND_PRODUCTION_FLOW2SUPERA_CONFIG

@@ -23,7 +23,7 @@ source $ND_PRODUCTION_DIR/util/init.data.inc.sh
 
 # Input HDF5-to-ROOT file
 outName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5)
-inName=$outName.FLOW.hdf5_hits.root
+inName=$outName.FLOW$ND_PRODUCTION_FILE_TAG.hdf5_hits.root
 inFile=${ND_PRODUCTION_FLOW2ROOT_DIR_BASE}/${relDir}/${inName}
 
 # Create temporary run directory
@@ -43,7 +43,7 @@ tmpMCHierOut=${tmpRunDir}/MCHierarchy.root
 tmpEvtHierOut=${tmpRunDir}/EventHierarchy.root
 
 anaOutDir=${outDir}/LAR_RECO_ND
-anaOutFile=${anaOutDir}/${outName}.LAR_RECO_ND.root
+anaOutFile=${anaOutDir}/${outName}.LAR_RECO_ND$ND_PRODUCTION_FILE_TAG.root
 
 mkdir -p ${anaOutDir}
 mv "${tmpAnaOut}" "${anaOutFile}"

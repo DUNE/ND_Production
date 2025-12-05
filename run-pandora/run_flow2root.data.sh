@@ -15,10 +15,10 @@ source $ND_PRODUCTION_DIR/util/init.data.inc.sh
 # Prevent excessive memory use
 export OMP_NUM_THREADS=1
 
-outName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).FLOW.hdf5_hits.root
+outName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).FLOW$ND_PRODUCTION_FILE_TAG.hdf5_hits.root
 outFile=${tmpOutDir}/${outName}
 
-inName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).FLOW.hdf5
+inName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).FLOW$ND_PRODUCTION_FILE_TAG.hdf5
 inFile=${ND_PRODUCTION_FLOW_DIR_BASE}/${relDir}/${inName}
 
 rm -f "$outFile"
