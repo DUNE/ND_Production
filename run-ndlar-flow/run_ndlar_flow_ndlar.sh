@@ -52,11 +52,12 @@ set -o errexit
 run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5\
     -i "$inFile" -o "$outFile" $compression
 
-run h5flow -c $workflow6 $workflow7\
-    -i "$inFile" -o "$outFile" $compression
-
-run h5flow -c $workflow8\
-    -i "$outFile" -o "$outFile" $compression
+if [[ -z "$ND_PRODUCTION_CHARGE_ONLY" || "$ND_PRODUCTION_CHARGE_ONLY" == "0" ]]; then
+    run h5flow -c $workflow6 $workflow7\
+        -i "$inFile" -o "$outFile" $compression
+    run h5flow -c $workflow8\
+        -i "$outFile" -o "$outFile" $compression
+fi
 
 mkdir -p "$outDir/FLOW/$subDir"
 mv "$outFile" "$outDir/FLOW/$subDir"
