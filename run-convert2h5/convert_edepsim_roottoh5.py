@@ -394,6 +394,8 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
 
         # Count total number of vertices and trajectories
         n_traj = 0
+        all_traj_ids = set()
+        traj_map = {}
 
         # Dump the primary vertices
         vertices = np.empty(len(event.Primaries), dtype=vertices_dtype)
@@ -436,8 +438,8 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                 trajectories[n_traj]["pxyz_end"] = p_end #(end_pt.GetMomentum().X(), end_pt.GetMomentum().Y(), end_pt.GetMomentum().Z())
                 trajectories[n_traj]["xyz_start"] = (start_pt.GetPosition().X() * edep2cm, start_pt.GetPosition().Y() * edep2cm, start_pt.GetPosition().Z() * edep2cm)
                 trajectories[n_traj]["xyz_end"] = (end_pt.GetPosition().X() * edep2cm, end_pt.GetPosition().Y() * edep2cm, end_pt.GetPosition().Z() * edep2cm)
-                trajectories[n_traj]["E_start"] = np.sqrt(np.sum(np.square(p_start)) + mass**2)
-                trajectories[n_traj]["E_end"] = np.sqrt(np.sum(np.square(p_end)) + mass**2)
+                trajectories[n_traj]["E_start"] = sqrt(start_pt.GetMomentum().Mag2() + mass**2)
+                trajectories[n_traj]["E_end"] = sqrt(end_pt.GetMomentum().Mag2() + mass**2)
                 trajectories[n_traj]["KE_start"] = trajectories[n_traj]["E_start"] - mass;
                 trajectories[n_traj]["KE_end"] = trajectories[n_traj]["E_end"] - mass;
                 trajectories[n_traj]["t_start"] = start_pt.GetPosition().T() * edep2us
@@ -451,6 +453,8 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                 for i in range(len(trajectory.Points)-1):
                     trajectories[n_traj]["dist_travel"]+=(trajectory.Points[i].GetPosition()-trajectory.Points[i+1].GetPosition()).Vect().Mag()* edep2cm
 
+                all_traj_ids.add(trajectory.GetTrackId())
+                traj_map[trajectory.GetTrackId()] = n_traj
                 n_traj += 1
 
             else:
@@ -473,12 +477,12 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                     segment[iHit]["traj_id"] = hitSegment.Contrib[0]
                     segment[iHit]["file_traj_id"] = trackMap[hitSegment.Contrib[0]]
                     seg_traj_id = hitSegment.Contrib[0]
-                    if segment[iHit]["traj_id"] not in trajectories["traj_id"]:
+                    if segment[iHit]["traj_id"] not in all_traj_ids:
                         # Given event.Trajectories is ordered by traj_id (trajectory.GetTrackId())
                         trajectory = event.Trajectories[seg_traj_id]
                         # Trace back in the family tree
                         while trajectory.GetParentId() >= -1:
-                            if trajectory.GetTrackId() in trajectories["traj_id"]:
+                            if trajectory.GetTrackId() in all_traj_ids:
                                 if trajectory.GetParentId() == -1:
                                     break
                                 else:
@@ -503,8 +507,8 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                             trajectories[n_traj]["pxyz_end"] = p_end #(end_pt.GetMomentum().X(), end_pt.GetMomentum().Y(), end_pt.GetMomentum().Z())
                             trajectories[n_traj]["xyz_start"] = (start_pt.GetPosition().X() * edep2cm, start_pt.GetPosition().Y() * edep2cm, start_pt.GetPosition().Z() * edep2cm)
                             trajectories[n_traj]["xyz_end"] = (end_pt.GetPosition().X() * edep2cm, end_pt.GetPosition().Y() * edep2cm, end_pt.GetPosition().Z() * edep2cm)
-                            trajectories[n_traj]["E_start"] = np.sqrt(np.sum(np.square(p_start)) + mass**2)
-                            trajectories[n_traj]["E_end"] = np.sqrt(np.sum(np.square(p_end)) + mass**2)
+                            trajectories[n_traj]["E_start"] = sqrt(start_pt.GetMomentum().Mag2() + mass**2)
+                            trajectories[n_traj]["E_end"] = sqrt(end_pt.GetMomentum().Mag2() + mass**2)
                             trajectories[n_traj]["t_start"] = start_pt.GetPosition().T() * edep2us
                             trajectories[n_traj]["t_end"] = end_pt.GetPosition().T() * edep2us
                             trajectories[n_traj]["start_process"] = start_pt.GetProcess()
@@ -512,10 +516,13 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                             trajectories[n_traj]["end_process"] = end_pt.GetProcess()
                             trajectories[n_traj]["end_subprocess"] = end_pt.GetSubprocess()
                             trajectories[n_traj]["pdg_id"] = trajectory.GetPDGCode()
-                            trajectories[n_traj]["dist_travel"]=0
-                            for i in range(len(trajectory.Points)-1):
-                                trajectories[n_traj]["dist_travel"]+=(trajectory.Points[i].GetPosition()-trajectory.Points[i+1].GetPosition()).Vect().Mag()* edep2cm
+                            trajectories[n_traj]["dist_travel"] = edep2cm * \
+                                sum((trajectory.Points[i].GetPosition()
+                                     - trajectory.Points[i+1].GetPosition()).Vect().Mag()
+                                    for i in range(len(trajectory.Points)-1))
                             n_traj += 1
+                            all_traj_ids.add(trajectory.GetTrackId())
+                            traj_map[trajectory.GetTrackId()] = n_traj
                             if trajectories[n_traj-1]["parent_id"] == -1:
                                 break
                             else:
@@ -552,7 +559,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                 segment[iHit]["t0"] = (segment[iHit]["t0_start"] + segment[iHit]["t0_end"]) / 2.
                 segment[iHit]["t"] = 0
                 segment[iHit]["dEdx"] = hitSegment.GetEnergyDeposit() / dx if dx > 0 else 0
-                segment[iHit]["pdg_id"] = trajectories[trajectories["traj_id"]==hitSegment.Contrib[0]]["pdg_id"]
+                segment[iHit]["pdg_id"] = trajectories[traj_map[hitSegment.Contrib[0]]]["pdg_id"]
                 segment[iHit]["n_electrons"] = 0
                 segment[iHit]["long_diff"] = 0
                 segment[iHit]["tran_diff"] = 0
