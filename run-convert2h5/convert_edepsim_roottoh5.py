@@ -266,7 +266,7 @@ def updateHDF5File(output_file, trajectories, segments, vertices, genie_s, genie
                 del f['mc_hdr']
 
 # Read a file and dump it.
-def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
+def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all_dets=False):
 
     """
     Script to convert edep-sim root output to an h5 file formatted in a way
@@ -396,13 +396,22 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
         n_traj = 0
         all_traj_ids = set()
         trajMap = {}
+        if is_mpvmpr:
+            vertexMap = {}
 
         # Dump the primary vertices
         vertices = np.empty(len(event.Primaries), dtype=vertices_dtype)
         for iVtx, primaryVertex in enumerate(event.Primaries):
             #printPrimaryVertex("PP", primaryVertex)
             vertices[iVtx]["event_id"] = spill_it
-            vertices[iVtx]["vertex_id"] = globalVertexID
+            # For MPV/MPR (the only(?) case where we have > 1 primary), keep the
+            # "local" vertex ID (since that's what the SPINE training expects)
+            if is_mpvmpr:
+                vertices[iVtx]["vertex_id"] = iVtx
+                for particle in primaryVertex.Particles:
+                    vertexMap[particle.GetTrackId()] = iVtx
+            else:
+                vertices[iVtx]["vertex_id"] = globalVertexID
             vertices[iVtx]["x_vert"] = primaryVertex.GetPosition().X() * edep2cm
             vertices[iVtx]["y_vert"] = primaryVertex.GetPosition().Y() * edep2cm
             vertices[iVtx]["z_vert"] = primaryVertex.GetPosition().Z() * edep2cm
@@ -423,7 +432,10 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
             if trajectory.GetParentId() == -1:
                 start_pt, end_pt = trajectory.Points[0], trajectory.Points[-1]
                 trajectories[n_traj]["event_id"] = spill_it
-                trajectories[n_traj]["vertex_id"] = globalVertexID
+                if is_mpvmpr:
+                    trajectories[n_traj]["vertex_id"] = vertexMap[trajectory.GetTrackId()]
+                else:
+                    trajectories[n_traj]["vertex_id"] = globalVertexID
 
                 trajectories[n_traj]["traj_id"] = trajectory.GetTrackId()
                 trajectories[n_traj]["file_traj_id"] = trackMap[trajectory.GetTrackId()]
@@ -458,6 +470,8 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                 n_traj += 1
 
             else:
+                if is_mpvmpr:
+                    vertexMap[trajectory.GetTrackId()] = vertexMap[trajectory.GetParentId()]
                 continue
 
         # Dump the segment containers
@@ -470,7 +484,10 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
             segment = np.empty(len(hitSegments), dtype=segments_dtype)
             for iHit, hitSegment in enumerate(hitSegments):
                 segment[iHit]["event_id"] = spill_it
-                segment[iHit]["vertex_id"] = globalVertexID
+                if is_mpvmpr:
+                    segment[iHit]["vertex_id"] = vertexMap[hitSegment.Contrib[0]]
+                else:
+                    segment[iHit]["vertex_id"] = globalVertexID
                 segment[iHit]["segment_id"] = segment_id
                 segment_id += 1
                 try:
@@ -482,6 +499,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
                         trajectory = event.Trajectories[seg_traj_id]
                         # Trace back in the family tree
                         while trajectory.GetParentId() >= -1:
+                            # Skip (and continue tracing) if traj was already seen
                             if trajectory.GetTrackId() in all_traj_ids:
                                 if trajectory.GetParentId() == -1:
                                     break
@@ -492,7 +510,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, keep_all_dets=False):
 
                             start_pt, end_pt = trajectory.Points[0], trajectory.Points[-1]
                             trajectories[n_traj]["event_id"] = spill_it
-                            trajectories[n_traj]["vertex_id"] = globalVertexID
+                            trajectories[n_traj]["vertex_id"] = segment[iHit]["vertex_id"]
 
                             trajectories[n_traj]["traj_id"] = trajectory.GetTrackId()
                             trajectories[n_traj]["file_traj_id"] = trackMap[trajectory.GetTrackId()]
