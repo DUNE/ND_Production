@@ -207,7 +207,15 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   TChain* edep_evts_bkg = new TChain("EDepSimEvents");
   TChain* genie_evts_bkg = new TChain("DetSimPassThru/gRooTracker");
   if(inFileBkgPOT > 0.) {
-    auto ghepFilesBkg = getGHEPfiles(prodBaseDir.c_str(), ghepNameBkg.c_str(), hadd_factor, spillFileId);
+    int rockFileId = spillFileId;
+    if (reuseRock){
+      std::string hadd_rock_dir = prodBaseDir + "/run-hadd/" + ghepNameBkg + "/EDEPSIM";
+      int n_hadd_rock_files = 0;
+      auto pipe = std::unique_ptr<FILE, decltype(&pclose)>{popen(("find " + hadd_rock_dir + " -type f | wc -l").c_str(), "r"), pclose};
+      fscanf(pipe.get(), "%d", &n_hadd_rock_files);
+      int rockFileId = spillFileId % n_hadd_rock_files;
+    }
+    auto ghepFilesBkg = getGHEPfiles(prodBaseDir.c_str(), ghepNameBkg.c_str(), hadd_factor, rockFileId);
     edep_evts_bkg->Add(inFileNameBkg.c_str());
     genie_evts_bkg->Add(inFileNameBkg.c_str());
     std::for_each(ghepFilesBkg.begin(), ghepFilesBkg.end(), [&](std::string const& fname){
