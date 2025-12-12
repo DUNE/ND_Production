@@ -90,7 +90,7 @@ def main(flow_file, charge_only):
            plt.ylabel('Maximum Value')
            plt.title('Maximum Values vs. Channel IDs')
            plt.grid(True)
-           plt.xlim(0, 60)
+           plt.xlim(0, 64)
            output.savefig()  
            plt.close()    
 
