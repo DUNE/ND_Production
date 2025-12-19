@@ -5,38 +5,38 @@ export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-mjkramer/sim2x2:ndlar0
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
-nuName=$ND_PRODUCTION_NU_NAME.$globalIdx
-rockName=$ND_PRODUCTION_ROCK_NAME.$globalIdx
+sampleAName=$ND_PRODUCTION_SAMPLE_A_NAME.$globalIdx
+sampleBName=$ND_PRODUCTION_SAMPLE_B_NAME.$globalIdx
 echo "outName is $outName"
 
 inBaseDir=$ND_PRODUCTION_OUTDIR_BASE/run-hadd
 if [[ "$ND_PRODUCTION_NO_HADD" == "1" ]]; then
   inBaseDir=$ND_PRODUCTION_OUTDIR_BASE/run-edep-sim
 fi
-nuInDir=$inBaseDir/$ND_PRODUCTION_NU_NAME
-rockInDir=$inBaseDir/$ND_PRODUCTION_ROCK_NAME
+sampleAInDir=$inBaseDir/$ND_PRODUCTION_SAMPLE_A_NAME
+sampleBInDir=$inBaseDir/$ND_PRODUCTION_SAMPLE_B_NAME
 
 [ -z "${ND_PRODUCTION_INDEX_OFFSET}" ] && export ND_PRODUCTION_INDEX_OFFSET=0
 
-if [[ "$ND_PRODUCTION_REUSE_ROCK" == "1" ]]; then
-  nNuFiles=$(find $nuInDir/EDEPSIM -type f | wc -l)
-  nRockFiles=$(find $rockInDir/EDEPSIM -type f | wc -l)
-  reuseRate=$((nNuFiles / nRockFiles))
-  echo "There are $nNuFiles fiducial files and $nRockFiles rock files"
-  echo "The rock file reuse rate is $reuseRate"
+if [[ "$ND_PRODUCTION_REUSE_SAMPLE_B" == "1" ]]; then
+  nSampleAFiles=$(find $sampleAInDir/EDEPSIM -type f | wc -l)
+  nSampleBFiles=$(find $sampleBInDir/EDEPSIM -type f | wc -l)
+  reuseRate=$((nSampleAFiles / nSampleBFiles))
+  echo "There are $nSampleAFiles sample_A files and $nSampleBFiles sample_B files"
+  echo "The sample_B file reuse rate is $reuseRate"
 
-  rockIdx=$((ND_PRODUCTION_INDEX % nRockFiles))
-  rockIdx=$((rockIdx + ND_PRODUCTION_INDEX_OFFSET))
-  rockGlobalIdx=$(printf "%07d" "$rockIdx")
+  sampleBIdx=$((ND_PRODUCTION_INDEX % nSampleBFiles))
+  sampleBIdx=$((sampleBIdx + ND_PRODUCTION_INDEX_OFFSET))
+  sampleBGlobalIdx=$(printf "%07d" "$sampleBIdx")
 
-  rockName=$ND_PRODUCTION_ROCK_NAME.$rockGlobalIdx
-  rockSubDir=$(printf "%07d" $((rockIdx / 1000 * 1000)))
+  sampleBName=$ND_PRODUCTION_SAMPLE_B_NAME.$sampleBGlobalIdx
+  sampleBSubDir=$(printf "%07d" $((sampleBIdx / 1000 * 1000)))
 else
-  rockSubDir=$subDir
+  sampleBSubDir=$subDir
 fi
 
-nuInFile=$nuInDir/EDEPSIM/$subDir/${nuName}.EDEPSIM.root
-rockInFile=$rockInDir/EDEPSIM/$rockSubDir/${rockName}.EDEPSIM.root
+sampleAInFile=$sampleAInDir/EDEPSIM/$subDir/${sampleAName}.EDEPSIM.root
+sampleBInFile=$sampleBInDir/EDEPSIM/$sampleBSubDir/${sampleBName}.EDEPSIM.root
 
 export GXMLPATH=$ND_PRODUCTION_DIR/run-genie/flux
 
@@ -45,7 +45,7 @@ rm -f "$spillFile"
 
 # run root -l -b -q \
 #     -e "gInterpreter->AddIncludePath(\"/opt/generators/edep-sim/install/include/EDepSim\")" \
-#     "overlaySinglesIntoSpills.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT)"
+#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT)"
 
 # HACK: We need to "unload" edep-sim; if it's in our LD_LIBRARY_PATH, we have to
 # use the "official" edepsim-io headers, which force us to use the getters, at
@@ -58,39 +58,39 @@ libpath_remove /opt/generators/edep-sim/install/lib
 
 [ -z "${ND_PRODUCTION_SPILL_POT}" ] && export ND_PRODUCTION_SPILL_POT=5e13
 [ -z "${ND_PRODUCTION_SPILL_PERIOD}" ] && export ND_PRODUCTION_SPILL_PERIOD=1.2
-[ -z "${ND_PRODUCTION_REUSE_ROCK}" ] && export ND_PRODUCTION_REUSE_ROCK=0
+[ -z "${ND_PRODUCTION_REUSE_SAMPLE_B}" ] && export ND_PRODUCTION_REUSE_SAMPLE_B=0
 
 if [[ "$ND_PRODUCTION_USE_GHEP_POT" == "1" ]]; then
   # Covering the case that we want to use the GHEP POT but build only
-  # fiducial or only rock spills. For example, to build fiducial 
-  # only spills, ND_PRODUCTION_ROCK_POT is set to zero.
-  if [[ "$ND_PRODUCTION_NU_POT" != "0" && -n "$ND_PRODUCTION_NU_POT" ]]; then
-    echo "Setting ND_PRODUCTION_NU_POT to a non-zero value while also using GHEP POT via"
+  # fiducial or only sample_B spills. For example, to build fiducial 
+  # only spills, ND_PRODUCTION_SAMPLE_B_POT is set to zero.
+  if [[ "$ND_PRODUCTION_SAMPLE_A_POT" != "0" && -n "$ND_PRODUCTION_SAMPLE_A_POT" ]]; then
+    echo "Setting ND_PRODUCTION_SAMPLE_A_POT to a non-zero value while also using GHEP POT via"
     echo "ND_PRODUCTION_USE_GHEP_POT is inconsistent. Please refactor..."
     exit
-  elif [[ "$ND_PRODUCTION_NU_POT" == "0" ]]; then
-    echo "ND_PRODUCTION_NU_POT is set to zero - spills will be rock only."
+  elif [[ "$ND_PRODUCTION_SAMPLE_A_POT" == "0" ]]; then
+    echo "ND_PRODUCTION_SAMPLE_A_POT is set to zero - spills will be sample_B only."
   else
-    read -r ND_PRODUCTION_NU_POT < "$nuInDir"/POT/$subDir/"$nuName".pot
+    read -r ND_PRODUCTION_SAMPLE_A_POT < "$sampleAInDir"/POT/$subDir/"$sampleAName".pot
   fi
-  if [[ "$ND_PRODUCTION_ROCK_POT" != "0" && -n "$ND_PRODUCTION_ROCK_POT" ]]; then
-    echo "Setting ND_PRODUCTION_ROCK_POT to a non-zero value while also using GHEP POT via"
+  if [[ "$ND_PRODUCTION_SAMPLE_B_POT" != "0" && -n "$ND_PRODUCTION_SAMPLE_B_POT" ]]; then
+    echo "Setting ND_PRODUCTION_SAMPLE_B_POT to a non-zero value while also using GHEP POT via"
     echo "ND_PRODUCTION_USE_GHEP_POT is inconsistent. Please refactor..."
     exit
-  elif [[ "$ND_PRODUCTION_ROCK_POT" == "0" ]]; then
-    echo "ND_PRODUCTION_NU_ROCK is set to zero - spills will be fiducial only."
+  elif [[ "$ND_PRODUCTION_SAMPLE_B_POT" == "0" ]]; then
+    echo "ND_PRODUCTION_NU_SAMPLE_B is set to zero - spills will be sample_A only."
   else
-    read -r ND_PRODUCTION_ROCK_POT < "$rockInDir"/POT/$rockSubDir/"$rockName".pot
+    read -r ND_PRODUCTION_SAMPLE_B_POT < "$sampleBInDir"/POT/$sampleBSubDir/"$sampleBName".pot
   fi
 fi
 
 # run root -l -b -q \
 #     -e "gInterpreter->AddIncludePath(\"libTG4Event\")" \
-#     "overlaySinglesIntoSpills.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT)"
+#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT)"
 
 # run root -l -b -q \
 #     -e "gSystem->Load(\"libTG4Event/libTG4Event.so\")" \
-#     "overlaySinglesIntoSpills.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT)"
+#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT)"
 
 # LIBTG4EVENT_DIR is provided by the podman-built containers
 # If unset, fall back to the local build provided by install_spill_build.sh
@@ -106,7 +106,7 @@ if [[ "$ND_PRODUCTION_USE_NU_TOF" == "0" ]]; then
   run root -l -b -q \
       -e "gSystem->AddDynamicPath(\"$LIBTG4EVENT_DIR\"); \
           gSystem->Load(\"libTG4Event.so\")" \
-      "overlaySinglesIntoSpillsSorted.C(\"$nuInFile\", \"$rockInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_REUSE_ROCK)"
+      "overlaySinglesIntoSpillsSorted.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_REUSE_SAMPLE_B)"
 elif [[ "$ND_PRODUCTION_USE_NU_TOF" == "1" ]]; then
   run root -l -b -q \
       -e  "gSystem->AddDynamicPath(\"$LIBTG4EVENT_DIR\"); \
@@ -120,7 +120,7 @@ elif [[ "$ND_PRODUCTION_USE_NU_TOF" == "1" ]]; then
             gSystem->Load(\"libGFwAlg.so\"); \
             gSystem->Load(\"libGFwUtl.so\"); " \
       "/opt/generators/dk2nu/scripts/load_dk2nu.C(true,true)" \
-      "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$nuInFile\", \"$rockInFile\", \"$ND_PRODUCTION_NU_NAME\", \"$ND_PRODUCTION_ROCK_NAME\", \"$ND_PRODUCTION_OUTDIR_BASE\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_NU_POT, $ND_PRODUCTION_ROCK_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR, $ND_PRODUCTION_REUSE_ROCK, \"$ND_PRODUCTION_DET_LOCATION\")"
+      "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$sampleAInFile\", \"$sampleBInFile\", \"$ND_PRODUCTION_SAMPLE_A_NAME\", \"$ND_PRODUCTION_SAMPLE_B_NAME\", \"$ND_PRODUCTION_OUTDIR_BASE\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR, $ND_PRODUCTION_REUSE_SAMPLE_B, \"$ND_PRODUCTION_DET_LOCATION\")"
 fi
 
 mkdir -p "$outDir/EDEPSIM_SPILLS/$subDir"
