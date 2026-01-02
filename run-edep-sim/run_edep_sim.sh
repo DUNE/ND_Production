@@ -38,6 +38,9 @@ else
         exit 1
     fi
     nEvents=$ND_PRODUCTION_NUM_EVENTS
+    if [[ -n "$ND_PRODUCTION_MPVMPR_CONFIG" ]]; then
+        edepCode+=("/generator/kinematics/bomb/config $ND_PRODUCTION_MPVMPR_CONFIG")
+    fi
 fi
 
 edepRootFile=$tmpOutDir/${outName}.EDEPSIM.root

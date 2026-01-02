@@ -16,7 +16,10 @@
 /edep/update
 
 /generator/kinematics/set bomb
-/generator/kinematics/bomb/config mpvmpr/mpvmpr_nd.yaml
+
+## Now controlled by ND_PRODUCTION_MPVMPR_CONFIG
+# /generator/kinematics/bomb/config mpvmpr/mpvmpr_nd.yaml
+
 /generator/position/set free
 /generator/time/set free
 /generator/count/fixed/number 1
