@@ -538,9 +538,9 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                                 sum((trajectory.Points[i].GetPosition()
                                      - trajectory.Points[i+1].GetPosition()).Vect().Mag()
                                     for i in range(len(trajectory.Points)-1))
-                            n_traj += 1
                             all_traj_ids.add(trajectory.GetTrackId())
                             trajMap[trajectory.GetTrackId()] = n_traj
+                            n_traj += 1
                             if trajectories[n_traj-1]["parent_id"] == -1:
                                 break
                             else:
