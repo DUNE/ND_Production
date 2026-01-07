@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#This script can be used to validate flow outputs for either 2x2 or ND-LAr full.
+#Example run: python flow_validation_v2.py --flow_file /global/cfs/cdirs/dune/www/data/2x2/simulation/productions/MiniRun6.4_1E19_RHC/MiniRun6.4_1E19_RHC.flow/FLOW/0000000/MiniRun6.4_1E19_RHC.flow.0000000.FLOW.hdf5
 
 import matplotlib as mlp
 import matplotlib.pyplot as plt
