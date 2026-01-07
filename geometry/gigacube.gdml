@@ -1,0 +1,4227 @@
+<?xml version="1.0" encoding="ASCII"?>
+<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://service-spi.web.cern.ch/service-spi/app/releases/GDML/schema/gdml.xsd">
+  <define>
+    <position unit="cm" name="PCB_pos" x="0.06855" y="0.0" z="0.0"/>
+    <position unit="cm" name="Asic_pos_0.0" x="-0.1613" y="-13.481955" z="-21.52431"/>
+    <position unit="cm" name="Asic_pos_0.1" x="-0.1613" y="-13.481955" z="-16.74113"/>
+    <position unit="cm" name="Asic_pos_0.2" x="-0.1613" y="-13.481955" z="-11.95795"/>
+    <position unit="cm" name="Asic_pos_0.3" x="-0.1613" y="-13.481955" z="-7.174769999999999"/>
+    <position unit="cm" name="Asic_pos_0.4" x="-0.1613" y="-13.481955" z="-2.3915899999999994"/>
+    <position unit="cm" name="Asic_pos_0.5" x="-0.1613" y="-13.481955" z="2.391590000000002"/>
+    <position unit="cm" name="Asic_pos_0.6" x="-0.1613" y="-13.481955" z="7.174770000000001"/>
+    <position unit="cm" name="Asic_pos_0.7" x="-0.1613" y="-13.481955" z="11.95795"/>
+    <position unit="cm" name="Asic_pos_0.8" x="-0.1613" y="-13.481955" z="16.741130000000005"/>
+    <position unit="cm" name="Asic_pos_0.9" x="-0.1613" y="-13.481955" z="21.524310000000003"/>
+    <position unit="cm" name="Asic_pos_1.0" x="-0.1613" y="-10.485965" z="-21.52431"/>
+    <position unit="cm" name="Asic_pos_1.1" x="-0.1613" y="-10.485965" z="-16.74113"/>
+    <position unit="cm" name="Asic_pos_1.2" x="-0.1613" y="-10.485965" z="-11.95795"/>
+    <position unit="cm" name="Asic_pos_1.3" x="-0.1613" y="-10.485965" z="-7.174769999999999"/>
+    <position unit="cm" name="Asic_pos_1.4" x="-0.1613" y="-10.485965" z="-2.3915899999999994"/>
+    <position unit="cm" name="Asic_pos_1.5" x="-0.1613" y="-10.485965" z="2.391590000000002"/>
+    <position unit="cm" name="Asic_pos_1.6" x="-0.1613" y="-10.485965" z="7.174770000000001"/>
+    <position unit="cm" name="Asic_pos_1.7" x="-0.1613" y="-10.485965" z="11.95795"/>
+    <position unit="cm" name="Asic_pos_1.8" x="-0.1613" y="-10.485965" z="16.741130000000005"/>
+    <position unit="cm" name="Asic_pos_1.9" x="-0.1613" y="-10.485965" z="21.524310000000003"/>
+    <position unit="cm" name="Asic_pos_2.0" x="-0.1613" y="-7.489975" z="-21.52431"/>
+    <position unit="cm" name="Asic_pos_2.1" x="-0.1613" y="-7.489975" z="-16.74113"/>
+    <position unit="cm" name="Asic_pos_2.2" x="-0.1613" y="-7.489975" z="-11.95795"/>
+    <position unit="cm" name="Asic_pos_2.3" x="-0.1613" y="-7.489975" z="-7.174769999999999"/>
+    <position unit="cm" name="Asic_pos_2.4" x="-0.1613" y="-7.489975" z="-2.3915899999999994"/>
+    <position unit="cm" name="Asic_pos_2.5" x="-0.1613" y="-7.489975" z="2.391590000000002"/>
+    <position unit="cm" name="Asic_pos_2.6" x="-0.1613" y="-7.489975" z="7.174770000000001"/>
+    <position unit="cm" name="Asic_pos_2.7" x="-0.1613" y="-7.489975" z="11.95795"/>
+    <position unit="cm" name="Asic_pos_2.8" x="-0.1613" y="-7.489975" z="16.741130000000005"/>
+    <position unit="cm" name="Asic_pos_2.9" x="-0.1613" y="-7.489975" z="21.524310000000003"/>
+    <position unit="cm" name="Asic_pos_3.0" x="-0.1613" y="-4.493985000000001" z="-21.52431"/>
+    <position unit="cm" name="Asic_pos_3.1" x="-0.1613" y="-4.493985000000001" z="-16.74113"/>
+    <position unit="cm" name="Asic_pos_3.2" x="-0.1613" y="-4.493985000000001" z="-11.95795"/>
+    <position unit="cm" name="Asic_pos_3.3" x="-0.1613" y="-4.493985000000001" z="-7.174769999999999"/>
+    <position unit="cm" name="Asic_pos_3.4" x="-0.1613" y="-4.493985000000001" z="-2.3915899999999994"/>
+    <position unit="cm" name="Asic_pos_3.5" x="-0.1613" y="-4.493985000000001" z="2.391590000000002"/>
+    <position unit="cm" name="Asic_pos_3.6" x="-0.1613" y="-4.493985000000001" z="7.174770000000001"/>
+    <position unit="cm" name="Asic_pos_3.7" x="-0.1613" y="-4.493985000000001" z="11.95795"/>
+    <position unit="cm" name="Asic_pos_3.8" x="-0.1613" y="-4.493985000000001" z="16.741130000000005"/>
+    <position unit="cm" name="Asic_pos_3.9" x="-0.1613" y="-4.493985000000001" z="21.524310000000003"/>
+    <position unit="cm" name="Asic_pos_4.0" x="-0.1613" y="-1.4979950000000004" z="-21.52431"/>
+    <position unit="cm" name="Asic_pos_4.1" x="-0.1613" y="-1.4979950000000004" z="-16.74113"/>
+    <position unit="cm" name="Asic_pos_4.2" x="-0.1613" y="-1.4979950000000004" z="-11.95795"/>
+    <position unit="cm" name="Asic_pos_4.3" x="-0.1613" y="-1.4979950000000004" z="-7.174769999999999"/>
+    <position unit="cm" name="Asic_pos_4.4" x="-0.1613" y="-1.4979950000000004" z="-2.3915899999999994"/>
+    <position unit="cm" name="Asic_pos_4.5" x="-0.1613" y="-1.4979950000000004" z="2.391590000000002"/>
+    <position unit="cm" name="Asic_pos_4.6" x="-0.1613" y="-1.4979950000000004" z="7.174770000000001"/>
+    <position unit="cm" name="Asic_pos_4.7" x="-0.1613" y="-1.4979950000000004" z="11.95795"/>
+    <position unit="cm" name="Asic_pos_4.8" x="-0.1613" y="-1.4979950000000004" z="16.741130000000005"/>
+    <position unit="cm" name="Asic_pos_4.9" x="-0.1613" y="-1.4979950000000004" z="21.524310000000003"/>
+    <position unit="cm" name="Asic_pos_5.0" x="-0.1613" y="1.4979950000000004" z="-21.52431"/>
+    <position unit="cm" name="Asic_pos_5.1" x="-0.1613" y="1.4979950000000004" z="-16.74113"/>
+    <position unit="cm" name="Asic_pos_5.2" x="-0.1613" y="1.4979950000000004" z="-11.95795"/>
+    <position unit="cm" name="Asic_pos_5.3" x="-0.1613" y="1.4979950000000004" z="-7.174769999999999"/>
+    <position unit="cm" name="Asic_pos_5.4" x="-0.1613" y="1.4979950000000004" z="-2.3915899999999994"/>
+    <position unit="cm" name="Asic_pos_5.5" x="-0.1613" y="1.4979950000000004" z="2.391590000000002"/>
+    <position unit="cm" name="Asic_pos_5.6" x="-0.1613" y="1.4979950000000004" z="7.174770000000001"/>
+    <position unit="cm" name="Asic_pos_5.7" x="-0.1613" y="1.4979950000000004" z="11.95795"/>
+    <position unit="cm" name="Asic_pos_5.8" x="-0.1613" y="1.4979950000000004" z="16.741130000000005"/>
+    <position unit="cm" name="Asic_pos_5.9" x="-0.1613" y="1.4979950000000004" z="21.524310000000003"/>
+    <position unit="cm" name="Asic_pos_6.0" x="-0.1613" y="4.493984999999998" z="-21.52431"/>
+    <position unit="cm" name="Asic_pos_6.1" x="-0.1613" y="4.493984999999998" z="-16.74113"/>
+    <position unit="cm" name="Asic_pos_6.2" x="-0.1613" y="4.493984999999998" z="-11.95795"/>
+    <position unit="cm" name="Asic_pos_6.3" x="-0.1613" y="4.493984999999998" z="-7.174769999999999"/>
+    <position unit="cm" name="Asic_pos_6.4" x="-0.1613" y="4.493984999999998" z="-2.3915899999999994"/>
+    <position unit="cm" name="Asic_pos_6.5" x="-0.1613" y="4.493984999999998" z="2.391590000000002"/>
+    <position unit="cm" name="Asic_pos_6.6" x="-0.1613" y="4.493984999999998" z="7.174770000000001"/>
+    <position unit="cm" name="Asic_pos_6.7" x="-0.1613" y="4.493984999999998" z="11.95795"/>
+    <position unit="cm" name="Asic_pos_6.8" x="-0.1613" y="4.493984999999998" z="16.741130000000005"/>
+    <position unit="cm" name="Asic_pos_6.9" x="-0.1613" y="4.493984999999998" z="21.524310000000003"/>
+    <position unit="cm" name="Asic_pos_7.0" x="-0.1613" y="7.4899749999999985" z="-21.52431"/>
+    <position unit="cm" name="Asic_pos_7.1" x="-0.1613" y="7.4899749999999985" z="-16.74113"/>
+    <position unit="cm" name="Asic_pos_7.2" x="-0.1613" y="7.4899749999999985" z="-11.95795"/>
+    <position unit="cm" name="Asic_pos_7.3" x="-0.1613" y="7.4899749999999985" z="-7.174769999999999"/>
+    <position unit="cm" name="Asic_pos_7.4" x="-0.1613" y="7.4899749999999985" z="-2.3915899999999994"/>
+    <position unit="cm" name="Asic_pos_7.5" x="-0.1613" y="7.4899749999999985" z="2.391590000000002"/>
+    <position unit="cm" name="Asic_pos_7.6" x="-0.1613" y="7.4899749999999985" z="7.174770000000001"/>
+    <position unit="cm" name="Asic_pos_7.7" x="-0.1613" y="7.4899749999999985" z="11.95795"/>
+    <position unit="cm" name="Asic_pos_7.8" x="-0.1613" y="7.4899749999999985" z="16.741130000000005"/>
+    <position unit="cm" name="Asic_pos_7.9" x="-0.1613" y="7.4899749999999985" z="21.524310000000003"/>
+    <position unit="cm" name="Asic_pos_8.0" x="-0.1613" y="10.485965" z="-21.52431"/>
+    <position unit="cm" name="Asic_pos_8.1" x="-0.1613" y="10.485965" z="-16.74113"/>
+    <position unit="cm" name="Asic_pos_8.2" x="-0.1613" y="10.485965" z="-11.95795"/>
+    <position unit="cm" name="Asic_pos_8.3" x="-0.1613" y="10.485965" z="-7.174769999999999"/>
+    <position unit="cm" name="Asic_pos_8.4" x="-0.1613" y="10.485965" z="-2.3915899999999994"/>
+    <position unit="cm" name="Asic_pos_8.5" x="-0.1613" y="10.485965" z="2.391590000000002"/>
+    <position unit="cm" name="Asic_pos_8.6" x="-0.1613" y="10.485965" z="7.174770000000001"/>
+    <position unit="cm" name="Asic_pos_8.7" x="-0.1613" y="10.485965" z="11.95795"/>
+    <position unit="cm" name="Asic_pos_8.8" x="-0.1613" y="10.485965" z="16.741130000000005"/>
+    <position unit="cm" name="Asic_pos_8.9" x="-0.1613" y="10.485965" z="21.524310000000003"/>
+    <position unit="cm" name="Asic_pos_9.0" x="-0.1613" y="13.481954999999997" z="-21.52431"/>
+    <position unit="cm" name="Asic_pos_9.1" x="-0.1613" y="13.481954999999997" z="-16.74113"/>
+    <position unit="cm" name="Asic_pos_9.2" x="-0.1613" y="13.481954999999997" z="-11.95795"/>
+    <position unit="cm" name="Asic_pos_9.3" x="-0.1613" y="13.481954999999997" z="-7.174769999999999"/>
+    <position unit="cm" name="Asic_pos_9.4" x="-0.1613" y="13.481954999999997" z="-2.3915899999999994"/>
+    <position unit="cm" name="Asic_pos_9.5" x="-0.1613" y="13.481954999999997" z="2.391590000000002"/>
+    <position unit="cm" name="Asic_pos_9.6" x="-0.1613" y="13.481954999999997" z="7.174770000000001"/>
+    <position unit="cm" name="Asic_pos_9.7" x="-0.1613" y="13.481954999999997" z="11.95795"/>
+    <position unit="cm" name="Asic_pos_9.8" x="-0.1613" y="13.481954999999997" z="16.741130000000005"/>
+    <position unit="cm" name="Asic_pos_9.9" x="-0.1613" y="13.481954999999997" z="21.524310000000003"/>
+    <position unit="cm" name="PixelPlane_pos_0_R" x="0" y="-134.81955000000002" z="-23.9159"/>
+    <position unit="cm" name="PixelPlane_pos_1_R" x="0" y="-104.85964999999999" z="-23.9159"/>
+    <position unit="cm" name="PixelPlane_pos_2_R" x="0" y="-74.89975" z="-23.9159"/>
+    <position unit="cm" name="PixelPlane_pos_3_R" x="0" y="-44.93985000000001" z="-23.9159"/>
+    <position unit="cm" name="PixelPlane_pos_4_R" x="0" y="-14.97995" z="-23.9159"/>
+    <position unit="cm" name="PixelPlane_pos_5_R" x="0" y="14.97995" z="-23.9159"/>
+    <position unit="cm" name="PixelPlane_pos_6_R" x="0" y="44.93985000000001" z="-23.9159"/>
+    <position unit="cm" name="PixelPlane_pos_7_R" x="0" y="74.89975" z="-23.9159"/>
+    <position unit="cm" name="PixelPlane_pos_8_R" x="0" y="104.85964999999999" z="-23.9159"/>
+    <position unit="cm" name="PixelPlane_pos_9_R" x="0" y="134.81955000000002" z="-23.9159"/>
+    <position unit="cm" name="PixelPlane_pos_0_L" x="0" y="-134.81955000000002" z="23.9159"/>
+    <rotation unit="degree" name="PixelPlane_rot_0_L" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="PixelPlane_pos_1_L" x="0" y="-104.85964999999999" z="23.9159"/>
+    <rotation unit="degree" name="PixelPlane_rot_1_L" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="PixelPlane_pos_2_L" x="0" y="-74.89975" z="23.9159"/>
+    <rotation unit="degree" name="PixelPlane_rot_2_L" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="PixelPlane_pos_3_L" x="0" y="-44.93985000000001" z="23.9159"/>
+    <rotation unit="degree" name="PixelPlane_rot_3_L" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="PixelPlane_pos_4_L" x="0" y="-14.97995" z="23.9159"/>
+    <rotation unit="degree" name="PixelPlane_rot_4_L" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="PixelPlane_pos_5_L" x="0" y="14.97995" z="23.9159"/>
+    <rotation unit="degree" name="PixelPlane_rot_5_L" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="PixelPlane_pos_6_L" x="0" y="44.93985000000001" z="23.9159"/>
+    <rotation unit="degree" name="PixelPlane_rot_6_L" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="PixelPlane_pos_7_L" x="0" y="74.89975" z="23.9159"/>
+    <rotation unit="degree" name="PixelPlane_rot_7_L" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="PixelPlane_pos_8_L" x="0" y="104.85964999999999" z="23.9159"/>
+    <rotation unit="degree" name="PixelPlane_rot_8_L" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="PixelPlane_pos_9_L" x="0" y="134.81955000000002" z="23.9159"/>
+    <rotation unit="degree" name="PixelPlane_rot_9_L" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="TPCPlane_pos" x="-23.395500000000002" y="0.0" z="0.0"/>
+    <position unit="cm" name="TPCActive_pos" x="0.2324" y="0" z="0"/>
+    <position unit="cm" name="Fieldcage_pos" x="0" y="0" z="0"/>
+    <position unit="cm" name="LAr_pos" x="-0.15875" y="0" z="0"/>
+    <position unit="cm" name="TPC_pos" x="0.016349999999997644" y="0" z="0"/>
+    <rotation unit="degree" name="OpticalDet_rot" x="180.0" y="0.0" z="0.0"/>
+    <position unit="cm" name="OpticalDet_pos_L" x="-0.21605000000000418" y="0" z="-95.6636"/>
+    <position unit="cm" name="Bracket_pos_L" x="23.32675" y="0" z="-1.0331999999999995"/>
+    <position unit="cm" name="OpticalDet_pos_R" x="-0.21605000000000418" y="0" z="95.6636"/>
+    <position unit="cm" name="Bracket_pos_R" x="23.32675" y="0" z="1.0331999999999995"/>
+    <position unit="cm" name="HalfDetector_pos_R" x="23.803" y="0" z="0"/>
+    <rotation unit="degree" name="HalfDetector_rot" x="0.0" y="180.0" z="0.0"/>
+    <position unit="cm" name="Module_pos_0.0.0" x="0.0" y="-1967.1561" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.0.1" x="0.0" y="-1967.1561" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.0.2" x="0.0" y="-1967.1561" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.0.3" x="0.0" y="-1967.1561" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.0.4" x="0.0" y="-1967.1561" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.0.5" x="0.0" y="-1967.1561" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.0.6" x="0.0" y="-1967.1561" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.0.7" x="0.0" y="-1967.1561" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.0.8" x="0.0" y="-1967.1561" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.0.9" x="0.0" y="-1967.1561" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.0.10" x="0.0" y="-1967.1561" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.0.11" x="0.0" y="-1967.1561" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.0.12" x="0.0" y="-1967.1561" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.0.13" x="0.0" y="-1967.1561" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.0.14" x="0.0" y="-1967.1561" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.0.15" x="0.0" y="-1967.1561" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.0.16" x="0.0" y="-1967.1561" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.0.17" x="0.0" y="-1967.1561" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.0.18" x="0.0" y="-1967.1561" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.0.19" x="0.0" y="-1967.1561" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.0.20" x="0.0" y="-1967.1561" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.0.21" x="0.0" y="-1967.1561" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.0.22" x="0.0" y="-1967.1561" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.0.23" x="0.0" y="-1967.1561" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.0.24" x="0.0" y="-1967.1561" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.0.25" x="0.0" y="-1967.1561" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.0.26" x="0.0" y="-1967.1561" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.0.27" x="0.0" y="-1967.1561" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.0.28" x="0.0" y="-1967.1561" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.0.29" x="0.0" y="-1967.1561" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.0.30" x="0.0" y="-1967.1561" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.0.31" x="0.0" y="-1967.1561" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.0.32" x="0.0" y="-1967.1561" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.0.33" x="0.0" y="-1967.1561" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.0.34" x="0.0" y="-1967.1561" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.0.35" x="0.0" y="-1967.1561" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.0.36" x="0.0" y="-1967.1561" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.0.37" x="0.0" y="-1967.1561" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.0.38" x="0.0" y="-1967.1561" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.0.39" x="0.0" y="-1967.1561" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.1.0" x="0.0" y="-1664.5167" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.1.1" x="0.0" y="-1664.5167" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.1.2" x="0.0" y="-1664.5167" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.1.3" x="0.0" y="-1664.5167" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.1.4" x="0.0" y="-1664.5167" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.1.5" x="0.0" y="-1664.5167" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.1.6" x="0.0" y="-1664.5167" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.1.7" x="0.0" y="-1664.5167" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.1.8" x="0.0" y="-1664.5167" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.1.9" x="0.0" y="-1664.5167" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.1.10" x="0.0" y="-1664.5167" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.1.11" x="0.0" y="-1664.5167" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.1.12" x="0.0" y="-1664.5167" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.1.13" x="0.0" y="-1664.5167" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.1.14" x="0.0" y="-1664.5167" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.1.15" x="0.0" y="-1664.5167" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.1.16" x="0.0" y="-1664.5167" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.1.17" x="0.0" y="-1664.5167" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.1.18" x="0.0" y="-1664.5167" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.1.19" x="0.0" y="-1664.5167" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.1.20" x="0.0" y="-1664.5167" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.1.21" x="0.0" y="-1664.5167" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.1.22" x="0.0" y="-1664.5167" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.1.23" x="0.0" y="-1664.5167" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.1.24" x="0.0" y="-1664.5167" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.1.25" x="0.0" y="-1664.5167" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.1.26" x="0.0" y="-1664.5167" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.1.27" x="0.0" y="-1664.5167" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.1.28" x="0.0" y="-1664.5167" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.1.29" x="0.0" y="-1664.5167" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.1.30" x="0.0" y="-1664.5167" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.1.31" x="0.0" y="-1664.5167" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.1.32" x="0.0" y="-1664.5167" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.1.33" x="0.0" y="-1664.5167" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.1.34" x="0.0" y="-1664.5167" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.1.35" x="0.0" y="-1664.5167" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.1.36" x="0.0" y="-1664.5167" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.1.37" x="0.0" y="-1664.5167" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.1.38" x="0.0" y="-1664.5167" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.1.39" x="0.0" y="-1664.5167" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.2.0" x="0.0" y="-1361.8772999999999" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.2.1" x="0.0" y="-1361.8772999999999" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.2.2" x="0.0" y="-1361.8772999999999" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.2.3" x="0.0" y="-1361.8772999999999" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.2.4" x="0.0" y="-1361.8772999999999" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.2.5" x="0.0" y="-1361.8772999999999" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.2.6" x="0.0" y="-1361.8772999999999" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.2.7" x="0.0" y="-1361.8772999999999" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.2.8" x="0.0" y="-1361.8772999999999" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.2.9" x="0.0" y="-1361.8772999999999" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.2.10" x="0.0" y="-1361.8772999999999" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.2.11" x="0.0" y="-1361.8772999999999" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.2.12" x="0.0" y="-1361.8772999999999" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.2.13" x="0.0" y="-1361.8772999999999" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.2.14" x="0.0" y="-1361.8772999999999" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.2.15" x="0.0" y="-1361.8772999999999" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.2.16" x="0.0" y="-1361.8772999999999" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.2.17" x="0.0" y="-1361.8772999999999" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.2.18" x="0.0" y="-1361.8772999999999" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.2.19" x="0.0" y="-1361.8772999999999" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.2.20" x="0.0" y="-1361.8772999999999" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.2.21" x="0.0" y="-1361.8772999999999" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.2.22" x="0.0" y="-1361.8772999999999" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.2.23" x="0.0" y="-1361.8772999999999" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.2.24" x="0.0" y="-1361.8772999999999" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.2.25" x="0.0" y="-1361.8772999999999" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.2.26" x="0.0" y="-1361.8772999999999" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.2.27" x="0.0" y="-1361.8772999999999" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.2.28" x="0.0" y="-1361.8772999999999" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.2.29" x="0.0" y="-1361.8772999999999" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.2.30" x="0.0" y="-1361.8772999999999" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.2.31" x="0.0" y="-1361.8772999999999" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.2.32" x="0.0" y="-1361.8772999999999" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.2.33" x="0.0" y="-1361.8772999999999" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.2.34" x="0.0" y="-1361.8772999999999" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.2.35" x="0.0" y="-1361.8772999999999" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.2.36" x="0.0" y="-1361.8772999999999" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.2.37" x="0.0" y="-1361.8772999999999" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.2.38" x="0.0" y="-1361.8772999999999" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.2.39" x="0.0" y="-1361.8772999999999" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.3.0" x="0.0" y="-1059.2378999999999" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.3.1" x="0.0" y="-1059.2378999999999" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.3.2" x="0.0" y="-1059.2378999999999" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.3.3" x="0.0" y="-1059.2378999999999" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.3.4" x="0.0" y="-1059.2378999999999" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.3.5" x="0.0" y="-1059.2378999999999" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.3.6" x="0.0" y="-1059.2378999999999" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.3.7" x="0.0" y="-1059.2378999999999" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.3.8" x="0.0" y="-1059.2378999999999" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.3.9" x="0.0" y="-1059.2378999999999" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.3.10" x="0.0" y="-1059.2378999999999" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.3.11" x="0.0" y="-1059.2378999999999" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.3.12" x="0.0" y="-1059.2378999999999" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.3.13" x="0.0" y="-1059.2378999999999" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.3.14" x="0.0" y="-1059.2378999999999" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.3.15" x="0.0" y="-1059.2378999999999" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.3.16" x="0.0" y="-1059.2378999999999" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.3.17" x="0.0" y="-1059.2378999999999" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.3.18" x="0.0" y="-1059.2378999999999" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.3.19" x="0.0" y="-1059.2378999999999" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.3.20" x="0.0" y="-1059.2378999999999" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.3.21" x="0.0" y="-1059.2378999999999" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.3.22" x="0.0" y="-1059.2378999999999" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.3.23" x="0.0" y="-1059.2378999999999" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.3.24" x="0.0" y="-1059.2378999999999" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.3.25" x="0.0" y="-1059.2378999999999" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.3.26" x="0.0" y="-1059.2378999999999" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.3.27" x="0.0" y="-1059.2378999999999" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.3.28" x="0.0" y="-1059.2378999999999" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.3.29" x="0.0" y="-1059.2378999999999" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.3.30" x="0.0" y="-1059.2378999999999" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.3.31" x="0.0" y="-1059.2378999999999" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.3.32" x="0.0" y="-1059.2378999999999" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.3.33" x="0.0" y="-1059.2378999999999" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.3.34" x="0.0" y="-1059.2378999999999" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.3.35" x="0.0" y="-1059.2378999999999" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.3.36" x="0.0" y="-1059.2378999999999" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.3.37" x="0.0" y="-1059.2378999999999" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.3.38" x="0.0" y="-1059.2378999999999" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.3.39" x="0.0" y="-1059.2378999999999" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.4.0" x="0.0" y="-756.5985" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.4.1" x="0.0" y="-756.5985" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.4.2" x="0.0" y="-756.5985" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.4.3" x="0.0" y="-756.5985" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.4.4" x="0.0" y="-756.5985" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.4.5" x="0.0" y="-756.5985" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.4.6" x="0.0" y="-756.5985" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.4.7" x="0.0" y="-756.5985" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.4.8" x="0.0" y="-756.5985" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.4.9" x="0.0" y="-756.5985" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.4.10" x="0.0" y="-756.5985" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.4.11" x="0.0" y="-756.5985" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.4.12" x="0.0" y="-756.5985" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.4.13" x="0.0" y="-756.5985" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.4.14" x="0.0" y="-756.5985" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.4.15" x="0.0" y="-756.5985" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.4.16" x="0.0" y="-756.5985" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.4.17" x="0.0" y="-756.5985" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.4.18" x="0.0" y="-756.5985" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.4.19" x="0.0" y="-756.5985" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.4.20" x="0.0" y="-756.5985" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.4.21" x="0.0" y="-756.5985" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.4.22" x="0.0" y="-756.5985" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.4.23" x="0.0" y="-756.5985" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.4.24" x="0.0" y="-756.5985" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.4.25" x="0.0" y="-756.5985" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.4.26" x="0.0" y="-756.5985" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.4.27" x="0.0" y="-756.5985" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.4.28" x="0.0" y="-756.5985" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.4.29" x="0.0" y="-756.5985" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.4.30" x="0.0" y="-756.5985" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.4.31" x="0.0" y="-756.5985" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.4.32" x="0.0" y="-756.5985" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.4.33" x="0.0" y="-756.5985" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.4.34" x="0.0" y="-756.5985" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.4.35" x="0.0" y="-756.5985" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.4.36" x="0.0" y="-756.5985" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.4.37" x="0.0" y="-756.5985" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.4.38" x="0.0" y="-756.5985" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.4.39" x="0.0" y="-756.5985" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.5.0" x="0.0" y="-453.95910000000003" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.5.1" x="0.0" y="-453.95910000000003" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.5.2" x="0.0" y="-453.95910000000003" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.5.3" x="0.0" y="-453.95910000000003" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.5.4" x="0.0" y="-453.95910000000003" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.5.5" x="0.0" y="-453.95910000000003" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.5.6" x="0.0" y="-453.95910000000003" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.5.7" x="0.0" y="-453.95910000000003" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.5.8" x="0.0" y="-453.95910000000003" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.5.9" x="0.0" y="-453.95910000000003" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.5.10" x="0.0" y="-453.95910000000003" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.5.11" x="0.0" y="-453.95910000000003" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.5.12" x="0.0" y="-453.95910000000003" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.5.13" x="0.0" y="-453.95910000000003" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.5.14" x="0.0" y="-453.95910000000003" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.5.15" x="0.0" y="-453.95910000000003" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.5.16" x="0.0" y="-453.95910000000003" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.5.17" x="0.0" y="-453.95910000000003" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.5.18" x="0.0" y="-453.95910000000003" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.5.19" x="0.0" y="-453.95910000000003" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.5.20" x="0.0" y="-453.95910000000003" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.5.21" x="0.0" y="-453.95910000000003" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.5.22" x="0.0" y="-453.95910000000003" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.5.23" x="0.0" y="-453.95910000000003" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.5.24" x="0.0" y="-453.95910000000003" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.5.25" x="0.0" y="-453.95910000000003" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.5.26" x="0.0" y="-453.95910000000003" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.5.27" x="0.0" y="-453.95910000000003" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.5.28" x="0.0" y="-453.95910000000003" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.5.29" x="0.0" y="-453.95910000000003" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.5.30" x="0.0" y="-453.95910000000003" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.5.31" x="0.0" y="-453.95910000000003" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.5.32" x="0.0" y="-453.95910000000003" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.5.33" x="0.0" y="-453.95910000000003" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.5.34" x="0.0" y="-453.95910000000003" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.5.35" x="0.0" y="-453.95910000000003" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.5.36" x="0.0" y="-453.95910000000003" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.5.37" x="0.0" y="-453.95910000000003" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.5.38" x="0.0" y="-453.95910000000003" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.5.39" x="0.0" y="-453.95910000000003" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.6.0" x="0.0" y="-151.3197" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.6.1" x="0.0" y="-151.3197" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.6.2" x="0.0" y="-151.3197" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.6.3" x="0.0" y="-151.3197" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.6.4" x="0.0" y="-151.3197" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.6.5" x="0.0" y="-151.3197" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.6.6" x="0.0" y="-151.3197" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.6.7" x="0.0" y="-151.3197" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.6.8" x="0.0" y="-151.3197" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.6.9" x="0.0" y="-151.3197" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.6.10" x="0.0" y="-151.3197" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.6.11" x="0.0" y="-151.3197" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.6.12" x="0.0" y="-151.3197" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.6.13" x="0.0" y="-151.3197" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.6.14" x="0.0" y="-151.3197" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.6.15" x="0.0" y="-151.3197" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.6.16" x="0.0" y="-151.3197" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.6.17" x="0.0" y="-151.3197" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.6.18" x="0.0" y="-151.3197" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.6.19" x="0.0" y="-151.3197" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.6.20" x="0.0" y="-151.3197" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.6.21" x="0.0" y="-151.3197" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.6.22" x="0.0" y="-151.3197" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.6.23" x="0.0" y="-151.3197" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.6.24" x="0.0" y="-151.3197" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.6.25" x="0.0" y="-151.3197" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.6.26" x="0.0" y="-151.3197" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.6.27" x="0.0" y="-151.3197" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.6.28" x="0.0" y="-151.3197" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.6.29" x="0.0" y="-151.3197" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.6.30" x="0.0" y="-151.3197" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.6.31" x="0.0" y="-151.3197" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.6.32" x="0.0" y="-151.3197" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.6.33" x="0.0" y="-151.3197" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.6.34" x="0.0" y="-151.3197" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.6.35" x="0.0" y="-151.3197" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.6.36" x="0.0" y="-151.3197" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.6.37" x="0.0" y="-151.3197" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.6.38" x="0.0" y="-151.3197" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.6.39" x="0.0" y="-151.3197" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.7.0" x="0.0" y="151.3197" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.7.1" x="0.0" y="151.3197" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.7.2" x="0.0" y="151.3197" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.7.3" x="0.0" y="151.3197" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.7.4" x="0.0" y="151.3197" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.7.5" x="0.0" y="151.3197" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.7.6" x="0.0" y="151.3197" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.7.7" x="0.0" y="151.3197" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.7.8" x="0.0" y="151.3197" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.7.9" x="0.0" y="151.3197" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.7.10" x="0.0" y="151.3197" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.7.11" x="0.0" y="151.3197" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.7.12" x="0.0" y="151.3197" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.7.13" x="0.0" y="151.3197" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.7.14" x="0.0" y="151.3197" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.7.15" x="0.0" y="151.3197" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.7.16" x="0.0" y="151.3197" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.7.17" x="0.0" y="151.3197" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.7.18" x="0.0" y="151.3197" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.7.19" x="0.0" y="151.3197" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.7.20" x="0.0" y="151.3197" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.7.21" x="0.0" y="151.3197" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.7.22" x="0.0" y="151.3197" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.7.23" x="0.0" y="151.3197" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.7.24" x="0.0" y="151.3197" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.7.25" x="0.0" y="151.3197" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.7.26" x="0.0" y="151.3197" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.7.27" x="0.0" y="151.3197" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.7.28" x="0.0" y="151.3197" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.7.29" x="0.0" y="151.3197" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.7.30" x="0.0" y="151.3197" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.7.31" x="0.0" y="151.3197" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.7.32" x="0.0" y="151.3197" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.7.33" x="0.0" y="151.3197" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.7.34" x="0.0" y="151.3197" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.7.35" x="0.0" y="151.3197" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.7.36" x="0.0" y="151.3197" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.7.37" x="0.0" y="151.3197" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.7.38" x="0.0" y="151.3197" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.7.39" x="0.0" y="151.3197" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.8.0" x="0.0" y="453.95910000000003" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.8.1" x="0.0" y="453.95910000000003" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.8.2" x="0.0" y="453.95910000000003" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.8.3" x="0.0" y="453.95910000000003" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.8.4" x="0.0" y="453.95910000000003" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.8.5" x="0.0" y="453.95910000000003" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.8.6" x="0.0" y="453.95910000000003" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.8.7" x="0.0" y="453.95910000000003" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.8.8" x="0.0" y="453.95910000000003" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.8.9" x="0.0" y="453.95910000000003" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.8.10" x="0.0" y="453.95910000000003" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.8.11" x="0.0" y="453.95910000000003" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.8.12" x="0.0" y="453.95910000000003" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.8.13" x="0.0" y="453.95910000000003" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.8.14" x="0.0" y="453.95910000000003" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.8.15" x="0.0" y="453.95910000000003" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.8.16" x="0.0" y="453.95910000000003" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.8.17" x="0.0" y="453.95910000000003" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.8.18" x="0.0" y="453.95910000000003" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.8.19" x="0.0" y="453.95910000000003" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.8.20" x="0.0" y="453.95910000000003" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.8.21" x="0.0" y="453.95910000000003" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.8.22" x="0.0" y="453.95910000000003" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.8.23" x="0.0" y="453.95910000000003" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.8.24" x="0.0" y="453.95910000000003" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.8.25" x="0.0" y="453.95910000000003" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.8.26" x="0.0" y="453.95910000000003" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.8.27" x="0.0" y="453.95910000000003" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.8.28" x="0.0" y="453.95910000000003" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.8.29" x="0.0" y="453.95910000000003" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.8.30" x="0.0" y="453.95910000000003" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.8.31" x="0.0" y="453.95910000000003" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.8.32" x="0.0" y="453.95910000000003" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.8.33" x="0.0" y="453.95910000000003" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.8.34" x="0.0" y="453.95910000000003" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.8.35" x="0.0" y="453.95910000000003" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.8.36" x="0.0" y="453.95910000000003" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.8.37" x="0.0" y="453.95910000000003" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.8.38" x="0.0" y="453.95910000000003" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.8.39" x="0.0" y="453.95910000000003" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.9.0" x="0.0" y="756.5985000000001" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.9.1" x="0.0" y="756.5985000000001" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.9.2" x="0.0" y="756.5985000000001" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.9.3" x="0.0" y="756.5985000000001" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.9.4" x="0.0" y="756.5985000000001" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.9.5" x="0.0" y="756.5985000000001" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.9.6" x="0.0" y="756.5985000000001" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.9.7" x="0.0" y="756.5985000000001" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.9.8" x="0.0" y="756.5985000000001" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.9.9" x="0.0" y="756.5985000000001" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.9.10" x="0.0" y="756.5985000000001" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.9.11" x="0.0" y="756.5985000000001" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.9.12" x="0.0" y="756.5985000000001" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.9.13" x="0.0" y="756.5985000000001" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.9.14" x="0.0" y="756.5985000000001" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.9.15" x="0.0" y="756.5985000000001" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.9.16" x="0.0" y="756.5985000000001" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.9.17" x="0.0" y="756.5985000000001" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.9.18" x="0.0" y="756.5985000000001" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.9.19" x="0.0" y="756.5985000000001" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.9.20" x="0.0" y="756.5985000000001" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.9.21" x="0.0" y="756.5985000000001" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.9.22" x="0.0" y="756.5985000000001" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.9.23" x="0.0" y="756.5985000000001" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.9.24" x="0.0" y="756.5985000000001" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.9.25" x="0.0" y="756.5985000000001" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.9.26" x="0.0" y="756.5985000000001" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.9.27" x="0.0" y="756.5985000000001" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.9.28" x="0.0" y="756.5985000000001" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.9.29" x="0.0" y="756.5985000000001" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.9.30" x="0.0" y="756.5985000000001" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.9.31" x="0.0" y="756.5985000000001" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.9.32" x="0.0" y="756.5985000000001" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.9.33" x="0.0" y="756.5985000000001" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.9.34" x="0.0" y="756.5985000000001" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.9.35" x="0.0" y="756.5985000000001" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.9.36" x="0.0" y="756.5985000000001" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.9.37" x="0.0" y="756.5985000000001" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.9.38" x="0.0" y="756.5985000000001" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.9.39" x="0.0" y="756.5985000000001" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.10.0" x="0.0" y="1059.2379" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.10.1" x="0.0" y="1059.2379" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.10.2" x="0.0" y="1059.2379" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.10.3" x="0.0" y="1059.2379" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.10.4" x="0.0" y="1059.2379" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.10.5" x="0.0" y="1059.2379" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.10.6" x="0.0" y="1059.2379" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.10.7" x="0.0" y="1059.2379" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.10.8" x="0.0" y="1059.2379" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.10.9" x="0.0" y="1059.2379" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.10.10" x="0.0" y="1059.2379" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.10.11" x="0.0" y="1059.2379" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.10.12" x="0.0" y="1059.2379" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.10.13" x="0.0" y="1059.2379" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.10.14" x="0.0" y="1059.2379" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.10.15" x="0.0" y="1059.2379" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.10.16" x="0.0" y="1059.2379" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.10.17" x="0.0" y="1059.2379" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.10.18" x="0.0" y="1059.2379" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.10.19" x="0.0" y="1059.2379" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.10.20" x="0.0" y="1059.2379" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.10.21" x="0.0" y="1059.2379" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.10.22" x="0.0" y="1059.2379" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.10.23" x="0.0" y="1059.2379" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.10.24" x="0.0" y="1059.2379" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.10.25" x="0.0" y="1059.2379" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.10.26" x="0.0" y="1059.2379" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.10.27" x="0.0" y="1059.2379" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.10.28" x="0.0" y="1059.2379" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.10.29" x="0.0" y="1059.2379" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.10.30" x="0.0" y="1059.2379" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.10.31" x="0.0" y="1059.2379" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.10.32" x="0.0" y="1059.2379" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.10.33" x="0.0" y="1059.2379" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.10.34" x="0.0" y="1059.2379" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.10.35" x="0.0" y="1059.2379" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.10.36" x="0.0" y="1059.2379" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.10.37" x="0.0" y="1059.2379" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.10.38" x="0.0" y="1059.2379" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.10.39" x="0.0" y="1059.2379" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.11.0" x="0.0" y="1361.8772999999999" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.11.1" x="0.0" y="1361.8772999999999" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.11.2" x="0.0" y="1361.8772999999999" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.11.3" x="0.0" y="1361.8772999999999" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.11.4" x="0.0" y="1361.8772999999999" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.11.5" x="0.0" y="1361.8772999999999" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.11.6" x="0.0" y="1361.8772999999999" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.11.7" x="0.0" y="1361.8772999999999" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.11.8" x="0.0" y="1361.8772999999999" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.11.9" x="0.0" y="1361.8772999999999" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.11.10" x="0.0" y="1361.8772999999999" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.11.11" x="0.0" y="1361.8772999999999" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.11.12" x="0.0" y="1361.8772999999999" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.11.13" x="0.0" y="1361.8772999999999" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.11.14" x="0.0" y="1361.8772999999999" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.11.15" x="0.0" y="1361.8772999999999" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.11.16" x="0.0" y="1361.8772999999999" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.11.17" x="0.0" y="1361.8772999999999" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.11.18" x="0.0" y="1361.8772999999999" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.11.19" x="0.0" y="1361.8772999999999" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.11.20" x="0.0" y="1361.8772999999999" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.11.21" x="0.0" y="1361.8772999999999" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.11.22" x="0.0" y="1361.8772999999999" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.11.23" x="0.0" y="1361.8772999999999" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.11.24" x="0.0" y="1361.8772999999999" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.11.25" x="0.0" y="1361.8772999999999" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.11.26" x="0.0" y="1361.8772999999999" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.11.27" x="0.0" y="1361.8772999999999" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.11.28" x="0.0" y="1361.8772999999999" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.11.29" x="0.0" y="1361.8772999999999" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.11.30" x="0.0" y="1361.8772999999999" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.11.31" x="0.0" y="1361.8772999999999" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.11.32" x="0.0" y="1361.8772999999999" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.11.33" x="0.0" y="1361.8772999999999" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.11.34" x="0.0" y="1361.8772999999999" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.11.35" x="0.0" y="1361.8772999999999" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.11.36" x="0.0" y="1361.8772999999999" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.11.37" x="0.0" y="1361.8772999999999" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.11.38" x="0.0" y="1361.8772999999999" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.11.39" x="0.0" y="1361.8772999999999" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.12.0" x="0.0" y="1664.5167" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.12.1" x="0.0" y="1664.5167" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.12.2" x="0.0" y="1664.5167" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.12.3" x="0.0" y="1664.5167" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.12.4" x="0.0" y="1664.5167" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.12.5" x="0.0" y="1664.5167" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.12.6" x="0.0" y="1664.5167" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.12.7" x="0.0" y="1664.5167" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.12.8" x="0.0" y="1664.5167" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.12.9" x="0.0" y="1664.5167" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.12.10" x="0.0" y="1664.5167" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.12.11" x="0.0" y="1664.5167" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.12.12" x="0.0" y="1664.5167" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.12.13" x="0.0" y="1664.5167" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.12.14" x="0.0" y="1664.5167" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.12.15" x="0.0" y="1664.5167" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.12.16" x="0.0" y="1664.5167" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.12.17" x="0.0" y="1664.5167" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.12.18" x="0.0" y="1664.5167" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.12.19" x="0.0" y="1664.5167" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.12.20" x="0.0" y="1664.5167" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.12.21" x="0.0" y="1664.5167" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.12.22" x="0.0" y="1664.5167" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.12.23" x="0.0" y="1664.5167" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.12.24" x="0.0" y="1664.5167" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.12.25" x="0.0" y="1664.5167" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.12.26" x="0.0" y="1664.5167" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.12.27" x="0.0" y="1664.5167" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.12.28" x="0.0" y="1664.5167" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.12.29" x="0.0" y="1664.5167" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.12.30" x="0.0" y="1664.5167" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.12.31" x="0.0" y="1664.5167" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.12.32" x="0.0" y="1664.5167" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.12.33" x="0.0" y="1664.5167" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.12.34" x="0.0" y="1664.5167" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.12.35" x="0.0" y="1664.5167" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.12.36" x="0.0" y="1664.5167" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.12.37" x="0.0" y="1664.5167" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.12.38" x="0.0" y="1664.5167" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.12.39" x="0.0" y="1664.5167" z="1930.5"/>
+    <position unit="cm" name="Module_pos_0.13.0" x="0.0" y="1967.1561" z="-1930.5"/>
+    <position unit="cm" name="Module_pos_0.13.1" x="0.0" y="1967.1561" z="-1831.5"/>
+    <position unit="cm" name="Module_pos_0.13.2" x="0.0" y="1967.1561" z="-1732.5"/>
+    <position unit="cm" name="Module_pos_0.13.3" x="0.0" y="1967.1561" z="-1633.5"/>
+    <position unit="cm" name="Module_pos_0.13.4" x="0.0" y="1967.1561" z="-1534.5"/>
+    <position unit="cm" name="Module_pos_0.13.5" x="0.0" y="1967.1561" z="-1435.5"/>
+    <position unit="cm" name="Module_pos_0.13.6" x="0.0" y="1967.1561" z="-1336.5"/>
+    <position unit="cm" name="Module_pos_0.13.7" x="0.0" y="1967.1561" z="-1237.5"/>
+    <position unit="cm" name="Module_pos_0.13.8" x="0.0" y="1967.1561" z="-1138.5"/>
+    <position unit="cm" name="Module_pos_0.13.9" x="0.0" y="1967.1561" z="-1039.5"/>
+    <position unit="cm" name="Module_pos_0.13.10" x="0.0" y="1967.1561" z="-940.5"/>
+    <position unit="cm" name="Module_pos_0.13.11" x="0.0" y="1967.1561" z="-841.5"/>
+    <position unit="cm" name="Module_pos_0.13.12" x="0.0" y="1967.1561" z="-742.5"/>
+    <position unit="cm" name="Module_pos_0.13.13" x="0.0" y="1967.1561" z="-643.5"/>
+    <position unit="cm" name="Module_pos_0.13.14" x="0.0" y="1967.1561" z="-544.5"/>
+    <position unit="cm" name="Module_pos_0.13.15" x="0.0" y="1967.1561" z="-445.5"/>
+    <position unit="cm" name="Module_pos_0.13.16" x="0.0" y="1967.1561" z="-346.5"/>
+    <position unit="cm" name="Module_pos_0.13.17" x="0.0" y="1967.1561" z="-247.5"/>
+    <position unit="cm" name="Module_pos_0.13.18" x="0.0" y="1967.1561" z="-148.5"/>
+    <position unit="cm" name="Module_pos_0.13.19" x="0.0" y="1967.1561" z="-49.5"/>
+    <position unit="cm" name="Module_pos_0.13.20" x="0.0" y="1967.1561" z="49.5"/>
+    <position unit="cm" name="Module_pos_0.13.21" x="0.0" y="1967.1561" z="148.5"/>
+    <position unit="cm" name="Module_pos_0.13.22" x="0.0" y="1967.1561" z="247.5"/>
+    <position unit="cm" name="Module_pos_0.13.23" x="0.0" y="1967.1561" z="346.5"/>
+    <position unit="cm" name="Module_pos_0.13.24" x="0.0" y="1967.1561" z="445.5"/>
+    <position unit="cm" name="Module_pos_0.13.25" x="0.0" y="1967.1561" z="544.5"/>
+    <position unit="cm" name="Module_pos_0.13.26" x="0.0" y="1967.1561" z="643.5"/>
+    <position unit="cm" name="Module_pos_0.13.27" x="0.0" y="1967.1561" z="742.5"/>
+    <position unit="cm" name="Module_pos_0.13.28" x="0.0" y="1967.1561" z="841.5"/>
+    <position unit="cm" name="Module_pos_0.13.29" x="0.0" y="1967.1561" z="940.5"/>
+    <position unit="cm" name="Module_pos_0.13.30" x="0.0" y="1967.1561" z="1039.5"/>
+    <position unit="cm" name="Module_pos_0.13.31" x="0.0" y="1967.1561" z="1138.5"/>
+    <position unit="cm" name="Module_pos_0.13.32" x="0.0" y="1967.1561" z="1237.5"/>
+    <position unit="cm" name="Module_pos_0.13.33" x="0.0" y="1967.1561" z="1336.5"/>
+    <position unit="cm" name="Module_pos_0.13.34" x="0.0" y="1967.1561" z="1435.5"/>
+    <position unit="cm" name="Module_pos_0.13.35" x="0.0" y="1967.1561" z="1534.5"/>
+    <position unit="cm" name="Module_pos_0.13.36" x="0.0" y="1967.1561" z="1633.5"/>
+    <position unit="cm" name="Module_pos_0.13.37" x="0.0" y="1967.1561" z="1732.5"/>
+    <position unit="cm" name="Module_pos_0.13.38" x="0.0" y="1967.1561" z="1831.5"/>
+    <position unit="cm" name="Module_pos_0.13.39" x="0.0" y="1967.1561" z="1930.5"/>
+    <position name="center"/>
+    <rotation name="identity"/>
+  </define>
+  <materials/>
+  <solids>
+    <box name="PixelPlane" lunit="cm" x="0.4648" y="29.9599" z="47.8318"/>
+    <box name="PCB_shape" lunit="cm" x="0.3175" y="29.9599" z="47.8318"/>
+    <box name="Pixel_shape" lunit="cm" x="0.0051" y="0.4" z="0.4"/>
+    <box name="Asic_shape" lunit="cm" x="0.1422" y="1.6" z="1.6"/>
+    <box name="TPCPlane" lunit="cm" x="0.4648" y="299.599" z="95.6636"/>
+    <box name="OpticalDet" lunit="cm" x="46.791000000000004" y="299.599" z="95.6636"/>
+    <box name="TPC" lunit="cm" x="47.25580000000001" y="299.599" z="95.6636"/>
+    <box name="TPCActive_shape" lunit="cm" x="46.791000000000004" y="299.599" z="95.6636"/>
+    <box name="HalfDetector" lunit="cm" x="47.606" y="302.63939999999997" z="99.0"/>
+    <box name="Fieldcage_shape" lunit="cm" x="47.606" y="302.63939999999997" z="99.0"/>
+    <box name="LAr_shape" lunit="cm" x="47.2885" y="301.3694" z="97.73"/>
+    <box name="Bracket_shape" lunit="cm" x="0.635" y="300.0" z="95.6636"/>
+    <box name="Module" lunit="cm" x="95.212" y="302.63939999999997" z="99.0"/>
+    <box name="World" lunit="cm" x="95.212" y="4236.951599999999" z="3960.0"/>
+  </solids>
+  <structure>
+    <volume name="volTPCPCB">
+      <materialref ref="FR4"/>
+      <solidref ref="PCB_shape"/>
+    </volume>
+    <volume name="volTPCAsic">
+      <materialref ref="Silicon"/>
+      <solidref ref="Asic_shape"/>
+    </volume>
+    <volume name="volPixelPlane">
+      <materialref ref="LAr"/>
+      <solidref ref="PixelPlane"/>
+      <physvol>
+        <volumeref ref="volTPCPCB"/>
+        <positionref ref="PCB_pos"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_0.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_0.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_0.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_0.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_0.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_0.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_0.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_0.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_0.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_0.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_1.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_1.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_1.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_1.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_1.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_1.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_1.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_1.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_1.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_1.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_2.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_2.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_2.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_2.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_2.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_2.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_2.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_2.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_2.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_2.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_3.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_3.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_3.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_3.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_3.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_3.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_3.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_3.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_3.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_3.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_4.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_4.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_4.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_4.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_4.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_4.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_4.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_4.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_4.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_4.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_5.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_5.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_5.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_5.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_5.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_5.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_5.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_5.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_5.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_5.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_6.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_6.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_6.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_6.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_6.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_6.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_6.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_6.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_6.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_6.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_7.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_7.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_7.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_7.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_7.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_7.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_7.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_7.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_7.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_7.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_8.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_8.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_8.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_8.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_8.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_8.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_8.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_8.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_8.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_8.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_9.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_9.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_9.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_9.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_9.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_9.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_9.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_9.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_9.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCAsic"/>
+        <positionref ref="Asic_pos_9.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+    </volume>
+    <volume name="volTPCPlane">
+      <materialref ref="LAr"/>
+      <solidref ref="TPCPlane"/>
+      <physvol>
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_0_R"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="2">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_1_R"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="4">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_2_R"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="6">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_3_R"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="8">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_4_R"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="10">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_5_R"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="12">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_6_R"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="14">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_7_R"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="16">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_8_R"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="18">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_9_R"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="1">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_0_L"/>
+        <rotationref ref="PixelPlane_rot_0_L"/>
+      </physvol>
+      <physvol copynumber="3">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_1_L"/>
+        <rotationref ref="PixelPlane_rot_1_L"/>
+      </physvol>
+      <physvol copynumber="5">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_2_L"/>
+        <rotationref ref="PixelPlane_rot_2_L"/>
+      </physvol>
+      <physvol copynumber="7">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_3_L"/>
+        <rotationref ref="PixelPlane_rot_3_L"/>
+      </physvol>
+      <physvol copynumber="9">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_4_L"/>
+        <rotationref ref="PixelPlane_rot_4_L"/>
+      </physvol>
+      <physvol copynumber="11">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_5_L"/>
+        <rotationref ref="PixelPlane_rot_5_L"/>
+      </physvol>
+      <physvol copynumber="13">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_6_L"/>
+        <rotationref ref="PixelPlane_rot_6_L"/>
+      </physvol>
+      <physvol copynumber="15">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_7_L"/>
+        <rotationref ref="PixelPlane_rot_7_L"/>
+      </physvol>
+      <physvol copynumber="17">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_8_L"/>
+        <rotationref ref="PixelPlane_rot_8_L"/>
+      </physvol>
+      <physvol copynumber="19">
+        <volumeref ref="volPixelPlane"/>
+        <positionref ref="PixelPlane_pos_9_L"/>
+        <rotationref ref="PixelPlane_rot_9_L"/>
+      </physvol>
+    </volume>
+    <volume name="volTPCActive">
+      <materialref ref="LAr"/>
+      <solidref ref="TPCActive_shape"/>
+      <auxiliary auxtype="SensDet" auxvalue="volTPCActive"/>
+      <auxiliary auxtype="EField" auxvalue="(500.0 V/cm, 0.0 V/cm, 0.0 V/cm)"/>
+    </volume>
+    <volume name="volTPC">
+      <materialref ref="LAr"/>
+      <solidref ref="TPC"/>
+      <physvol>
+        <volumeref ref="volTPCPlane"/>
+        <positionref ref="TPCPlane_pos"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTPCActive"/>
+        <positionref ref="TPCActive_pos"/>
+        <rotationref ref="identity"/>
+      </physvol>
+    </volume>
+    <volume name="volOpticalDet">
+      <materialref ref="LAr"/>
+      <solidref ref="OpticalDet"/>
+    </volume>
+    <volume name="volLAr">
+      <materialref ref="LAr"/>
+      <solidref ref="LAr_shape"/>
+      <physvol>
+        <volumeref ref="volTPC"/>
+        <positionref ref="TPC_pos"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volOpticalDet"/>
+        <positionref ref="OpticalDet_pos_L"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volOpticalDet"/>
+        <positionref ref="OpticalDet_pos_R"/>
+        <rotationref ref="OpticalDet_rot"/>
+      </physvol>
+    </volume>
+    <volume name="volFieldcage">
+      <materialref ref="G10"/>
+      <solidref ref="Fieldcage_shape"/>
+      <physvol>
+        <volumeref ref="volLAr"/>
+        <positionref ref="LAr_pos"/>
+        <rotationref ref="identity"/>
+      </physvol>
+    </volume>
+    <volume name="volHalfDetector">
+      <materialref ref="G10"/>
+      <solidref ref="HalfDetector"/>
+      <physvol>
+        <volumeref ref="volFieldcage"/>
+        <positionref ref="Fieldcage_pos"/>
+        <rotationref ref="identity"/>
+      </physvol>
+    </volume>
+    <volume name="volModule">
+      <materialref ref="G10"/>
+      <solidref ref="Module"/>
+      <physvol copynumber="1">
+        <volumeref ref="volHalfDetector"/>
+        <positionref ref="HalfDetector_pos_R"/>
+        <rotationref ref="HalfDetector_rot"/>
+      </physvol>
+    </volume>
+    <volume name="volWorld">
+      <materialref ref="LAr"/>
+      <solidref ref="World"/>
+      <physvol>
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="1">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="2">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="3">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="4">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="5">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="6">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="7">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="8">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="9">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="10">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="11">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="12">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="13">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="14">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="15">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="16">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="17">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="18">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="19">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="20">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="21">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="22">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="23">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="24">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="25">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="26">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="27">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="28">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="29">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="30">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="31">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="32">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="33">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="34">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="35">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="36">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="37">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="38">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="39">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.0.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="40">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="41">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="42">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="43">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="44">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="45">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="46">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="47">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="48">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="49">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="50">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="51">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="52">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="53">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="54">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="55">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="56">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="57">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="58">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="59">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="60">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="61">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="62">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="63">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="64">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="65">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="66">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="67">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="68">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="69">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="70">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="71">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="72">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="73">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="74">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="75">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="76">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="77">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="78">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="79">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.1.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="80">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="81">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="82">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="83">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="84">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="85">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="86">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="87">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="88">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="89">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="90">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="91">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="92">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="93">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="94">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="95">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="96">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="97">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="98">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="99">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="100">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="101">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="102">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="103">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="104">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="105">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="106">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="107">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="108">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="109">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="110">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="111">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="112">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="113">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="114">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="115">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="116">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="117">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="118">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="119">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.2.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="120">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="121">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="122">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="123">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="124">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="125">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="126">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="127">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="128">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="129">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="130">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="131">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="132">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="133">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="134">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="135">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="136">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="137">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="138">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="139">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="140">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="141">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="142">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="143">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="144">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="145">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="146">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="147">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="148">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="149">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="150">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="151">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="152">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="153">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="154">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="155">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="156">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="157">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="158">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="159">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.3.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="160">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="161">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="162">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="163">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="164">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="165">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="166">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="167">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="168">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="169">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="170">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="171">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="172">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="173">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="174">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="175">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="176">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="177">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="178">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="179">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="180">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="181">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="182">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="183">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="184">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="185">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="186">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="187">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="188">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="189">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="190">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="191">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="192">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="193">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="194">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="195">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="196">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="197">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="198">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="199">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.4.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="200">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="201">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="202">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="203">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="204">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="205">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="206">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="207">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="208">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="209">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="210">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="211">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="212">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="213">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="214">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="215">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="216">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="217">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="218">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="219">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="220">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="221">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="222">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="223">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="224">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="225">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="226">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="227">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="228">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="229">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="230">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="231">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="232">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="233">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="234">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="235">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="236">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="237">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="238">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="239">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.5.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="240">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="241">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="242">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="243">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="244">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="245">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="246">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="247">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="248">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="249">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="250">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="251">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="252">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="253">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="254">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="255">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="256">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="257">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="258">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="259">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="260">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="261">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="262">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="263">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="264">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="265">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="266">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="267">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="268">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="269">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="270">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="271">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="272">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="273">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="274">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="275">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="276">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="277">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="278">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="279">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.6.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="280">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="281">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="282">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="283">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="284">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="285">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="286">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="287">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="288">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="289">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="290">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="291">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="292">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="293">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="294">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="295">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="296">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="297">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="298">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="299">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="300">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="301">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="302">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="303">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="304">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="305">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="306">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="307">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="308">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="309">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="310">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="311">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="312">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="313">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="314">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="315">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="316">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="317">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="318">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="319">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.7.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="320">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="321">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="322">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="323">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="324">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="325">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="326">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="327">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="328">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="329">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="330">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="331">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="332">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="333">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="334">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="335">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="336">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="337">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="338">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="339">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="340">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="341">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="342">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="343">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="344">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="345">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="346">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="347">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="348">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="349">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="350">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="351">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="352">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="353">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="354">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="355">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="356">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="357">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="358">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="359">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.8.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="360">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="361">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="362">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="363">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="364">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="365">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="366">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="367">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="368">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="369">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="370">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="371">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="372">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="373">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="374">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="375">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="376">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="377">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="378">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="379">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="380">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="381">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="382">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="383">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="384">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="385">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="386">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="387">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="388">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="389">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="390">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="391">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="392">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="393">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="394">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="395">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="396">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="397">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="398">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="399">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.9.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="400">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="401">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="402">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="403">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="404">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="405">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="406">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="407">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="408">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="409">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="410">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="411">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="412">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="413">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="414">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="415">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="416">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="417">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="418">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="419">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="420">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="421">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="422">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="423">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="424">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="425">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="426">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="427">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="428">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="429">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="430">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="431">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="432">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="433">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="434">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="435">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="436">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="437">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="438">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="439">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.10.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="440">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="441">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="442">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="443">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="444">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="445">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="446">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="447">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="448">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="449">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="450">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="451">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="452">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="453">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="454">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="455">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="456">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="457">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="458">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="459">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="460">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="461">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="462">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="463">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="464">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="465">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="466">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="467">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="468">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="469">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="470">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="471">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="472">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="473">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="474">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="475">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="476">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="477">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="478">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="479">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.11.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="480">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="481">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="482">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="483">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="484">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="485">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="486">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="487">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="488">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="489">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="490">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="491">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="492">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="493">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="494">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="495">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="496">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="497">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="498">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="499">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="500">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="501">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="502">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="503">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="504">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="505">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="506">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="507">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="508">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="509">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="510">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="511">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="512">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="513">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="514">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="515">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="516">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="517">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="518">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="519">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.12.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="520">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.0"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="521">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.1"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="522">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.2"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="523">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.3"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="524">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.4"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="525">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.5"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="526">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.6"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="527">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.7"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="528">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.8"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="529">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.9"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="530">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.10"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="531">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.11"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="532">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.12"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="533">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.13"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="534">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.14"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="535">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.15"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="536">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.16"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="537">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.17"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="538">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.18"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="539">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.19"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="540">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.20"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="541">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.21"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="542">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.22"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="543">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.23"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="544">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.24"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="545">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.25"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="546">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.26"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="547">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.27"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="548">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.28"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="549">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.29"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="550">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.30"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="551">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.31"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="552">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.32"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="553">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.33"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="554">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.34"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="555">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.35"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="556">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.36"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="557">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.37"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="558">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.38"/>
+        <rotationref ref="identity"/>
+      </physvol>
+      <physvol copynumber="559">
+        <volumeref ref="volModule"/>
+        <positionref ref="Module_pos_0.13.39"/>
+        <rotationref ref="identity"/>
+      </physvol>
+    </volume>
+  </structure>
+  <setup name="Default" version="0">
+    <world ref="volWorld"/>
+  </setup>
+</gdml>
