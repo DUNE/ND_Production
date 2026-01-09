@@ -2,7 +2,7 @@
 #include "gRooTracker.h"
 
 
-void convertEvtToSpill(std::string const& inFileName, std::string const& outFileName, int runOffset){
+void convert4sandreco(std::string const& inFileName, std::string const& outFileName, int runOffset){
 
     TG4Event* edep_evt = nullptr;
     TG4Event* spill = nullptr;
@@ -53,7 +53,6 @@ void convertEvtToSpill(std::string const& inFileName, std::string const& outFile
     for (auto &pair : spill_event_map){
         auto spillId = pair.first;
         auto eventIds = pair.second;
-        std::cout<<"spillId: "<<spillId<<std::endl;
 
         spill = new TG4Event();
 
@@ -61,7 +60,6 @@ void convertEvtToSpill(std::string const& inFileName, std::string const& outFile
 
         // loop over each event in a single spill
         for (int i = 0; i < eventIds.size(); i++){
-            std::cout<<"evId: "<<eventIds[i]<<std::endl;
             edep_tree->GetEntry(entry + i);
             spill->RunId = (edep_evt->RunId) % runOffset;
             spill->EventId = spillId;
@@ -93,55 +91,5 @@ void convertEvtToSpill(std::string const& inFileName, std::string const& outFile
     geom->Write();
 
     outFile->Close();
-
-}
-
-/****************************************************************/
-
-void takeInitialSpillTime(std::string inFileName){
-
-    TG4Event* spill = nullptr;
-    double t0_spill;
-
-    // input file (which is the output of the previous function) - .OVERLAY.root
-    std::unique_ptr<TFile> inFile(TFile::Open(inFileName.c_str(), "UPDATE"));
-    // input tree
-    std::unique_ptr<TTree> spill_tree(inFile->Get<TTree>("EDepSimEvents"));
-    spill_tree->SetBranchAddress("Event", &spill);
-
-    // output tree
-    std::unique_ptr<TTree> outTree = std::make_unique<TTree>("tSpillTime", "Initial Spill Time");
-    outTree->Branch("t0_spill", &t0_spill);
-
-    int spillN = spill_tree->GetEntries();
-    std::cout<<" number of spills: "<<spillN<<std::endl;
-
-    std::ofstream ofs("t0_spill.txt");
-
-    // I need to store the spill initial time
-    for (int i = 0; i < spill_tree->GetEntries(); i++){
-        spill_tree->GetEntry(i);
-
-        // if (ofs.is_open()){
-        //     ofs << "spill "<<i<<" initial time: "<<std::fixed << std::setprecision(1) << spill->Primaries[0].Position.T()<<std::endl;
-        // }
-
-        // if (i == 0) t0_spill = 0.;
-        // else t0_spill = spill->Primaries[0].Position.T();
-
-        t0_spill = i*1.2E9;
-        std::cout<<t0_spill<<std::endl;
-
-        outTree->Fill();
-    }
-
-    outTree->Write();
-}
-
-void convert4sandreco(std::string const& inFileName, std::string const& outFileName, int runOffset){
-    
-    convertEvtToSpill(inFileName, outFileName, runOffset);
-    takeInitialSpillTime(outFileName);
-
 }
 
