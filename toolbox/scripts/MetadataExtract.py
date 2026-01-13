@@ -130,7 +130,7 @@ def _EventHelperHdf5(filenmame,workflow) :
 def _EventHelperGenie(filename) :
 
     first = last = total = -1
-    tname= "gRooTracker" if filename.find("GTRAC") != 1 else gtree
+    tname= "gRooTracker" if filename.find("GTRAC") != -1 else gtree
 
     file  = ROOT.TFile(filename, "READ") 
     tree  = file.Get(tname)
