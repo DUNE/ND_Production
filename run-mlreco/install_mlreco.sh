@@ -48,7 +48,7 @@ source configure.sh
 make -j16
 cd ..
 
-git clone -b v1.8.0 https://github.com/DeepLearnPhysics/SuperaAtomic.git
+git clone -b v1.9.0 https://github.com/DeepLearnPhysics/SuperaAtomic.git
 
 cd SuperaAtomic
 git submodule update --init     # pybind11
