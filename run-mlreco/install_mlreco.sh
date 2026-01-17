@@ -48,7 +48,7 @@ source configure.sh
 make -j16
 cd ..
 
-git clone -b v1.8.0 https://github.com/DeepLearnPhysics/SuperaAtomic.git
+git clone -b v1.9.0 https://github.com/DeepLearnPhysics/SuperaAtomic.git
 
 cd SuperaAtomic
 git submodule update --init     # pybind11
@@ -67,7 +67,7 @@ pip install .
 cd ..
 
 
-git clone -b develop https://github.com/DeepLearnPhysics/flow2supera.git
+git clone -b v5.0.0 https://github.com/DeepLearnPhysics/flow2supera.git
 ## Don't pip install because e.g. config files are expected to live near
 ## __file__
 # cd flow2supera
@@ -93,7 +93,7 @@ cd ..
 # git clone -b jw_dune_nd_lar https://github.com/chenel/lartpc_mlreco3d.git
 
 #git clone -b v2.9.5 https://github.com/DeepLearnPhysics/lartpc_mlreco3d.git
-git clone -b develop https://github.com/DeepLearnPhysics/spine.git
+git clone -b v0.9.2 https://github.com/DeepLearnPhysics/spine.git
 
 # git clone https://github.com/chenel/dune-nd-lar-reco.git
 # the old yaml.load API has been removed
