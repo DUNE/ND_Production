@@ -1,9 +1,9 @@
 Generator1:
   NumEvent: [1, 1]
   NumParticle: [1, 1]
-  XRange: [0, 0] #mm
-  YRange: [0, 0] #mm
-  ZRange: [0, 0] #mm
+  XRange: [0, 20000] #mm
+  YRange: [-10000, 10000] #mm
+  ZRange: [-35000, 35000] #mm
   TRange: [0, 0] #ns
 
   Particles:
