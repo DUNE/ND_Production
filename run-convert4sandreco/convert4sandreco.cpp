@@ -37,19 +37,28 @@ void convert4sandreco(std::string const& inFileName, std::string const& outFileN
         // take the map and get the spillId
         std::string event_string = std::to_string(edep_evt->RunId) + " "
         + std::to_string(edep_evt->EventId); 
-        TObjString* event_tobj = new TObjString(event_string.c_str());
+        TObjString event_tobj(event_string.c_str());
 
-        auto spillId_obj = input_map->GetValue(event_tobj);
+        auto spillId_obj = input_map->GetValue(&event_tobj);
+        if (!spillId_obj){
+            std::cerr << "Warning: No spill ID found for event " << event_string << std::endl;
+            continue;
+        }
+
         auto* spillIdStr = dynamic_cast<TObjString*>(spillId_obj);
+        if (!spillIdStr) {
+            std::cerr << "Error: Invalid spill ID object for event " << event_string << std::endl;
+            continue;
+        }
+
         auto spillId = std::atoi(spillIdStr->GetString());
 
         // fill the map assigning the eventIds to the corresponding spillId
         spill_event_map[spillId].push_back(edep_evt->EventId);
-  
     }
 
     // useful to keep track of the number of the entry 
-    // I have to take from the edep_tree
+    // I need from the edep_tree
     int entry = 0;
 
     // loop over the map: for each spillId I loop over all the events
@@ -62,14 +71,16 @@ void convert4sandreco(std::string const& inFileName, std::string const& outFileN
         std::map<std::string, std::vector<TG4HitSegment>> SegmentDetectors;
 
         // loop over each event in a single spill
-        for (int i = 0; i < eventIds.size(); i++){
+        for (size_t i = 0; i < eventIds.size(); i++){
             edep_tree->GetEntry(entry + i);
             spill->RunId = (edep_evt->RunId) % runOffset;
             spill->EventId = spillId;
 
             // interaction vertex
-            auto& v = edep_evt->Primaries[0];
-            spill->Primaries.push_back(v);
+            if (!edep_evt->Primaries.empty()){
+                auto& v = edep_evt->Primaries[0];
+                spill->Primaries.push_back(v);
+            }
 
             // trajectories
             for (auto &t : edep_evt->Trajectories){
@@ -95,7 +106,9 @@ void convert4sandreco(std::string const& inFileName, std::string const& outFileN
 
     outFile->mkdir("DetSimPassThru");
     outFile->cd("DetSimPassThru");
-    out_genie_tree->Write();
+    if (out_genie_tree){
+        out_genie_tree->Write();
+    }
 
     outFile->Close();
 }
