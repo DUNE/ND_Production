@@ -7,21 +7,23 @@ void convert4sandreco(std::string const& inFileName, std::string const& outFileN
     TG4Event* edep_evt = nullptr;
     TG4Event* spill = nullptr;
 
-    // input file
+    // input files and geometry
     std::unique_ptr<TFile> inFile(TFile::Open(inFileName.c_str()));
-    // input tree
     std::unique_ptr<TTree> edep_tree(inFile->Get<TTree>("EDepSimEvents"));
     edep_tree->SetBranchAddress("Event", &edep_evt);
-    // input geom
+    std::unique_ptr<TTree> in_genie_tree(inFile->Get<TTree>("DetSimPassThru/gRooTracker"));
     auto geom = (TGeoManager*) inFile->Get("EDepSimGeometry");
 
-    // output file
+    // output files (GENIE tree is just a copy of the input)
     std::unique_ptr<TFile> outFile(TFile::Open(outFileName.c_str(), "RECREATE"));
-    // output tree
     auto outTree = edep_tree->CloneTree(0);
     outTree->SetBranchAddress("Event", &spill);
+    TTree* out_genie_tree = nullptr;
+    if (in_genie_tree) {
+        outFile->cd();
+        out_genie_tree = in_genie_tree->CloneTree(-1, "fast");
+    }
     
-    // import the TMap created in run-spill-build
     TMap* input_map = (TMap*)inFile->Get("event_spill_map");
 
     // create a map to match the eventIds with the corresponding spillId
@@ -46,7 +48,8 @@ void convert4sandreco(std::string const& inFileName, std::string const& outFileN
   
     }
 
-    // useful to keep track of the number of the entry I have to take from the edep_tree
+    // useful to keep track of the number of the entry 
+    // I have to take from the edep_tree
     int entry = 0;
 
     // loop over the map: for each spillId I loop over all the events
@@ -90,6 +93,9 @@ void convert4sandreco(std::string const& inFileName, std::string const& outFileN
     outTree->Write();
     geom->Write();
 
+    outFile->mkdir("DetSimPassThru");
+    outFile->cd("DetSimPassThru");
+    out_genie_tree->Write();
+
     outFile->Close();
 }
-
