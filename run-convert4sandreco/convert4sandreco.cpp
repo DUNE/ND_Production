@@ -1,6 +1,4 @@
 #include "TG4Event.h"
-#include "gRooTracker.h"
-
 
 void convert4sandreco(std::string const& inFileName, std::string const& outFileName, int runOffset){
 
