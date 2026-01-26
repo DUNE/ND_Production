@@ -20,7 +20,13 @@ LIBTG4EVENT_DIR=${LIBTG4EVENT_DIR:-libTG4Event}
 
 run root -l -b -q \
     -e "gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\")" \
-    "convert4sandreco.cpp(\"$spillFile\", \"$overlayFile\", $ND_PRODUCTION_RUN_OFFSET)"
+    "convert2edepsim_spill_format.cpp(\"$spillFile\", \"$overlayFile\", $ND_PRODUCTION_RUN_OFFSET)"
+
+echo run root -l -b -q \
+    -e "gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\")" \
+    "convert2edepsim_spill_format.cpp(\"$spillFile\", \"$overlayFile\", $ND_PRODUCTION_RUN_OFFSET)"
 
 mkdir -p "$outDir/OVERLAY/$subDir"
 mv "$overlayFile" "$outDir/OVERLAY/$subDir"
+
+echo $outDir/OVERLAY/$subDir

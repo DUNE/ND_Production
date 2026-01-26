@@ -1,6 +1,6 @@
 #include "TG4Event.h"
 
-void convert4sandreco(std::string const& inFileName, std::string const& outFileName, int runOffset){
+void convert2edepsim_spill_format(std::string const& inFileName, std::string const& outFileName, int runOffset){
 
     TG4Event* edep_evt = nullptr;
     TG4Event* spill = nullptr;
