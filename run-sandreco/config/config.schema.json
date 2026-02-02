@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UFW Configuration",
+  "description": "Schema for SAND reconstruction framework configuration files",
+  "type": "object",
+  "required": ["ufw", "globals", "contexts", "run"],
+  "additionalProperties": false,
+  "properties": {
+    "ufw": {
+      "type": "object",
+      "description": "UFW configuration settings",
+      "additionalProperties": false,
+      "properties": {
+        "ufw-loglevel": {
+          "type": "string",
+          "description": "Log level for the framework (default: info)",
+          "enum": ["trace", "debug", "info", "warn", "error", "fatal"],
+          "default": "info"
+        },
+        "ufw-basepath": {
+          "type": "string",
+          "description": "Base path for data files (default: .)",
+          "default": "."
+        },
+        "ufw-ldpath": {
+          "type": "array",
+          "description": "Library search paths (default: [.])",
+          "items": {
+            "type": "string"
+          },
+          "default": ["."]
+        },
+        "ufw-env": {
+          "type": "object",
+          "description": "Environment variables to set",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "ufw-ignore-errors": {
+          "type": "object",
+          "description": "Exception tolerance configuration (exception type -> max count)",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "globals": {
+      "type": "object",
+      "description": "Global configuration objects shared across all modules",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "contexts": {
+      "type": "object",
+      "description": "Context configuration for event processing",
+      "required": ["keys", "locals"],
+      "additionalProperties": false,
+      "properties": {
+        "keys": {
+          "description": "Number of context keys/events to process",
+          "oneOf": [
+            { "type": "integer", "minimum": 1 },
+            { "type": "array" },
+            { "type": "object" }
+          ]
+        },
+        "locals": {
+          "type": "object",
+          "description": "Local context-specific configurations",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "seed": {
+          "type": "integer",
+          "description": "Random seed for reproducibility (default: 123456789)",
+          "default": 123456789
+        }
+      }
+    },
+    "run": {
+      "type": "array",
+      "description": "Sequence of modules to execute",
+      "items": {
+        "$ref": "#/$defs/runStep"
+      }
+    }
+  },
+  "$defs": {
+    "runStep": {
+      "type": "object",
+      "description": "A single step in the run sequence",
+      "properties": {
+        "reqs": {
+          "type": "object",
+          "description": "Required inputs for this module",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "prods": {
+          "type": "object",
+          "description": "Products/outputs produced by this module",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "read": {
+          "type": "array",
+          "description": "Data products to read from stream",
+          "items": {
+            "type": "string"
+          }
+        },
+        "write": {
+          "type": "array",
+          "description": "Data products to write to stream",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "object"
+      }
+    }
+  }
+}
