@@ -8,15 +8,21 @@
 source ../util/init.inc.sh
 source ../util/reload_in_container.inc.sh
 
+############################################################################################
 # check correct json configuration file --> use json schema
-# N.B. this should be removed when check-jsonschema will be installed in the image (I hope it will be installed)
+#
+# N.B. this should be removed since this step should be done inside ufw when we call ufwrun
 if pip show check-jsonschema &>/dev/null; then
     echo "check-jsonschema is already installed"
 else
     echo "Installing check-jsonschema..."
-    pip install check-jsonschema
+    if pip install check-jsonschema; then
+        echo "Installation completed successfully!"
+    else 
+        echo "Installation failed, no json schema validation"
+    fi
 fi
-PATH="/home/NEUTRINO/gsantonineutrino/.local/bin:$PATH" # it must change
+PATH="$HOME/.local/bin:$PATH"
 
 JSON_SCHEMA_CONTAINER_PATH="${ND_PRODUCTION_DIR}/run-sandreco/config/config.schema.json"
 JSON_FILE_CONTAINER_PATH="${ND_PRODUCTION_DIR}/run-sandreco/config/config_sandreco.json"
@@ -26,21 +32,28 @@ if check-jsonschema --schemafile $JSON_SCHEMA_CONTAINER_PATH $JSON_FILE_CONTAINE
 else 
     echo "JSON file wrong! Check again"
 fi
+############################################################################################
 
-# create output folder
-inDir=$ND_PRODUCTION_OUTDIR_BASE/run-convert2edepsim-spill-format/sand-events-4/OVERLAY/$subDir
+# set useful input path
+overlayName=$ND_PRODUCTION_SPILL_NAME.$globalIdx
+echo "input file name is $overlayName"
 
-mkdir -p "$outDir/DIGI/$subDir"
-echo $outDir/DIGI/$subDir
+inDir=$ND_PRODUCTION_OUTDIR_BASE/run-convert2edepsim-spill-format/
+overlayDir=$inDir/$ND_PRODUCTION_SPILL_NAME
 
+overlayFile=$overlayDir/OVERLAY/$subDir/${overlayName}.OVERLAY.root
+
+# set output path
 echo "tmp " $tmpOutDir
-digiFile=$inDir/drift_fast_digi.root
+CAFfile=$tmpOutDir/${outName}.CAF.root
+rm -f "$CAFfile"
 
 # some problems since test files are in /usr/local, but we can't write to /usr/local
 # since we are not root users. This will be solved because the .json will be written by the user
 run ufwrun config/config_sandreco.json
 
-mv "$digiFile" "$outDir/DIGI/$subDir/$outName.DIGI.root"
+mkdir -p "$outDir/CAF/$subDir"
+mv "$CAFfile" "$outDir/CAF/$subDir/$outName.CAF.root"
 
-/storage/gpfs_data/neutrino/users/gsantoni/ND_Production_main/workspace/output/productions-full-prod-02-12/run-convert2edepsim-spill-format/sand-events-4/OVERLAY/0000000/drift_fast_digi.root
+echo $outDir/CAF/$subDir
 

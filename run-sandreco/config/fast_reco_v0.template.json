@@ -1,0 +1,44 @@
+{
+  "ufw": {
+    "ufw-loglevel": "debug",
+    "ufw-basepath": "",
+    "ufw-ldpath": [
+      "/usr/local/lib64"
+    ],
+    "ufw-env": {}
+  },
+  "globals": {
+    "sand::root_tgeomanager": {
+      "geometry": ""
+    }
+  },
+  "contexts": {
+    "keys": 1,
+    "locals": {
+      "sand::edep_reader": {
+        "uri": ""
+      },
+      "sand::genie_reader": {
+        "uri": ""
+      }
+    }
+  },
+  "run": [
+    {
+      "sand::fake_reco": {},
+      "reqs": {},
+      "prods": {
+        "output_caf": "produced_caf"
+      }
+    },
+    {
+      "sand::caf::caf_streamer": {
+        "uri": "",
+        "tree": "SR"
+      },
+      "write": [
+        "produced_caf"
+      ]
+    }
+  ]
+}
