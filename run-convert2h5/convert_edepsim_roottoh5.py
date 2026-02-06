@@ -38,7 +38,7 @@ trajectories_dtype = np.dtype([("event_id","u4"), ("vertex_id", "u8"),
                                ("start_subprocess", "i4"), ("end_process", "i4"),
                                ("end_subprocess", "i4"),("dist_travel", "f4")], align=True)
 
-trajpoints_dtype = np.dtype([("event_id","u4"), ("vertex_id","u8"), ("traj_id","i4"),
+trajpoints_dtype = np.dtype([("event_id","u4"), ("vertex_id","u8"), ("traj_id","i4"), ("file_traj_id","u4"),
                              ("x","f4"),("y","f4"),("z","f4"),
                              ("px","f4"),("py","f4"),("pz","f4"),
                              ("process","i4"),("subprocess","i4")])
@@ -281,6 +281,7 @@ def set_trajpoint(point_h5, traj_h5, point_root):
     point_h5['event_id'] = traj_h5['event_id']
     point_h5['vertex_id'] = traj_h5['vertex_id']
     point_h5['traj_id'] = traj_h5['traj_id']
+    point_h5['file_traj_id'] = traj_h5['file_traj_id']
     point_h5['x'] = point_root.GetPosition().X() * edep2cm
     point_h5['y'] = point_root.GetPosition().Y() * edep2cm
     point_h5['z'] = point_root.GetPosition().Z() * edep2cm
