@@ -627,7 +627,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
 
             segments_list.append(segment)
         trajectories_list.append(trajectories[:n_traj])
-        trajpoints_list.append(trajpoints[:n_trajpoints])
+        trajpoints_list.append(trajpoints[:n_trajpoint])
 
         # Save truth information from GENIE
         if genieTree:
