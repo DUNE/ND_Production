@@ -41,7 +41,7 @@ trajectories_dtype = np.dtype([("event_id","u4"), ("vertex_id", "u8"),
 trajpoints_dtype = np.dtype([("event_id","u4"), ("vertex_id","u8"), ("traj_id","i4"),
                              ("x","f4"),("y","f4"),("z","f4"),
                              ("px","f4"),("py","f4"),("pz","f4"),
-                             ("process","i4"),("subprocess","i4"),("material", "S32")])
+                             ("process","i4"),("subprocess","i4")])
 
 vertices_dtype = np.dtype([("event_id","u4"), ("vertex_id","u8"),
                            ("x_vert","f4"), ("y_vert","f4"), ("z_vert","f4"),
@@ -289,7 +289,6 @@ def set_trajpoint(point_h5, traj_h5, point_root):
     point_h5['pz'] = point_root.GetPosition().Z()
     point_h5['process'] = point_root.GetProcess()
     point_h5['subprocess'] = point_root.GetSubprocess()               
-    point_h5['material'] = point_root.GetMaterial()
 
 
 # Read a file and dump it.
