@@ -40,7 +40,7 @@ trajectories_dtype = np.dtype([("event_id","u4"), ("vertex_id", "u8"),
 
 trajpoints_dtype = np.dtype[("event_id","u4"), ("vertex_id","u8"), ("traj_id","i4"),
                             ("x","f4"),("y","f4"),("z","f4"),
-                            ("px","f4"),("py","f4"),("pz","f4")
+                            ("px","f4"),("py","f4"),("pz","f4"),
                             ("process","i4"),("subprocess","i4"),("material", "S32")]
 
 vertices_dtype = np.dtype([("event_id","u4"), ("vertex_id","u8"),
@@ -230,20 +230,26 @@ def getReactionCode(genie_str):
 def initHDF5File(output_file):
     with h5py.File(output_file, 'w') as f:
         f.create_dataset('trajectories', (0,), dtype=trajectories_dtype, maxshape=(None,))
+        f.create_dataset('trajpoints', (0,), dtype=trajpoints_dtype, maxshape=(None,))
         f.create_dataset('segments', (0,), dtype=segments_dtype, maxshape=(None,))
         f.create_dataset('vertices', (0,), dtype=vertices_dtype, maxshape=(None,))
         f.create_dataset('mc_stack', (0,), dtype=genie_stack_dtype, maxshape=(None,))
         f.create_dataset('mc_hdr', (0,), dtype=genie_hdr_dtype, maxshape=(None,))
 
 # Resize HDF5 file and save output arrays
-def updateHDF5File(output_file, trajectories, segments, vertices, genie_s, genie_h):
-    if any([len(trajectories), len(segments), len(vertices), len(genie_s), len(genie_h)]):
+def updateHDF5File(output_file, trajectories, trajpoints, segments, vertices, genie_s, genie_h):
+    if any([len(trajectories), len(trajpoints), len(segments), len(vertices), len(genie_s), len(genie_h)]):
         with h5py.File(output_file, 'a') as f:
             if len(trajectories):
                 ntraj = len(f['trajectories'])
                 f['trajectories'].resize((ntraj+len(trajectories),))
                 f['trajectories'][ntraj:] = trajectories
 
+            if len(trajpoints):
+                ntrajpoints = len(f['trajpoints'])
+                f['trajpoints'].resize((ntrajpoints+len(trajpoints),))
+                f['trajpoints'][ntrajpoints:] = trajpoints
+  
             if len(segments):
                 nseg = len(f['segments'])
                 f['segments'].resize((nseg+len(segments),))
@@ -370,12 +376,14 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
             updateHDF5File(
                 output_file,
                 np.concatenate(trajectories_list, axis=0) if trajectories_list else np.empty((0,)),
+                np.concatenate(trajpoints_list, axis=0) if trajpoints_list else np.empty((0,)),
                 np.concatenate(segments_list, axis=0) if segments_list else np.empty((0,)),
                 np.concatenate(vertices_list, axis=0) if vertices_list else np.empty((0,)),
                 np.concatenate(genie_stack_list, axis=0) if genie_stack_list else np.empty((0,)),
                 np.concatenate(genie_hdr_list, axis=0) if genie_hdr_list else np.empty((0,)))
 
             trajectories_list = list()
+            trajpoints_list = list()
             segments_list = list()
             vertices_list = list()
             genie_hdr_list = list()
@@ -399,6 +407,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
 
         # Count total number of vertices and trajectories
         n_traj = 0
+        n_trajpoints = 0
         all_traj_ids = set()
         trajMap = {}
         if is_mpvmpr:
@@ -429,6 +438,8 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
 
         # Dump the trajectories
         trajectories = np.full(len(event.Trajectories), np.iinfo(trajectories_dtype['traj_id']).max, dtype=trajectories_dtype)
+        trajpoints = np.zeros(sum(len(traj.Points) for traj in event.Trajectories),
+                              dtype=trajpoints_dtype)
         for iTraj, trajectory in enumerate(event.Trajectories):
             fileTrackID = trackCounter
             trackCounter += 1
@@ -469,6 +480,9 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                 trajectories[n_traj]["dist_travel"]=0
                 for i in range(len(trajectory.Points)-1):
                     trajectories[n_traj]["dist_travel"]+=(trajectory.Points[i].GetPosition()-trajectory.Points[i+1].GetPosition()).Vect().Mag()* edep2cm
+                for i in range(len(trajectory.Points)):
+                    trajpoints[n_trajpoints]['x] = ...
+                    
 
                 all_traj_ids.add(trajectory.GetTrackId())
                 trajMap[trajectory.GetTrackId()] = n_traj
