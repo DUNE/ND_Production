@@ -38,6 +38,11 @@ trajectories_dtype = np.dtype([("event_id","u4"), ("vertex_id", "u8"),
                                ("start_subprocess", "i4"), ("end_process", "i4"),
                                ("end_subprocess", "i4"),("dist_travel", "f4")], align=True)
 
+trajpoints_dtype = np.dtype[("event_id","u4"), ("vertex_id","u8"), ("traj_id","i4"),
+                            ("x","f4"),("y","f4"),("z","f4"),
+                            ("px","f4"),("py","f4"),("pz","f4")
+                            ("process","i4"),("subprocess","i4"),("material", "S32")]
+
 vertices_dtype = np.dtype([("event_id","u4"), ("vertex_id","u8"),
                            ("x_vert","f4"), ("y_vert","f4"), ("z_vert","f4"),
                            ("t_vert","f8"), ("t_event","f8")], align=True)
