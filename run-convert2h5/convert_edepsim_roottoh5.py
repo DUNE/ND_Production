@@ -332,6 +332,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
 
     segments_list = list()
     trajectories_list = list()
+    trajpoints_list = list()
     vertices_list = list()
     genie_stack_list = list()
     genie_hdr_list = list()
@@ -481,9 +482,19 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                 for i in range(len(trajectory.Points)-1):
                     trajectories[n_traj]["dist_travel"]+=(trajectory.Points[i].GetPosition()-trajectory.Points[i+1].GetPosition()).Vect().Mag()* edep2cm
                 for i in range(len(trajectory.Points)):
-                    trajpoints[n_trajpoints]['x] = ...
-                    
-
+                    trajpoints[n_trajpoints]['event_id'] = trajectories[n_traj]['event_id']
+                    trajpoints[n_trajpoints]['vertex_id'] = trajectories[n_traj]['vertex_id']
+                    trajpoints[n_trajpoints]['traj_id'] = trajectories[n_traj]['traj_id']
+                    trajpoints[n_trajpoints]['x'] = trajectory.Points[i].GetPosition().X() * edep2cm
+                    trajpoints[n_trajpoints]['y'] = trajectory.Points[i].GetPosition().Y() * edep2cm
+                    trajpoints[n_trajpoints]['z'] = trajectory.Points[i].GetPosition().Z() * edep2cm
+                    trajpoints[n_trajpoints]['px'] = trajectory.Points[i].GetMomentum().X()
+                    trajpoints[n_trajpoints]['py'] = trajectory.Points[i].GetPosition().Y()
+                    trajpoints[n_trajpoints]['pz'] = trajectory.Points[i].GetPosition().Z()
+                    trajpoints[n_trajpoints]['process'] = trajectory.Points[i].GetProcess()
+                    trajpoints[n_trajpoints]['subprocess'] = trajectory.Points[i].GetSubprocess()               
+                    trajpoints[n_trajpoints]['material'] = trajectory.Points[i].GetMaterial()
+                
                 all_traj_ids.add(trajectory.GetTrackId())
                 trajMap[trajectory.GetTrackId()] = n_traj
                 n_traj += 1
