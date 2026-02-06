@@ -424,7 +424,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
 
         # Count total number of vertices and trajectories
         n_traj = 0
-        n_trajpoints = 0
+        n_trajpoint = 0
         all_traj_ids = set()
         trajMap = {}
         if is_mpvmpr:
