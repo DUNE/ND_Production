@@ -276,6 +276,22 @@ def updateHDF5File(output_file, trajectories, trajpoints, segments, vertices, ge
             else:
                 del f['mc_hdr']
 
+
+def set_trajpoint(point_h5, traj_h5, point_root):
+    point_h5['event_id'] = traj_h5['event_id']
+    point_h5['vertex_id'] = traj_h5['vertex_id']
+    point_h5['traj_id'] = traj_h5['traj_id']
+    point_h5['x'] = point_root.GetPosition().X() * edep2cm
+    point_h5['y'] = point_root.GetPosition().Y() * edep2cm
+    point_h5['z'] = point_root.GetPosition().Z() * edep2cm
+    point_h5['px'] = point_root.GetMomentum().X()
+    point_h5['py'] = point_root.GetPosition().Y()
+    point_h5['pz'] = point_root.GetPosition().Z()
+    point_h5['process'] = point_root.GetProcess()
+    point_h5['subprocess'] = point_root.GetSubprocess()               
+    point_h5['material'] = point_root.GetMaterial()
+
+
 # Read a file and dump it.
 def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all_dets=False):
 
@@ -482,18 +498,9 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                 for i in range(len(trajectory.Points)-1):
                     trajectories[n_traj]["dist_travel"]+=(trajectory.Points[i].GetPosition()-trajectory.Points[i+1].GetPosition()).Vect().Mag()* edep2cm
                 for i in range(len(trajectory.Points)):
-                    trajpoints[n_trajpoints]['event_id'] = trajectories[n_traj]['event_id']
-                    trajpoints[n_trajpoints]['vertex_id'] = trajectories[n_traj]['vertex_id']
-                    trajpoints[n_trajpoints]['traj_id'] = trajectories[n_traj]['traj_id']
-                    trajpoints[n_trajpoints]['x'] = trajectory.Points[i].GetPosition().X() * edep2cm
-                    trajpoints[n_trajpoints]['y'] = trajectory.Points[i].GetPosition().Y() * edep2cm
-                    trajpoints[n_trajpoints]['z'] = trajectory.Points[i].GetPosition().Z() * edep2cm
-                    trajpoints[n_trajpoints]['px'] = trajectory.Points[i].GetMomentum().X()
-                    trajpoints[n_trajpoints]['py'] = trajectory.Points[i].GetPosition().Y()
-                    trajpoints[n_trajpoints]['pz'] = trajectory.Points[i].GetPosition().Z()
-                    trajpoints[n_trajpoints]['process'] = trajectory.Points[i].GetProcess()
-                    trajpoints[n_trajpoints]['subprocess'] = trajectory.Points[i].GetSubprocess()               
-                    trajpoints[n_trajpoints]['material'] = trajectory.Points[i].GetMaterial()
+                    set_trajpoint(trajpoints[n_trajpoint], trajectories[n_traj], trajectory.Points[i])
+                    n_trajpoint += 1
+
                 
                 all_traj_ids.add(trajectory.GetTrackId())
                 trajMap[trajectory.GetTrackId()] = n_traj
@@ -568,6 +575,11 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                                 sum((trajectory.Points[i].GetPosition()
                                      - trajectory.Points[i+1].GetPosition()).Vect().Mag()
                                     for i in range(len(trajectory.Points)-1))
+
+                            for i in range(len(trajectory.Points)):
+                                set_trajpoint(trajpoints[n_trajpoint], trajectories[n_traj], trajectory.Points[i])
+                                n_trajpoint += 1
+
                             all_traj_ids.add(trajectory.GetTrackId())
                             trajMap[trajectory.GetTrackId()] = n_traj
                             n_traj += 1
@@ -616,6 +628,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
 
             segments_list.append(segment)
         trajectories_list.append(trajectories[:n_traj])
+        trajpoints_list.append(trajpoints[:n_trajpoints])
 
         # Save truth information from GENIE
         if genieTree:
