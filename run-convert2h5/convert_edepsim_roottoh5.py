@@ -286,8 +286,8 @@ def set_trajpoint(point_h5, traj_h5, point_root):
     point_h5['y'] = point_root.GetPosition().Y() * edep2cm
     point_h5['z'] = point_root.GetPosition().Z() * edep2cm
     point_h5['px'] = point_root.GetMomentum().X()
-    point_h5['py'] = point_root.GetPosition().Y()
-    point_h5['pz'] = point_root.GetPosition().Z()
+    point_h5['py'] = point_root.GetMomentum().Y()
+    point_h5['pz'] = point_root.GetMomentum().Z()
     point_h5['process'] = point_root.GetProcess()
     point_h5['subprocess'] = point_root.GetSubprocess()               
 
