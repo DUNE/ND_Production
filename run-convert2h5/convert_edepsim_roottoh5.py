@@ -724,6 +724,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
     updateHDF5File(
         output_file,
         np.concatenate(trajectories_list, axis=0) if trajectories_list else np.empty((0,)),
+        np.concatenate(trajpoints_list, axis=0) if trajpoints_list else np.empty((0,)),
         np.concatenate(segments_list, axis=0) if segments_list else np.empty((0,)),
         np.concatenate(vertices_list, axis=0) if vertices_list else np.empty((0,)),
         np.concatenate(genie_stack_list, axis=0) if genie_stack_list else np.empty((0,)),
