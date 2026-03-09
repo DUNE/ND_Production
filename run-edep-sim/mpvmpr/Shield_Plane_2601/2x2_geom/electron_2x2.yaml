@@ -1,0 +1,13 @@
+Generator1:
+  NumEvent: [1,1]
+  NumParticle: [1,1]
+  XRange: [-640, 640] #mm
+  YRange: [-620, 620] #mm
+  ZRange: [-650, 650] #mm
+  TRange: [0, 0] #ns
+
+  Particles:
+    -
+      PDG:      [11]
+      NumRange: [1, 1]
+      KERange:  [0.5, 10]
