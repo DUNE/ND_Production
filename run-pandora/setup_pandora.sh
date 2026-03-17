@@ -23,12 +23,12 @@ export ND_PRODUCTION_PANDORA_BASEDIR=${ND_PRODUCTION_DIR}/run-pandora
 export ND_PRODUCTION_PANDORA_INSTALL=${ND_PRODUCTION_PANDORA_BASEDIR}/install
 
 # Pandora package versions
-export ND_PRODUCTION_PANDORA_PFA_VERSION=v04-16-00
-export ND_PRODUCTION_PANDORA_SDK_VERSION=v04-00-00
-export ND_PRODUCTION_PANDORA_MONITORING_VERSION=v04-00-00
-export ND_PRODUCTION_PANDORA_LAR_CONTENT_VERSION=v04_16_00
-export ND_PRODUCTION_PANDORA_LAR_MLDATA_VERSION=v04-16-00
-export ND_PRODUCTION_PANDORA_LAR_RECO_ND_VERSION=v01-02-02
+export ND_PRODUCTION_PANDORA_PFA_VERSION=v04-19-02
+export ND_PRODUCTION_PANDORA_SDK_VERSION=v04-01-00
+export ND_PRODUCTION_PANDORA_MONITORING_VERSION=v04-00-03
+export ND_PRODUCTION_PANDORA_LAR_CONTENT_VERSION=v04_19_02
+export ND_PRODUCTION_PANDORA_LAR_MLDATA_VERSION=v04-19-03
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_VERSION=v01-04-00
 
 # Relative path used by Pandora packages
 export MY_TEST_AREA=${ND_PRODUCTION_PANDORA_INSTALL}
@@ -55,7 +55,21 @@ else
   export ND_PRODUCTION_PANDORA_GEOM=${ND_PRODUCTION_PANDORA_INSTALL}/LArRecoND/${GDMLName}.root
 fi
 
-# Specify LArRecoND input data format: SP (SpacePoint data) or SPMC (SpacePoint MC)
+# Set LArRecoND input data format: SP (SpacePoint data) or SPMC (SpacePoint MC)
 export ND_PRODUCTION_PANDORA_INPUT_FORMAT=SPMC
+
+# Set LArRecoND Pandora workflow settings xml files for the reconstruction & outerface (track/shower PID).
+# ND-LAr cheated workflows require the SPMC format since they need the MC truth info
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/settings/PandoraSettings_LArRecoND_ThreeD_PartialCheated.xml
+# Nominal 3D reco settings without cheating (for 2x2)
+#export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/settings/PandoraSettings_LArRecoND_ThreeD.xml
+# Pandora Outerface
+export ND_PRODUCTION_PANDORA_OUTERFACE_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/settings/PandoraSettings_Outerface_Voxelize.xml
+
+# Set LArRecoND run option: AllHitsSliceNu (recommended), AllHitsSliceCR, Full, AllHitsCR, AllHitsNu, CRRemHitsSliceCR, CRRemHitsSliceNu
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_RUN_OPTION=AllHitsSliceNu
+
+# Set LArRecoND view option: both (recommended), 3d, lartpc
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_VIEW_OPTION=both
 
 set -o errexit
