@@ -24,10 +24,15 @@ inFile=${ND_PRODUCTION_FLOW_DIR_BASE}/${relDir}/${inName}
 rm -f "$outFile"
 
 isData=1
-isFinal=${ND_PRODUCTION_USE_FINAL_HITS:-1}
+# Switch on whether to use prompt, final or merged hits (defaults to merged)
+# 0 = prompt, 1 = final, 2 = merged
+isFinal=${ND_PRODUCTION_USE_FINAL_HITS:-2}
+
+# Select legacy mode (0 = no legacy, 1 = samples before MiniRun6, 2 = samples from MiniRun6 but no usec time)
+legacyMode=0
 
 source $ND_PRODUCTION_PANDORA_INSTALL/pandora.venv/bin/activate
-run python3 $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile $isData $isFinal ${outFile}.firstStep.root
+run python3 $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile $isData $isFinal $legacyMode ${outFile}.firstStep.root
 run root -l -q $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/rootToRootConversion.C+\(false,\"${outFile}.firstStep.root\",\"${outFile}\"\)
 rm ${outFile}.firstStep.root
 deactivate
