@@ -90,11 +90,11 @@ cd $ND_PRODUCTION_PANDORA_INSTALL
 git clone https://github.com/PandoraPFA/LArMachineLearningData.git
 cd LArMachineLearningData
 git checkout $ND_PRODUCTION_PANDORA_LAR_MLDATA_VERSION
-# # Download training files: only do this once to avoid google drive's access restrictions (up to 24 hrs wait)
-# . download.sh sbnd
-# . download.sh dune
-# . download.sh dunend
-cp -r /global/cfs/cdirs/dune/www/data/pandora/LArMachineLearningData/* .
+# Download MLData files from CERNBox:
+source download.sh dunend
+source download.sh dune lbl
+source download.sh uboone
+#cp -r /global/cfs/cdirs/dune/www/data/pandora/LArMachineLearningData/* .
 
 # Install h5flow for converting HDF5 input files to ROOT for LArRecoND
 cd $ND_PRODUCTION_PANDORA_INSTALL
