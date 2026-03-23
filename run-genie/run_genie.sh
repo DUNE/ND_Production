@@ -40,9 +40,15 @@ pushd "$tmpDir"
 
 rm -f "$genieOutPrefix".*
 
+fluxArgs="$dk2nuFile,$ND_PRODUCTION_DET_LOCATION"
+
+if [ -n "$ND_PRODUCTION_GENIE_NU_FLAVORS" ]; then
+    fluxArgs="$fluxArgs,$ND_PRODUCTION_GENIE_NU_FLAVORS"
+fi
+
 args_gevgen_fnal=( \
     -e "$ND_PRODUCTION_EXPOSURE" \
-    -f "$dk2nuFile,$ND_PRODUCTION_DET_LOCATION" \
+    -f "$fluxArgs" \
     -g "$geomFile" \
     -r "$runNo" \
     -L cm -D g_cm3 \
