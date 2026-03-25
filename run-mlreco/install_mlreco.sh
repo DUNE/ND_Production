@@ -33,7 +33,8 @@ rm virtualenv.pyz
 source mlreco.venv/bin/activate
 # setuptools 70 doesn't like SparseConvNet
 # (pkg_resources.packaging is the culprit)
-pip install --upgrade pip setuptools==69 wheel
+# also SuperaAtomic uses the deprecated bdist_wheel so pip >= 25.3 won't work
+pip install --upgrade pip==25.2 setuptools==69 wheel
 # pip install 'ruamel.yaml<0.18.0' # for deprecated load()
 
 ## Need the following?

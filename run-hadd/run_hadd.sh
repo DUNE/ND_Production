@@ -6,7 +6,11 @@ source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 # e.g. hadd'ed file 123 comes from genie files 1230 -> 1239
-# so the input (GENIE) subdir is 0001200
+# so the input (GENIE) subdir is 0001200, an ND_PRODUCTION_HADD_FACTOR of 10 is assumed.
+if [ "$ND_PRODUCTION_HADD_FACTOR" != "10" ]; then  
+  echo "For now, ND_PRODUCTION_HADD_FACTOR must be 10."
+  exit
+fi
 inSubDir=$(printf "%07d" $((ND_PRODUCTION_INDEX / 100 * 1000)))
 inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-edep-sim/$ND_PRODUCTION_IN_NAME/EDEPSIM/$inSubDir
 tmpfile=$(mktemp)

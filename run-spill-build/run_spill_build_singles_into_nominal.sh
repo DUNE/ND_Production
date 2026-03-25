@@ -11,6 +11,9 @@ echo "outName is $outName"
 
 spillsInDir=$ND_PRODUCTION_OUTDIR_BASE/run-spill-build/$ND_PRODUCTION_SPILL_NAME
 singlesInDir=$ND_PRODUCTION_OUTDIR_BASE/run-hadd/$ND_PRODUCTION_SINGLES_NAME
+if [[ "$ND_PRODUCTION_NO_HADD" == "1" ]]; then
+  singlesInDir=$ND_PRODUCTION_OUTDIR_BASE/run-edep-sim/$ND_PRODUCTION_SINGLES_NAME
+fi
 
 spillsInFile=$spillsInDir/EDEPSIM_SPILLS/$subDir/${spillsName}.EDEPSIM_SPILLS.root
 singlesInFile=$singlesInDir/EDEPSIM/$subDir/${singlesName}.EDEPSIM.root
