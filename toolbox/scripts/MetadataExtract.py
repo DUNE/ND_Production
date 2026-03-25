@@ -150,9 +150,12 @@ def _EventHelperGenie(filename) :
 def _EventHelperEdepSim(filename) :
 
     first = last = total = -1
- 
-    file  = ROOT.TFile(filename, "READ") 
-    file.MakeProject('EDepSimEvents',"*", "RECREATE++")
+    file  = ROOT.TFile(filename, "READ")
+
+    if os.path.exists('EDepSimEvents/EDepSimEvents.so') :
+       ROOT.gSystem.Load('EDepSimEvents/EDepSimEvents.so')
+    else :
+       file.MakeProject('EDepSimEvents',"*", "RECREATE++")
 
     events = file.Get('EDepSimEvents')
     total  = events.GetEntries()
@@ -163,7 +166,6 @@ def _EventHelperEdepSim(filename) :
         elif e == total-1 : last = event.EventId
 
     file.Close()
-    shutil.rmtree('EDepSimEvents')
 
     return int(first), int(last), int(total)
 
@@ -205,6 +207,8 @@ def _EventHelperTree(filename,treename) :
     tree.GetEntry( total - 1 )
     last  = tree.event
 
+    file.Close()
+
     return int(first), int(last), int(total)
 
 
@@ -239,9 +243,10 @@ def _EventHelper(filename,workflow) :
 #+++++++++++++++++++++++++++++
 # get the application family
 #+++++++++++++++++++++++++++++
-def _GetApplicationFamily() :
+def _GetApplicationFamily(filename) :
     if DATA_TIER.find("genie") != -1 :
-       return "genie"
+       family_name = "genie_gtrac" if filename.find("GTRAC") != -1 else "genie_ghep"
+       return family_name
     elif DATA_TIER == "edep-sim" :
        return 'geant4_edep_sim'
     elif DATA_TIER.find("spill-builder") != -1 or DATA_TIER.find("convert2h5") != -1 : 
@@ -351,7 +356,7 @@ def _GetMetadata(metadata_blocks,filename,workflow) :
     return_md['dune.config_file']         = _GetConfigFiles(workflow)
     return_md['dune.workflow']            = { 'workflow_id' : JUSTIN_WORKFLOW_ID, 'site_name' : JUSTIN_SITE_NAME }
     return_md['dune.output_status']       = "good"
-    return_md['core.application.family']  = _GetApplicationFamily()
+    return_md['core.application.family']  = _GetApplicationFamily(filename)
     return_md['core.application.name']    = str(os.environ.get('APPLICATION_NAME')) if 'APPLICATION_NAME' in os.environ else ""
     return_md['core.application.version'] = SOFTWARE
     return_md['retention.status']         = 'active'

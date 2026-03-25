@@ -21,7 +21,7 @@ def _HelpMenu() :
 
     # 2x2 job parameters
     parser.add_option("-d", "--dataset", dest="dataset", type="string", default=None, help="name of the Metacat dataset [not required when running GENIE]")
-    parser.add_option("-s", "--software", dest="software", type="string", default="v00_00_01d0", help="software release for processing [default: %default]")
+    parser.add_option("-s", "--software", dest="software", type="string", default="v1.6.0", help="software release for processing [default: %default]")
     parser.add_option("-n", "--nfiles", dest="nfiles", type="int", default=-1, help="the number of files to process in the dataset or generate in a submission job [default is all files in the dataset]") 
     parser.add_option("-e", "--nevts", dest="nevts", type="int", default=-1, help="the number of events to process in the option file [default is all events per file]")
     parser.add_option("-j", "--jobscript", dest="jobscript", type="string", default="NDLarFlowProduction.jobscript", help="name of the job processing script [default: %default]")

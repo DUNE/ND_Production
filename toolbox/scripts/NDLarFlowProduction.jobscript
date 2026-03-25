@@ -289,6 +289,7 @@ fi
 echo -e "\nSetup and enter the miniforge conda environment for the software release [${TWOBYTWO_RELEASE}]" 2>&1 | tee -a $envlog
 echo -e "\tRunning [ source ${CVMFS_TWOBYTWO_DIR}/miniforge/${EXTERNAL_RELEASE}/miniforge3/etc/profile.d/conda.sh ]" 2>&1 | tee -a $envlog
 
+unset PYTHONHOME
 source ${CVMFS_TWOBYTWO_DIR}/miniforge/${EXTERNAL_RELEASE}/miniforge3/etc/profile.d/conda.sh
 source ${CVMFS_TWOBYTWO_DIR}/miniforge/${EXTERNAL_RELEASE}/conda_envs/conda.envs.sh
 

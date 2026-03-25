@@ -8,7 +8,7 @@
 #++++++++++++++++++++++++++++++++++++++++
 # setup environment variables 
 #++++++++++++++++++++++++++++++++++++++++
-export EXTERNAL_RELEASE="v25.3.0-3"
+export EXTERNAL_RELEASE="v26.1.0-0"
 
 export CVMFS_TWOBYTWO_DIR="/cvmfs/dune.opensciencegrid.org/dunend/2x2/"
 export CVMFS_WORKING_DIR="${CVMFS_TWOBYTWO_DIR}/releases/${TWOBYTWO_RELEASE}"
