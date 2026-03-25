@@ -13,8 +13,8 @@ overlayFile=$overlayDir/OVERLAY/$subDir/${overlayName}.OVERLAY.root
 echo "input file is $overlayFile"
 
 # set output path
-CAFfile=$tmpOutDir/${outName}.CAF.root
-rm -f "$CAFfile"
+SANDRECOfile=$tmpOutDir/${outName}.CAF.root
+rm -f "$SANDRECOfile"
 
 # export some useful variables for json configuration
 export overlayName
@@ -27,8 +27,8 @@ python3 config/config_json.py
 run ufwrun config/config_sandreco.json
 
 # to follow the naming convention
-mkdir -p "$outDir/CAF/$subDir"
-mv "$CAFfile" "$outDir/CAF/$subDir/$outName.CAF.root"
+mkdir -p "$outDir/SANDRECO/$subDir"
+mv "$SANDRECOfile" "$outDir/SANDRECO/$subDir/$outName.SANDRECO.root"
 
-echo "output file is $outDir/CAF/$subDir/$outName.CAF.root"
+echo "output file is $outDir/SANDRECO/$subDir/$outName.SANDRECO.root"
 

@@ -34,7 +34,7 @@
     {
       "sand::caf::caf_streamer": {
         "uri": "",
-        "tree": "SR"
+        "tree": "cafTree"
       },
       "write": [
         "produced_caf"
