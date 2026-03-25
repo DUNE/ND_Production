@@ -256,14 +256,16 @@ def updateHDF5File(output_file, trajectories, segments, vertices, genie_s, genie
             else:
                 # larnd-sim expects either full or nonexistent MC datasets
                 # not empty ones
-                del f['mc_stack']
+                if 'mc_stack' in f:
+                    del f['mc_stack']
 
             if len(genie_h):
                 ngenie_h = len(f['mc_hdr'])
                 f['mc_hdr'].resize((ngenie_h+len(genie_h),))
                 f['mc_hdr'][ngenie_h:] = genie_h
             else:
-                del f['mc_hdr']
+                if 'mc_hdr' in f:
+                    del f['mc_hdr']
 
 # Read a file and dump it.
 def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all_dets=False):
