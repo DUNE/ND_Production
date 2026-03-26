@@ -111,7 +111,7 @@ def _EventHelperHdf5(filenmame,workflow) :
 
     dataset = '%s/events/data' % workflow
     if workflow == "combined" :
-       dataset = 'combined/t0/data'
+       dataset = 'charge/events/data'
 
     first = last = total = -1
 
