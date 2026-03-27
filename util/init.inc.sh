@@ -8,8 +8,11 @@ source "$(dirname "${BASH_SOURCE[0]}")/prelude.inc.sh"
 # The root of ND_Production:
 baseDir=$(realpath "$PWD"/..)
 
+isMC=$([[ -n $ND_PRODUCTION_INDEX ]] && echo 1)
+
 # Start seeds at 1 instead of 0, just in case GENIE does something
 # weird when given zero (e.g. use the current time)
+ND_PRODUCTION_INDEX=${ND_PRODUCTION_INDEX:-0}
 seed=$((1 + ND_PRODUCTION_INDEX))
 echo "Seed is $seed"
 
@@ -41,16 +44,36 @@ export ND_PRODUCTION_INSTALL_DIR=${ND_PRODUCTION_INSTALL_DIR:-$PWD}
 
 stepname=$(basename "$PWD")
 
+if [[ -n $isMC ]]; then
+    subDir=$(printf "%07d" $((ND_PRODUCTION_INDEX / 1000 * 1000)))
+else
+    export ND_PRODUCTION_DATA_FILE=$ND_PRODUCTION_CHARGE_FILE
+    [[ -z $ND_PRODUCTION_DATA_FILE ]] && export ND_PRODUCTION_DATA_FILE=$ND_PRODUCTION_LIGHT_FILE
+    if [[ -z $ND_PRODUCTION_DATA_FILE ]]; then
+        echo "Please set either ND_PRODUCTION_INDEX (for MC) or ND_PRODUCTION_CHARGE_FILE or ND_PRODUCTION_LIGHT_FILE (for data)"
+        exit 1
+    fi
+    subDir=${ND_PRODUCTION_DATA_FILE##"$ND_PRODUCTION_INDIR_BASE"}
+fi
+
 outDir=$ND_PRODUCTION_OUTDIR_BASE/${stepname}/$ND_PRODUCTION_OUT_NAME
 echo "outDir is $outDir"
-outName=$ND_PRODUCTION_OUT_NAME.$globalIdx
-echo "outName is $outName"
 mkdir -p "$outDir"
+
+if [[ -n $isMC ]]; then
+    outName=$ND_PRODUCTION_OUT_NAME.$globalIdx
+    inName=$ND_PRODUCTION_IN_NAME.$globalIdx
+else
+    dataExt=${ND_PRODUCTION_DATA_FILE##*.}
+    fileId=$(basename "$ND_PRODUCTION_DATA_FILE" "$dataExt")
+    outName=$ND_PRODUCTION_OUT_NAME.$fileId
+    inName=$ND_PRODUCTION_IN_NAME.$fileId
+fi
+
+echo "outName is $outName"
 
 tmpOutDir=$ND_PRODUCTION_OUTDIR_BASE/tmp/$stepname/$ND_PRODUCTION_OUT_NAME
 mkdir -p "$tmpOutDir"
-
-subDir=$(printf "%07d" $((ND_PRODUCTION_INDEX / 1000 * 1000)))
 
 logBase=$ND_PRODUCTION_LOGDIR_BASE/$stepname/$ND_PRODUCTION_OUT_NAME
 echo "logBase is $logBase"

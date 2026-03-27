@@ -1,24 +1,18 @@
 #!/usr/bin/env bash
 
 source ../util/reload_in_container.inc.sh
-source ../util/init.data.inc.sh
+source ../util/init.inc.sh
 
 source load_mlreco.inc.sh
 
-[ -z "$ND_PRODUCTION_FLOW2SUPERA_CONFIG" ] && export ND_PRODUCTION_FLOW2SUPERA_CONFIG="2x2_data"
+inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/${ND_PRODUCTION_IN_NAME}/FLOW/${subDir}/${inName}.FLOW.hdf5
 
-outName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).LARCV.root
-outFile=${tmpOutDir}/${outName}
-
-inName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).FLOW.hdf5
-inFile=${ND_PRODUCTION_FLOW_DIR_BASE}/${relDir}/${inName}
-
-config=$ND_PRODUCTION_FLOW2SUPERA_CONFIG
-
+mkdir -p $tmpOutDir/$subDir
+outFile=$tmpOutDir/$subDir/$outName.LARCV.root
 rm -f "$outFile"
 
+config=$ND_PRODUCTION_FLOW2SUPERA_CONFIG
 run install/flow2supera/bin/run_flow2supera.py -o "$outFile" -c "$config" "$inFile"
 
-mv "${outFile}" "${outDir}"
-
-echo "Written to $(realpath "${outDir}/$(basename "$outFile")")"
+mkdir -p "$outDir/LARCV/$subDir"
+mv "${outFile}" "${outDir}/LARCV/$subDir"
