@@ -37,6 +37,12 @@ pip install --upgrade pip setuptools wheel
 
 pip install pyyaml-include==1.3.2
 
+# install larpix-control (needed for binary->packet conversion of raw data)
+git clone -b release https://github.com/larpix/larpix-control.git
+cd larpix-control
+pip install -e .
+cd ..
+
 # install h5flow
 git clone -b main https://github.com/DUNE/h5flow.git
 cd h5flow
