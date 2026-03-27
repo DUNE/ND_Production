@@ -4,7 +4,7 @@ source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 source flow.venv/bin/activate
-cd install/ndlar_flow
+cd ndlar_flow
 
 chargef=$ND_PRODUCTION_CHARGE_FILE
 # split $ND_PRODUCTION_LIGHT_FILES into an array $lightfs
