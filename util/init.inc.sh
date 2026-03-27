@@ -65,7 +65,7 @@ if [[ -n $isMC ]]; then
     inName=$ND_PRODUCTION_IN_NAME.$globalIdx
 else
     dataExt=${ND_PRODUCTION_DATA_FILE##*.}
-    fileId=$(basename "$ND_PRODUCTION_DATA_FILE" "$dataExt")
+    fileId=$(basename "$ND_PRODUCTION_DATA_FILE" ".$dataExt")
     outName=$ND_PRODUCTION_OUT_NAME.$fileId
     inName=$ND_PRODUCTION_IN_NAME.$fileId
 fi
