@@ -54,6 +54,7 @@ else
         exit 1
     fi
     subDir=${ND_PRODUCTION_DATA_FILE##"$ND_PRODUCTION_INDIR_BASE"}
+    subDir=${subDir#/}          # strip leading slash, if any
 fi
 
 outDir=$ND_PRODUCTION_OUTDIR_BASE/${stepname}/$ND_PRODUCTION_OUT_NAME
