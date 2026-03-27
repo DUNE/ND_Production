@@ -30,7 +30,7 @@ if [[ "$ND_PRODUCTION_COMPRESS" != "" ]]; then
 fi
 
 get_range() {
-    ../../scripts/get_light_event_range.py \
+    run ../../scripts/get_light_event_range.py \
         --workflow "$workflow_light_event_build" \
         --chargef "$input_chargef" \
         --first-lightf "$(realpath "${lightfs[0]}")" \
@@ -52,19 +52,19 @@ if [[ -n "${lightfs[*]}" ]]; then
 
        workflows=$ND_PRODUCTION_LIGHT_EVTBUILD_WORKFLOWS
        # DO NOT QUOTE THE workflows ARRAY; we want it to be split
-       $h5flow -i "$(realpath "$lightf")" -o "$outf" -c ${workflows[@]} "${extra_args[@]}"
+       run $h5flow -i "$(realpath "$lightf")" -o "$outf" -c ${workflows[@]} "${extra_args[@]}"
     done
 
     if [[ -n "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS" ]]; then
         workflows=$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS
         # DO NOT QUOTE THE workflows ARRAY; we want it to be split
-        $h5flow -i "$outf" -o "$outf" -c ${workflows[@]}
+        run $h5flow -i "$outf" -o "$outf" -c ${workflows[@]}
     fi
 fi
 
 workflows="$ND_PRODUCTION_CHARGE_EVTBUILD_WORKFLOWS $ND_PRODUCTION_CHARGE_RECO_WORKFLOWS"
 # DO NOT QUOTE THE workflows ARRAY; we want it to be split
-$h5flow -i "$input_chargef" -o "$outf" -c ${workflows[@]}
+run $h5flow -i "$input_chargef" -o "$outf" -c ${workflows[@]}
 
 if [[ -n "$ND_PRODUCTION_RUN_BINARY2PACKET" ]]; then
     rm "$input_chargef"
@@ -73,7 +73,7 @@ fi
 if [[ -n "${lightfs[*]}" ]]; then
     workflows=$ND_PRODUCTION_CLMATCH_WORKFLOWS
     # DO NOT QUOTE THE workflows ARRAY; we want it to be split
-    $h5flow -i "$outf" -o "$outf" -c ${workflows[@]}
+    run $h5flow -i "$outf" -o "$outf" -c ${workflows[@]}
 fi
 
 mkdir -p "$outDir/FLOW/$subDir"
