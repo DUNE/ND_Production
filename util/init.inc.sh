@@ -53,8 +53,7 @@ else
         echo "Please set either ND_PRODUCTION_INDEX (for MC) or ND_PRODUCTION_CHARGE_FILE or ND_PRODUCTION_LIGHT_FILE (for data)"
         exit 1
     fi
-    subDir=${ND_PRODUCTION_DATA_FILE##"$ND_PRODUCTION_INDIR_BASE"}
-    subDir=${subDir#/}          # strip leading slash, if any
+    subDir=$(dirname ${ND_PRODUCTION_DATA_FILE##"$ND_PRODUCTION_INDIR_BASE"})
 fi
 
 outDir=$ND_PRODUCTION_OUTDIR_BASE/${stepname}/$ND_PRODUCTION_OUT_NAME
