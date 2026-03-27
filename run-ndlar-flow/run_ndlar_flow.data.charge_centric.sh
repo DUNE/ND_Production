@@ -51,12 +51,14 @@ if [[ -n "${lightfs[*]}" ]]; then
        fi
 
        workflows=$ND_PRODUCTION_LIGHT_EVTBUILD_WORKFLOWS
-       $h5flow -i "$(realpath "$lightf")" -o "$outf" -c "${workflows[@]}" "${extra_args[@]}"
+       # DO NOT QUOTE THE workflows ARRAY; we want it to be split
+       $h5flow -i "$(realpath "$lightf")" -o "$outf" -c ${workflows[@]} "${extra_args[@]}"
     done
 
     if [[ -n "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS" ]]; then
         workflows=$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS
-        $h5flow -i "$outf" -o "$outf" -c "${workflows[@]}"
+       # DO NOT QUOTE THE workflows ARRAY; we want it to be split
+        $h5flow -i "$outf" -o "$outf" -c ${workflows[@]}
     fi
 fi
 
@@ -69,7 +71,8 @@ fi
 
 if [[ -n "${lightfs[*]}" ]]; then
     workflows=$ND_PRODUCTION_CLMATCH_WORKFLOWS
-    $h5flow -i "$outf" -o "$outf" -c "${workflows[@]}"
+    # DO NOT QUOTE THE workflows ARRAY; we want it to be split
+    $h5flow -i "$outf" -o "$outf" -c ${workflows[@]}
 fi
 
 mkdir -p "$outDir/FLOW/$subDir"
