@@ -17,7 +17,7 @@ rm -f "$outf"
 if [[ -n "$ND_PRODUCTION_RUN_BINARY2PACKET" ]]; then
     input_chargef=$tmpOutDir/$subDir/$outName.PACKET.hdf5
     rm -f "$input_chargef"
-    convert_rawhdf5_to_hdf5.py --direct --input_filename  "$chargef" --output_filename "$input_chargef"
+    run convert_rawhdf5_to_hdf5.py --direct --input_filename  "$chargef" --output_filename "$input_chargef"
 else
     input_chargef=$chargef
 fi

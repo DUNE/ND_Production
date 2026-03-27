@@ -55,6 +55,7 @@ else
     fi
     subDir=$(dirname ${ND_PRODUCTION_DATA_FILE##"$ND_PRODUCTION_INDIR_BASE"})
 fi
+echo "subDir is $subDir"
 
 outDir=$ND_PRODUCTION_OUTDIR_BASE/${stepname}/$ND_PRODUCTION_OUT_NAME
 echo "outDir is $outDir"
