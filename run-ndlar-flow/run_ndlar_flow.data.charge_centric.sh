@@ -57,13 +57,14 @@ if [[ -n "${lightfs[*]}" ]]; then
 
     if [[ -n "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS" ]]; then
         workflows=$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS
-       # DO NOT QUOTE THE workflows ARRAY; we want it to be split
+        # DO NOT QUOTE THE workflows ARRAY; we want it to be split
         $h5flow -i "$outf" -o "$outf" -c ${workflows[@]}
     fi
 fi
 
 workflows="$ND_PRODUCTION_CHARGE_EVTBUILD_WORKFLOWS $ND_PRODUCTION_CHARGE_RECO_WORKFLOWS"
-$h5flow -i "$input_chargef" -o "$outf" -c "${workflows[@]}"
+# DO NOT QUOTE THE workflows ARRAY; we want it to be split
+$h5flow -i "$input_chargef" -o "$outf" -c ${workflows[@]}
 
 if [[ -n "$ND_PRODUCTION_RUN_BINARY2PACKET" ]]; then
     rm "$input_chargef"
