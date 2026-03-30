@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.0.0}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-docker:baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.0.0}
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
@@ -15,7 +15,7 @@ overlayFile=$overlayDir/OVERLAY/$subDir/${overlayName}.OVERLAY.root
 echo "input file is $overlayFile"
 
 # set output path
-SANDRECOfile=$tmpOutDir/${outName}.CAF.root
+SANDRECOfile=$tmpOutDir/${outName}.SANDRECO.root
 rm -f "$SANDRECOfile"
 
 # export some useful variables for json configuration
