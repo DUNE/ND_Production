@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.0.0}
+
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
