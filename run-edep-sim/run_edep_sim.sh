@@ -24,6 +24,13 @@ else
     exit 1
 fi
 
+if [[ -n "$ND_PRODUCTION_CHERRYPICKER_SCRIPT" ]]; then
+    origInputFile=$inputFile
+    inputFile=$tmpOutDir/$(basename "$inputFile" .root).PICKED.root
+    rm -f "$inputFile"
+    python3 "$ND_PRODUCTION_CHERRYPICKER_SCRIPT" -i "$origInputFile" -o "$inputFile"
+fi
+
 edepCode=()
 
 if [[ -n "$inputFile" ]]; then
@@ -56,3 +63,7 @@ run edep-sim -C -g "$ND_PRODUCTION_GEOM_EDEP" -o "$edepRootFile" -e "$nEvents" \
 
 mkdir -p "$outDir/EDEPSIM/$subDir"
 mv "$edepRootFile" "$outDir/EDEPSIM/$subDir"
+
+if [[ -n "$ND_PRODUCTION_CHERRYPICKER_SCRIPT" ]]; then
+    rm "$inputFile"
+fi
