@@ -48,7 +48,7 @@ rm -f "$edepRootFile"
 
 edepCode+=("/edep/runId $runNo")
 
-# The geometry file is given relative to the root of 2x2_sim
+# The geometry file is given relative to the root of ND_Production
 export ND_PRODUCTION_GEOM_EDEP=$baseDir/${ND_PRODUCTION_GEOM_EDEP:-$ND_PRODUCTION_GEOM}
 
 run edep-sim -C -g "$ND_PRODUCTION_GEOM_EDEP" -o "$edepRootFile" -e "$nEvents" \
