@@ -18,6 +18,8 @@ in_file_name = os.environ.get('overlayName')
 nd_prod_out_name = os.environ.get('ND_PRODUCTION_OUT_NAME')
 out_file_name = os.environ.get('outName')
 
+cfg_json_file = os.environ.get('CONFIG_JSON_FILE')
+
 # count the number of input entries, since I want to process all of them
 in_file = f"{nd_prod_out_dir_base}/run-convert2edepsim-spill-format/{nd_prod_in_name}/OVERLAY/{sub_dir}/{in_file_name}.OVERLAY.root"
 tree = "EDepSimEvents"
@@ -49,7 +51,7 @@ config_sandreco['contexts']['locals']['sand::genie_reader']['uri'] = f"{relative
 config_sandreco['run'][1]['sand::caf::caf_streamer']['uri'] = f"{relative_out_dir_path}/tmp/run-sandreco/{nd_prod_out_name}/{out_file_name}.SANDRECO.root"
 
 
-with open(f"{nd_prod_dir}/run-sandreco/config/config_sandreco.json", mode="w", encoding="utf-8") as write_file:
+with open(f"{cfg_json_file}", mode="w", encoding="utf-8") as write_file:
     json.dump(config_sandreco, write_file, indent=2)
 
 
