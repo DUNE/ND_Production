@@ -1,0 +1,182 @@
+# ===============
+# mpvmpr_cfg.yaml
+# ===============
+
+## Used MiniProdN5p2 Genie GTRAC (fiducial LAr)
+## - Uniform directions
+## - KE range covers >80% of LBNF
+## - Multiplicity range covers >80% of LBNF
+## - The generation volume includes ~20 cm padding around the detector boundaries
+##
+## Detector boundaries:
+## X: [-346.788 ,  346.788 ]
+## Y: [-215.6713,   81.9287]
+## Z: [ 418.1399,  913.3719]
+SEED: -1
+
+# CC (with lepton)
+Generator1:
+  NumEvent: [5,15]
+  NumParticle: [1,10]
+  XRange: [-3700, 3700] #mm
+  YRange: [-2368.713, 1031.287] #mm
+  ZRange: [3957.559, 9357.559] #mm
+  TRange: [0,10000] #ns
+  AddParent: True
+  Particles:
+    -
+      PDG:      [11,-11,13,-13]
+      NumRange: [1,1]
+      KERange:  [0.01,15.0] # 12.6 for muons and 12.3 for electrons
+      UseMom:   False
+      Weight:   1
+    -
+      PDG:      [211,-211]
+      NumRange: [0,2]
+      KERange:  [0.01,2.5] # 2.1 for 211
+      UseMom:   False
+      Weight:   1
+
+    -
+      PDG:      [22,111]
+      NumRange: [0,2]
+      KERange:  [0.01,2.5] # 2.0 for 22, 1.7 for 111
+      UseMom:   False
+      Weight:   1
+
+    -
+      PDG:      [2212]
+      NumRange: [0,5]
+      KERange:  [0.02,1.0] # 0.7 for 2212
+      UseMom:   False
+      Weight:   1
+
+    -
+      PDG:      [2112]
+      NumRange: [0,3]
+      KERange:  [0.02,1.0] # 0.6 for 2112
+      UseMom:   False
+      Weight:   1
+
+    -
+      PDG:      [130, 321, -321, 310]
+      NumRange: [0,1]
+      KERange:  [0.01,5.0] # 4.4 for 130, 4.5 for 321, no 310?
+      UseMom:   False
+      Weight:   0.25
+
+    -
+      PDG:      [3122]
+      NumRange: [0,1]
+      KERange:  [0.01,3.0] # 2.4 for 3122
+      UseMom:   False
+      Weight:   0.25
+
+# NC (no lepton)
+Generator2:
+  NumEvent: [3,7]
+  NumParticle: [1,9]
+  XRange: [-3700, 3700] #mm
+  YRange: [-2368.713, 1031.287] #mm
+  ZRange: [3957.559, 9357.559] #mm
+  TRange: [0,10000] #ns
+  AddParent: True
+  Particles:
+    -
+      PDG:      [211,-211]
+      NumRange: [0,2]
+      KERange:  [0.01,2.5] # 2.1 for 211
+      UseMom:   False
+      Weight:   1
+
+    -
+      PDG:      [22,111]
+      NumRange: [0,2]
+      KERange:  [0.01,2.5] # 2.0 for 22, 1.7 for 111
+      UseMom:   False
+      Weight:   1
+
+    -
+      PDG:      [2212]
+      NumRange: [0,5]
+      KERange:  [0.02,1.0] # 0.7 for 2212
+      UseMom:   False
+      Weight:   1
+
+    -
+      PDG:      [2112]
+      NumRange: [0,3]
+      KERange:  [0.02,1.0] # 0.6 for 2112
+      UseMom:   False
+      Weight:   1
+
+    -
+      PDG:      [130, 321, -321, 310]
+      NumRange: [0,1]
+      KERange:  [0.01,5.0] # 4.4 for 130, 4.5 for 321, no 310?
+      UseMom:   False
+      Weight:   0.25
+
+    -
+      PDG:      [3122]
+      NumRange: [0,1]
+      KERange:  [0.01,3.0] # 2.4 for 3122
+      UseMom:   False
+      Weight:   0.25
+
+Singles:
+  NumEvent: [30,50]
+  NumParticle: [1,1]
+  XRange: [-3700, 3700] #mm
+  YRange: [-2368.713, 1031.287] #mm
+  ZRange: [3957.559, 9357.559] #mm
+  TRange: [0,10000] #ns
+  Particles:
+    -
+      PDG:  [13, -13]
+      NumRange: [0,30]
+      KERange:  [0.1,15.0] # 12.6 for muons
+      UseMom:   False
+      Weight:   1
+
+    -
+      PDG:  [-13]
+      NumRange: [0,20]
+      KERange:  [0.1,0.5] # To enhance Michel sample (decaying antimuons)
+      UseMom:   False
+      Weight:   1
+
+    -
+      PDG:  [11, -11]
+      NumRange: [0,1]
+      KERange:  [0.1,15.0] # 12.3 for electrons
+      UseMom:   False
+      Weight:   0.5
+
+    -
+      PDG:  [22]
+      NumRange: [0,1]
+      KERange:  [0.1,2.5] # 2.0 for 22
+      UseMom:   False
+      Weight:   0.5
+
+    -
+      PDG:  [211,-211]
+      NumRange: [0,1]
+      KERange:  [0.1,2.5] # 2.1 for 211
+      UseMom:   False
+      Weight:   0.5
+
+    -
+      PDG:  [2212]
+      NumRange: [0,1]
+      KERange:  [0.1,1.0] # 0.7 for 2212
+      UseMom:   False
+      Weight:   0.5
+
+    -
+      PDG:  [2112]
+      NumRange: [0,3]
+      KERange:  [0.1,1.0] # 0.6 for 2112
+      UseMom:   False
+      Weight:   0.25
