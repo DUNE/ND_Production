@@ -6,6 +6,7 @@ source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 simulation=${ND_PRODUCTION_SIM:-GENIE}
+inputFile=""
 
 if [[ "$simulation" == "GENIE" ]]; then
     inputPrefix=${ND_PRODUCTION_OUTDIR_BASE}/run-genie/${ND_PRODUCTION_GENIE_NAME}/GTRAC/$subDir/${ND_PRODUCTION_GENIE_NAME}.$globalIdx
@@ -25,6 +26,11 @@ else
 fi
 
 if [[ -n "$ND_PRODUCTION_CHERRYPICKER_SCRIPT" ]]; then
+    if [[ -z "$inputFile" ]]; then
+        echo "\$ND_PRODUCTION_CHERRYPICKER_SCRIPT can only be used when edep-sim " \
+            "takes an input file (e.g. from GENIE or CORSIKA)"
+        exit 1
+    fi
     origInputFile=$inputFile
     inputFile=$tmpOutDir/$(basename "$inputFile" .root).PICKED.root
     rm -f "$inputFile"
