@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-docker:baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.0.0}
 
