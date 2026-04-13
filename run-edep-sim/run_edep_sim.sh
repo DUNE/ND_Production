@@ -34,7 +34,7 @@ if [[ -n "$ND_PRODUCTION_CHERRYPICKER_SCRIPT" ]]; then
     origInputFile=$inputFile
     inputFile=$tmpOutDir/$(basename "$inputFile" .root).PICKED.root
     rm -f "$inputFile"
-    python3 "$ND_PRODUCTION_CHERRYPICKER_SCRIPT" -i "$origInputFile" -o "$inputFile"
+    run python3 "$ND_PRODUCTION_CHERRYPICKER_SCRIPT" -i "$origInputFile" -o "$inputFile"
 fi
 
 edepCode=()
