@@ -6,10 +6,10 @@ base_dir = os.environ.get('BASE_DIR')
 nd_prod_dir = os.environ.get('ND_PRODUCTION_DIR')
 
 nd_prod_out_dir_base = os.environ.get('ND_PRODUCTION_OUTDIR_BASE')
-relative_out_dir_path = 'workspace/' + nd_prod_out_dir_base.split('/workspace/', 1)[1]
+relative_out_dir_path = os.path.relpath(nd_prod_out_dir_base, base_dir)
 
 nd_prod_log_dir_base = os.environ.get('ND_PRODUCTION_LOGDIR_BASE')
-relative_log_dir_path = 'workspace/' + nd_prod_log_dir_base.split('/workspace/', 1)[1]
+relative_log_dir_path = os.path.relpath(nd_prod_log_dir_base, base_dir)
 
 nd_prod_in_name = os.environ.get('ND_PRODUCTION_IN_NAME')
 sub_dir = os.environ.get('subDir')
