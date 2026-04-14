@@ -32,6 +32,10 @@ if [[ "$ND_PRODUCTION_COSMIC_SIM" == "1" ]]; then
     ARGS="$ARGS --is_cosmic_sim"
 fi
 
+if [[ "$ND_PRODUCTION_IS_MPVMPR" == "1" ]]; then
+    ARGS="$ARGS --is_mpvmpr"
+fi
+
 # After going from ROOT 6.14.06 to 6.28.06, apparently we need to point CPATH to
 # the edepsim-io headers. Otherwise convert2h5 fails. (This "should" be set in
 # the container already.)

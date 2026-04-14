@@ -29,20 +29,22 @@ if [[ "$ND_PRODUCTION_COMPRESS" != "" ]]; then
     compression="-z $ND_PRODUCTION_COMPRESS"
 fi
 
+yamldir=${ND_PRODUCTION_YAML_DIR:-ndlar_flow}
+
 # charge workflows
-workflow1='yamls/ndlar_flow/workflows/charge/charge_event_building_mc.yaml'
-workflow2='yamls/ndlar_flow/workflows/charge/charge_event_reconstruction_mc.yaml'
-workflow3='yamls/ndlar_flow/workflows/combined/combined_reconstruction_mc.yaml'
-workflow4='yamls/ndlar_flow/workflows/charge/prompt_calibration_mc.yaml'
-workflow5='yamls/ndlar_flow/workflows/charge/merged_calibration_mc.yaml'
-workflow6='yamls/ndlar_flow/workflows/charge/final_calibration_mc.yaml'
+workflow1="yamls/$yamldir/workflows/charge/charge_event_building_mc.yaml"
+workflow2="yamls/$yamldir/workflows/charge/charge_event_reconstruction_mc.yaml"
+workflow3="yamls/$yamldir/workflows/combined/combined_reconstruction_mc.yaml"
+workflow4="yamls/$yamldir/workflows/charge/prompt_calibration_mc.yaml"
+workflow5='yamls/$yamldir/workflows/charge/merged_calibration_mc.yaml'
+workflow6="yamls/$yamldir/workflows/charge/final_calibration_mc.yaml"
 
 # light workflows
-workflow7='yamls/ndlar_flow/workflows/light/light_event_building_mc.yaml'
-workflow8='yamls/ndlar_flow/workflows/light/light_event_reconstruction_mc.yaml'
+workflow7="yamls/$yamldir/workflows/light/light_event_building_mc.yaml"
+workflow8="yamls/$yamldir/workflows/light/light_event_reconstruction_mc.yaml"
 
 # charge-light trigger matching
-workflow9='yamls/ndlar_flow/workflows/charge/charge_light_assoc_mc.yaml'
+workflow9="yamls/$yamldir/workflows/charge/charge_light_assoc_mc.yaml"
 
 cd "$ND_PRODUCTION_INSTALL_DIR"/ndlar_flow
 
@@ -53,11 +55,12 @@ set -o errexit
 run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5 $workflow6\
     -i "$inFile" -o "$outFile" $compression
 
-run h5flow -c $workflow7 $workflow8\
-    -i "$inFile" -o "$outFile" $compression
-
-run h5flow -c $workflow9\
-    -i "$outFile" -o "$outFile" $compression
+if [[ -z "$ND_PRODUCTION_CHARGE_ONLY" || "$ND_PRODUCTION_CHARGE_ONLY" == "0" ]]; then
+    run h5flow -c $workflow7 $workflow8\
+        -i "$inFile" -o "$outFile" $compression
+    run h5flow -c $workflow9\
+        -i "$outFile" -o "$outFile" $compression
+fi
 
 mkdir -p "$outDir/FLOW/$subDir"
 mv "$outFile" "$outDir/FLOW/$subDir"
