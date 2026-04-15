@@ -36,14 +36,15 @@ workflow1="yamls/$yamldir/workflows/charge/charge_event_building_mc.yaml"
 workflow2="yamls/$yamldir/workflows/charge/charge_event_reconstruction_mc.yaml"
 workflow3="yamls/$yamldir/workflows/combined/combined_reconstruction_mc.yaml"
 workflow4="yamls/$yamldir/workflows/charge/prompt_calibration_mc.yaml"
-workflow5="yamls/$yamldir/workflows/charge/final_calibration_mc.yaml"
+workflow5='yamls/$yamldir/workflows/charge/merged_calibration_mc.yaml'
+workflow6="yamls/$yamldir/workflows/charge/final_calibration_mc.yaml"
 
 # light workflows
-workflow6="yamls/$yamldir/workflows/light/light_event_building_mc.yaml"
-workflow7="yamls/$yamldir/workflows/light/light_event_reconstruction_mc.yaml"
+workflow7="yamls/$yamldir/workflows/light/light_event_building_mc.yaml"
+workflow8="yamls/$yamldir/workflows/light/light_event_reconstruction_mc.yaml"
 
 # charge-light trigger matching
-workflow8="yamls/$yamldir/workflows/charge/charge_light_assoc_mc.yaml"
+workflow9="yamls/$yamldir/workflows/charge/charge_light_assoc_mc.yaml"
 
 cd "$ND_PRODUCTION_INSTALL_DIR"/ndlar_flow
 
@@ -51,13 +52,13 @@ cd "$ND_PRODUCTION_INSTALL_DIR"/ndlar_flow
 # ensures that we properly report the failure to the production system.
 set -o errexit
 
-run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5\
+run h5flow -c $workflow1 $workflow2 $workflow3 $workflow4 $workflow5 $workflow6\
     -i "$inFile" -o "$outFile" $compression
 
 if [[ -z "$ND_PRODUCTION_CHARGE_ONLY" || "$ND_PRODUCTION_CHARGE_ONLY" == "0" ]]; then
-    run h5flow -c $workflow6 $workflow7\
+    run h5flow -c $workflow7 $workflow8\
         -i "$inFile" -o "$outFile" $compression
-    run h5flow -c $workflow8\
+    run h5flow -c $workflow9\
         -i "$outFile" -o "$outFile" $compression
 fi
 
