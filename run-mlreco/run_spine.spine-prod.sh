@@ -16,12 +16,10 @@ outFile=${tmpOutDir}/${outName}.MLRECO_SPINE.hdf5
 inName=${ND_PRODUCTION_IN_NAME}.${globalIdx}
 inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-mlreco/${ND_PRODUCTION_IN_NAME}/LARCV/${subDir}/${inName}.LARCV.root
 
+rm -f "$outFile"
+
 source install/spine-prod/configure.sh
 
-# spine does something interesting with the output filename
-actualOutFile=${tmpOutDir}/${inName}.LARCV_$(basename "$outFile" .hdf5).h5
-
-rm -f "$actualOutFile"
 
 run python3 install/spine/bin/run.py \
     --config "$ND_PRODUCTION_SPINE_CONFIG" \
@@ -32,4 +30,4 @@ run python3 install/spine/bin/run.py \
 
 infOutDir=${outDir}/MLRECO_SPINE/${subDir}
 mkdir -p "$infOutDir"
-mv "$actualOutFile" "$infOutDir/$(basename "$outFile")"
+mv "$outFile" "$infOutDir/"
