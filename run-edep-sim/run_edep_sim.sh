@@ -6,6 +6,7 @@ source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 simulation=${ND_PRODUCTION_SIM:-GENIE}
+inputFile=""
 
 if [[ "$simulation" == "GENIE" ]]; then
     inputPrefix=${ND_PRODUCTION_OUTDIR_BASE}/run-genie/${ND_PRODUCTION_GENIE_NAME}/GTRAC/$subDir/${ND_PRODUCTION_GENIE_NAME}.$globalIdx
@@ -22,6 +23,18 @@ else
     echo "Unsupported \$ND_PRODUCTION_SIM type. Exiting."
     echo "\$ND_PRODUCTION_SIM = ${ND_PRODUCTION_SIM}"
     exit 1
+fi
+
+if [[ -n "$ND_PRODUCTION_CHERRYPICKER_SCRIPT" ]]; then
+    if [[ -z "$inputFile" ]]; then
+        echo "\$ND_PRODUCTION_CHERRYPICKER_SCRIPT can only be used when edep-sim " \
+            "takes an input file (e.g. from GENIE or CORSIKA)"
+        exit 1
+    fi
+    origInputFile=$inputFile
+    inputFile=$tmpOutDir/$(basename "$inputFile" .root).PICKED.root
+    rm -f "$inputFile"
+    run python3 "$ND_PRODUCTION_CHERRYPICKER_SCRIPT" -i "$origInputFile" -o "$inputFile"
 fi
 
 edepCode=()
@@ -56,3 +69,7 @@ run edep-sim -C -g "$ND_PRODUCTION_GEOM_EDEP" -o "$edepRootFile" -e "$nEvents" \
 
 mkdir -p "$outDir/EDEPSIM/$subDir"
 mv "$edepRootFile" "$outDir/EDEPSIM/$subDir"
+
+if [[ -n "$ND_PRODUCTION_CHERRYPICKER_SCRIPT" ]]; then
+    rm "$inputFile"
+fi
