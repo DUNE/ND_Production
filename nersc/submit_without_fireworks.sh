@@ -7,9 +7,7 @@
 # change ND_PRODUCTION_PATH_TO_EXECUTABLE, ND_PRODUCTION_START_INDEX,
 # ND_PRODUCTION_END_INDEX and the sbatch directives. They should also explicitly 
 # export the env vars, usually defined in a stage's specs, at the top of 
-# ND_PRODUCTION_PATH_TO_EXECUTABLE. An example of that can be found at:
-#
-# https://github.com/DUNE/ND_Production/blob/feature/abooth-pandora_hit_merging/run-ndlar-flow/run_ndlar_flow_ndlar_withmerging_sbatch_manual.sh
+# ND_PRODUCTION_PATH_TO_EXECUTABLE.
 #
 ################################################################################
 
@@ -23,14 +21,14 @@
 #SBATCH --nodes=7
 #SBATCH --time=01:00:00
 
-#SBATCH --job-name=MicroProdN3p4_NDLAr_2E18_FHC.flow.geomfix.singles.nu.v251016
+#SBATCH --job-name=my_job_name
 
 
 logdir=${SCRATCH}/logs_slurm/${SLURM_JOB_NAME}/${SLURM_JOBID}
 mkdir -p "$logdir"
 
 
-export ND_PRODUCTION_PATH_TO_EXECUTABLE=/global/homes/a/abooth/dune/Production/development_repos/ND_Production/run-ndlar-flow/run_ndlar_flow_ndlar_withmerging_nolight_sbatch_manual.sh
+export ND_PRODUCTION_PATH_TO_EXECUTABLE=/path/to/executable/example/ND_Production/run-ndlar-flow/run_ndlar_flow_ndlar_sbatch_manual.sh
 export ND_PRODUCTION_START_INDEX=1
 export ND_PRODUCTION_END_INDEX=1120
 
