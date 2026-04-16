@@ -100,4 +100,7 @@ git clone -b develop https://github.com/DeepLearnPhysics/spine.git
 # sed -i 's/yaml.load(open(filename))/yaml.load(open(filename), yaml.Loader)/' \
 #     dune-nd-lar-reco/load_helpers.py
 
-git clone -b main https://github.com/DeepLearnPhysics/spine_prod.git
+git clone -b main https://github.com/DeepLearnPhysics/spine-prod.git
+
+# for backward-compatibility with run_mlreco.spine.sh
+ln -s spine-prod spine_prod
