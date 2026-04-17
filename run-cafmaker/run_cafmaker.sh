@@ -46,7 +46,7 @@ cat "$cfgFile"
 echo ""
 echo ===================
 
-run makeCAF "--fcl=$cfgFile"
+run install/ND_CAFMaker/install/bin/makeCAF "--fcl=$cfgFile"
 
 cafOutDir=$outDir/CAF/$subDir
 flatCafOutDir=$outDir/CAF.flat/$subDir
