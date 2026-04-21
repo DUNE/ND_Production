@@ -19,23 +19,24 @@ def h5_Dataset_to_pandas_DataFrame( h5Dataset ):
     # eg prop_names : ('event_id', 'vertex_id', 'traj_id', 'file_traj_id', 'parent_id', 'primary', 'E_start', 'pxyz_start', 'xyz_start', 't_start', 'E_end', 'pxyz_end', 'xyz_end', 't_end', 'pdg_id', 'start_process', 'start_subprocess', 'end_process', 'end_subprocess', 'dist_travel')
 
     df_names = pd.DataFrame(prop_names)
-    df_names.columns=['property_name']
+    df_names.columns = ['property_name']
 
     property_dfs=[]
 
     for index, row in df_names.iterrows():
+
         pname = row['property_name'] 
-
-        data = h5Dataset[pname]
-
-        dfi = pd.DataFrame( data )
+        data  = h5Dataset[pname]
+        dfi   = pd.DataFrame( data )
   
         # lazy, dodgy, effective for this file format
-        if(dfi.columns.size ==3):
+        if( dfi.columns.size ==3):
             #print(f'...splitting data for {pname} into {pname}.x,y,z')
             dfi.columns=[str(pname)+'.x', str(pname)+'.y', str(pname)+'.z']
-        elif(dfi.columns.size ==1):
+
+        elif( dfi.columns.size ==1):
             dfi.columns=[str(pname)]
+
         else:
             print('UH OH. This script only handles single values and 3-vectors. It will now bork.')
 
@@ -83,191 +84,199 @@ def summarise_df(df, message=""):
 # Naming is a la evtgen
 def add_particle_names(dfo, prinfo=False):
 
-    #print('\n-------- add_particle_names ----------\n')
-
     pd.options.mode.chained_assignment = None  # default='warn'
     
-    series_pdg_id = dfo["pdg_id"]
-    uids = np.unique( series_pdg_id )
+    series_pdg_id   = dfo["pdg_id"]
+
     series_particle = series_pdg_id.copy(deep=False)
 
     from particle import Particle
     
-    evtgen_particle_names=[]
-    
-    for uid in uids:
+    uids = np.unique( series_pdg_id )
+    for uid in uids:       
+        series_particle.replace( uid, Particle.from_pdgid(uid).name, inplace=True )        
 
-        p = Particle.from_pdgid(uid).name        
-        series_particle.replace( uid, p , inplace=True )        
-        evtgen_particle_names.append( p )
-    
-    if(prinfo):
-        print("Primary particle types present in this file:{}\n".format(evtgen_particle_names) )
-    
+    evtgen_particle_names=[ Particle.from_pdgid(uid).name for uid in uids ]
     dfo['ParticleType'] = series_particle 
 
     pd.options.mode.chained_assignment = 'warn' 
 
-    return dfo 
+    return dfo, evtgen_particle_names 
 
+# --------------------
+# This function augments the passed DataFrame
+# input is a pandas DataFrame
+# output is same pandas DataFrame where colname int values are assigned the string value label
+def replace_num_with_label(dfo, colname, label):
+
+    pd.options.mode.chained_assignment = None  # default='warn'
+
+    spn = dfo[colname].copy(deep=False)
+
+    is_int = ( spn.apply( lambda x: isinstance(x, int) ) )
+    
+    bad_procs = spn[ is_int ]
+
+    for i in bad_procs:       
+        spn.replace(i, label, inplace=True)
+
+    dfo[colname] = spn
+
+    pd.options.mode.chained_assignment = 'warn' 
+
+    return dfo
 
 # --------------------
 # This function augments the passed DataFrame
 # input is a pandas DataFrame
 # output is same pandas DataFrame with a new column for G4ProcessType
-
-def add_process_names(dfo, which_end='start',prinfo=False):
-
-    #print(f"...Adding G4ProcessTypes ({which_end}_process)\n")
+def add_process_names(dfo, which_end='start'):
 
     pd.options.mode.chained_assignment = None  # default='warn'
 
+    prop_name   = which_end+"_process"
+    newcol_name = "G4ProcessType_"+which_end
+    
     # Copy the [start,end]_process Series from the original DataFrame dfo
-    df = dfo[f"{which_end}_process"].copy(deep=False)
-    
-    sp_unique_values = df.unique()
-    spurious_processes = []
-    for sp in sp_unique_values:
-        if (sp not in range(1,8)):
-            spurious_processes.append(sp)
-    
-    if(prinfo):
-        print('Unrecognised {}_process numbers ({}):{}\n'.format(which_end,len(spurious_processes),spurious_processes))
-    #print('Plots saved to {}'.format(output_pdf_name))
+    spn = dfo[prop_name].copy(deep=False)
 
-    strange_ones = dfo[ dfo[f"{which_end}_process"]>7 ]
-    #print(f"df for these: {strange_ones}")
     # Add G4 names for each of the process types
     # https://apc.u-paris.fr/~franco/g4doxy/html/G4ProcessType_8hh.html
-    df.replace(1, "fTransportation", inplace=True)
-    df.replace(2, "fElectromagnetic", inplace=True)
-    df.replace(3, "fOptical", inplace=True)
-    df.replace(4, "fHadronic", inplace=True)
-    df.replace(5, "fPhotolepton_hadron", inplace=True)
-    df.replace(6, "fDecay", inplace=True)
-    df.replace(7, "fGeneral", inplace=True)
-    for i in spurious_processes:
-        df.replace(i, "SpuriousProcess", inplace=True)
+    spn.replace(0, "fNotDefined", inplace=True)
+    spn.replace(1, "fTransportation", inplace=True)
+    spn.replace(2, "fElectromagnetic", inplace=True)
+    spn.replace(3, "fOptical", inplace=True)
+    spn.replace(4, "fHadronic", inplace=True)
+    spn.replace(5, "fPhotolepton_hadron", inplace=True)
+    spn.replace(6, "fDecay", inplace=True)
+    spn.replace(7, "fGeneral", inplace=True)
+    spn.replace(8, "fParameterisation", inplace=True)
+
     # add the Series as a new column in the original DataFrame
-    if(prinfo):
-        print("Named G4Process types present in this file:{}\n".format( df.unique() ) )
+    dfo[newcol_name] = spn
 
-    dfo[f"G4ProcessType_{which_end}"] = df  
-
-    #print(f"Added G4ProcessType_{which_end} column to dataframe with process names:")
+    # if any of the values are ints rather than strings, they are spurious.
+    replace_num_with_label(dfo, newcol_name, "SpuriousProcess")
 
     pd.options.mode.chained_assignment = 'warn' 
 
-    return dfo
+    return dfo, dfo[newcol_name].unique()
 
 # --------------------
 # This function augments the passed DataFrame
 # input is a pandas DataFrame
 # output is same pandas DataFrame with a new column for G4SubProcessType
+def add_subprocess_names(dfo, which_end='start'):       
 
-def add_subprocess_names(dfo, which_end='start', prinfo=False):       
+    pd.options.mode.chained_assignment = None  # default='warn'
 
-    #print(f"...Adding G4SubProcessTypes ({which_end}_process)\n")
-    pd.options.mode.chained_assignment = None
-    # Copy the start_subprocess Series from the original DataFrame dfo
-    spname = which_end+"_subprocess"
-    df = dfo[spname].copy(deep=False)
-    sp_unique_values = df.unique()
-    if(prinfo):
-        print("{} unique_values: {}".format(spname,sp_unique_values) )
+    prop_name   = which_end+"_subprocess"
+    newcol_name = "G4SubProcessType_"+which_end
+    
+    # Copy the [start,end]_process Series from the original DataFrame dfo
+    spn = dfo[prop_name].copy(deep=False)
 
-    named_sp_enums=[]
+    spn.replace(0,  "fNotDefined",             inplace=True)
+
     # Add G4 names for each of the subprocess types
     # This is the complete set as of April 2026.I have used identical naming and capitalising to the G4 code.
     # https://apc.u-paris.fr/~franco/g4doxy/html/G4EmProcessSubType_8hh.html
-    df.replace(1,  "fCoulombScattering",     inplace=True)
-    df.replace(2,  "fIonisation",            inplace=True)
-    df.replace(3,  "fBremsstrahlung",        inplace=True)
-    df.replace(4,  "fPairProdByCharged",     inplace=True)
-    df.replace(5,  "fAnnihilation",          inplace=True)
-    df.replace(6,  "fAnnihilationToMuMu",    inplace=True)
-    df.replace(7,  "fAnnihilationToHadrons", inplace=True)
-    df.replace(8,  "fNuclearStopping",       inplace=True)
-    df.replace(10, "fMultipleScattering",    inplace=True)
-    df.replace(11, "fRayleigh",              inplace=True)
-    df.replace(12, "fPhotoElectricEffect",   inplace=True)
-    df.replace(13, "fComptonScattering",     inplace=True)
-    df.replace(14, "fGammaConversion",       inplace=True)
-    df.replace(15, "fGammaConversionToMuMu", inplace=True)
-    df.replace(21, "fCerenkov",              inplace=True)
-    df.replace(22, "fScintillation",         inplace=True)
-    df.replace(23, "fSynchrotronRadiation",  inplace=True)
-    df.replace(24, "fTransitionRadiation",   inplace=True)  
-    named_sp_enums.extend( list(range(1,24) ) )
+    spn.replace(1,  "fCoulombScattering",     inplace=True)
+    spn.replace(2,  "fIonisation",            inplace=True)
+    spn.replace(3,  "fBremsstrahlung",        inplace=True)
+    spn.replace(4,  "fPairProdByCharged",     inplace=True)
+    spn.replace(5,  "fAnnihilation",          inplace=True)
+    spn.replace(6,  "fAnnihilationToMuMu",    inplace=True)
+    spn.replace(7,  "fAnnihilationToHadrons", inplace=True)
+    spn.replace(8,  "fNuclearStopping",       inplace=True)
+    spn.replace(10, "fMultipleScattering",    inplace=True)
+    spn.replace(11, "fRayleigh",              inplace=True)
+    spn.replace(12, "fPhotoElectricEffect",   inplace=True)
+    spn.replace(13, "fComptonScattering",     inplace=True)
+    spn.replace(14, "fGammaConversion",       inplace=True)
+    spn.replace(15, "fGammaConversionToMuMu", inplace=True)
+    spn.replace(21, "fCerenkov",              inplace=True)
+    spn.replace(22, "fScintillation",         inplace=True)
+    spn.replace(23, "fSynchrotronRadiation",  inplace=True)
+    spn.replace(24, "fTransitionRadiation",   inplace=True)  
 
     # https://apc.u-paris.fr/~franco/g4doxy/html/G4TransportationProcessType_8hh.html      
-    df.replace(91,  "TRANSPORTATION",         inplace=True)
-    df.replace(92,  "COUPLED_TRANSPORTATION", inplace=True)
-    df.replace(401, "STEP_LIMITER",           inplace=True)
-    df.replace(402, "USER_SPECIAL_CUTS",      inplace=True)
-    df.replace(403, "NEUTRON_KILLER",         inplace=True)
-    named_sp_enums.extend( [91,92,401,402,403] )
+    spn.replace(91,  "TRANSPORTATION",         inplace=True)
+    spn.replace(92,  "COUPLED_TRANSPORTATION", inplace=True)
+    spn.replace(401, "STEP_LIMITER",           inplace=True)
+    spn.replace(402, "USER_SPECIAL_CUTS",      inplace=True)
+    spn.replace(403, "NEUTRON_KILLER",         inplace=True)
 
     # https://apc.u-paris.fr/~franco/g4doxy/html/G4HadronicProcessType_8hh.html
-    df.replace(111, "fHadronElastic",    inplace=True)
-    df.replace(121, "fHadronInelastic",  inplace=True)
-    df.replace(131, "fCapture",          inplace=True)
-    df.replace(141, "fFission",          inplace=True)
-    df.replace(151, "fHadronAtRest",     inplace=True)
-    df.replace(152, "fLeptonAtRest",     inplace=True)
-    df.replace(161, "fChargeExchange",   inplace=True) 
-    df.replace(210, "fRadioactiveDecay", inplace=True)
-    named_sp_enums.extend( [111,121,131,141,151,152,161,210] )
+    spn.replace(111, "fHadronElastic",    inplace=True)
+    spn.replace(121, "fHadronInelastic",  inplace=True)
+    spn.replace(131, "fCapture",          inplace=True)
+    spn.replace(141, "fFission",          inplace=True)
+    spn.replace(151, "fHadronAtRest",     inplace=True)
+    spn.replace(152, "fLeptonAtRest",     inplace=True)
+    spn.replace(161, "fChargeExchange",   inplace=True) 
+    spn.replace(210, "fRadioactiveDecay", inplace=True)
+
     # https://apc.u-paris.fr/~franco/g4doxy/html/G4DecayProcessType_8hh.html
-    df.replace(201, "DECAY",             inplace=True)
-    df.replace(210, "DECAY_Radioactive", inplace=True)
-    df.replace(211, "DECAY_Unknown",     inplace=True)
-    df.replace(231, "DECAY_External",    inplace=True)
-    named_sp_enums.extend( [201,210,211,231] )
-
-    spurious_processes = []
-    for sp in sp_unique_values:
-        if ( abs(sp) not in named_sp_enums):
-            spurious_processes.append(sp)
-        if ( sp==0 ):
-            spurious_processes.append(sp)
-    if(prinfo):
-        print('Unrecognised {}_subprocess numbers ({}):{}\n'.format(which_end,len(spurious_processes),spurious_processes))
-
-    for i in spurious_processes:
-        df.replace(i, "SpuriousSubProcess", inplace=True)
+    spn.replace(201, "DECAY",             inplace=True)
+    spn.replace(210, "DECAY_Radioactive", inplace=True)
+    spn.replace(211, "DECAY_Unknown",     inplace=True)
+    spn.replace(231, "DECAY_External",    inplace=True)
+   
     # add the Series as a new column in the original DataFrame
-    dfo[f"G4SubProcessType_{which_end}"] = df
+    dfo[newcol_name] = spn
 
-    if(prinfo):
-        print("Named G4SubProcess types present in this file:{}\n".format( df.unique() ) )
-
-    #print(df.unique())
+    # if any of the values are ints rather than strings, they are spurious.
+    replace_num_with_label(dfo, newcol_name, "SpuriousSubProcess")
 
     pd.options.mode.chained_assignment = 'warn' 
 
-    return dfo
+    return dfo, dfo[newcol_name].unique()
+
 
 # --------------------
-# This function skims the passed DataFrame
+# This function prints out a sliced dataframe
 # input is a pandas DataFrame
-# output is skim of frame with no undefined G4 processes
+def print_spurious_processes(dfo):
 
-def remove_spurious_processes(dfo, which_end="start"):
-    #print(f"\n-------- remove_spurious_processes ({which_end})-----------\n")
-    # some odd process numbers. For now, just remove them
-    sel1 = ( abs( dfo[f"{which_end}_process"] ) <13 )
-    sel2 = ( abs( dfo[f"{which_end}_process"] ) >0 )
+    # All of the process numbers I am acknowledging
+    named_p_enums = list(range(0,9))
+    # All of the subprocess numbers I am acknowledging
+    named_sp_enums=[]
+    named_sp_enums.append(0)
+    named_sp_enums.extend( list(range(1,  8) ) )
+    named_sp_enums.extend( list(range(10,15) ) )
+    named_sp_enums.extend( list(range(21,24) ) )
+    named_sp_enums.extend( [91,92,401,402,403] )
+    named_sp_enums.extend( [111,121,131,141,151,152,161,210] )
+    named_sp_enums.extend( [201,210,211,231] )
 
-    df_clean = dfo[ sel1 & sel2 ]
-    return df_clean
+    # numpy array of unique occurrences of eg start_process
+    ar_unique_p   = dfo["start_process"].unique()
+    ar_unique_sp  = dfo["start_subprocess"].unique()
 
+    # list of values outside the expected subprocess numbers
+    spurious_processes    = [s for s in ar_unique_p  if s not in named_p_enums ] 
+    #print('Unrecognised start_process numbers ({}):{}\n'.format(len(spurious_processes), spurious_processes))
 
+    spurious_subprocesses = [s for s in ar_unique_sp if s not in named_sp_enums ] 
+    #print('Unrecognised start_subprocess numbers ({}):{}\n'.format(len(spurious_subprocesses), spurious_subprocesses))
+
+    selA = ( dfo["start_process"].isin(spurious_processes)  )   
+    selB = ( dfo["start_subprocess"].isin(spurious_subprocesses)  )   
+    df_strange     = dfo[ selA | selB ]
+
+    df_strange_slim = df_strange[["parent_id", "pdg_id", "start_process", "G4ProcessType_start", "start_subprocess", "G4SubProcessType_start", "E_start", "end_process", "end_subprocess","E_end" ]]
+        
+    print('Slimmed DF for weird subprocess numbers:' ) 
+    print(df_strange_slim.to_string(index=False))
+
+    return
+    
 # --------------------
 # This function skims the passed DataFrame
 # input is a pandas DataFrame
 # output is skim of frame with only primary particles
-
 def select_primary_processes(dfo):
     #print('\n-------- select_primary_processes -----------\n')
     # only want particles from the primary interaction
@@ -285,17 +294,15 @@ def reduce_category_space(dfo, catname1, catname2, catname3, ncats, mincount):
 
     nparticletypes = dfo[catname1].nunique()
 
-    #print(f"\nReducing category space. Selecting top {ncats} of {nparticletypes} particles and processes, subproccesses with a minimum of {mincount} occurrences.\n")
+    #print("Reducing category space. Selecting top {} of {} particles and processes, subproccesses with a minimum of {} occurrences.\n".format(ncats, nparticletypes, mincount ) )
     
     if(ncats>nparticletypes):
         ncats=nparticletypes
 
     highest_process_count = dfo[catname2].value_counts().max()
-    #print(f"highest_process_count: {highest_process_count }")
     highest_subprocess_count = dfo[catname3].value_counts().max()
     #second_highest_process_count = dfo[catname2].value_counts().nlargest(2).iloc[-1]
-    #print(f"second_highest_process_count: {second_highest_process_count }")
-
+    
     hmax = min(highest_process_count , highest_subprocess_count )
 
     if(mincount > hmax):
@@ -305,7 +312,7 @@ def reduce_category_space(dfo, catname1, catname2, catname3, ncats, mincount):
     dfr = dfo.copy(deep=False)
 
     if(ncats==0 and mincount==0):
-        #print(f'Need to specify either ncats>0 or mincount>0 (or both). Returning original df')
+        print('Neither ncats>0 or mincount>0 (or both) are specified. Returning original df')
         return dfr
 
     # count the occurrences of each particle type   
@@ -329,7 +336,7 @@ def reduce_category_space(dfo, catname1, catname2, catname3, ncats, mincount):
     return df_reduced
 
 # --------------------
-# Make a plot
+# Make a plot, what a faff
 # --------------------
 def make_sn_displot(dfo, cat1, cat2, cat3, filename, ncats, mincount, sn_log=False):
 
@@ -346,14 +353,10 @@ def make_sn_displot(dfo, cat1, cat2, cat3, filename, ncats, mincount, sn_log=Fal
     # particle type by count for hue order
     pt_by_count = list( dfo[cat1].value_counts().keys() )
 
-    #print(f"pt_by_count: {pt_by_count}")
-    
     # splitting into columns according to G4Process
     colnames = dfo[cat2].unique()
 
-    #print(f"colnames: {colnames}")
-
-    # legend
+    # legend - more faffing below
     snl_frameon  = True   
 
     # grid     
@@ -361,41 +364,39 @@ def make_sn_displot(dfo, cat1, cat2, cat3, filename, ncats, mincount, sn_log=Fal
     sng_minor_alpha = 0.2
     sng_major_alpha = 0.6    
 
-
     # make the plots
     g = sns.displot(
             data=dfo, 
             hue=cat1, col=cat2, y=cat3, 
-            #palette=sn_palette, multiple=sn_multiple, alpha=sn_alpha, aspect=sn_aspect, hue_order = pt_by_count,
             palette=sn_palette, multiple=sn_multiple, alpha=sn_alpha,  hue_order = pt_by_count,
         )
 
     # adjustments so legend can go outside figure
     # ncols plus space for ylabels on left and legend on right
     # if ncats>climit we split legend into columns and need more space
-    climit=15
+    climit = 15
     nparticletypes = dfo[cat1].nunique()
+
     # if we asked for more particles types than there are, fix that.
-    ncatsrequested=ncats
     if( ncats > nparticletypes ):
         ncats = nparticletypes
 
     snl_ncol = 1
-    if(ncats>climit): 
+    if( ncats > climit ): 
         # eg if ncats=20, snl_col=20/15 = 2
         snl_ncol = np.ceil( 1*(ncats/climit) )
 
     tot_ncols = len(colnames) + 1 + snl_ncol 
     colwidth  = 1 / tot_ncols
+    # left edge of last column 
     snl_r     = 1 - snl_ncol * colwidth
-    #print(f"Legend ncols: {snl_ncol}, colwidth:{colwidth}, snl_r:{snl_r}")
-    snl_rc    = 1 - 0.5* snl_ncol  * colwidth
+    # center of last column 
+    snl_rc    = 1 - 0.5 * snl_ncol * colwidth
     
     g.figure.subplots_adjust(right=snl_r)
 
     snl_title   = "Primaries"
-    snl_loc     = "upper center"
-    
+    snl_loc     = "upper center"   
     snl_pos     = (snl_rc, .95)
 
     sns.move_legend(g, loc=snl_loc, bbox_to_anchor=snl_pos , ncol=snl_ncol,  frameon=snl_frameon, fontsize=sn_fontsize, title=snl_title, title_fontsize=sn_title_fontsize)
@@ -407,7 +408,7 @@ def make_sn_displot(dfo, cat1, cat2, cat3, filename, ncats, mincount, sn_log=Fal
         if sng:
             ax.grid(which='minor', alpha=sng_minor_alpha)
             ax.grid(which='major', alpha=sng_major_alpha) 
-
+    
     # linear or log
     if sn_log:
         g.set_axis_labels(' Log Count', '',fontsize=sn_fontsize)
@@ -418,8 +419,8 @@ def make_sn_displot(dfo, cat1, cat2, cat3, filename, ncats, mincount, sn_log=Fal
     # notes to print on bottom of figure
     g.figure.subplots_adjust(bottom=.25)
 
-    sn_file_note =f"file: {filename};"
-    sn_cuts_note =f"cuts: (Sub)Processes with >= {mincount} occurrences; {ncats} most prolific particles"
+    sn_file_note = f"file: {filename};"
+    sn_cuts_note = f"cuts: (Sub)Processes with >= {mincount} occurrences; {ncats} most prolific particles"
 
     plt.figtext(0.05, 0.09, sn_file_note, wrap=True, horizontalalignment='left', fontsize=10, color='blue')
     plt.figtext(0.05, 0.02, sn_cuts_note, wrap=True, horizontalalignment='left', fontsize=10, color='blue')

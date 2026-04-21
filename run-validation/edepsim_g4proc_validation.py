@@ -21,9 +21,9 @@ import pandas as pd
 #rasterize_plots()
 
 # sample only 100 events for plot if TEST=True
-TEST=False
+TEST    = False
 # print everything
-VERBOSE=False
+VERBOSE = True
 
 from edepsim_g4proc_helpers import *
 
@@ -43,32 +43,46 @@ def main(sim_file, input_type, det_complex):
 
     dataset = sim_h5['trajectories']
 
+    print("\n... converting h5 DS to pandas DF")
     df = h5_Dataset_to_pandas_DataFrame( dataset )
-
     #summarise_df(df, "raw data")
 
-    #df = remove_spurious_processes(df)  
-    #summarise_df(df, "cleaned data")
-
-    df = select_primary_processes(df,True)
-
+    print("\n... selecting primaries")
+    df = select_primary_processes(df)
     #summarise_df(df, f"primary process selection")
 
     # add a series to the DataFrame with the evtgen particle names
-    df = add_particle_names(df,True)
+    print("\n... adding evt_gen particle names")
+    df, particle_list = add_particle_names(df)
+    print(particle_list)
+    
 
     # add a series to the DataFrame with the G4Process names
-    df = add_process_names(df, "start",True)
-    df = add_process_names(df, "end")
+    print("\n... adding start_process names")
+    df, process_list = add_process_names(df, "start")
+    print(process_list)
+
+    print("\n... adding end_process names")
+    df, end_process_list = add_process_names(df, "end")
+    print(end_process_list)
 
     # add a series to the DataFrame with the G4SubProcess names
-    df = add_subprocess_names(df, "start",True)
-    df = add_subprocess_names(df, "end")
+    print("\n... adding start_subprocess names")
+    df, subprocess_list = add_subprocess_names(df, "start")
+    print(subprocess_list)
+
+    print("\n... adding end_subprocess names")
+    df, end_subprocess_list = add_subprocess_names(df, "end")
+    print(end_subprocess_list)
+
+    # try to gain insight into the weird process numbers
+    print("\n... printing weird processes")
+    print_spurious_processes(df)
 
     with PdfPages(output_pdf_name) as output:
 
-        ncats = 10 # number of particles to include, ordered by how prolificly they occur
-        mincount = 1 # minimum occurrences of a process to include it
+        ncats    = 10 # number of particles to include, ordered by how prolificly they occur
+        mincount = 1  # minimum occurrences of a process to include it
 
         dfplot = df.copy(deep=False)
 
@@ -77,26 +91,28 @@ def main(sim_file, input_type, det_complex):
         cat3 = "G4SubProcessType_start"
 
         # reduce the phase space for plotting purposes
+        print("\n... reducing category space for plots, ncats = {}, mincount = {}".format(ncats, mincount))
         dfplot = reduce_category_space(dfplot, cat1, cat2, cat3, ncats, mincount)
         #summarise_df(dfplot, "reduced category space")
 
         if(TEST):
-            print("...Plotting 100 entries as TEST is selected")
+            print("\n...Plotting 100 entries as TEST is selected")
             dfplot=dfplot.sample(n=100)
 
-        # LINEAR SCALE PLOT               
+        # LINEAR SCALE PLOT  
+        print("\n... making linear count process plots")             
         g=make_sn_displot(dfplot, cat1, cat2, cat3, sim_file, ncats, mincount,False) 
         output.savefig()
         plt.close()
 
         # LOG X SCALE PLOT 
+        print("\n... making log count process plots") 
         g=make_sn_displot(dfplot, cat1, cat2, cat3, sim_file, ncats, mincount, True)
         output.savefig()
         plt.close()
 
-        # All plots saved to big pdf
-        
-        print('Plots saved to {}'.format(output_pdf_name))
+        # All plots saved to big pdf      
+        print('\nPlots saved to {}'.format(output_pdf_name))
         
 
 if __name__ == '__main__':
