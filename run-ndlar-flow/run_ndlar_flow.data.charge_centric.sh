@@ -33,7 +33,8 @@ get_range() {
 if [[ -n "$ND_PRODUCTION_RUN_BINARY2PACKET" ]]; then
     input_chargef=$tmpOutDir/$subDir/$outName.PACKET.hdf5
     rm -f "$input_chargef"
-    run convert_rawhdf5_to_hdf5.py $ND_PRODUCTION_BINARY2PACKET_ARGS \
+    read -ra args <<< "$ND_PRODUCTION_BINARY2PACKET_ARGS"
+    run convert_rawhdf5_to_hdf5.py "${args[@]}"  \
         --input_filename  "$chargef" --output_filename "$input_chargef"
 else
     input_chargef=$chargef
@@ -51,27 +52,29 @@ if [[ -n "${lightfs[*]}" ]]; then
             extra_args+=("--end_position" "${evt_range[1]}")
         fi
 
-        workflows=$ND_PRODUCTION_LIGHT_EVTBUILD_WORKFLOWS
-        run $h5flow -i "$(realpath "$lightf")" -o "$outf" -c ${workflows[@]} \
+        workflows=("$ND_PRODUCTION_LIGHT_EVTBUILD_WORKFLOWS")
+        run $h5flow -i "$(realpath "$lightf")" -o "$outf" -c "${workflows[@]}" \
             "${extra_args[@]}"
     done
 
     if [[ -n "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS" ]]; then
-        workflows=$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS
-        run $h5flow -i "$outf" -o "$outf" -c ${workflows[@]}
+        read -ra workflows <<< "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS"
+        run $h5flow -i "$outf" -o "$outf" -c "${workflows[@]}"
     fi
 fi
 
-workflows="$ND_PRODUCTION_CHARGE_EVTBUILD_WORKFLOWS $ND_PRODUCTION_CHARGE_RECO_WORKFLOWS"
-run $h5flow -i "$input_chargef" -o "$outf" -c ${workflows[@]}
+read -ra workflows_evb <<< "$ND_PRODUCTION_CHARGE_EVTBUILD_WORKFLOWS"
+read -ra workflows_reco <<< "$ND_PRODUCTION_CHARGE_RECO_WORKFLOWS"
+workflows=("${workflows_evb[@]}" "${workflows_reco[@]}")
+run $h5flow -i "$input_chargef" -o "$outf" -c "${workflows[@]}"
 
 if [[ -n "$ND_PRODUCTION_RUN_BINARY2PACKET" ]]; then
     rm "$input_chargef"
 fi
 
 if [[ -n "${lightfs[*]}" ]]; then
-    workflows=$ND_PRODUCTION_CLMATCH_WORKFLOWS
-    run $h5flow -i "$outf" -o "$outf" -c ${workflows[@]}
+    read -ra workflows <<< "$ND_PRODUCTION_CLMATCH_WORKFLOWS"
+    run $h5flow -i "$outf" -o "$outf" -c "${workflows[@]}"
 fi
 
 mkdir -p "$outDir/FLOW/$subDir"
