@@ -138,9 +138,9 @@ fi
 # CHARGE/LIGHT MATCHING
 ################################################################################
 
+read -ra workflows <<< "$ND_PRODUCTION_CLMATCH_WORKFLOWS"
 if [[ (${#workflows[@]} -gt 0)
             && (${#chargefs[@]} -gt 0) && (${#lightfs[@]} -gt 0) ]]; then
-    read -ra workflows <<< "$ND_PRODUCTION_CLMATCH_WORKFLOWS"
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     run_flow -i "$outf" -o "$outf" -c "${workflows[@]}"
 fi
