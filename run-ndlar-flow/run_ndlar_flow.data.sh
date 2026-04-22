@@ -86,9 +86,11 @@ for lightf in "${lightfs[@]}"; do
     run_flow "${extra_args[@]}" -i "$lightf" -o "$outf" -c "${workflows[@]}"
 done
 
-read -ra workflows <<< "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS"
+if [[ "${#lightfs[@]}" -gt 0 ]]; then
+    read -ra workflows <<< "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS"
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-run_flow -i "$outf" -o "$outf" -c "${workflows[@]}"
+    run_flow -i "$outf" -o "$outf" -c "${workflows[@]}"
+fi
 
 ################################################################################
 # CHARGE EVENT-BUILDING AND RECONSTRUCTION
@@ -120,14 +122,17 @@ for chargef in "${packet_chargefs[@]}"; do
             extra_args+=("--end_position" "${packet_range[1]}")
         fi
     fi
+    # FIXME: flow's charge event builder can't append to an existing file
     read -ra workflows <<< "$ND_PRODUCTION_CHARGE_EVB_WORKFLOWS"
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     run_flow "${extra_args[@]}" -i "$chargef" -o "$outf" -c "${workflows[@]}"
 done
     
-read -ra workflows <<< "$ND_PRODUCTION_CHARGE_RECO_WORKFLOWS"
+if [[ "${#chargefs[@]}" -gt 0 ]]; then
+    read -ra workflows <<< "$ND_PRODUCTION_CHARGE_RECO_WORKFLOWS"
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-run_flow -i "$outf" -o "$outf" -c "${workflows[@]}"
+    run_flow -i "$outf" -o "$outf" -c "${workflows[@]}"
+fi
 
 ################################################################################
 # CHARGE/LIGHT MATCHING
