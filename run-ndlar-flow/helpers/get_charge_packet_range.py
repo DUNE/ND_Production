@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
+from contextlib import nullcontext
 from pathlib import Path
 from subprocess import DEVNULL, check_call
 from tempfile import TemporaryDirectory
+import sys
 
 import h5py
 import numpy as np
@@ -48,6 +50,8 @@ def main():
                     help='May be the same as --first-chargef')
     ap.add_argument('--start-padding', default=0)
     ap.add_argument('--end-padding', default=0)
+    ap.add_argument('--output', type=Path,
+                    help='File to write the result to (otherwise is stdout)')
     args = ap.parse_args()
 
     first_chargef_h5 = h5py.File(args.first_chargef)
@@ -62,7 +66,9 @@ def main():
     start_pos, end_pos = get_limits(lightf_h5, first_chargef_h5, last_chargef_h5,
                                     args.start_padding, args.end_padding)
 
-    print(start_pos, end_pos)
+    with (open(args.output, 'w') if args.output else nullcontext(sys.stdout)) \
+         as outf:
+        outf.write(f'{start_pos} {end_pos}\n')
 
 
 if __name__ == '__main__':

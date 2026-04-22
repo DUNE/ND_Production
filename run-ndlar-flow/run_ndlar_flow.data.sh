@@ -58,11 +58,15 @@ get_light_event_range() {       # requires charge packet file
         --chargef "${packet_chargefs[0]}" \
         --first-lightf "$(realpath "${lightfs[0]}")" \
         --last-lightf "$(realpath "${lightfs[-1]}")" \
-        --tmpdir "$tmpOutDir"
+        --tmpdir "$tmpOutDir" \
+        --output "$1"
 }
 
 if [[ ("$basis" == "charge") && (${#lightfs[@]} -gt 0) ]]; then
-    read -ra event_range <<< "$(get_light_event_range)"
+    rangefile=$(mktemp)
+    get_light_event_range "$rangefile"
+    read -ra event_range < "$rangefile"
+    rm "$rangefile"
 fi
 
 for lightf in "${lightfs[@]}"; do
@@ -89,11 +93,15 @@ get_charge_packet_range() {     # requires minimal light flow file
     run ../helpers/get_charge_packet_range.py \
         --lightf "$outf" \
         --first-chargef "$(realpath "${packet_chargefs[0]}")" \
-        --last-chargef "$(realpath "${packet_chargefs[-1]}")"
+        --last-chargef "$(realpath "${packet_chargefs[-1]}")" \
+        --output "$1"
 }
 
 if [[ ("$basis" == "light") && (${#chargefs[@]} -gt 0) ]]; then
-    read -ra packet_range <<< "$(get_charge_packet_range)"
+    rangefile=$(mktemp)
+    get_charge_packet_range "$rangefile"
+    read -ra packet_range < "$rangefile"
+    rm "$rangefile"
 fi
 
 for chargef in "${packet_chargefs[@]}"; do
