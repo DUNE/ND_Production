@@ -40,6 +40,7 @@ if [[ -n "$ND_PRODUCTION_RUN_BINARY2PACKET" ]]; then
         packet_chargef=$tmpOutDir/$subDir/$packet_chargef_name
         rm -f "$packet_chargef"
         read -ra args <<< "$ND_PRODUCTION_BINARY2PACKET_ARGS"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         run convert_rawhdf5_to_hdf5.py "${args[@]}" \
             --input_filename  "$chargef" --output_filename "$packet_chargef"
         packet_chargefs+=("$packet_chargef")
@@ -64,6 +65,7 @@ get_light_event_range() {       # requires charge packet file
 
 if [[ ("$basis" == "charge") && (${#lightfs[@]} -gt 0) ]]; then
     rangefile=$(mktemp)
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     get_light_event_range "$rangefile"
     read -ra event_range < "$rangefile"
     rm "$rangefile"
@@ -80,10 +82,12 @@ for lightf in "${lightfs[@]}"; do
         fi
     fi
     read -ra workflows <<< "$ND_PRODUCTION_LIGHT_EVB_WORKFLOWS"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     run_flow "${extra_args[@]}" -i "$lightf" -o "$outf" -c "${workflows[@]}"
 done
 
 read -ra workflows <<< "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 run_flow -i "$outf" -o "$outf" -c "${workflows[@]}"
 
 ################################################################################
@@ -100,6 +104,7 @@ get_charge_packet_range() {     # requires minimal light flow file
 
 if [[ ("$basis" == "light") && (${#chargefs[@]} -gt 0) ]]; then
     rangefile=$(mktemp)
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     get_charge_packet_range "$rangefile"
     read -ra packet_range < "$rangefile"
     rm "$rangefile"
@@ -116,19 +121,22 @@ for chargef in "${packet_chargefs[@]}"; do
         fi
     fi
     read -ra workflows <<< "$ND_PRODUCTION_CHARGE_EVB_WORKFLOWS"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     run_flow "${extra_args[@]}" -i "$chargef" -o "$outf" -c "${workflows[@]}"
 done
     
 read -ra workflows <<< "$ND_PRODUCTION_CHARGE_RECO_WORKFLOWS"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 run_flow -i "$outf" -o "$outf" -c "${workflows[@]}"
 
 ################################################################################
 # CHARGE/LIGHT MATCHING
 ################################################################################
 
-read -ra workflows <<< "$ND_PRODUCTION_CLMATCH_WORKFLOWS"
 if [[ (${#workflows[@]} -gt 0)
             && (${#chargefs[@]} -gt 0) && (${#lightfs[@]} -gt 0) ]]; then
+    read -ra workflows <<< "$ND_PRODUCTION_CLMATCH_WORKFLOWS"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     run_flow -i "$outf" -o "$outf" -c "${workflows[@]}"
 fi
 
