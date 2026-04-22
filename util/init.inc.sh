@@ -47,11 +47,27 @@ stepname=$(basename "$PWD")
 if [[ -n $isMC ]]; then
     subDir=$(printf "%07d" $((ND_PRODUCTION_INDEX / 1000 * 1000)))
 else
-    export ND_PRODUCTION_DATA_FILE=$ND_PRODUCTION_CHARGE_FILE
-    [[ -z $ND_PRODUCTION_DATA_FILE ]] && export ND_PRODUCTION_DATA_FILE=$ND_PRODUCTION_LIGHT_FILE
-    if [[ -z $ND_PRODUCTION_DATA_FILE ]]; then
-        echo "Please set either ND_PRODUCTION_INDEX (for MC) or ND_PRODUCTION_CHARGE_FILE or ND_PRODUCTION_LIGHT_FILE (for data)"
+    if [[ ("$ND_PRODUCTION_FILE_BASIS" != "charge") &&
+          ("$ND_PRODUCTION_FILE_BASIS" != "light") ]]; then
+        echo "Error: ND_PRODUCTION_FILE_BASIS must be either 'charge' or 'light'"
         exit 1
+    fi
+    if [[ "$ND_PRODUCTION_FILE_BASIS" == "charge" ]]; then
+        read -ra chargefs <<< "$ND_PRODUCTION_CHARGE_FILES"
+        if [[ ${#chargefs[@]} != 1 ]]; then
+            echo "Error: ND_PRODUCTION_CHARGE_FILES must contain exactly one" \
+                " file when ND_PRODUCTION_FILE_BASIS is 'charge'"
+            exit 1
+        fi
+        export ND_PRODUCTION_DATA_FILE=${chargefs[0]}
+    elif [[ "$ND_PRODUCTION_FILE_BASIS" == "light" ]]; then
+        read -ra lightfs <<< "$ND_PRODUCTION_LIGHT_FILES"
+        if [[ ${#lightfs[@]} != 1 ]]; then
+            echo "Error: ND_PRODUCTION_LIGHT_FILES must contain exactly one" \
+                " file when ND_PRODUCTION_FILE_BASIS is 'light'"
+            exit 1
+        fi
+        export ND_PRODUCTION_DATA_FILE=${lightfs[0]}
     fi
     subDir=$(dirname ${ND_PRODUCTION_DATA_FILE##"$ND_PRODUCTION_INDIR_BASE"})
     subDir=${subDir#/}         # strip leading slash
