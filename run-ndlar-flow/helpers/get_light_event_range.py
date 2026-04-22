@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
+from contextlib import nullcontext
 from pathlib import Path
 from subprocess import DEVNULL, check_call
 from tempfile import TemporaryDirectory
+import sys
 
 import h5py
 import numpy as np
@@ -49,6 +51,8 @@ def main():
     ap.add_argument('--last-lightf', type=Path,
                     help='May be the same as --first-lightf')
     ap.add_argument('--tmpdir', default='/tmp')
+    ap.add_argument('--output', type=Path,
+                    help='File to write the result to (otherwise is stdout)')
     args = ap.parse_args()
 
     outdir_obj = TemporaryDirectory(dir=args.tmpdir)
@@ -71,7 +75,9 @@ def main():
                                     first_lightf_built_h5,
                                     last_lightf_built_h5)
 
-    print(start_pos, end_pos)
+    with (open(args.output, 'w') if args.output else nullcontext(sys.stdout)) \
+         as outf:
+        outf.write(f'{start_pos} {end_pos}\n')
 
 
 if __name__ == '__main__':
