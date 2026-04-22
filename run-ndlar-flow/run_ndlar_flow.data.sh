@@ -50,7 +50,7 @@ else
 fi
 
 ################################################################################
-# LIGHT EVENT-BUILDING AND RECONSTRUCTION
+# LIGHT EVENT BUILDING
 ################################################################################
 
 get_light_event_range() {       # requires charge packet file
@@ -86,6 +86,10 @@ for lightf in "${lightfs[@]}"; do
     run_flow "${extra_args[@]}" -i "$lightf" -o "$outf" -c "${workflows[@]}"
 done
 
+################################################################################
+# LIGHT RECONSTRUCTION
+################################################################################
+
 if [[ "${#lightfs[@]}" -gt 0 ]]; then
     read -ra workflows <<< "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS"
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -93,7 +97,7 @@ if [[ "${#lightfs[@]}" -gt 0 ]]; then
 fi
 
 ################################################################################
-# CHARGE EVENT-BUILDING AND RECONSTRUCTION
+# CHARGE EVENT BUILDING
 ################################################################################
 
 get_charge_packet_range() {     # requires minimal light flow file
@@ -127,7 +131,11 @@ for chargef in "${packet_chargefs[@]}"; do
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     run_flow "${extra_args[@]}" -i "$chargef" -o "$outf" -c "${workflows[@]}"
 done
-    
+
+################################################################################
+# CHARGE RECONSTRUCTION
+################################################################################
+
 if [[ "${#chargefs[@]}" -gt 0 ]]; then
     read -ra workflows <<< "$ND_PRODUCTION_CHARGE_RECO_WORKFLOWS"
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
