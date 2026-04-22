@@ -36,7 +36,7 @@ workflow1="yamls/$yamldir/workflows/charge/charge_event_building_mc.yaml"
 workflow2="yamls/$yamldir/workflows/charge/charge_event_reconstruction_mc.yaml"
 workflow3="yamls/$yamldir/workflows/combined/combined_reconstruction_mc.yaml"
 workflow4="yamls/$yamldir/workflows/charge/prompt_calibration_mc.yaml"
-workflow5='yamls/$yamldir/workflows/charge/merged_calibration_mc.yaml'
+workflow5="yamls/$yamldir/workflows/charge/merged_calibration_mc.yaml"
 workflow6="yamls/$yamldir/workflows/charge/final_calibration_mc.yaml"
 
 # light workflows
