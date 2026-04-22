@@ -79,11 +79,12 @@ for lightf in "${lightfs[@]}"; do
            extra_args+=("--end_position" "${event_range[1]}")
         fi
     fi
-    read -ra workflows_evb <<< "$ND_PRODUCTION_LIGHT_EVB_WORKFLOWS"
-    read -ra workflows_reco <<< "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS"
-    workflows=("${workflows_evb[@]}" "${workflows_reco[@]}")
+    read -ra workflows <<< "$ND_PRODUCTION_LIGHT_EVB_WORKFLOWS"
     run_flow "${extra_args[@]}" -i "$lightf" -o "$outf" -c "${workflows[@]}"
 done
+
+read -ra workflows <<< "$ND_PRODUCTION_LIGHT_RECO_WORKFLOWS"
+run_flow -i "$outf" -o "$outf" -c "${workflows[@]}"
 
 ################################################################################
 # CHARGE EVENT-BUILDING AND RECONSTRUCTION
