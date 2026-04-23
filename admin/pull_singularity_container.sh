@@ -18,14 +18,16 @@ export SINGULARITY_CACHEDIR=$ND_PRODUCTION_CONTAINER_DIR/.singularity
 export SINGULARITY_TMPDIR=$ND_PRODUCTION_CONTAINER_DIR/.singularity/tmp
 
 # edit to pull a different container
-CONTAINER_NAME='sim2x2:genie_edep.LFG_testing.20230228.v2'
+CONTAINER_NAME=${CONTAINER_NAME:-sim2x2:genie_edep.LFG_testing.20230228.v2}
+
+DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker://mjkramer}
 
 mkdir -p $SINGULARITY_TMPDIR
 
 echo "Pulling container... this will take O(1 hour)..."
 echo "Container name: ${CONTAINER_NAME}"
 
-singularity pull docker://mjkramer/${CONTAINER_NAME}
+singularity pull ${DOCKER_REGISTRY}/${CONTAINER_NAME}
 
 mv ${CONTAINER_NAME//:/_}.sif $ND_PRODUCTION_CONTAINER_DIR
 echo "Finished."
