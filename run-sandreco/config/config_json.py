@@ -39,7 +39,7 @@ nr_input_spills = int(output.splitlines()[-1])
 print("nr input spills ", nr_input_spills)
 
 # open and configure the json file
-with open(f"{nd_prod_dir}/run-sandreco/config/fast_reco_v0.template.json") as f:
+with open(f"{nd_prod_dir}/run-sandreco/config/sandreco_v1.0.x.template.json") as f:
   config_sandreco = json.load(f)
 
 
