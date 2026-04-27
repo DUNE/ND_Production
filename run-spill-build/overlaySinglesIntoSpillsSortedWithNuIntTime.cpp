@@ -21,9 +21,6 @@
 //   (2) The timing information is edited to impose the timing microstructure of
 //       the LBNF beamline, the neutrino parent time of flight, the neutrino time of flight 
 //       and the "macrostructure" (spill period).
-//   
-//   (3) The TrackId follows the edep-sim convention: first all primaries, and all the primaries
-//       trajectories; then the secondaries, and the secondaries trajectories
 
 constexpr long double conversionTo_ns = 1.E9; 
 constexpr long double c = TMath::C() / conversionTo_ns; // [m/ns]
@@ -355,25 +352,11 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       gRooTracker& genie_evt = is_sampleA ? genie_evts_A_data : genie_evts_B_data;
 
       times[i] = TaggedTime(getInteractionTime_LBNF(*dk2nu_evt, genie_evt, flux), is_sampleA, is_sampleA ? evt_it + i : evt_it_B_sequence.at(evt_it + i - Nevts_this_spill_A));
-
-      // needed to count the the number of primary particles and trajectories, 
-      // (referred to point (3) at the beginning). We select just the first entry since
-      // we have always a single interaction (one interaction vertex)
-      auto v = edep_evt->Primaries[0];
-      nPrimaryPart += v.Particles.size();
-      nTrajectories += edep_evt->Trajectories.size();
     }
     
     std::sort(times.begin(),
               times.end(),
               [](const auto& lhs, const auto& rhs) { return lhs.time < rhs.time; });
-
-    std::cout << "This spill: " << std::endl;
-    std::cout << "  - Primary particle: " << nPrimaryPart << std::endl;
-    std::cout << "  - Trajectories    : " << nTrajectories << std::endl;
-
-    int lastPriTrajId = 0;
-    int lastSecTrajId = nPrimaryPart;
 
     // loop on times vector: different from overlaySingleIntoSpillsSorted.cpp!
     // there, the first time is associated with the first event
@@ -415,16 +398,6 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       genie_tree_data.EvtNum = edep_evt->EventId;
       genie_tree_data.EvtVtx[3] = event_time;
 
-      // count the number of primaries, secondaries and trajectories
-      int nPrimaryPartThisEvent = 0;
-      nPrimaryPartThisEvent += edep_evt->Primaries[0].Particles.size();
-      int nTrajectoriesThisEvent = edep_evt->Trajectories.size();
-      int nSecondaryPartThisEvent = nTrajectoriesThisEvent - nPrimaryPartThisEvent;
-
-      // function to update the TrackId as explained in the point (3) at the beginning
-      auto updateTrackId = [lastPriTrajId, lastSecTrajId, nPrimaryPartThisEvent](int &trkId)
-      { trkId = trkId < nPrimaryPartThisEvent ? lastPriTrajId + trkId : lastSecTrajId + trkId - nPrimaryPartThisEvent; };
-
       // assign the correct time to the vertex, the trajectories and the energy depositions
       // ... interaction vertex
       auto& v = edep_evt->Primaries[0];
@@ -436,9 +409,6 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       // trivially set InteractionNumber to be the current entry number.
       // https://github.com/DUNE/2x2_sim/issues/54
       v.InteractionNumber = evt_it_A + evt_it_B;
-      for (auto &p : v.Particles){
-        updateTrackId(p.TrackId);
-      }
 
 
       // ... trajectories
@@ -447,10 +417,6 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
         for (std::vector<TG4TrajectoryPoint>::iterator p = t->Points.begin(); p != t->Points.end(); ++p) {
           double offset = p->Position.T() - old_event_time;
           p->Position.SetT(event_time + offset);
-        }
-        updateTrackId(t->TrackId);
-        if (t->ParentId != -1){
-          updateTrackId(t->ParentId);
         }
       }
 
@@ -461,15 +427,8 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
           double stop_offset = h->Stop.T() - old_event_time;
           h->Start.SetT(event_time + start_offset);
           h->Stop.SetT(event_time + stop_offset);
-          updateTrackId(h->PrimaryId);
-          for (auto &trkId : h->Contrib){
-            updateTrackId(trkId);
-          }
         }
       }
-
-      lastPriTrajId += nPrimaryPartThisEvent;
-      lastSecTrajId += nSecondaryPartThisEvent;
 
       new_tree->Fill();
       genie_tree->Fill();
