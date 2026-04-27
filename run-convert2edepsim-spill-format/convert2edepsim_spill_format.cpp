@@ -1,5 +1,11 @@
 #include "TG4Event.h"
 
+// ROOT macro meant to take in input edep-sim files organized as 1 single nu interaction per entry
+// and convert them into edep-sim files organized as spills. 
+// The TrackId assignment is changed following the edep-sim convention: 
+//  - first all primaries, and all the primaries trajectories; then the secondaries, and the secondaries trajectories. 
+//  - TrackIds always increase, i.e. 1st entry 0, 1, 2; 2nd entry 3, 4, 5, etc.
+
 void convert2edepsim_spill_format(std::string const& inFileName, std::string const& outFileName, int runOffset){
 
     TG4Event* edep_evt = nullptr;
@@ -64,6 +70,22 @@ void convert2edepsim_spill_format(std::string const& inFileName, std::string con
         auto spillId = pair.first;
         auto eventIds = pair.second;
 
+        int nPrimaryPart = 0;
+        int nTrajectories = 0;
+        inFile->cd();
+        for (int i = 0; i < eventIds.size(); i++){
+            edep_tree->GetEntry(entry + i);
+            // here (and afterwards) we assume there is just one primary
+            assert(edep_evt->Primaries.size() != 0u && "Multiple interaction vertices in the same event not supported!!");
+
+            auto v = edep_evt->Primaries[0];
+            nPrimaryPart += v.Particles.size();
+            nTrajectories += edep_evt->Trajectories.size();
+        }
+
+        int lastPriTrajId = 0;
+        int lastSecTrajId = nPrimaryPart;
+
         spill = new TG4Event();
 
         std::map<std::string, std::vector<TG4HitSegment>> SegmentDetectors;
@@ -74,24 +96,48 @@ void convert2edepsim_spill_format(std::string const& inFileName, std::string con
             spill->RunId = (edep_evt->RunId) % runOffset;
             spill->EventId = spillId;
 
+            // count the number of primaries, secondaries and trajectories
+            int nPrimaryPartThisEvent = 0;
+            nPrimaryPartThisEvent += edep_evt->Primaries[0].Particles.size();
+            int nTrajectoriesThisEvent = edep_evt->Trajectories.size();
+            int nSecondaryPartThisEvent = nTrajectoriesThisEvent - nPrimaryPartThisEvent;
+
+            // function to update the TrackId as explained in the point (3) at the beginning
+            auto updateTrackId = [lastPriTrajId, lastSecTrajId, nPrimaryPartThisEvent](int &trkId)
+            { trkId = trkId < nPrimaryPartThisEvent ? lastPriTrajId + trkId : lastSecTrajId + trkId - nPrimaryPartThisEvent; };
+
             // interaction vertex
             if (!edep_evt->Primaries.empty()){
                 auto& v = edep_evt->Primaries[0];
                 spill->Primaries.push_back(v);
+                // for (auto &p : spill->Primaries[i].Particles){
+                //     updateTrackId(p.TrackId);
+                // }
             }
 
             // trajectories
             for (auto &t : edep_evt->Trajectories){
                 spill->Trajectories.push_back(t);
+                //updateTrackId(spill->Trajectories.back().TrackId);
+                if (spill->Trajectories.back().ParentId != -1){
+                  //  updateTrackId(spill->Trajectories.back().ParentId);
+                }
             }
 
             // energy depositions
             for (auto &d : edep_evt->SegmentDetectors){
                 for (auto &h : d.second){
                     SegmentDetectors[d.first].push_back(h);
+                    //updateTrackId(SegmentDetectors[d.first].back().PrimaryId);
+                    for (auto &trkId : SegmentDetectors[d.first].back().Contrib){
+                      //  updateTrackId(trkId);
+                    }
                 }
             }
-        }// end loop over events of the same spillId
+            
+            lastPriTrajId += nPrimaryPartThisEvent;
+            lastSecTrajId += nSecondaryPartThisEvent;
+    }// end loop over events of the same spillId
     entry += eventIds.size();
     spill->SegmentDetectors = std::vector<std::pair<std::string, std::vector<TG4HitSegment>>>(SegmentDetectors.begin(), SegmentDetectors.end());
     outTree->Fill();
