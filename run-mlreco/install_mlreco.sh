@@ -66,6 +66,11 @@ cd h5flow
 pip install .
 cd ..
 
+git clone https://github.com/larpix/larpix-control.git
+cd larpix-control
+pip install .
+cd ..
+
 
 git clone -b develop https://github.com/DeepLearnPhysics/flow2supera.git
 ## Don't pip install because e.g. config files are expected to live near
