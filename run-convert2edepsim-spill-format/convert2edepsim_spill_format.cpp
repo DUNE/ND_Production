@@ -92,7 +92,7 @@ void convert2edepsim_spill_format(std::string const& inFileName, std::string con
         // Loop over each event in a single spill
         for (size_t i = 0; i < eventIds.size(); ++i) {
             edep_tree->GetEntry(entry + i);
-            spill->RunId = (edep_evt->RunId) % runOffset;
+            spill->RunId = -1; // since we can match the previous files in the chain without using it, and because there can be more RunIds per spill
             spill->EventId = spillId;
 
             // Count the number of primaries, secondaries and trajectories
