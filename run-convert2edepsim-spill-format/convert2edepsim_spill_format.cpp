@@ -86,18 +86,17 @@ void convert2edepsim_spill_format(std::string const& inFileName, std::string con
         int lastSecTrajId = nPrimaryPart;
 
         spill = new TG4Event();
+        spill->RunId = -1; // since we can match the previous files in the chain without using it, and because there can be more RunIds per spill
+        spill->EventId = spillId;
 
         std::map<std::string, std::vector<TG4HitSegment>> SegmentDetectors;
 
         // Loop over each event in a single spill
         for (size_t i = 0; i < eventIds.size(); ++i) {
             edep_tree->GetEntry(entry + i);
-            spill->RunId = -1; // since we can match the previous files in the chain without using it, and because there can be more RunIds per spill
-            spill->EventId = spillId;
 
             // Count the number of primaries, secondaries and trajectories
-            int nPrimaryPartThisEvent = 0;
-            nPrimaryPartThisEvent += edep_evt->Primaries[0].Particles.size();
+            int nPrimaryPartThisEvent = edep_evt->Primaries[0].Particles.size();
             int nTrajectoriesThisEvent = edep_evt->Trajectories.size();
             int nSecondaryPartThisEvent = nTrajectoriesThisEvent - nPrimaryPartThisEvent;
 
