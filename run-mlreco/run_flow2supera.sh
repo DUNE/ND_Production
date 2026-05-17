@@ -13,6 +13,8 @@ config=$ND_PRODUCTION_FLOW2SUPERA_CONFIG
 
 rm -f "$outFile"
 
+export OMP_NUM_THREADS=1
+
 run install/flow2supera/bin/run_flow2supera.py -o "$outFile" -c "$config" "$inFile"
 
 larcvOutDir=$outDir/LARCV/$subDir
