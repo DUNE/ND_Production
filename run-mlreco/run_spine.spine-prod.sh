@@ -13,7 +13,6 @@ source load_mlreco.inc.sh
 [ -n "$ND_PRODUCTION_SPINE_OPENBLAS_NUM_THREADS" ] && export OPENBLAS_NUM_THREADS=$ND_PRODUCTION_SPINE_OPENBLAS_NUM_THREADS
 
 outFile=${tmpOutDir}/${outName}.MLRECO_SPINE.hdf5
-inName=${ND_PRODUCTION_IN_NAME}.${globalIdx}
 inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-mlreco/${ND_PRODUCTION_IN_NAME}/LARCV/${subDir}/${inName}.LARCV.root
 
 rm -f "$outFile"
