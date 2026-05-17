@@ -21,7 +21,6 @@ source $ND_PRODUCTION_DIR/run-pandora/setup_pandora.sh
 source $ND_PRODUCTION_DIR/util/init.inc.sh
 
 # Input HDF5 file
-inName=${ND_PRODUCTION_IN_NAME}.${globalIdx}
 inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/${ND_PRODUCTION_IN_NAME}/FLOW/${subDir}/${inName}.FLOW.hdf5
 
 # Is this data or MC?
