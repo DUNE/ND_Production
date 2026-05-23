@@ -130,9 +130,11 @@ create_metadata_file()
        fi 
     fi
 
+    PYTHON_VERSION=$(python --version 2>&1)
+    unsetup python
+
     echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} ${ARGS}]"  2>&1 | tee -a $envlog
     (
-       source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
        source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 
        setup metacat
@@ -142,6 +144,8 @@ create_metadata_file()
 
        python ${METADATA_EXTRACT} ${ARGS} 
     )
+
+    setup python ${PYTHON_VERSION}
 }
 
 
