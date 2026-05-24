@@ -130,14 +130,10 @@ create_metadata_file()
        fi 
     fi
 
-    PYTHON_VERSION=$(python --version 2>&1)
-    unsetup python
-
     echo -e "\tRunning the command [python3 ${METADATA_EXTRACT} ${ARGS}]"  2>&1 | tee -a $envlog
     (
        source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 
-       setup metacat
        setup python v3_8_3b
        setup h5py v3_1_0d -q e20:p383b:prof
        setup root v6_22_08b -q e20:p383b:prof

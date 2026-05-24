@@ -11,7 +11,6 @@ import ROOT # change to uproot with a ups or spack product is available
 
 from pathlib import Path
 from argparse import ArgumentParser as ap
-from metacat.webapi import MetaCatClient
 
 from collections import OrderedDict
 
@@ -37,16 +36,6 @@ CAMPAIGN_NAME         = str(os.environ.get('CAMPAIGN_NAME')) if 'CAMPAIGN_NAME' 
 GENERATOR             = str(os.environ.get('GENERATOR')) if 'GENERATOR' in os.environ else 'None'
 JUSTIN_WORKFLOW_ID    = str(os.environ.get('JUSTIN_WORKFLOW_ID')) if 'JUSTIN_WORKFLOW_ID' in os.environ else 'None'
 JUSTIN_SITE_NAME      = str(os.environ.get('JUSTIN_SITE_NAME')) if 'JUSTIN_SITE_NAME' in os.environ else 'None'
-
-
-#+++++++++++++++++++++++++++++++++
-# get the metacat client
-#+++++++++++++++++++++++++++++++++
-def _GetMetacatClient() :
-    client = MetaCatClient(server_url='https://metacat.fnal.gov:9443/dune_meta_prod/app',
-                           auth_server_url='https://metacat.fnal.gov:8143/auth/dune',
-                           timeout=30)
-    return client
 
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -445,17 +434,18 @@ if __name__ == '__main__' :
    global NAMESPACE
    NAMESPACE = args.namespace
 
-
-   # get the metacat client
-   client = _GetMetacatClient()
-
    # get the parent files metadata
    parent_metadata = {}
-   parents = [] if args.parents == None else args.parents.split(",")
+   parents  = [] if args.parents == None else args.parents.split(",")
 
+   env      = "export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app; export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune;"
+   setcmd   = "source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh; setup metacat; setup python v3_9_15;"
    for parent in parents :
-       info = client.get_file(did=parent,with_metadata=True,with_provenance=True,with_datasets=False)
-       parent_metadata[parent] = info['metadata']
+       cmd  = "%s %s metacat file show -m -j %s" % (env, setcmd, parent)
+       proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env={}, bufsize=1, text=True, shell=True)
+       stdout, error = proc.communicate()
+       data = json.loads(stdout[stdout.find("{"):])
+       parent_metadata[parent] = data['metadata']
 
 
    # loop over the input file names
