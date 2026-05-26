@@ -14,7 +14,7 @@ git clone -b main https://github.com/DUNE/ND_CAFMaker.git
 cd ND_CAFMaker
 
 #./build_deps.sh
-source ndcaf_setup.sh prof
+source ndcaf_setup_deps.sh prof
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${PWD}/install
 cmake --build build --target install
 cd ../..
