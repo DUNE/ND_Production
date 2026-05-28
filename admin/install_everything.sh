@@ -9,10 +9,12 @@ echo "Installation of common tools"
 # If using the ND_PRODUCTION_USE_GHEP_POT option, need to install a single
 # executable via install_hadd.sh.
 pushd run-hadd
+echo "Installing hadd tools"
 ./install_hadd.sh
 popd
 
 pushd run-cafmaker
+echo "Installing CAFMaker tools"
 ./install_cafmaker.sh
 popd
 

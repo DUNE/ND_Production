@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-export ND_PRODUCTION_RUNTIME=SHIFTER
-export ND_PRODUCTION_CONTAINER=fermilab/fnal-wn-sl7:latest
+export ND_PRODUCTION_RUNTIME=${ND_PRODUCTION_RUNTIME:-SHIFTER}
+
+export ND_PRODUCTION_CONTAINER=$ND_PRODUCTION_CONTAINER_CAF
 
 source ../util/reload_in_container.inc.sh
 
