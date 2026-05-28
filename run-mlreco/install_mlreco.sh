@@ -33,7 +33,8 @@ rm virtualenv.pyz
 source mlreco.venv/bin/activate
 # setuptools 70 doesn't like SparseConvNet
 # (pkg_resources.packaging is the culprit)
-pip install --upgrade pip setuptools==69 wheel
+# also SuperaAtomic uses the deprecated bdist_wheel so pip >= 25.3 won't work
+pip install --upgrade pip==25.2 setuptools==69 wheel
 # pip install 'ruamel.yaml<0.18.0' # for deprecated load()
 
 ## Need the following?
@@ -47,7 +48,7 @@ source configure.sh
 make -j16
 cd ..
 
-git clone -b v1.8.0 https://github.com/DeepLearnPhysics/SuperaAtomic.git
+git clone -b v1.9.0 https://github.com/DeepLearnPhysics/SuperaAtomic.git
 
 cd SuperaAtomic
 git submodule update --init     # pybind11
@@ -62,6 +63,11 @@ cd ..
 
 git clone -b main https://github.com/DUNE/h5flow.git
 cd h5flow
+pip install .
+cd ..
+
+git clone https://github.com/larpix/larpix-control.git
+cd larpix-control
 pip install .
 cd ..
 
@@ -99,4 +105,7 @@ git clone -b develop https://github.com/DeepLearnPhysics/spine.git
 # sed -i 's/yaml.load(open(filename))/yaml.load(open(filename), yaml.Loader)/' \
 #     dune-nd-lar-reco/load_helpers.py
 
-git clone -b main https://github.com/DeepLearnPhysics/spine_prod.git
+git clone -b main https://github.com/DeepLearnPhysics/spine-prod.git
+
+# for backward-compatibility with run_mlreco.spine.sh
+ln -s spine-prod spine_prod
