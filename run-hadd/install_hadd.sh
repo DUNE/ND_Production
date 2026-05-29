@@ -5,24 +5,7 @@ export ND_PRODUCTION_RUNTIME=${ND_PRODUCTION_RUNTIME:-SHIFTER}
 
 export ND_PRODUCTION_CONTAINER=$ND_PRODUCTION_CONTAINER_HADD
 
-
-if [[ "$ND_PRODUCTION_RUNTIME" == "SHIFTER" ]]; then
-    # Reload in Shifter
-    if [[ "$SHIFTER_IMAGEREQUEST" != "$ND_PRODUCTION_CONTAINER" ]]; then
-        shifter --image=$ND_PRODUCTION_CONTAINER --module=none -- "$0" "$@"
-        exit
-    fi
-elif [[ "$ND_PRODUCTION_RUNTIME" == "SINGULARITY" ]]; then
-    # Reload in Singularity
-    if [[ "$SINGULARITY_NAME" != "$ND_PRODUCTION_CONTAINER" ]]; then
-        singularity exec -B $ND_PRODUCTION_DIR,$ND_PRODUCTION_OUTDIR_BASE,$ND_PRODUCTION_LOGDIR_BASE $ND_PRODUCTION_CONTAINER_DIR/$ND_PRODUCTION_CONTAINER /bin/bash "$0" "$@"
-        exit
-    fi
-else
-    echo "Unsupported \$ND_PRODUCTION_RUNTIME"
-    exit
-fi
-
+source ../util/reload_in_container.inc.sh
 
 rm -f getGhepPOT.exe
 
