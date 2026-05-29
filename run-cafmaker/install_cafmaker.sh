@@ -9,6 +9,12 @@ source ../util/reload_in_container.inc.sh
 
 set +o errexit
 
+if [[ -d install ]]; then
+    echo "CAFMaker appears to be installed already."
+    echo "To force a reinstall, please delete the directory run-cafmaker/install"
+    exit
+fi
+
 mkdir install
 cd install
 
