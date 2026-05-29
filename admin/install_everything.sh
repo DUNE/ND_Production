@@ -59,3 +59,9 @@ else
       chmod +x "$timeProg"
     fi
 fi
+
+if [ -z "$detector" ]; then
+    echo
+    echo "No detector specified. In order to install larnd-sim, ndlar_flow, SPINE, and Pandora,"
+    echo "please pass a detector name (2x2 or ndlar) as an argument to this install script."
+fi
