@@ -14,7 +14,8 @@ using namespace std;
 
 enum class Format { UNDEFINED, NORMAL, COMPACT };
 static constexpr unsigned _fbsize_words = 5733 + 2;
-static constexpr float ceiling = 10; // where we start the simulation in y
+static constexpr float ceiling = 106 ; // where we start the simulation in y (meters). current 2x2 geometry only has ~30m of rock overburden so setting around that much
+static constexpr float acceptance_buffer = 2; // buffer in meters around the detector where particles which intersect will be accepted
 
 // Single module dimensions
 /*
@@ -25,9 +26,15 @@ static constexpr float z_border[2] = {-3.15174500e-01,  3.15174500e-01};
 */
 
 // FSD dimensions
-static constexpr float x_border[2] = { -4.67879982e-01,   4.67879982e-01};
-static constexpr float y_border[2] = {-14.879999841e-01, 14.879999841e-01};
-static constexpr float z_border[2] = { -4.761600031e-01,  4.761600031e-01};
+//static constexpr float x_border[2] = { -4.67879982e-01,   4.67879982e-01};
+//static constexpr float y_border[2] = {-14.879999841e-01, 14.879999841e-01};
+//static constexpr float z_border[2] = { -4.761600031e-01,  4.761600031e-01};
+//static constexpr float box_width[3] = {x_border[1]-x_border[0], y_border[1]-y_border[0], z_border[1]-z_border[0]};
+
+// 2x2 rough dimensions (meters)
+static constexpr float x_border[2] = {-7.0e-01,  7.0e-01};
+static constexpr float y_border[2] = {-7.0e-01,  7.0e-01};
+static constexpr float z_border[2] = {-7.0e-01,  7.0e-01};
 static constexpr float box_width[3] = {x_border[1]-x_border[0], y_border[1]-y_border[0], z_border[1]-z_border[0]};
 
 union {
@@ -168,6 +175,46 @@ const std::map<unsigned int, int> corsikaToPdgId = {
     {2814, 1000140280}, // Silicon
     {9900, 22}          // Cherenkov gamma
 };
+
+bool CheckIntersection(const double pos[3], const std::vector<float>& dir) {
+    // Uses slab method for checking if ray intersects with an axis aligned bounding box (the detector + buffer)
+    
+    // Define the acceptance box (detector + buffer)
+    const double b_min[3] = { x_border[0] - acceptance_buffer, 
+                              y_border[0] - acceptance_buffer, 
+                              z_border[0] - acceptance_buffer };
+                        
+    const double b_max[3] = { x_border[1] + acceptance_buffer, 
+                              y_border[1] + acceptance_buffer, 
+                              z_border[1] + acceptance_buffer };
+
+    double t_min = -1e20; // Start with -infinity
+    double t_max = 1e20;  // Start with +infinity
+
+    for (int i = 0; i < 3; ++i) {
+        // Prevent division by zero
+        if (std::abs(dir[i]) > 1e-9) {
+            double t1 = (b_min[i] - pos[i]) / dir[i];
+            double t2 = (b_max[i] - pos[i]) / dir[i];
+
+            // t_near is intersection with near plane, t_far with far plane
+            double t_near = std::min(t1, t2);
+            double t_far  = std::max(t1, t2);
+
+            // tighten the interval
+            t_min = std::max(t_min, t_near);
+            t_max = std::min(t_max, t_far);
+        } else {
+            // ray is parallel to this axis plane
+            // if origin is outside the slab, it never hits
+            if (pos[i] < b_min[i] || pos[i] > b_max[i]) {
+                return false;
+            }
+        }
+    }
+    // valid intersection if entry is before exit, and exit is in the future
+    return (t_max >= t_min && t_max > 0);
+}
 
 int main(int argc, char *argv[]) {
     if (argc == 1) {
@@ -444,6 +491,16 @@ int main(int argc, char *argv[]) {
 
                     for (int nx = -5; nx <= 5; nx++) {
                         for (int nz = -5; nz <= 5; nz++) {
+                            // Calculate Vertex (Moved to top of loop)
+                            EvtVtx[0] = x[i_part] - x_shift + nx*(x_border[1]-x_border[0]);
+                            EvtVtx[1] = ceiling;
+                            EvtVtx[2] = z[i_part] - z_shift + nz*(z_border[1]-z_border[0]);
+
+                            // Pass pre-calculated 'dir_vector'
+                            if (!CheckIntersection(EvtVtx, dir_vector)) {
+                                continue; // Skip particles that miss the detector volume + buffer
+                            }
+                            
                             // Clear variables
                             memset(StdHepPdg, 0, sizeof(StdHepPdg));
                             memset(StdHepP4, 0, sizeof(StdHepP4));
