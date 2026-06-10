@@ -12,6 +12,8 @@ rasterize_plots()
 
 def main(sim_file, input_type, det_complex):
 
+    index_name = 0
+
     sim_h5 = h5py.File(sim_file,'r')
     print('\n----------------- File content -----------------')
     print('File:',sim_file)
@@ -54,6 +56,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel('t0_start')
         plt.ylabel(r'N segments')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Plot the time structure of packets for adjacent spills for the first max_time seconds.
@@ -70,6 +74,8 @@ def main(sim_file, input_type, det_complex):
             plt.xlabel(r't0_start (us)')
             plt.ylabel(r'N segments')
             output.savefig()
+            print(index_name)
+            index_name+=1
             plt.close()
             spill += 1
 
@@ -84,6 +90,8 @@ def main(sim_file, input_type, det_complex):
             plt.xlabel(r't0_start (us)')
             plt.ylabel(r'N segments')
             output.savefig()
+            print(index_name)
+            index_name+=1
             plt.close()
             spill += 1
 
@@ -100,6 +108,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel('Time since first segment in spill (us)')
         plt.ylabel(r'N segments')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         # Plot a single segment for each event ID.
@@ -111,6 +121,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel(r't0_start (us)')
         plt.ylabel(r'Event ID')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Plot number of hit segments per event id
@@ -119,6 +131,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel(r'N segments')
         plt.ylabel('Spills')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Plot dEdx for each segment
@@ -127,6 +141,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel(r'dEdx [MeV/cm]')
         plt.ylabel(r'N segments')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Plot segment lengths:
@@ -135,6 +151,8 @@ def main(sim_file, input_type, det_complex):
         plt.ylabel(r'N segments')
         plt.yscale('log')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Plot segment position in x:
@@ -143,6 +161,8 @@ def main(sim_file, input_type, det_complex):
         plt.ylabel(r'N segments')
         plt.yscale('log')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Plot segment position in y:
@@ -151,6 +171,8 @@ def main(sim_file, input_type, det_complex):
         plt.ylabel(r'N segments')
         plt.yscale('log')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Plot segment position in z:
@@ -159,6 +181,8 @@ def main(sim_file, input_type, det_complex):
         plt.ylabel(r'N segments')
         plt.yscale('log')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Plot the outgoing muon momentum
@@ -171,6 +195,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel(r'$p_\mu$ [MeV]')
         plt.ylabel(r'Event rate')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Plot the outgoing muon angle w.r.t. the neutrino beam direction
@@ -183,6 +209,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel(r'$\theta_\mu$ [degrees]')
         plt.ylabel(r'Event rate')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Now by their powers combined -- 2D muon momentum vs angle
@@ -192,6 +220,8 @@ def main(sim_file, input_type, det_complex):
         plt.ylabel(r'$p_\mu$ [MeV]')
         plt.colorbar(label='Event rate')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Need to check that these are the same / good enough for full ND complex. 
@@ -294,6 +324,8 @@ def main(sim_file, input_type, det_complex):
             plt.ylabel(r'Event rate')
             plt.legend()
             output.savefig()
+            print(index_name)
+            index_name+=1
             plt.close()
 
         ### Plot the outgoing muon end position
@@ -323,6 +355,8 @@ def main(sim_file, input_type, det_complex):
             plt.ylabel(r'Event rate')
             plt.legend()
             output.savefig()
+            print(index_name)
+            index_name+=1
             plt.close()
 
         ### Plot the muon end points
@@ -332,6 +366,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
    
         plt.axes().set_aspect('equal')
@@ -340,6 +376,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel('z [cm]')
         plt.ylabel('y [cm]')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
         
         plt.axes().set_aspect('equal')
@@ -348,6 +386,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel('z [cm]')
         plt.ylabel('x [cm]')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
             
         ### Plot the interaction vertex positions. The distinction from the above is that
@@ -378,6 +418,8 @@ def main(sim_file, input_type, det_complex):
             plt.ylabel(r'Event rate')
             plt.legend()
             output.savefig()
+            print(index_name)
+            index_name+=1
             plt.close()
 
         r_squared = vertex[:,"x_vert"]**2 + vertex[:,"y_vert"] **2 + vertex[:,"z_vert"] **2 
@@ -386,6 +428,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel(r'Radial distance')
         plt.ylabel(r'Event rate')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
             
         plt.axes().set_aspect('equal')
@@ -394,6 +438,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
    
         plt.axes().set_aspect('equal')
@@ -402,6 +448,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel('z [cm]')
         plt.ylabel('y [cm]')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
         
         plt.axes().set_aspect('equal')
@@ -410,6 +458,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel('z [cm]')
         plt.ylabel('x [cm]')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         plt.axes().set_aspect('equal')
@@ -424,6 +474,8 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
         ### Plot total number of primary tracks from the vertex
@@ -444,48 +496,54 @@ def main(sim_file, input_type, det_complex):
         plt.xlabel(r'N tracks')
         plt.ylabel(r'Event rate')
         output.savefig()
+        print(index_name)
+        index_name+=1
         plt.close()
 
-        ### Plot vertex time distribution (helps with number of events in each spill).
-        vertices_time = sim_h5['vertices']['t_vert']
-        spill = 0
-        packet_duration = 10
-        epsillon = 5
-        n_vertices_per_spill = []
-        n_vertices_per_spill_ndlar = []
-        while (spill < len(event_id_uniq)):
-            this_vertices = vertex[vertex['t_vert'] > spill*spill_duration - epsillon]
-            this_vertices = this_vertices[this_vertices['t_vert'] < spill*(spill_duration) + packet_duration + epsillon]
-            n_vertices_per_spill.append(len(this_vertices['t_vert']))
-            plt.hist(this_vertices['t_vert'], bins=100, range=[spill*spill_duration - epsillon, spill*spill_duration+packet_duration + epsillon])
-            plt.xlabel('Vertex t_vert (us)')
-            plt.ylabel(r'N Vertices')
-            output.savefig()
+        # ### Plot vertex time distribution (helps with number of events in each spill).
+        # vertices_time = sim_h5['vertices']['t_vert']
+        # spill = 0
+        # packet_duration = 10
+        # epsillon = 5
+        # n_vertices_per_spill = []
+        # n_vertices_per_spill_ndlar = []
+        # while (spill < len(event_id_uniq)):
+        #     this_vertices = vertex[vertex['t_vert'] > spill*spill_duration - epsillon]
+        #     this_vertices = this_vertices[this_vertices['t_vert'] < spill*(spill_duration) + packet_duration + epsillon]
+        #     n_vertices_per_spill.append(len(this_vertices['t_vert']))
+        #     plt.hist(this_vertices['t_vert'], bins=100, range=[spill*spill_duration - epsillon, spill*spill_duration+packet_duration + epsillon])
+        #     plt.xlabel('Vertex t_vert (us)')
+        #     plt.ylabel(r'N Vertices')
+        #     output.savefig()
+        # print(index_name)
+        # index_name+=1
 
-            if det_complex == "full":
-                this_vertices = this_vertices[this_vertices['x_vert'] < 350.0]
-                this_vertices = this_vertices[this_vertices['x_vert'] > -350.0]
-                this_vertices = this_vertices[this_vertices['y_vert'] < 124.233]
-                this_vertices = this_vertices[this_vertices['y_vert'] > -218.191]
-                this_vertices = this_vertices[this_vertices['z_vert'] < 918.2441]
-                this_vertices = this_vertices[this_vertices['z_vert'] > 415.7559]
-                n_vertices_per_spill_ndlar.append(len(this_vertices['z_vert']))
+        #     if det_complex == "full":
+        #         this_vertices = this_vertices[this_vertices['x_vert'] < 350.0]
+        #         this_vertices = this_vertices[this_vertices['x_vert'] > -350.0]
+        #         this_vertices = this_vertices[this_vertices['y_vert'] < 124.233]
+        #         this_vertices = this_vertices[this_vertices['y_vert'] > -218.191]
+        #         this_vertices = this_vertices[this_vertices['z_vert'] < 918.2441]
+        #         this_vertices = this_vertices[this_vertices['z_vert'] > 415.7559]
+        #         n_vertices_per_spill_ndlar.append(len(this_vertices['z_vert']))
 
-            plt.close()
-            spill += 1
+        #     plt.close()
+        #     spill += 1
 
-        ### Plot the number of vertices per spill.    
-        plt.hist(n_vertices_per_spill, range=[0,200], bins=20)
-        if det_complex == "full":
-            plt.title("Total Vertices: "+str(sum(n_vertices_per_spill))+". ("+str(sum(n_vertices_per_spill_ndlar))+" are in NDLAr)")
-            plt.hist(n_vertices_per_spill_ndlar, range=[0,200], bins=20)
-            plt.hist(np.subtract(n_vertices_per_spill, n_vertices_per_spill_ndlar), range=[0,200], bins=20)
-        else:
-            plt.title("Total Vertices: "+str(sum(n_vertices_per_spill))+".")
-        plt.xlabel('Number of Vertices per Spill')
-        plt.ylabel(r'Spills')
-        output.savefig()
-        plt.close()
+        # ### Plot the number of vertices per spill.    
+        # plt.hist(n_vertices_per_spill, range=[0,200], bins=20)
+        # if det_complex == "full":
+        #     plt.title("Total Vertices: "+str(sum(n_vertices_per_spill))+". ("+str(sum(n_vertices_per_spill_ndlar))+" are in NDLAr)")
+        #     plt.hist(n_vertices_per_spill_ndlar, range=[0,200], bins=20)
+        #     plt.hist(np.subtract(n_vertices_per_spill, n_vertices_per_spill_ndlar), range=[0,200], bins=20)
+        # else:
+        #     plt.title("Total Vertices: "+str(sum(n_vertices_per_spill))+".")
+        # plt.xlabel('Number of Vertices per Spill')
+        # plt.ylabel(r'Spills')
+        # output.savefig()
+        # print(index_name)
+        # index_name+=1
+        # plt.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

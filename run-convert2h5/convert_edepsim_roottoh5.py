@@ -23,7 +23,7 @@ segments_dtype = np.dtype([("event_id","u4"),("vertex_id", "u8"), ("segment_id",
                            ("t0_start", "f8"), ("t0_end", "f8"), ("t0", "f8"),
                            ("dx", "f4"), ("long_diff", "f4"),
                            ("pixel_plane", "i4"), ("t", "f8"), ("t_end", "f8"),
-                           ("dEdx", "f4"), ("dE", "f4"), ("dE_secondary", "f4"),
+                           ("dEdx", "f4"), ("dE", "f4"), ("dE_secondary", "f4"), ("p_mag_traj_start", "f4"),
                            ("y", "f4"), ("x", "f4"), ("z", "f4"),
                            ("n_photons","f4")], align=True)
 
@@ -55,6 +55,11 @@ genie_hdr_dtype = np.dtype([("event_id", "u4"), ("vertex_id", "u8"),
                             ("Elep", "f4"), ("lep_mom", "f4"), ("lep_ang", "f4"), ("lep_pdg", "i4"),
                             ("q0", "f4"), ("q3", "f4"), ("Q2", "f4"),
                             ("x", "f4"), ("y", "f4")], align=True)
+
+decay0_stack_dtype = np.dtype([("event_id", "u4"), ("vertex_id", "u8"), ("traj_id", "i4"), ("file_traj_id", "i4"),
+                                ("part_4mom", "f4", (4,)), ("part_pdg", "i4"), ("time_correction", "f8"),
+                                ("x_vert", "f4"), ("y_vert", "f4"), ("z_vert", "f4"), ("t_vert", "f8"),
+                                ], align=True)
 
 # Convert from EDepSim default units (mm, ns)
 edep2cm = 0.1   # convert to cm
@@ -222,17 +227,20 @@ def getReactionCode(genie_str):
     return reaction
 
 # Prep HDF5 file for writing
-def initHDF5File(output_file):
+def initHDF5File(output_file,is_decay0=False):
     with h5py.File(output_file, 'w') as f:
         f.create_dataset('trajectories', (0,), dtype=trajectories_dtype, maxshape=(None,))
         f.create_dataset('segments', (0,), dtype=segments_dtype, maxshape=(None,))
         f.create_dataset('vertices', (0,), dtype=vertices_dtype, maxshape=(None,))
-        f.create_dataset('mc_stack', (0,), dtype=genie_stack_dtype, maxshape=(None,))
-        f.create_dataset('mc_hdr', (0,), dtype=genie_hdr_dtype, maxshape=(None,))
+        if(not is_decay0):
+            f.create_dataset('mc_stack', (0,), dtype=genie_stack_dtype, maxshape=(None,))
+            f.create_dataset('mc_hdr', (0,), dtype=genie_hdr_dtype, maxshape=(None,))
+        elif is_decay0:
+            f.create_dataset('decay0_stack', (0,), dtype=decay0_stack_dtype, maxshape=(None,))
 
 # Resize HDF5 file and save output arrays
-def updateHDF5File(output_file, trajectories, segments, vertices, genie_s, genie_h):
-    if any([len(trajectories), len(segments), len(vertices), len(genie_s), len(genie_h)]):
+def updateHDF5File(output_file, trajectories, segments, vertices, genie_s, genie_h, decay0_s):
+    if any([len(trajectories), len(segments), len(vertices), len(genie_s), len(genie_h), len(decay0_s)]):
         with h5py.File(output_file, 'a') as f:
             if len(trajectories):
                 ntraj = len(f['trajectories'])
@@ -267,8 +275,16 @@ def updateHDF5File(output_file, trajectories, segments, vertices, genie_s, genie
                 if 'mc_hdr' in f:
                     del f['mc_hdr']
 
+            if len(decay0_s):
+                ndecay0_s = len(f['decay0_stack'])
+                f['decay0_stack'].resize((ndecay0_s+len(decay0_s),))
+                f['decay0_stack'][ndecay0_s:] = decay0_s
+            else:
+                if 'decay0_stack' in f:
+                    del f['decay0_stack']
+
 # Read a file and dump it.
-def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all_dets=False):
+def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all_dets=False, is_decay0=False):
 
     """
     Script to convert edep-sim root output to an h5 file formatted in a way
@@ -279,16 +295,22 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
         output_file (str): name of the h5 output file to which the information should
             be written
     """
+    if(is_decay0):
+        print("Running with is_decay0=True, therefore we omit mc_hrd and mc_stack branches, and instead just save the initial state particles in the decay0_stack branch.")
 
     # Prep output file
-    initHDF5File(output_file)
+    initHDF5File(output_file, is_decay0=is_decay0)
 
     segment_id = 0
 
     # Get the input tree out of the file.
     inputFile = TFile(input_file)
     inputTree = inputFile.Get("EDepSimEvents")
-    genieTree = inputFile.Get("DetSimPassThru/gRooTracker")
+    if is_decay0:
+        genieTree = None
+        decay0Tree = inputFile.Get("DetSimPassThru/gRooTracker")
+    else:
+        genieTree = inputFile.Get("DetSimPassThru/gRooTracker")
     # print("Class: ", inputTree.ClassName())
     # print("Class: ", genieTree.ClassName())
 
@@ -326,6 +348,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
     vertices_list = list()
     genie_stack_list = list()
     genie_hdr_list = list()
+    decay0_stack_list = list()
 
     # For assigning unique-in-file track IDs:
     trackCounter = 0
@@ -339,6 +362,24 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
         nb = inputTree.GetEntry(jentry)
         if genieTree:
             gb = genieTree.GetEntry(jentry)
+        elif is_decay0:
+            decay0_entries = decay0Tree.GetEntriesFast()
+            db = decay0Tree.GetEntry(jentry)
+            time_corrections = [decay0Tree.StdHepX4[3+4*i] for i in range(decay0Tree.StdHepN)]
+            # define a function to recursively find the time correction for a given track ID by tracing back through the parent IDs until we find a match in the time_correction_map, which is initialized with the time corrections for the primary particles (the first StdHepN entries in the decay0 tree)
+            # the first StdHepN entries are primary, so map them to the time_corrections in order
+            global time_correction_map
+            time_correction_map = {i: time_corrections[i] for i in range(decay0Tree.StdHepN)}
+            def find_time_correction(traj_id):
+                # print(traj_id)
+                global time_correction_map
+                # print(time_correction_map.keys())
+                # print(traj_id)
+                traj_id = int(traj_id)
+                if not traj_id in time_correction_map.keys():
+                    # print("Trajectory ID not found in trajectories array:", traj_id)
+                    time_correction_map[traj_id] = find_time_correction(trajectories[trajectories['traj_id'] == traj_id]['parent_id'][0])
+                return time_correction_map[traj_id]
 
         # IF CRASH: Comment this line (also see IF CRASH above)
         event = inputTree.Event
@@ -370,13 +411,15 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                 np.concatenate(segments_list, axis=0) if segments_list else np.empty((0,)),
                 np.concatenate(vertices_list, axis=0) if vertices_list else np.empty((0,)),
                 np.concatenate(genie_stack_list, axis=0) if genie_stack_list else np.empty((0,)),
-                np.concatenate(genie_hdr_list, axis=0) if genie_hdr_list else np.empty((0,)))
+                np.concatenate(genie_hdr_list, axis=0) if genie_hdr_list else np.empty((0,)),
+                np.concatenate(decay0_stack_list, axis=0) if decay0_stack_list else np.empty((0,)))
 
             trajectories_list = list()
             segments_list = list()
             vertices_list = list()
             genie_hdr_list = list()
             genie_stack_list = list()
+            decay0_stack_list = list()
 
         if nb <= 0:
             continue
@@ -458,6 +501,10 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                 trajectories[n_traj]["KE_end"] = trajectories[n_traj]["E_end"] - mass;
                 trajectories[n_traj]["t_start"] = start_pt.GetPosition().T() * edep2us
                 trajectories[n_traj]["t_end"] = end_pt.GetPosition().T() * edep2us
+                if is_decay0:
+                    time_correction = find_time_correction(trajectory.GetTrackId())
+                    trajectories[n_traj]["t_start"] += time_correction * 1e6
+                    trajectories[n_traj]["t_end"] += time_correction * 1e6
                 trajectories[n_traj]["start_process"] = start_pt.GetProcess()
                 trajectories[n_traj]["start_subprocess"] = start_pt.GetSubprocess()
                 trajectories[n_traj]["end_process"] = end_pt.GetProcess()
@@ -531,6 +578,10 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                             trajectories[n_traj]["E_end"] = sqrt(end_pt.GetMomentum().Mag2() + mass**2)
                             trajectories[n_traj]["t_start"] = start_pt.GetPosition().T() * edep2us
                             trajectories[n_traj]["t_end"] = end_pt.GetPosition().T() * edep2us
+                            if is_decay0:
+                                time_correction = find_time_correction(trajectory.GetTrackId())
+                                trajectories[n_traj]["t_start"] += time_correction * 1e6
+                                trajectories[n_traj]["t_end"] += time_correction * 1e6
                             trajectories[n_traj]["start_process"] = start_pt.GetProcess()
                             trajectories[n_traj]["start_subprocess"] = start_pt.GetSubprocess()
                             trajectories[n_traj]["end_process"] = end_pt.GetProcess()
@@ -566,6 +617,10 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                 segment[iHit]["z_end"] = hitSegment.GetStop().Z() * edep2cm
                 segment[iHit]["t0_end"] = hitSegment.GetStop().T() * edep2us
                 segment[iHit]["t_end"] = 0
+                if is_decay0:
+                    time_correction = find_time_correction(segment[iHit]["traj_id"])
+                    segment[iHit]["t0_start"] += time_correction * 1e6
+                    segment[iHit]["t0_end"] += time_correction * 1e6
                 segment[iHit]["dE"] = hitSegment.GetEnergyDeposit()
                 segment[iHit]["dE_secondary"] = hitSegment.GetSecondaryDeposit()
                 xd = segment[iHit]["x_end"] - segment[iHit]["x_start"]
@@ -580,11 +635,16 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                 segment[iHit]["t"] = 0
                 segment[iHit]["dEdx"] = hitSegment.GetEnergyDeposit() / dx if dx > 0 else 0
                 segment[iHit]["pdg_id"] = trajectories[trajMap[hitSegment.Contrib[0]]]["pdg_id"]
+                segment[iHit]["p_mag_traj_start"] = sqrt(sum(trajectories[trajMap[hitSegment.Contrib[0]]]["pxyz_start"]**2))
                 segment[iHit]["n_electrons"] = 0
                 segment[iHit]["long_diff"] = 0
                 segment[iHit]["tran_diff"] = 0
                 segment[iHit]["pixel_plane"] = 0
                 segment[iHit]["n_photons"] = 0
+                # if is_decay0:
+                #     segment[iHit]["t0_end"] -= segment[iHit]["t0_start"]
+                #     segment[iHit]["t0"] -= segment[iHit]["t0_start"]
+                #     segment[iHit]["t0_start"] = 0
 
             segments_list.append(segment)
         trajectories_list.append(trajectories[:n_traj])
@@ -679,7 +739,36 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
             genie_hdr["x"]  = genie_hdr["Q2"] / (2.0 * nucleon_mass * genie_hdr["q0"])
             genie_hdr["y"]  = 1.0 - (genie_hdr["Elep"] / genie_hdr["Enu"])
             genie_hdr_list.append(genie_hdr)
+        
+        if is_decay0:
+            # print("Saving initial state particles from decay0 tree...")
+            decay0_idx = 0
+            decay0_stack = np.empty(decay0Tree.StdHepN, dtype=decay0_stack_dtype)
 
+            for p in range(decay0Tree.StdHepN):
+                
+                part_4mom = np.array([decay0Tree.StdHepP4[p*4 + 0]*gev2mev,
+                                    decay0Tree.StdHepP4[p*4 + 1]*gev2mev,
+                                    decay0Tree.StdHepP4[p*4 + 2]*gev2mev,
+                                    decay0Tree.StdHepP4[p*4 + 3]*gev2mev])
+                part_pdg = decay0Tree.StdHepPdg[p]
+
+                decay0_stack[decay0_idx]["event_id"] = spill_it
+                decay0_stack[decay0_idx]["vertex_id"] = globalVertexID
+                decay0_stack[decay0_idx]["part_4mom"] = part_4mom
+                decay0_stack[decay0_idx]["part_pdg"] = part_pdg
+                # decay0_stack[decay0_idx]["part_status"] = decay0Tree.StdHepStatus[p]
+                decay0_stack[decay0_idx]["time_correction"] = decay0Tree.StdHepX4[3+4*p]
+                decay0_stack[decay0_idx]["x_vert"] = decay0Tree.EvtVtx[0]*meter2cm
+                decay0_stack[decay0_idx]["y_vert"] = decay0Tree.EvtVtx[1]*meter2cm
+                decay0_stack[decay0_idx]["z_vert"] = decay0Tree.EvtVtx[2]*meter2cm
+                decay0_stack[decay0_idx]["t_vert"] = decay0Tree.EvtVtx[3]*edep2us
+
+                decay0_idx += 1
+
+            decay0_stack.resize((decay0_idx,))
+            decay0_stack_list.append(decay0_stack)
+        
     # save any lingering data not written to file
     updateHDF5File(
         output_file,
@@ -687,7 +776,8 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
         np.concatenate(segments_list, axis=0) if segments_list else np.empty((0,)),
         np.concatenate(vertices_list, axis=0) if vertices_list else np.empty((0,)),
         np.concatenate(genie_stack_list, axis=0) if genie_stack_list else np.empty((0,)),
-        np.concatenate(genie_hdr_list, axis=0) if genie_hdr_list else np.empty((0,)))
+        np.concatenate(genie_hdr_list, axis=0) if genie_hdr_list else np.empty((0,)),
+        np.concatenate(decay0_stack_list, axis=0) if decay0_stack_list else np.empty((0,)))
 
 if __name__ == "__main__":
     fire.Fire(dump)

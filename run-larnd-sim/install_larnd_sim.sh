@@ -38,6 +38,6 @@ pip install --upgrade pip setuptools wheel
 pip install cupy-cuda12x
 
 # https://docs.nersc.gov/development/languages/python/using-python-perlmutter/#installing-with-pip
-( git clone -b develop https://github.com/DUNE/larnd-sim.git
+( git clone -b seschwar_LE https://github.com/DUNE/larnd-sim.git
   cd larnd-sim
   pip install -e . )

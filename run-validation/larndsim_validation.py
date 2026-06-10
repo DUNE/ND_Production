@@ -150,17 +150,17 @@ def main(sim_file, charge_only):
         plt.close()
 
         ### Plot interactions per spill
-        mc_hdr = sim_h5['mc_hdr']
-        event_ids = np.unique(mc_hdr['event_id'])
-        n_vertices = np.zeros(len(event_ids))
-        for i in range(len(n_vertices)):
-            n_vertices[i] = np.count_nonzero(mc_hdr['event_id'] == event_ids[i])
-        plt.title('Total interactions per spill')
-        plt.xlabel('Interactions')
-        plt.ylabel('Counts')
-        plt.hist(n_vertices, bins = np.arange(-0.5, n_vertices.max() + 1.5, 1))
-        output.savefig()
-        plt.close()
+        # mc_hdr = sim_h5['mc_hdr']
+        # event_ids = np.unique(mc_hdr['event_id'])
+        # n_vertices = np.zeros(len(event_ids))
+        # for i in range(len(n_vertices)):
+        #     n_vertices[i] = np.count_nonzero(mc_hdr['event_id'] == event_ids[i])
+        # plt.title('Total interactions per spill')
+        # plt.xlabel('Interactions')
+        # plt.ylabel('Counts')
+        # plt.hist(n_vertices, bins = np.arange(-0.5, n_vertices.max() + 1.5, 1))
+        # output.savefig()
+        # plt.close()
 
         ### Plot hits per event
         segments = sim_h5['segments']
@@ -260,7 +260,7 @@ def main(sim_file, charge_only):
         ## INSPECT PRE-TRIGGER NOISE FOR 150 SPILLS
         PRE_NOISE = 65
         #NUM_LIGHT_EVENTS = len(light_wvfm)
-        NUM_LIGHT_EVENTS = 150 # Save processing time
+        NUM_LIGHT_EVENTS = 100 # Save processing time
         THRESHOLD = 50 # change this if you want to exclude events from noise analysis
         SAMPLE_RATE = 6.25e7
         ## SEPARATE WAVEFORMS FROM LCM AND ACL

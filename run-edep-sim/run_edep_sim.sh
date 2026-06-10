@@ -18,6 +18,10 @@ elif [[ "$simulation" == "CORSIKA" ]]; then
 
 elif [[ "$simulation" == "BOMB" ]]; then
     : # no input file, nothing to do here
+    
+elif [[ "$simulation" == "DECAY0" ]]; then
+    inputPrefix=${ND_PRODUCTION_OUTDIR_BASE}/run-decay0/${ND_PRODUCTION_DECAY0_NAME}/DECAY0_root/$subDir/${ND_PRODUCTION_DECAY0_NAME}.$globalIdx
+    inputFile=$inputPrefix.DECAY0.root
 
 else
     echo "Unsupported \$ND_PRODUCTION_SIM type. Exiting."

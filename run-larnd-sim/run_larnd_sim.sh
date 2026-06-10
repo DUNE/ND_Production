@@ -31,6 +31,8 @@ if [[ -n "$ND_PRODUCTION_LARNDSIM_CONFIG" ]]; then
         --output_filename "$outFile" \
         --rand_seed "$seed" \
         --compression "$compression"
+        # --simulation_properties="/global/cfs/cdirs/dune/users/seschwar/ND_Production/run-larnd-sim/larnd-sim/larndsim/simulation_properties/singles_sim.yaml"
+
 else
     [ -z "$ND_PRODUCTION_LARNDSIM_DETECTOR_PROPERTIES" ] && export ND_PRODUCTION_LARNDSIM_DETECTOR_PROPERTIES="larnd-sim/larndsim/detector_properties/2x2.yaml"
     [ -z "$ND_PRODUCTION_LARNDSIM_PIXEL_LAYOUT" ] && export ND_PRODUCTION_LARNDSIM_PIXEL_LAYOUT="larnd-sim/larndsim/pixel_layouts/multi_tile_layout-2.4.16.yaml"

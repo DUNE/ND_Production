@@ -1,0 +1,41 @@
+## Physics changes
+
+## Not everything is LAr
+/edep/phys/ionizationModel 0
+
+# This ensures that each hit segment in the LAr is only associated with one
+# trajectory. It must be run BEFORE /edep/update.
+# https://github.com/DUNE/2x2_sim/issues/20
+#/edep/hitLength volTPCActive 0.1 mm
+/edep/hitSeparation volTPCActive -1 mm
+
+/edep/update
+#/tracking/verbose 1
+#/event/verbose 1
+
+/generator/kinematics/set rooTracker
+# input is set in slurm_task.sh
+# /generator/kinematics/rooTracker/input gntp.0.roo.cherry.root
+
+# set the uniform generator to volTPCActive_PV (i.e. LAr only? Should verify but good for now)
+/generator/position/uniform/clear
+/generator/position/uniform/sample volWorld_PV
+/generator/position/uniform/volume volTPCActive_PV
+/generator/position/uniform/minX -1 m
+/generator/position/uniform/minY -1 m
+/generator/position/uniform/minZ -1 m
+/generator/position/uniform/maxX 1 m
+/generator/position/uniform/maxY 1 m
+/generator/position/uniform/maxZ 1 m
+/generator/position/set uniform
+
+# pulls vtxT from DECAY0.root
+/generator/time/set free
+
+# tells edep-sim to intake one block from DECAY0.root
+/generator/count/fixed/number 1
+/generator/count/set fixed
+
+/generator/add
+
+/edep/db/set/requireEventsWithHits true
