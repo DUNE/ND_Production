@@ -5,6 +5,11 @@ export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-mjkramer/sim2x2:genie_
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
+if [[ "$ND_PRODUCTION_CONTAINER" == "fermilab/fnal-wn-el9:9.7" ]]; then
+    source /cvmfs/dune.opensciencegrid.org/spack/v1.1.1/share/spack/setup-env.sh
+    spack env activate dunesw-10_20_03d01-justin-01_06_01-prototype
+fi
+
 dk2nuAll=("$ND_PRODUCTION_DK2NU_DIR"/*.dk2nu*)
 dk2nuCount=${#dk2nuAll[@]}
 dk2nuIdx=$((ND_PRODUCTION_INDEX % dk2nuCount))
