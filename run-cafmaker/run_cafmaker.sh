@@ -22,8 +22,8 @@ cfgFile=$(mktemp --suffix .cfg)
 # Compulsory arguments regardless of use case.
 args_gen_cafmaker_cfg=( \
     --base-dir "$ND_PRODUCTION_OUTDIR_BASE" \
-    --spine-name "$ND_PRODUCTION_SPINE_NAME" \
-    --pandora-name "$ND_PRODUCTION_PANDORA_NAME" \
+    # --spine-name "$ND_PRODUCTION_SPINE_NAME" \
+    # --pandora-name "$ND_PRODUCTION_PANDORA_NAME" \
     --caf-path "$outFile" \
     --cfg-file "$cfgFile" \
     --file-id "$ND_PRODUCTION_INDEX" \
@@ -35,6 +35,7 @@ args_gen_cafmaker_cfg=( \
 [ -n "${ND_PRODUCTION_SPILL_NAME}" ] && args_gen_cafmaker_cfg+=( --edepsim-name "$ND_PRODUCTION_SPILL_NAME" )
 [ -n "${ND_PRODUCTION_MINERVA_NAME}" ] && args_gen_cafmaker_cfg+=( --minerva-name "$ND_PRODUCTION_MINERVA_NAME" )
 [ -n "${ND_PRODUCTION_TMSRECO_NAME}" ] && args_gen_cafmaker_cfg+=( --tmsreco-name "$ND_PRODUCTION_TMSRECO_NAME" )
+[ -n "${ND_PRODUCTION_SANDRECO_NAME}" ] && args_gen_cafmaker_cfg+=( --sandreco-name "$ND_PRODUCTION_SANDRECO_NAME" )
 [ -n "${ND_PRODUCTION_HADD_FACTOR}" ] && args_gen_cafmaker_cfg+=( --hadd-factor "$ND_PRODUCTION_HADD_FACTOR" )
 [ -n "${ND_PRODUCTION_EXTRA_LINES}" ] && args_gen_cafmaker_cfg+=( --extra-lines "$ND_PRODUCTION_EXTRA_LINES" )
 [ "${ND_PRODUCTION_REUSE_ROCK}" == 1 ] && args_gen_cafmaker_cfg+=( --reuse-rock )

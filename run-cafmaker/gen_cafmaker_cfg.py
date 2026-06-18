@@ -44,6 +44,7 @@ def main():
     ap.add_argument('--spine-name', required=False)
     ap.add_argument('--pandora-name', required=False)
     ap.add_argument('--tmsreco-name', required=False)
+    ap.add_argument('--sandreco-name', required=False)
     ap.add_argument('--minerva-name', required=False)
     ap.add_argument('--edepsim-name', required=False)
     ap.add_argument('--caf-path', required=True)
@@ -57,7 +58,7 @@ def main():
     if not args.ghep_nu_name and not args.ghep_rock_name:
         raise ValueError("One or both of ghep-nu-name and ghep-rock-name must be specified")
 
-    if not args.spine_name and not args.pandora_name:
+    # if not args.spine_name and not args.pandora_name:
         raise ValueError("One or both of spine-name and pandora-name must be specified")
 
     if args.reuse_rock and not args.hadd_rock_name:
@@ -105,6 +106,11 @@ def main():
             tmsreco_path = get_path(args.base_dir, 'run-tms-reco', args.tmsreco_name,
                                     'TMSRECO', 'root', args.file_id)
             outf.write(f'nd_cafmaker.CAFMakerSettings.TMSRecoFile: "{tmsreco_path}"\n')
+
+        if args.sandreco_name:
+            sandreco_path = get_path(args.base_dir, 'run-sandreco', args.sandreco_name,
+                                    'SANDRECO', 'root', args.file_id)
+            outf.write(f'nd_cafmaker.CAFMakerSettings.SANDRecoExperimentalFile: "{sandreco_path}"\n')
 
         edepsim_path = get_path(args.base_dir, 'run-spill-build', args.edepsim_name,
                                 'EDEPSIM_SPILLS','root',args.file_id) 

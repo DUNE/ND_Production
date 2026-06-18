@@ -18,7 +18,7 @@ fi
 mkdir install
 cd install
 
-git clone -b main https://github.com/DUNE/ND_CAFMaker.git
+git clone -b 130-create-a-branch-filler-for-sandreco-experimental https://github.com/DUNE/ND_CAFMaker.git
 cd ND_CAFMaker
 
 ./build_deps.sh
