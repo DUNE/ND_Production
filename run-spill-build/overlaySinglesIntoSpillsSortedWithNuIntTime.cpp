@@ -58,6 +58,18 @@ std::vector<std::string> getGHEPfiles(std::string const& base_outdir,  std::stri
   return ghep_files;
 }
 
+std::string genie2edep(const std::string& input) {
+    const std::string target = ".genie.";
+    const std::string replacement = ".edep.";
+
+    std::string result = input;
+    std::size_t pos = result.find(target);
+    if (pos != std::string::npos) {
+        result.replace(pos, target.size(), replacement);
+    }
+    result += ".hadd";
+    return result;
+}
 
 // Get neutrino interaction time, with the following 4 methods:
 
@@ -199,7 +211,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
     if(spillPOT <= (double)n_int_max) is_n_int_mode = true;
   }
   gRooTracker genie_evts_A_data(genie_evts_A);
-  
+
   // get input sampleB-nu GHEP and EDEPSIM (with edep and genie trees) files
   TChain* ghep_evts_B = new TChain("gtree");
   TChain* edep_evts_B = new TChain("EDepSimEvents");
@@ -207,7 +219,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   if(inFileBPOT > 0.) {
     int sampleBFileId = spillFileId;
     if (reuse_sampleB){
-      std::string hadd_sampleB_dir = prodBaseDir + "/run-hadd/" + ghepNameB + "/EDEPSIM";
+      std::string hadd_sampleB_dir = prodBaseDir + "/run-hadd/" + genie2edep(ghepNameB) + "/EDEPSIM";
       int n_hadd_sampleB_files = 0;
       auto pipe = std::unique_ptr<FILE, decltype(&pclose)>{popen(("find " + hadd_sampleB_dir + " -type f | wc -l").c_str(), "r"), pclose};
       fscanf(pipe.get(), "%d", &n_hadd_sampleB_files);
