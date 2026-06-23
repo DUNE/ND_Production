@@ -49,10 +49,21 @@ std::string getPath(std::string const& base_outdir, std::string const& step, std
   return path;
 }
 
+bool ends_with(const std::string& str, const std::string& suffix) {
+    return str.size() >= suffix.size() &&
+           str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
 std::vector<std::string> getGHEPfiles(std::string const& base_outdir,  std::string const& ghep_fname, int const& hadd_factor,  int file_id) {
+  if (not ends_with(ghep_fname, ".hadd")) {
+    const char* e = "Name of input sample should end in '.hadd'";
+    throw std::runtime_error(e);
+  }
+  const std::string actual_ghep_fname = ghep_fname.substr(0, ghep_fname.size() - 5);
+
   std::vector<std::string> ghep_files;
   for (int ghep_id = file_id * hadd_factor; ghep_id < (file_id + 1) * hadd_factor; ++ghep_id) {
-    std::string path = getPath(base_outdir, "run-genie", ghep_fname, "GHEP", "root", ghep_id);
+    std::string path = getPath(base_outdir, "run-genie", actual_ghep_fname, "GHEP", "root", ghep_id);
     ghep_files.push_back(path);
   }
   return ghep_files;
