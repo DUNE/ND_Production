@@ -38,9 +38,12 @@ inFile=$(realpath $inDir/FLOW/$subDir/${inName}.FLOW.hdf5)
 # on the upstream step's output, copy to tmpOutDir first, run there, then mv
 # the modified file to the canonical outDir.
 outFile=$tmpOutDir/${outName}.FLOW.hdf5
+workDir=$tmpOutDir/${outName}_work
 rm -f "$outFile"
+rm -rf "$workDir"
 
 set -o errexit
+mkdir -p "$workDir"
 echo "Copying input flow file to tmp work area:"
 echo "  $inFile -> $outFile"
 cp "$inFile" "$outFile"
@@ -49,8 +52,10 @@ cd "$CLMATCH_REPO"
 
 # The single-file driver auto-detects Mode A (in-place HDF5) vs Mode B (.pt)
 # from the source dtype and runs the 8-worker pipeline + aggregation.
+# Explicitly route worker shards/logs through our per-task $workDir so they
+# do not accumulate inside the cloned CLMatching repo across production runs.
 run env PY="$PY" REPO="$CLMATCH_REPO" \
-    bash scripts/process_one_flow_file.sh "$outFile"
+    bash scripts/process_one_flow_file.sh "$outFile" "$workDir"
 
 # Sanity-check that Mode A populated t_0/t_cluster_id.
 "$PY" - <<PY
@@ -70,3 +75,11 @@ PY
 
 mkdir -p "$outDir/FLOW/$subDir"
 mv "$outFile" "$outDir/FLOW/$subDir"
+
+# Worker shards are large and transient; preserve the worker logs (small) under
+# the canonical LOGS dir so failures stay debuggable, then drop the rest.
+if [[ -d "$workDir/worker_logs" ]]; then
+    mkdir -p "$logDir"
+    cp -r "$workDir/worker_logs" "$logDir/${outName}_worker_logs" 2>/dev/null || true
+fi
+rm -rf "$workDir"

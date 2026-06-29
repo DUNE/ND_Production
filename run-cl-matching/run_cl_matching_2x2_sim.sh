@@ -53,9 +53,9 @@ run env FILE="$inFile" \
     PY="$PY" HERE="$CLMATCH_REPO" \
     bash scripts/run_2x2_sim.sh
 
-# The aggregator names the .pt after the input file's basename (with .hdf5
-# stripped, then '.qlmatch2x2.pt' appended).
-srcBasename=$(basename "$inFile" .hdf5)
+# The aggregator names the .pt as '<full basename incl. .hdf5>.qlmatch2x2.pt'
+# (yes, it keeps the .hdf5 in the .pt filename).
+srcBasename=$(basename "$inFile")
 producedPt="$workDir/pt_outputs/${srcBasename}.qlmatch2x2.pt"
 if [[ ! -f "$producedPt" ]]; then
     echo "ERROR: expected .pt not found at $producedPt" >&2

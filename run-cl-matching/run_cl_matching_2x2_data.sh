@@ -58,7 +58,8 @@ run env FILE="$inFile" \
     PY="$PY" HERE="$CLMATCH_REPO" \
     bash scripts/run_2x2_data.sh
 
-srcBasename=$(basename "$inFile" .hdf5)
+# The aggregator names the .pt as '<full basename incl. .hdf5>.qlmatch2x2.pt'.
+srcBasename=$(basename "$inFile")
 producedPt="$workDir/pt_outputs/${srcBasename}.qlmatch2x2.pt"
 if [[ ! -f "$producedPt" ]]; then
     echo "ERROR: expected .pt not found at $producedPt" >&2
