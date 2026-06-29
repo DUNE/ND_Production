@@ -28,6 +28,10 @@ pushd run-ndlar-flow
 ./install_ndlar_flow.sh
 popd
 
+pushd run-cl-matching
+./install_cl_matching.sh
+popd
+
 pushd run-pandora
 ./install_pandora.sh "$detector"
 popd
