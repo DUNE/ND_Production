@@ -159,6 +159,24 @@ def _EventHelperEdepSim(filename) :
     return int(first), int(last), int(total)
 
 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+# event helper function for tms files
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+def _EventHelperTMS(filename) :
+
+    first = last = total = -1
+
+    file  = ROOT.TFile(filename, "READ")
+
+    tree  = file.Line_Candidates
+    total = tree.GetEntries()
+    first = 0 #tree.GetEntry(0)
+    last  = tree.GetEntries() - 1
+
+    file.Close()
+
+    return int(first), int(last), int(total)
+
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
 # event helper function for cafmaker files
@@ -185,16 +203,13 @@ def _EventHelperTree(filename,treename) :
 
     first = last = total = -1
 
-    file  = ROOT.TFile(filename, "READ") 
+    file  = ROOT.TFile(filename, "READ")
+
     tree = file.Get(treename)
-        
-    tree.GetEntry(0)
-    first = tree.event
 
+    first = tree.GetEntry(0) #event
     total = tree.GetEntries()
-
-    tree.GetEntry( total - 1 )
-    last  = tree.event
+    last  = tree.GetEntry( total - 1 )
 
     file.Close()
 
@@ -221,6 +236,12 @@ def _EventHelper(filename,workflow) :
        elif DATA_TIER == "reco-pandora" :
           treename = "LArRecoND"
           return _EventHelperTree(filename,treename)           
+
+       elif DATA_TIER.find("tms") != -1 :
+          if DATA_TIER.find("readout") != -1 :
+             return _EventHelperTree(filename,"TMS")
+          else :
+             return _EventHelperTMS(filename)
 
        elif DATA_TIER == "caf" :
           return _EventHelperCaf(filename)
@@ -364,9 +385,10 @@ def _GetMetadata(metadata_blocks,filename,workflow) :
           return_md[name] = _GetGlobalSubrun(metadata_blocks) if metadata_blocks[0].get('core.data_tier') == "raw" else etadata_blocks[0].get(name)
     else :
        run = int(str(os.environ.get('RUN'))) if 'RUN' in os.environ else -1
+       sub = int(str(os.environ.get('SUBRUN'))) if 'RUN' in os.environ else -1
        return_md['core.runs']         =  [run]
-       return_md['core.runs_subruns'] =  [run*100000+1]
-       
+       return_md['core.runs_subruns'] =  [sub]
+ 
        if DETECTOR_CONFIG == "proto_nd" :
           return_md['dune.mx2x2_global_subrun_numbers'] = [run*100000+1]
 
