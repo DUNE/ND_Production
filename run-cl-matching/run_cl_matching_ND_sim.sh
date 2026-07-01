@@ -54,8 +54,15 @@ cd "$CLMATCH_REPO"
 # from the source dtype and runs the 8-worker pipeline + aggregation.
 # Explicitly route worker shards/logs through our per-task $workDir so they
 # do not accumulate inside the cloned CLMatching repo across production runs.
+#
+# Bracket the `run` call in `set +/-o errexit`: process_one_flow_file.sh (and
+# its underlying launcher) may exit non-zero from spurious tail commands (e.g.
+# ls-ing pt_outputs that Mode A never populates). The Python sanity-check
+# below is the authoritative Mode A success criterion; do not trust rc here.
+set +o errexit
 run env PY="$PY" REPO="$CLMATCH_REPO" \
     bash scripts/process_one_flow_file.sh "$outFile" "$workDir"
+set -o errexit
 
 # Sanity-check that Mode A populated t_0/t_cluster_id.
 "$PY" - <<PY
