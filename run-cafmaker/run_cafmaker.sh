@@ -4,11 +4,9 @@ export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:l
 
 source ../util/reload_in_container.inc.sh
 
-cd install/ND_CAFMaker
 set +o errexit
-source ndcaf_setup.sh
+source install/ND_CAFMaker/install/bin/ndcaf_setup.sh prof
 set -o errexit
-cd ../..
 
 # Must go after ndcaf_setup.sh
 source ../util/init.inc.sh
@@ -46,7 +44,7 @@ cat "$cfgFile"
 echo ""
 echo ===================
 
-run install/ND_CAFMaker/install/bin/makeCAF "--fcl=$cfgFile"
+run makeCAF "--fcl=$cfgFile"
 
 cafOutDir=$outDir/CAF/$subDir
 flatCafOutDir=$outDir/CAF.flat/$subDir
