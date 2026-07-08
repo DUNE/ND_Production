@@ -28,11 +28,17 @@ def get_path(base_dir, step, name, ftype, ext, file_id: int):
 
 
 def write_ghep_files(outf, base_dir, name, hadd_factor, file_id: int, no_final_comma=False):
+    files = []
     for ghep_id in range(file_id * hadd_factor, (file_id+1) * hadd_factor):
-        path = get_path(base_dir, 'run-genie', name, 'GHEP', 'root', ghep_id)
-        is_last = ghep_id == (file_id+1) * hadd_factor - 1
+        try:
+            path = get_path(base_dir, 'run-genie', name, 'GHEP', 'root', ghep_id)
+        except:
+            continue
+        files.append(path)
+    for i in range(len(files)):
+        is_last = i == len(files) - 1
         maybe_comma = '' if (no_final_comma and is_last) else ','
-        outf.write(f'   "{path}"{maybe_comma}\n')
+        outf.write(f'   "{files[i]}"{maybe_comma}\n')
 
 
 def main():
