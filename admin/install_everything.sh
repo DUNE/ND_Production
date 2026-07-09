@@ -21,12 +21,17 @@ popd
 if [ "$detector" = "ndlar" ] || [ "$detector" = "2x2" ]; then
   echo "Installation of $detector specific tools"
 
-  pushd run-larnd-sim 
+  pushd run-larnd-sim
   ./install_larnd_sim.sh
   popd
 
   pushd run-ndlar-flow
   ./install_ndlar_flow.sh
+  popd
+
+  pushd run-cl-matching
+  echo "Installing CL matching tools"
+  ./install_cl_matching.sh
   popd
 
   pushd run-pandora
