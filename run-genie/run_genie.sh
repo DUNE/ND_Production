@@ -7,7 +7,7 @@ source ../util/init.inc.sh
 
 if [[ "$ND_PRODUCTION_CONTAINER" == "fermilab/fnal-wn-el9:9.7" ]]; then
     source /cvmfs/dune.opensciencegrid.org/spack/v1.1.1/share/spack/setup-env.sh
-    spack env activate dunesw-10_20_03d01-justin-01_06_01-prototype
+    spack load genie/mel32va
 fi
 
 dk2nuAll=("$ND_PRODUCTION_DK2NU_DIR"/*.dk2nu*)
