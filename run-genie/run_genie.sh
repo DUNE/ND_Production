@@ -5,7 +5,8 @@ export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-mjkramer/sim2x2:genie_
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
-if [[ "$ND_PRODUCTION_CONTAINER" == "fermilab/fnal-wn-el9:9.7" ]]; then
+if [[ "$ND_PRODUCTION_CONTAINER" == "fermilab/fnal-wn-el9:9.7"
+    || "$ND_PRODUCTION_CONTAINER" == "fnal-wn-el9_9.7.sif" ]]; then
     source /cvmfs/dune.opensciencegrid.org/spack/v1.1.1/share/spack/setup-env.sh
     if [[ -n "$ND_PRODUCTION_SPACK_USER_CACHE_PATH" ]]; then
         export SPACK_USER_CACHE_PATH=$ND_PRODUCTION_SPACK_USER_CACHE_PATH
