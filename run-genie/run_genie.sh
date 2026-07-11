@@ -7,6 +7,9 @@ source ../util/init.inc.sh
 
 if [[ "$ND_PRODUCTION_CONTAINER" == "fermilab/fnal-wn-el9:9.7" ]]; then
     source /cvmfs/dune.opensciencegrid.org/spack/v1.1.1/share/spack/setup-env.sh
+    if [[ -n "$ND_PRODUCTION_SPACK_USER_CACHE_PATH" ]]; then
+        export SPACK_USER_CACHE_PATH=$ND_PRODUCTION_SPACK_USER_CACHE_PATH
+    fi
     spack load genie/mel32va
     spack load dk2nugenie/lwjy7ey
     spack load dk2nudata/jtrxl2a
