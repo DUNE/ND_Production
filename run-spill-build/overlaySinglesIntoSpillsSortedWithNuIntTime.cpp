@@ -223,7 +223,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       int n_hadd_sampleB_files = 0;
       auto pipe = std::unique_ptr<FILE, decltype(&pclose)>{popen(("find " + hadd_sampleB_dir + " -type f | wc -l").c_str(), "r"), pclose};
       fscanf(pipe.get(), "%d", &n_hadd_sampleB_files);
-      int sampleBFileId = spillFileId % n_hadd_sampleB_files;
+      sampleBFileId = spillFileId % n_hadd_sampleB_files;
     }
     auto ghepFilesB = getGHEPfiles(prodBaseDir.c_str(), ghepNameB.c_str(), hadd_factor, sampleBFileId);
     edep_evts_B->Add(inFileNameB.c_str());
