@@ -347,7 +347,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       auto entry = is_sampleA ? evt_it + i : evt_it_B_sequence.at(evt_it + i - Nevts_this_spill_A);
       in_tree->GetEntry(entry);
       gn_tree->GetEntry(entry);
-      ghep_tree->GetEntry(entry);
+      ghep_tree->GetEntry(edep_evt->EventId);
 
       gRooTracker& genie_evt = is_sampleA ? genie_evts_A_data : genie_evts_B_data;
 
