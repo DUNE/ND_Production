@@ -158,9 +158,9 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
                                     std::string det_location = "DUNEND" // detector location in GNuMIFlux file, needed for the coord system conversion
                                   ) { 
 
-  // Each output file must have its own random stream.  spillFileId is the
-  // production index passed by run_spill_build.sh; add one so index zero does
-  // not request ROOT's special zero-seed behaviour.
+  // Each run must have its own random stream.  spillFileId is the run number
+  // passed by run_spill_build.sh; add one so run zero does not request ROOT's
+  // special zero-seed behaviour.
   const unsigned int randomSeed = static_cast<unsigned int>(spillFileId) + 1;
   gRandom->SetSeed(randomSeed);
   std::cout << "Random seed: " << randomSeed << std::endl;
