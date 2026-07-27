@@ -43,10 +43,6 @@ export GXMLPATH=$ND_PRODUCTION_DIR/run-genie/flux
 spillFile=$tmpOutDir/${outName}.EDEPSIM_SPILLS.root
 rm -f "$spillFile"
 
-# run root -l -b -q \
-#     -e "gInterpreter->AddIncludePath(\"/opt/generators/edep-sim/install/include/EDepSim\")" \
-#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT)"
-
 # HACK: We need to "unload" edep-sim; if it's in our LD_LIBRARY_PATH, we have to
 # use the "official" edepsim-io headers, which force us to use the getters, at
 # least when using cling(?). overlaySinglesIntoSpills.C directly accesses the
@@ -83,14 +79,6 @@ if [[ "$ND_PRODUCTION_USE_GHEP_POT" == "1" ]]; then
     read -r ND_PRODUCTION_SAMPLE_B_POT < "$sampleBInDir"/POT/$sampleBSubDir/"$sampleBName".pot
   fi
 fi
-
-# run root -l -b -q \
-#     -e "gInterpreter->AddIncludePath(\"libTG4Event\")" \
-#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT)"
-
-# run root -l -b -q \
-#     -e "gSystem->Load(\"libTG4Event/libTG4Event.so\")" \
-#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT)"
 
 # LIBTG4EVENT_DIR is provided by the podman-built containers
 # If unset, fall back to the local build provided by install_spill_build.sh
