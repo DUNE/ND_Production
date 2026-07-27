@@ -37,7 +37,7 @@ LIBTG4EVENT_DIR=${LIBTG4EVENT_DIR:-libTG4Event}
 
 run root -l -b -q \
     -e "gSystem->Load(\"$LIBTG4EVENT_DIR/libTG4Event.so\")" \
-    "overlaySinglesIntoExistingSpillsSorted.C(\"$spillsInFile\", \"$singlesInFile\", \"$overlaidFile\", $ND_PRODUCTION_N_SINGLES_OVERLAID_PER_SPILL)"
+    "overlaySinglesIntoExistingSpillsSorted.C(\"$spillsInFile\", \"$singlesInFile\", \"$overlaidFile\", $ND_PRODUCTION_N_SINGLES_OVERLAID_PER_SPILL, $ND_PRODUCTION_INDEX)"
 
 mkdir -p "$outDir/EDEPSIM_SPILLS/$subDir"
 mv "$overlaidFile" "$outDir/EDEPSIM_SPILLS/$subDir"

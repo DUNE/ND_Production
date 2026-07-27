@@ -61,6 +61,13 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
                                     double spillPeriod_s = 1.2, 
                                     int reuseRock = 0) {
 
+  // Each output file must have its own random stream.  spillFileId is the
+  // production index passed by run_spill_build.sh; add one so index zero does
+  // not request ROOT's special zero-seed behaviour.
+  const unsigned int randomSeed = static_cast<unsigned int>(spillFileId) + 1;
+  gRandom->SetSeed(randomSeed);
+  std::cout << "Random seed: " << randomSeed << std::endl;
+
   // Maximum number of interactions that can be simulated in
   // one spill in "N Interaction" mode. Choice of this number
   // here is somewhat arbitrary, seemed like a very safe

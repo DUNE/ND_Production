@@ -43,7 +43,14 @@ struct TaggedTime {
 void overlaySinglesIntoExistingSpillsSorted(std::string inFileNameSpills,
                                             std::string inFileNameSingles,
                                             std::string outFileName,
-                                            unsigned int n_singles_overlaid_per_spill = 1) {
+                                            unsigned int n_singles_overlaid_per_spill = 1,
+                                            unsigned int spillFileId = 0) {
+
+  // Keep the added singles' times reproducible but distinct for every output
+  // file.  Adding one avoids ROOT's special zero-seed behaviour.
+  const unsigned int randomSeed = spillFileId + 1;
+  gRandom->SetSeed(randomSeed);
+  std::cout << "Random seed: " << randomSeed << std::endl;
 
   // Maximum number of single interactions that can be added to
   // one spill. Choice of this number here is somewhat arbitrary.
