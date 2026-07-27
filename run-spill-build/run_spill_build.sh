@@ -45,7 +45,7 @@ rm -f "$spillFile"
 
 # run root -l -b -q \
 #     -e "gInterpreter->AddIncludePath(\"/opt/generators/edep-sim/install/include/EDepSim\")" \
-#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT)"
+#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $runNo)"
 
 # HACK: We need to "unload" edep-sim; if it's in our LD_LIBRARY_PATH, we have to
 # use the "official" edepsim-io headers, which force us to use the getters, at
@@ -86,11 +86,11 @@ fi
 
 # run root -l -b -q \
 #     -e "gInterpreter->AddIncludePath(\"libTG4Event\")" \
-#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT)"
+#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $runNo)"
 
 # run root -l -b -q \
 #     -e "gSystem->Load(\"libTG4Event/libTG4Event.so\")" \
-#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT)"
+#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $runNo)"
 
 # LIBTG4EVENT_DIR is provided by the podman-built containers
 # If unset, fall back to the local build provided by install_spill_build.sh

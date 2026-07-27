@@ -36,7 +36,14 @@ double getInteractionTime_LBNF() {
 
 }
 
-void overlaySinglesIntoSpills(std::string inFileName1, std::string inFileName2, std::string outFileName = "spillFile", double inFile1POT = 1.024E19, double inFile2POT = 1.024E19, double spillPOT = 6.5E13) {
+void overlaySinglesIntoSpills(std::string inFileName1, std::string inFileName2, std::string outFileName = "spillFile", double inFile1POT = 1.024E19, double inFile2POT = 1.024E19, double spillPOT = 6.5E13, int runNumber = 0) {
+
+  // Keep the spill structure reproducible for a given run, including when it
+  // is rebuilt in a different production.  Add one to avoid ROOT's special
+  // zero-seed behaviour.
+  const unsigned int randomSeed = static_cast<unsigned int>(runNumber) + 1;
+  gRandom->SetSeed(randomSeed);
+  std::cout << "Random seed: " << randomSeed << std::endl;
 
   // get input nu-LAr files 
   TChain* edep_evts_1 = new TChain("EDepSimEvents");
