@@ -61,13 +61,6 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
                                     double spillPeriod_s = 1.2, 
                                     int reuseRock = 0) {
 
-  // Each run must have its own random stream.  spillFileId is the run number
-  // passed by run_spill_build.sh; add one so run zero does not request ROOT's
-  // special zero-seed behaviour.
-  const unsigned int randomSeed = static_cast<unsigned int>(spillFileId) + 1;
-  gRandom->SetSeed(randomSeed);
-  std::cout << "Random seed: " << randomSeed << std::endl;
-
   // Maximum number of interactions that can be simulated in
   // one spill in "N Interaction" mode. Choice of this number
   // here is somewhat arbitrary, seemed like a very safe
@@ -108,6 +101,20 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
     have_nu_rock = true;
   }
   gRooTracker genie_evts_2_data(genie_evts_2);
+
+  // Seed from the fiducial input's RunId rather than a caller-provided value.
+  // This keeps a run reproducible across productions and makes the seed
+  // independent of any reused rock input.
+  TChain* seed_tree = have_nu_lar ? edep_evts_1 : edep_evts_2;
+  if (seed_tree->GetEntries() == 0) {
+    throw std::runtime_error("Cannot seed spill builder from an empty input tree");
+  }
+  TG4Event* seed_event = NULL;
+  seed_tree->SetBranchAddress("Event", &seed_event);
+  seed_tree->GetEntry(0);
+  const unsigned int randomSeed = static_cast<unsigned int>(seed_event->RunId) + 1;
+  gRandom->SetSeed(randomSeed);
+  std::cout << "Random seed (RunId " << seed_event->RunId << "): " << randomSeed << std::endl;
 
   // Dump some useful information about the running mode.
   if(have_nu_lar && !have_nu_rock){

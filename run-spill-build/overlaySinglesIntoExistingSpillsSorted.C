@@ -1,6 +1,8 @@
 #include "TG4Event.h"
 #include "gRooTracker.h"
 
+#include <stdexcept>
+
 
 // A root macro to overlay single neutrino interactions, usually of special 
 // interest (nu-on-e for example), into existing nominal spills. It takes an 
@@ -43,14 +45,7 @@ struct TaggedTime {
 void overlaySinglesIntoExistingSpillsSorted(std::string inFileNameSpills,
                                             std::string inFileNameSingles,
                                             std::string outFileName,
-                                            unsigned int n_singles_overlaid_per_spill = 1,
-                                            unsigned int spillFileId = 0) {
-
-  // Keep the added singles' times reproducible but distinct for every output
-  // file.  Adding one avoids ROOT's special zero-seed behaviour.
-  const unsigned int randomSeed = spillFileId + 1;
-  gRandom->SetSeed(randomSeed);
-  std::cout << "Random seed: " << randomSeed << std::endl;
+                                            unsigned int n_singles_overlaid_per_spill = 1) {
 
   // Maximum number of single interactions that can be added to
   // one spill. Choice of this number here is somewhat arbitrary.
@@ -74,6 +69,17 @@ void overlaySinglesIntoExistingSpillsSorted(std::string inFileNameSpills,
   genie_evts_1->Add(inFileNameSpills.c_str());
 
   gRooTracker genie_evts_1_data(genie_evts_1);
+
+  // The nominal spill file is the fiducial input to this overlay step.
+  if (edep_evts_1->GetEntries() == 0) {
+    throw std::runtime_error("Cannot seed spill builder from an empty input tree");
+  }
+  TG4Event* seed_event = NULL;
+  edep_evts_1->SetBranchAddress("Event", &seed_event);
+  edep_evts_1->GetEntry(0);
+  const unsigned int randomSeed = static_cast<unsigned int>(seed_event->RunId) + 1;
+  gRandom->SetSeed(randomSeed);
+  std::cout << "Random seed (RunId " << seed_event->RunId << "): " << randomSeed << std::endl;
 
   // Get input from singles file.
   TChain* edep_evts_2 = new TChain("EDepSimEvents");

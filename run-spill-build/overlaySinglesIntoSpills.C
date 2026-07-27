@@ -1,5 +1,7 @@
 #include "TG4Event.h"
 
+#include <stdexcept>
+
 // Simple root macro meant to take in an output file from edep-sim
 // containing single neutrino interactions (from some flux) in the
 // event tree and overlay these events into full spills.
@@ -36,14 +38,7 @@ double getInteractionTime_LBNF() {
 
 }
 
-void overlaySinglesIntoSpills(std::string inFileName1, std::string inFileName2, std::string outFileName = "spillFile", double inFile1POT = 1.024E19, double inFile2POT = 1.024E19, double spillPOT = 6.5E13, int runNumber = 0) {
-
-  // Keep the spill structure reproducible for a given run, including when it
-  // is rebuilt in a different production.  Add one to avoid ROOT's special
-  // zero-seed behaviour.
-  const unsigned int randomSeed = static_cast<unsigned int>(runNumber) + 1;
-  gRandom->SetSeed(randomSeed);
-  std::cout << "Random seed: " << randomSeed << std::endl;
+void overlaySinglesIntoSpills(std::string inFileName1, std::string inFileName2, std::string outFileName = "spillFile", double inFile1POT = 1.024E19, double inFile2POT = 1.024E19, double spillPOT = 6.5E13) {
 
   // get input nu-LAr files 
   TChain* edep_evts_1 = new TChain("EDepSimEvents");
@@ -52,6 +47,16 @@ void overlaySinglesIntoSpills(std::string inFileName1, std::string inFileName2, 
   // get input nu-Rock files 
   TChain* edep_evts_2 = new TChain("EDepSimEvents");
   edep_evts_2->Add(inFileName2.c_str());
+
+  if (edep_evts_1->GetEntries() == 0) {
+    throw std::runtime_error("Cannot seed spill builder from an empty fiducial input tree");
+  }
+  TG4Event* seed_event = NULL;
+  edep_evts_1->SetBranchAddress("Event", &seed_event);
+  edep_evts_1->GetEntry(0);
+  const unsigned int randomSeed = static_cast<unsigned int>(seed_event->RunId) + 1;
+  gRandom->SetSeed(randomSeed);
+  std::cout << "Random seed (RunId " << seed_event->RunId << "): " << randomSeed << std::endl;
 
   // make output file
   TFile* outFile = new TFile(outFileName.c_str(),"RECREATE");

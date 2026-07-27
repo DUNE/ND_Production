@@ -45,7 +45,7 @@ rm -f "$spillFile"
 
 # run root -l -b -q \
 #     -e "gInterpreter->AddIncludePath(\"/opt/generators/edep-sim/install/include/EDepSim\")" \
-#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $runNo)"
+#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT)"
 
 # HACK: We need to "unload" edep-sim; if it's in our LD_LIBRARY_PATH, we have to
 # use the "official" edepsim-io headers, which force us to use the getters, at
@@ -86,11 +86,11 @@ fi
 
 # run root -l -b -q \
 #     -e "gInterpreter->AddIncludePath(\"libTG4Event\")" \
-#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $runNo)"
+#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT)"
 
 # run root -l -b -q \
 #     -e "gSystem->Load(\"libTG4Event/libTG4Event.so\")" \
-#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $runNo)"
+#     "overlaySinglesIntoSpills.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT)"
 
 # LIBTG4EVENT_DIR is provided by the podman-built containers
 # If unset, fall back to the local build provided by install_spill_build.sh
@@ -106,7 +106,7 @@ if [[ "$ND_PRODUCTION_USE_NU_TOF" == "0" ]]; then
   run root -l -b -q \
       -e "gSystem->AddDynamicPath(\"$LIBTG4EVENT_DIR\"); \
           gSystem->Load(\"libTG4Event.so\")" \
-      "overlaySinglesIntoSpillsSorted.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $runNo, $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_REUSE_SAMPLE_B)"
+      "overlaySinglesIntoSpillsSorted.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_REUSE_SAMPLE_B)"
 elif [[ "$ND_PRODUCTION_USE_NU_TOF" == "1" ]]; then
   run root -l -b -q \
       -e  "gSystem->AddDynamicPath(\"$LIBTG4EVENT_DIR\"); \
@@ -120,7 +120,7 @@ elif [[ "$ND_PRODUCTION_USE_NU_TOF" == "1" ]]; then
             gSystem->Load(\"libGFwAlg.so\"); \
             gSystem->Load(\"libGFwUtl.so\"); " \
       "/opt/generators/dk2nu/scripts/load_dk2nu.C(true,true)" \
-      "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$sampleAInFile\", \"$sampleBInFile\", \"$ND_PRODUCTION_SAMPLE_A_NAME\", \"$ND_PRODUCTION_SAMPLE_B_NAME\", \"$ND_PRODUCTION_OUTDIR_BASE\", \"$spillFile\", $runNo, $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR, $ND_PRODUCTION_REUSE_SAMPLE_B, \"$ND_PRODUCTION_DET_LOCATION\")"
+      "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$sampleAInFile\", \"$sampleBInFile\", \"$ND_PRODUCTION_SAMPLE_A_NAME\", \"$ND_PRODUCTION_SAMPLE_B_NAME\", \"$ND_PRODUCTION_OUTDIR_BASE\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR, $ND_PRODUCTION_REUSE_SAMPLE_B, \"$ND_PRODUCTION_DET_LOCATION\")"
 fi
 
 mkdir -p "$outDir/EDEPSIM_SPILLS/$subDir"
