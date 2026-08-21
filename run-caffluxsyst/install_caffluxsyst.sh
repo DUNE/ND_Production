@@ -19,10 +19,20 @@ mkdir install
 cd install
 
 . /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-setup duneanaobj v04_01_00 -q "e20:prof"
 setup cmake v3_27_4
 
-git clone --depth 1 --branch v0.9.0 https://github.com/DUNE/duneanafluxtools.git
+# TODO: switch back to the v0.9.0 tag (or a newer release tag) once
+# https://github.com/DUNE/duneanafluxtools/pull/new/feature/abooth-add_duneanaobj_setup
+# is merged upstream. For now use the feature branch that adds the
+# 'setup duneanaobj' call to the generated setup.duneanafluxtools.sh.
+git clone --depth 1 --branch feature/abooth-add_duneanaobj_setup https://github.com/DUNE/duneanafluxtools.git
+
+# The duneanaobj version is defined by duneanafluxtools itself (its
+# DUNE_ANAOBJ_BRANCH CMake default), not by ND_Production. Read it out so we
+# don't have to duplicate/hardcode the version here.
+duneanaobj_version=$(sed -n 's/^\s*set(DUNE_ANAOBJ_BRANCH \(.*\))/\1/p' duneanafluxtools/CMakeLists.txt)
+setup duneanaobj "$duneanaobj_version" -q "e20:prof"
+
 mkdir duneanafluxtools/build
 cd duneanafluxtools/build
 

@@ -7,7 +7,6 @@ source ../util/reload_in_container.inc.sh
 # Setup environment.
 setup() {
     . /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-    setup duneanaobj v04_01_00 -q "e20:prof"
 
     source "${PWD}"/install/duneanafluxtools/build/bin/setup.duneanafluxtools.sh
 }
