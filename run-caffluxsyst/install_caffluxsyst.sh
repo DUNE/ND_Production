@@ -21,11 +21,8 @@ cd install
 . /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup cmake v3_27_4
 
-# TODO: switch back to the v0.9.0 tag (or a newer release tag) once
-# https://github.com/DUNE/duneanafluxtools/pull/new/feature/abooth-add_duneanaobj_setup
-# is merged upstream. For now use the feature branch that adds the
-# 'setup duneanaobj' call to the generated setup.duneanafluxtools.sh.
-git clone --depth 1 --branch feature/abooth-add_duneanaobj_setup https://github.com/DUNE/duneanafluxtools.git
+# Should maybe checkout a tag here the first time we run real production.
+git clone https://github.com/DUNE/duneanafluxtools.git
 
 # The duneanaobj version is defined by duneanafluxtools itself (its
 # DUNE_ANAOBJ_BRANCH CMake default), not by ND_Production. Read it out so we
