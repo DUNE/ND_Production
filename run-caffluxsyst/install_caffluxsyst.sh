@@ -21,8 +21,7 @@ cd install
 . /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup cmake v3_27_4
 
-# Should maybe checkout a tag here the first time we run real production.
-git clone https://github.com/DUNE/duneanafluxtools.git
+git clone --depth 1 --branch v0.9.1 https://github.com/DUNE/duneanafluxtools.git
 
 # The duneanaobj version is defined by duneanafluxtools itself (its
 # DUNE_ANAOBJ_BRANCH CMake default), not by ND_Production. Read it out so we
