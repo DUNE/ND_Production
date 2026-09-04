@@ -31,6 +31,11 @@ PROMPT_DSET = "charge/calib_prompt_hits/data"
 FINAL_DSET = "charge/calib_final_hits/data"
 FIELDS = ("t_0", "t_cluster_id", "t_confidence")
 
+# v1 emits t_0 as float32 nanoseconds. Upstream flow files must reserve the
+# t_0 field as f4 to accept it (older flow files with i2 t_0 in TICKS need
+# their calib_prompt_hits.py dtype bumped and to be regenerated).
+NS_PER_TICK = 16.0
+
 
 def _as_numpy(obj) -> np.ndarray:
     """Accept torch tensor OR numpy array in the .pt."""
@@ -47,10 +52,21 @@ def _count_nondefault(arr: np.ndarray) -> int:
 
 def apply_one(pt_path: Path, hdf5_path: Path, *, verbose: bool = True) -> dict:
     pt = torch.load(pt_path, map_location="cpu", weights_only=False)
+    # Strict units contract: every clmatchND_v1 PT declares t0_units="ns".
+    # Refuse to apply an unversioned / mis-versioned PT so we can't silently
+    # write tick-valued ints into a nanosecond-valued float field.
+    pt_units = pt.get("t0_units")
+    if pt_units != "ns":
+        raise RuntimeError(
+            f"PT does not declare t0_units='ns' (found {pt_units!r}). This is "
+            f"required by clmatchND_v1: t_0 must be in nanoseconds. Refusing "
+            f"to apply. Regenerate the .pt with the current aggregate_v1_to_pt.py."
+        )
     info = {
         "pt_path": str(pt_path),
         "hdf5_path": str(hdf5_path),
         "version": pt.get("version"),
+        "t0_units": pt_units,
         "src_basename_expected": pt.get("src_basename"),
         "prompt": {"wrote_fields": [], "prewrite_nondefault": {}, "size_mismatch": None},
         "final":  {"wrote_fields": [], "prewrite_nondefault": {}, "size_mismatch": None},
@@ -98,8 +114,21 @@ def apply_one(pt_path: Path, hdf5_path: Path, *, verbose: bool = True) -> dict:
                 if nz > 0 and verbose:
                     print(f"  WARN: {dset_path}[{field}] had {nz} non-default entries "
                           "before v1 PT-fill; overwriting all values.", flush=True)
-                # Coerce to the HDF5 field's dtype in case pt stored a wider type.
+                # ---- units-aware safety check for t_0 ---------------------
+                # v1 PTs store t_0 as float32 nanoseconds. Old flow files still
+                # have t_0 as int16 (ticks). Silently .astype(int16) would
+                # catastrophically overflow (500 ns -> 500 stored as ticks? no,
+                # 500 ns > 32767 ticks range wrap). Refuse loudly instead.
                 target_dtype = data.dtype[field]
+                if field == "t_0" and pt.get("t0_units") == "ns" \
+                        and target_dtype.kind == "i":
+                    raise RuntimeError(
+                        f"{dset_path}[t_0] is {target_dtype} (integer ticks) but "
+                        f"the .pt stores t_0 in nanoseconds (float). Refusing to "
+                        f"convert without an explicit divide-by-{NS_PER_TICK:.0f}. "
+                        f"Fix: bump ndlar_flow's calib_prompt_hits dtype for t_0 "
+                        f"from 'i2' to 'f4' and regenerate this flow file."
+                    )
                 data[field] = new_val.astype(target_dtype, copy=False)
                 info[info_key]["wrote_fields"].append(field)
             dset[:] = data

@@ -26,24 +26,27 @@ Schema of the .pt (torch.save of a dict):
     "n_prompt_assigned":        int,   # count of prompt hits with t_0 != -1
     "n_final_assigned":         int,
     "n_events":                 int,   # number of shards aggregated
-    "t0_overflow_high":         int,   # count of ts_final > +32767
-    "t0_overflow_low":          int,   # count of ts_final < -32768
-    "t0_max_abs_ticks":         int,   # max |ts_final| seen (informational)
+    "t0_units":                 "ns",  # units of the t_0 field (nanoseconds)
+    "ticks_per_ns":             16,    # LArPix clock: 1 tick = 16 ns
     "cluster_id_overflow":      int,   # count of labels outside int16 range
 
     # Per-prompt-hit arrays, size = n_calib_prompt_hits, in the SAME on-disk
-    # dtype the flow HDF5 fields use. Sentinel -1 for unassigned.
+    # dtype the flow HDF5 fields use.
+    #   t_0            float32 nanoseconds (v1's ts_final ticks * 16.0);
+    #                  -1.0 = unassigned (matches HDF5 sentinel).
+    #   t_cluster_id   int16   -1 = unassigned.
+    #   t_confidence   float32 0.0 = unavailable (matches HDF5 init default).
     "calib_prompt_hits": {
-      "t_0":            torch.int16 tensor (ticks, clipped),
+      "t_0":            torch.float32 tensor,
       "t_cluster_id":   torch.int16 tensor,
-      "t_confidence":   torch.float32 tensor (0.0 for unavailable),
+      "t_confidence":   torch.float32 tensor,
     },
 
     # Per-final-hit arrays, size = n_calib_final_hits. Derived by gathering
     # from the prompt arrays via the col-0 of
     # charge/calib_prompt_hits/ref/charge/calib_final_hits/ref
     "calib_final_hits": {
-      "t_0":            torch.int16 tensor,
+      "t_0":            torch.float32 tensor,
       "t_cluster_id":   torch.int16 tensor,
       "t_confidence":   torch.float32 tensor,
     },
@@ -61,23 +64,27 @@ import torch
 
 
 SCHEMA_VERSION = "clmatchND_v1"
-T0_SENTINEL_I2 = -1
+T0_SENTINEL_F4 = -1.0        # float32 ns sentinel for "unassigned"
 CLUSTER_SENTINEL_I2 = -1
-CONF_UNAVAILABLE_F4 = 0.0  # 0.0 == "not filled" (matches HDF5 init default)
+CONF_UNAVAILABLE_F4 = 0.0    # 0.0 == "not filled" (matches HDF5 init default)
+NS_PER_TICK = 16.0           # LArPix clock: 1 tick = 16 ns
 
 PROMPT_DSET = "charge/calib_prompt_hits/data"
 FINAL_DSET = "charge/calib_final_hits/data"
 FINAL_TO_PROMPT_REF = "charge/calib_prompt_hits/ref/charge/calib_final_hits/ref"
 
 
-def _clip_float_to_i2(arr: np.ndarray) -> tuple[np.ndarray, int, int, int]:
-    lo, hi = np.iinfo(np.int16).min, np.iinfo(np.int16).max
-    finite = np.isfinite(arr)
-    n_high = int((finite & (arr > hi)).sum())
-    n_low = int((finite & (arr < lo)).sum())
-    max_abs = int(np.nanmax(np.abs(arr))) if finite.any() else 0
-    out = np.where(finite, np.clip(arr, lo, hi), T0_SENTINEL_I2).astype(np.int16)
-    return out, n_high, n_low, max_abs
+def _ticks_to_ns_f4(arr_ticks: np.ndarray) -> np.ndarray:
+    """Convert per-hit ts_final (ticks) into per-hit t_0 (ns, float32).
+
+    Non-finite (NaN/inf) and unassigned entries land as -1.0 (matches the
+    HDF5 sentinel convention).  We do NOT clip -- t_0 is now stored as
+    float32 nanoseconds, which comfortably covers the full drift window.
+    """
+    finite = np.isfinite(arr_ticks) & (arr_ticks >= 0)
+    out = np.full(arr_ticks.shape, T0_SENTINEL_F4, dtype=np.float32)
+    out[finite] = (arr_ticks[finite] * NS_PER_TICK).astype(np.float32)
+    return out
 
 
 def _clip_int_to_i2(arr: np.ndarray) -> tuple[np.ndarray, int]:
@@ -151,22 +158,22 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
         n_events += 1
         n_assigned += int(good.sum())
 
-    p_t0_i2, oh_high, oh_low, oh_max = _clip_float_to_i2(prompt_t0_f)
+    p_t0_ns = _ticks_to_ns_f4(prompt_t0_f)
     p_cl_i2, cl_over = _clip_int_to_i2(prompt_lab_i)
     p_conf_out = np.where(np.isnan(prompt_conf_f),
                           CONF_UNAVAILABLE_F4, prompt_conf_f).astype(np.float32)
 
-    f_t0_i2 = np.full(n_final, T0_SENTINEL_I2, dtype=np.int16)
+    f_t0_ns = np.full(n_final, T0_SENTINEL_F4, dtype=np.float32)
     f_cl_i2 = np.full(n_final, CLUSTER_SENTINEL_I2, dtype=np.int16)
     f_conf_out = np.full(n_final, CONF_UNAVAILABLE_F4, dtype=np.float32)
     if n_final:
         in_range = (final_to_prompt >= 0) & (final_to_prompt < n_prompt)
-        f_t0_i2[in_range] = p_t0_i2[final_to_prompt[in_range]]
+        f_t0_ns[in_range] = p_t0_ns[final_to_prompt[in_range]]
         f_cl_i2[in_range] = p_cl_i2[final_to_prompt[in_range]]
         f_conf_out[in_range] = p_conf_out[final_to_prompt[in_range]]
 
-    n_p_assigned = int((p_t0_i2 != T0_SENTINEL_I2).sum())
-    n_f_assigned = int((f_t0_i2 != T0_SENTINEL_I2).sum()) if n_final else 0
+    n_p_assigned = int((p_t0_ns != T0_SENTINEL_F4).sum())
+    n_f_assigned = int((f_t0_ns != T0_SENTINEL_F4).sum()) if n_final else 0
 
     out = {
         "version": SCHEMA_VERSION,
@@ -177,17 +184,16 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
         "n_prompt_assigned": n_p_assigned,
         "n_final_assigned": n_f_assigned,
         "n_events": n_events,
-        "t0_overflow_high": oh_high,
-        "t0_overflow_low": oh_low,
-        "t0_max_abs_ticks": oh_max,
+        "t0_units": "ns",
+        "ticks_per_ns": NS_PER_TICK,
         "cluster_id_overflow": cl_over,
         "calib_prompt_hits": {
-            "t_0": torch.from_numpy(p_t0_i2),
+            "t_0": torch.from_numpy(p_t0_ns),
             "t_cluster_id": torch.from_numpy(p_cl_i2),
             "t_confidence": torch.from_numpy(p_conf_out),
         },
         "calib_final_hits": {
-            "t_0": torch.from_numpy(f_t0_i2),
+            "t_0": torch.from_numpy(f_t0_ns),
             "t_cluster_id": torch.from_numpy(f_cl_i2),
             "t_confidence": torch.from_numpy(f_conf_out),
         },
@@ -196,9 +202,7 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
         print(f"  {out['src_basename']}: shards={len(shards)} events={n_events}  "
               f"prompt {n_p_assigned}/{n_prompt} "
               f"({100.0*n_p_assigned/max(n_prompt,1):.2f}%)  "
-              f"final {n_f_assigned}/{n_final}"
-              + (f"  t0-overflow(>i2)={oh_high+oh_low} max|t0|={oh_max}"
-                 if (oh_high + oh_low) else ""),
+              f"final {n_f_assigned}/{n_final}",
               flush=True)
     return out
 
