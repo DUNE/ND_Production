@@ -23,19 +23,21 @@ Schema of the .pt (torch.save of a dict):
     "src_basename":             "<basename of source>",
     "n_calib_prompt_hits":      int,
     "n_calib_final_hits":       int,
-    "n_prompt_assigned":        int,   # count of prompt hits with t_0 != -1
+    "n_prompt_assigned":        int,   # count of prompt hits with t_0 != UNASSIGNED
     "n_final_assigned":         int,
     "n_events":                 int,   # number of shards aggregated
     "t0_units":                 "ns",  # units of the t_0 field (nanoseconds)
     "ticks_per_ns":             16,    # LArPix clock: 1 tick = 16 ns
     "cluster_id_overflow":      int,   # count of labels outside int16 range
+    "unassigned_sentinel":      -10000,# uniform sentinel across all three fields
 
-    # Per-prompt-hit arrays, size = n_calib_prompt_hits, in the SAME on-disk
-    # dtype the flow HDF5 fields use.
+    # Per-prompt-hit arrays, size = n_calib_prompt_hits, matching the ndlar_flow
+    # HDF5 field dtypes. Uniform sentinel -10000 for unassigned / unavailable
+    # (unphysical for all three fields).
     #   t_0            float32 nanoseconds (v1's ts_final ticks * 16.0);
-    #                  -1.0 = unassigned (matches HDF5 sentinel).
-    #   t_cluster_id   int16   -1 = unassigned.
-    #   t_confidence   float32 0.0 = unavailable (matches HDF5 init default).
+    #                  -10000.0 = unassigned.
+    #   t_cluster_id   int16    -10000 = unassigned.
+    #   t_confidence   float32  -10000.0 = unavailable.
     "calib_prompt_hits": {
       "t_0":            torch.float32 tensor,
       "t_cluster_id":   torch.int16 tensor,
@@ -64,10 +66,16 @@ import torch
 
 
 SCHEMA_VERSION = "clmatchND_v1"
-T0_SENTINEL_F4 = -1.0        # float32 ns sentinel for "unassigned"
-CLUSTER_SENTINEL_I2 = -1
-CONF_UNAVAILABLE_F4 = 0.0    # 0.0 == "not filled" (matches HDF5 init default)
-NS_PER_TICK = 16.0           # LArPix clock: 1 tick = 16 ns
+# Uniform sentinel -10000 across all three writeback fields. Unphysical for
+# all of them: t_0 (ns) is naturally non-negative in real physics; t_cluster_id
+# is a non-negative cluster label; t_confidence lives in [0, 1]. -10000 is
+# easy to check for and distinguishes "CL matching ran and didn't assign this
+# hit" from the pre-CL-matching HDF5 default of 0.
+UNASSIGNED = -10000
+T0_SENTINEL_F4 = float(UNASSIGNED)          # float32 ns
+CLUSTER_SENTINEL_I2 = int(UNASSIGNED)       # int16 (well within -32768..32767)
+CONF_UNAVAILABLE_F4 = float(UNASSIGNED)     # float32
+NS_PER_TICK = 16.0                          # LArPix clock: 1 tick = 16 ns
 
 PROMPT_DSET = "charge/calib_prompt_hits/data"
 FINAL_DSET = "charge/calib_final_hits/data"
@@ -77,8 +85,8 @@ FINAL_TO_PROMPT_REF = "charge/calib_prompt_hits/ref/charge/calib_final_hits/ref"
 def _ticks_to_ns_f4(arr_ticks: np.ndarray) -> np.ndarray:
     """Convert per-hit ts_final (ticks) into per-hit t_0 (ns, float32).
 
-    Non-finite (NaN/inf) and unassigned entries land as -1.0 (matches the
-    HDF5 sentinel convention).  We do NOT clip -- t_0 is now stored as
+    Non-finite (NaN/inf) and unassigned entries land at the -10000 sentinel
+    (unphysical for real drift ns). We do NOT clip -- t_0 is now stored as
     float32 nanoseconds, which comfortably covers the full drift window.
     """
     finite = np.isfinite(arr_ticks) & (arr_ticks >= 0)
@@ -186,6 +194,7 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
         "n_events": n_events,
         "t0_units": "ns",
         "ticks_per_ns": NS_PER_TICK,
+        "unassigned_sentinel": UNASSIGNED,
         "cluster_id_overflow": cl_over,
         "calib_prompt_hits": {
             "t_0": torch.from_numpy(p_t0_ns),
