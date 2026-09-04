@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# 2x2 charge-light matching (real DATA).
+# 2x2 charge-light matching (real DATA) -- .PT-FIRST.
 #
 # Real 2x2 DAQ flow files are NOT produced by ND_Production's run-ndlar-flow
 # step; they live on the dune cfs area (or wherever the user points us). The
@@ -11,6 +11,11 @@
 #          default = /global/cfs/cdirs/dune/www/data/2x2/reflows/v10/flow/beam/
 #                    july10_2024/nominal_hv/packet-0050018-2024_07_10_09_36_12_CDT.FLOW.hdf5
 # Output : run-cl-matching/<OUT_NAME>/PT/<subDir>/<outName>.qlmatch2x2.pt
+#
+# Workflow (mirrors the ND wrapper's .pt-first pattern):
+#   1. Check if the .pt already exists at the canonical PT/<subDir>/<outName>.qlmatch2x2.pt.
+#   2. If yes -> skip the pipeline entirely; the .pt is the source of truth.
+#      If no  -> run the pipeline and move the produced .pt to that path.
 #
 # Algorithm version (env ND_PRODUCTION_CLMATCH_VERSION):
 #   v1.0 (default) = error-matrix small-cluster association
@@ -41,11 +46,23 @@ if [[ ! -f "$inFile" ]]; then
     exit 2
 fi
 
-workDir=$tmpOutDir/${outName}_work
+ptDstDir=$outDir/PT/$subDir
 ptName=${outName}.qlmatch2x2.pt
-rm -rf "$workDir"
+ptFile=$ptDstDir/$ptName
 
 set -o errexit
+mkdir -p "$ptDstDir"
+
+# ---- Stage 1: PT-first check ----
+if [[ -f "$ptFile" ]]; then
+    echo "PT cache hit: $ptFile"
+    echo "  Skipping 2x2 pipeline; PT is the source of truth for this file."
+    exit 0
+fi
+echo "PT cache miss: building $ptFile"
+
+workDir=$tmpOutDir/${outName}_work
+rm -rf "$workDir"
 mkdir -p "$workDir"
 
 cd "$CLMATCH_REPO"
@@ -68,6 +85,5 @@ if [[ ! -f "$producedPt" ]]; then
     exit 3
 fi
 
-mkdir -p "$outDir/PT/$subDir"
-mv "$producedPt" "$outDir/PT/$subDir/$ptName"
+mv "$producedPt" "$ptFile"
 rm -f "$workDir"/*.npz "$workDir"/*.json

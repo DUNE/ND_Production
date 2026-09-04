@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 #
-# 2x2 charge-light matching (simulation).
+# 2x2 charge-light matching (simulation) -- .PT-FIRST.
 #
 # Input  : run-ndlar-flow/<IN_NAME>/FLOW/<subDir>/<inName>.FLOW.hdf5
 #          (a 2x2-configured flow file)
 # Output : run-cl-matching/<OUT_NAME>/PT/<subDir>/<outName>.qlmatch2x2.pt
+#          (the .pt IS the output; no HDF5 modification for 2x2)
 #
-# The 2x2 workflow always produces a .pt (the 2x2 calib_*_hits dtypes do not
-# yet reserve t_0/t_cluster_id, so we cannot do in-place HDF5 writeback).
+# Workflow (mirrors the ND wrapper's .pt-first pattern):
+#   1. Check if the .pt already exists at the canonical PT/<subDir>/<outName>.qlmatch2x2.pt.
+#   2. If yes -> skip the pipeline entirely; the .pt is the source of truth.
+#      If no  -> run the pipeline and move the produced .pt to that path.
 #
 # Algorithm version (env ND_PRODUCTION_CLMATCH_VERSION):
 #   v1.0 (default) = error-matrix small-cluster association (greedy, unit-var)
@@ -34,13 +37,23 @@ inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/$ND_PRODUCTION_IN_NAME
 inName=$ND_PRODUCTION_IN_NAME.$globalIdx
 inFile=$(realpath $inDir/FLOW/$subDir/${inName}.FLOW.hdf5)
 
-# 2x2 produces a .pt, not a modified HDF5. Stage workers/shards in a per-file
-# tmp dir; mv the final .pt into the canonical outDir at the end.
-workDir=$tmpOutDir/${outName}_work
+ptDstDir=$outDir/PT/$subDir
 ptName=${outName}.qlmatch2x2.pt
-rm -rf "$workDir"
+ptFile=$ptDstDir/$ptName
 
 set -o errexit
+mkdir -p "$ptDstDir"
+
+# ---- Stage 1: PT-first check ----
+if [[ -f "$ptFile" ]]; then
+    echo "PT cache hit: $ptFile"
+    echo "  Skipping 2x2 pipeline; PT is the source of truth for this file."
+    exit 0
+fi
+echo "PT cache miss: building $ptFile"
+
+workDir=$tmpOutDir/${outName}_work
+rm -rf "$workDir"
 mkdir -p "$workDir"
 
 cd "$CLMATCH_REPO"
@@ -54,7 +67,7 @@ run env FILE="$inFile" \
     bash scripts/run_2x2_sim.sh
 
 # The aggregator names the .pt as '<full basename incl. .hdf5>.qlmatch2x2.pt'
-# (yes, it keeps the .hdf5 in the .pt filename).
+# (it keeps the .hdf5 in the .pt filename).
 srcBasename=$(basename "$inFile")
 producedPt="$workDir/pt_outputs/${srcBasename}.qlmatch2x2.pt"
 if [[ ! -f "$producedPt" ]]; then
@@ -64,7 +77,6 @@ if [[ ! -f "$producedPt" ]]; then
     exit 2
 fi
 
-mkdir -p "$outDir/PT/$subDir"
-mv "$producedPt" "$outDir/PT/$subDir/$ptName"
+mv "$producedPt" "$ptFile"
 # Keep worker logs for debugging; drop the per-event NPZ shards (large, transient).
 rm -f "$workDir"/*.npz "$workDir"/*.json
