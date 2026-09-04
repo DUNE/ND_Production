@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
 #
-# ND-LAr charge-light matching (simulation) -- v1.0 pipeline.
+# ND-LAr charge-light matching (simulation) -- v1.0 pipeline, .PT-FIRST.
 #
 # Input  : run-ndlar-flow/<IN_NAME>/FLOW/<subDir>/<inName>.FLOW.hdf5
-# Output : run-cl-matching/<OUT_NAME>/FLOW/<subDir>/<outName>.FLOW.hdf5
-#          (same .FLOW.hdf5 with t_0, t_cluster_id, t_confidence populated
-#           in charge/calib_prompt_hits and charge/calib_final_hits)
+# Output : run-cl-matching/<OUT_NAME>/FLOW/<subDir>/<outName>.FLOW.hdf5     (HDF5, fields filled)
+#          run-cl-matching/<OUT_NAME>/PT/<subDir>/<outName>.qlmatchND_v1.pt (source of truth)
 #
-# Pipeline: CLMatching_v1/testing/overflow_rescue_pipeline.py invoked directly
-# (same flag set as CLMatching_v1/run_v1.sh) plus --dump-dir so we get per-event
-# NPZ shards. Our aggregate_v1_to_hdf5.py then scatters ts_final/labels/
-# hit_conf93 into the HDF5 fields in-place.
+# Workflow (per file):
+#   1. Check if the .pt already exists at the canonical PT/<subDir>/<outName>.qlmatchND_v1.pt.
+#   2. If yes  -> skip the v1 pipeline entirely; the .pt is the source of truth.
+#      If no   -> copy input flow file to tmp; run the v1 pipeline; aggregate NPZs into .pt.
+#   3. Regardless: apply the .pt into a fresh copy of the flow HDF5 and move it
+#      to the canonical FLOW/<subDir>/ output.
 #
-# Requires a 4-GPU node. On Perlmutter:
-#   salloc -A dune -q interactive -C gpu --gpus-per-node=4 -N 1 -t 60 \
-#     srun -N1 -n1 --gpus-per-node=4 ./run_cl_matching_ND_sim.sh
+# The .pt ALWAYS exists on disk after a successful run. Re-running against the
+# same OUT_NAME is idempotent -- and free from the pipeline's perspective if
+# the .pt is already there.
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
@@ -36,7 +37,6 @@ for r in "$CLMATCH_V1" "$FRONTEND"; do
 done
 if [[ ! -r "$SMALL_CKPT" ]]; then
     echo "ERROR: small light checkpoint not readable at $SMALL_CKPT" >&2
-    echo "       Override with ND_PRODUCTION_CLMATCH_SMALL_CKPT." >&2
     exit 1
 fi
 
@@ -44,8 +44,9 @@ inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/$ND_PRODUCTION_IN_NAME
 inName=$ND_PRODUCTION_IN_NAME.$globalIdx
 inFile=$(realpath $inDir/FLOW/$subDir/${inName}.FLOW.hdf5)
 
-# v1 modifies the flow file IN-PLACE for the writeback stage. Copy first so we
-# don't scribble the upstream step's output.
+flowDstDir=$outDir/FLOW/$subDir
+ptDstDir=$outDir/PT/$subDir
+ptFile=$ptDstDir/${outName}.qlmatchND_v1.pt
 outFile=$tmpOutDir/${outName}.FLOW.hdf5
 workDir=$tmpOutDir/${outName}_work
 dumpDir=$workDir/dump
@@ -53,59 +54,78 @@ rm -f "$outFile"
 rm -rf "$workDir"
 
 set -o errexit
-mkdir -p "$workDir" "$dumpDir"
-echo "Copying input flow file to tmp work area:"
-echo "  $inFile -> $outFile"
-cp "$inFile" "$outFile"
+mkdir -p "$flowDstDir" "$ptDstDir" "$workDir"
 
-# --- flag set copied verbatim from CLMatching_v1/run_v1.sh (V09 block) ---
-V1_ARGS=(--backbone stack2 --merge-p2 --sigma-mode poisson --max-clip-ticks 4
-         --police locked --merge-vertex --skip-baseline --phase3 joint
-         --pass2-trade --pass2-light-nom --force-coverage --swap-fix
-         --swap-ratio-max 0.85 --p2-threshold 30 --predict-min-energy 1.5
-         --skip-v2 --gate-support --force-simple --isolate-cm 25 --fast-scan
-         --edge-penalty --subtick --conf-cluster
-         --light-ckpt "$SMALL_CKPT" --frontend-repo "$FRONTEND")
+# ---- Stage 1: ensure the .pt exists ----
+if [[ -f "$ptFile" ]]; then
+    echo "PT cache hit: $ptFile"
+    echo "  Skipping v1 pipeline; PT is the source of truth for this file."
+else
+    echo "PT cache miss: building $ptFile"
+    mkdir -p "$dumpDir"
+    echo "Copying input flow file for pipeline read:"
+    echo "  $inFile -> $outFile"
+    cp "$inFile" "$outFile"
 
-# --- spawn N workers, round-robin on GPUs, event-strided ---
-cd "$CLMATCH_V1"
-export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+    V1_ARGS=(--backbone stack2 --merge-p2 --sigma-mode poisson --max-clip-ticks 4
+             --police locked --merge-vertex --skip-baseline --phase3 joint
+             --pass2-trade --pass2-light-nom --force-coverage --swap-fix
+             --swap-ratio-max 0.85 --p2-threshold 30 --predict-min-energy 1.5
+             --skip-v2 --gate-support --force-simple --isolate-cm 25 --fast-scan
+             --edge-penalty --subtick --conf-cluster
+             --light-ckpt "$SMALL_CKPT" --frontend-repo "$FRONTEND")
 
-echo "Launching $N_WORKERS workers on $N_GPUS GPUs..."
-nvidia-smi -L 2>&1 | head -8 || echo "no nvidia-smi"
+    cd "$CLMATCH_V1"
+    export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+    echo "Launching $N_WORKERS workers on $N_GPUS GPUs..."
+    nvidia-smi -L 2>&1 | head -8 || echo "no nvidia-smi"
 
-PIDS=()
-for w in $(seq 0 $((N_WORKERS - 1))); do
-    g=$((w % N_GPUS))
-    log="$workDir/worker${w}_gpu${g}.log"
-    (
-        CUDA_VISIBLE_DEVICES="$g" "$PY" testing/overflow_rescue_pipeline.py \
-            --files "$outFile" \
-            --out "$workDir/groups_worker${w}.jsonl" \
-            --dump-dir "$dumpDir" \
-            --event-stride "$N_WORKERS" --event-offset "$w" \
-            "${V1_ARGS[@]}"
-    ) > "$log" 2>&1 &
-    PIDS+=("$!")
-    echo "  worker $w -> GPU $g  log=$log"
-done
+    PIDS=()
+    for w in $(seq 0 $((N_WORKERS - 1))); do
+        g=$((w % N_GPUS))
+        log="$workDir/worker${w}_gpu${g}.log"
+        (
+            CUDA_VISIBLE_DEVICES="$g" "$PY" testing/overflow_rescue_pipeline.py \
+                --files "$outFile" \
+                --out "$workDir/groups_worker${w}.jsonl" \
+                --dump-dir "$dumpDir" \
+                --event-stride "$N_WORKERS" --event-offset "$w" \
+                "${V1_ARGS[@]}"
+        ) > "$log" 2>&1 &
+        PIDS+=("$!")
+        echo "  worker $w -> GPU $g  log=$log"
+    done
+    FAIL=0
+    for p in "${PIDS[@]}"; do wait "$p" || FAIL=$((FAIL + 1)); done
+    n_dump=$(ls "$dumpDir"/*.npz 2>/dev/null | wc -l)
+    echo "workers done; failures=$FAIL  npz-shards=$n_dump"
+    if [[ "$FAIL" -gt 0 && "$n_dump" -eq 0 ]]; then
+        echo "ERROR: all workers failed and no shards produced." >&2
+        exit 2
+    fi
 
-FAIL=0
-for p in "${PIDS[@]}"; do wait "$p" || FAIL=$((FAIL + 1)); done
-n_dump=$(ls "$dumpDir"/*.npz 2>/dev/null | wc -l)
-echo "workers done; failures=$FAIL  npz-shards=$n_dump"
-if [[ "$FAIL" -gt 0 && "$n_dump" -eq 0 ]]; then
-    echo "ERROR: all workers failed and no shards produced." >&2
-    exit 2
+    run "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/aggregate_v1_to_pt.py" \
+        --dump-dir "$dumpDir" \
+        --src-file "$outFile" \
+        --out "$ptFile" \
+        --summary-json "$workDir/v1_aggregator_summary.json"
+
+    if [[ ! -f "$ptFile" ]]; then
+        echo "ERROR: aggregate_v1_to_pt did not produce $ptFile" >&2
+        exit 3
+    fi
 fi
 
-# --- aggregate NPZs into HDF5 in-place ---
-run "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/aggregate_v1_to_hdf5.py" \
-    --dump-dir "$dumpDir" \
-    --src-file "$outFile" \
-    --summary-json "$workDir/v1_aggregator_summary.json"
+# ---- Stage 2: apply .pt to a fresh copy of the flow HDF5, then publish ----
+echo "Copying input flow file for fill:"
+echo "  $inFile -> $outFile"
+[[ -f "$outFile" ]] || cp "$inFile" "$outFile"
 
-# --- sanity check that HDF5 fields are populated ---
+run "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/apply_pt_to_hdf5.py" \
+    --pt "$ptFile" \
+    --hdf5 "$outFile" \
+    --summary-json "$workDir/v1_applier_summary.json"
+
 "$PY" - <<PY
 import h5py, sys
 with h5py.File("$outFile", "r") as h:
@@ -116,19 +136,20 @@ with h5py.File("$outFile", "r") as h:
             continue
         nz = int((d["t_cluster_id"][:] != 0).any() or (d["t_0"][:] != 0).any())
         if not nz:
-            print(f"ERROR: {path} t_0 and t_cluster_id are still all zero.", file=sys.stderr)
+            print(f"ERROR: {path} still all zero after PT-fill.", file=sys.stderr)
             sys.exit(2)
-print("v1 writeback verified: t_0 and t_cluster_id populated in HDF5.")
+print("PT-fill verified: t_0 and t_cluster_id populated in HDF5.")
 PY
 
-mkdir -p "$outDir/FLOW/$subDir"
-mv "$outFile" "$outDir/FLOW/$subDir"
+mv "$outFile" "$flowDstDir/"
 
-# Keep worker + aggregator logs under canonical LOGS dir; drop bulky shards.
+# preserve logs, drop bulky shards
+mkdir -p "$logDir"
 if compgen -G "$workDir/worker*.log" > /dev/null; then
     mkdir -p "$logDir/${outName}_worker_logs"
     cp "$workDir"/worker*.log "$logDir/${outName}_worker_logs/" 2>/dev/null || true
 fi
-[[ -f "$workDir/v1_aggregator_summary.json" ]] && \
-    cp "$workDir/v1_aggregator_summary.json" "$logDir/${outName}_v1_aggregator_summary.json"
+for f in v1_aggregator_summary.json v1_applier_summary.json; do
+    [[ -f "$workDir/$f" ]] && cp "$workDir/$f" "$logDir/${outName}_$f"
+done
 rm -rf "$workDir"
