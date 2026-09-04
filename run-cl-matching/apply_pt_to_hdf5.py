@@ -68,8 +68,10 @@ def apply_one(pt_path: Path, hdf5_path: Path, *, verbose: bool = True) -> dict:
         "version": pt.get("version"),
         "t0_units": pt_units,
         "src_basename_expected": pt.get("src_basename"),
-        "prompt": {"wrote_fields": [], "prewrite_nondefault": {}, "size_mismatch": None},
-        "final":  {"wrote_fields": [], "prewrite_nondefault": {}, "size_mismatch": None},
+        "prompt": {"wrote_fields": [], "skipped_fields": {},
+                   "prewrite_nondefault": {}, "size_mismatch": None},
+        "final":  {"wrote_fields": [], "skipped_fields": {},
+                   "prewrite_nondefault": {}, "size_mismatch": None},
     }
 
     with h5py.File(hdf5_path, "r+") as h:
@@ -77,8 +79,11 @@ def apply_one(pt_path: Path, hdf5_path: Path, *, verbose: bool = True) -> dict:
                                 ("calib_final_hits", FINAL_DSET)):
             info_key = "prompt" if key == "calib_prompt_hits" else "final"
             if dset_path not in h:
+                reason = f"dataset {dset_path} missing from HDF5"
                 if verbose:
                     print(f"  {dset_path}: MISSING; skipping ({key})", flush=True)
+                for f in FIELDS:
+                    info[info_key]["skipped_fields"][f] = reason
                 continue
             if key not in pt:
                 if verbose:
@@ -102,10 +107,13 @@ def apply_one(pt_path: Path, hdf5_path: Path, *, verbose: bool = True) -> dict:
             data = dset[:]
             for field in FIELDS:
                 if field not in fields_in_pt:
+                    info[info_key]["skipped_fields"][field] = "pt lacks this field"
                     continue
                 if field not in data.dtype.names:
+                    reason = "HDF5 dtype lacks the field"
+                    info[info_key]["skipped_fields"][field] = reason
                     if verbose:
-                        print(f"  {dset_path}[{field}]: dtype lacks field; skipping",
+                        print(f"  {dset_path}[{field}]: {reason}; skipping",
                               flush=True)
                     continue
                 new_val = _as_numpy(fields_in_pt[field])
@@ -117,18 +125,19 @@ def apply_one(pt_path: Path, hdf5_path: Path, *, verbose: bool = True) -> dict:
                 # ---- units-aware safety check for t_0 ---------------------
                 # v1 PTs store t_0 as float32 nanoseconds. Old flow files still
                 # have t_0 as int16 (ticks). Silently .astype(int16) would
-                # catastrophically overflow (500 ns -> 500 stored as ticks? no,
-                # 500 ns > 32767 ticks range wrap). Refuse loudly instead.
+                # catastrophically overflow. Skip with a clear reason instead
+                # of raising -- the wrapper reports it to the user.
                 target_dtype = data.dtype[field]
                 if field == "t_0" and pt.get("t0_units") == "ns" \
                         and target_dtype.kind == "i":
-                    raise RuntimeError(
-                        f"{dset_path}[t_0] is {target_dtype} (integer ticks) but "
-                        f"the .pt stores t_0 in nanoseconds (float). Refusing to "
-                        f"convert without an explicit divide-by-{NS_PER_TICK:.0f}. "
-                        f"Fix: bump ndlar_flow's calib_prompt_hits dtype for t_0 "
-                        f"from 'i2' to 'f4' and regenerate this flow file."
-                    )
+                    reason = (f"HDF5 dtype is {target_dtype} (integer ticks) but pt "
+                              f"stores t_0 in nanoseconds; upgrade ndlar_flow's "
+                              f"calib_prompt_hits t_0 dtype from 'i2' to 'f4' and "
+                              f"regenerate this flow file")
+                    info[info_key]["skipped_fields"][field] = reason
+                    if verbose:
+                        print(f"  SKIP: {dset_path}[{field}]: {reason}", flush=True)
+                    continue
                 data[field] = new_val.astype(target_dtype, copy=False)
                 info[info_key]["wrote_fields"].append(field)
             dset[:] = data

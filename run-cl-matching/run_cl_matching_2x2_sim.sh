@@ -59,10 +59,11 @@ mkdir -p "$flowDstDir" "$ptDstDir" "$workDir"
 
 # ---- Stage 1: ensure the .pt exists ----
 if [[ -f "$ptFile" ]]; then
-    echo "PT cache hit: $ptFile"
-    echo "  Skipping 2x2 pipeline; PT is the source of truth for this file."
+    echo "CLMatching .pt found, algorithm output already exists at $ptFile"
+    was_cache_hit=1
 else
-    echo "PT cache miss: building $ptFile"
+    echo "CLMatching .pt not found, running the full algorithm"
+    was_cache_hit=0
     cd "$CLMATCH_REPO"
     run env FILE="$inFile" \
         VERSION="$VERSION" \
@@ -85,14 +86,40 @@ else
 fi
 
 # ---- Stage 2: apply .pt to a fresh copy of the flow HDF5, then publish ----
-echo "Copying input flow file for fill:"
-echo "  $inFile -> $outFile"
+if [[ "$was_cache_hit" == "1" ]]; then
+    echo "CLMatching .pt exists, filling the flow files at $flowDstDir"
+else
+    echo "CLMatching .pt completed at $ptFile, filling the flow files at $flowDstDir"
+fi
 cp "$inFile" "$outFile"
 
+applier_summary="$workDir/qlmatch2x2_applier_summary.json"
 run "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/apply_pt_to_hdf5.py" \
     --pt "$ptFile" \
     --hdf5 "$outFile" \
-    --summary-json "$workDir/qlmatch2x2_applier_summary.json"
+    --summary-json "$applier_summary"
+
+"$PY" - "$applier_summary" "$ptFile" <<'PY'
+import json, sys
+sp, ptp = sys.argv[1], sys.argv[2]
+d = json.load(open(sp))
+res = d.get("result", {})
+skipped, wrote = [], []
+for section in ("prompt", "final"):
+    sec = res.get(section, {}) or {}
+    for f, why in (sec.get("skipped_fields") or {}).items():
+        skipped.append(f"{section}.{f} ({why})")
+    for f in (sec.get("wrote_fields") or []):
+        wrote.append(f"{section}.{f}")
+if skipped:
+    print("flow file does not contain the required field(s):")
+    for s in skipped:
+        print(f"  - {s}")
+    if wrote:
+        print(f"  (some fields were filled OK: {', '.join(wrote)})")
+    else:
+        print(f"  skipping the fill-in stage. .pt file completed at {ptp}")
+PY
 
 mv "$outFile" "$flowDstDir/"
 

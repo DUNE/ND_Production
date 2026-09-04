@@ -85,14 +85,14 @@ for idx in "${INDICES[@]}"; do
     IDX_ONAME[$idx]=$onm
 
     if [[ -f "$pt_f" ]]; then
-        echo "  idx=$idx: PT cache hit ($pt_f)"
+        echo "  idx=$idx: CLMatching .pt found, algorithm output already exists at $pt_f"
     else
         tmp="$BATCH_WORKDIR/${onm}.FLOW.hdf5"
         cp "$inFile" "$tmp"
         IDX_TMP[$idx]=$tmp
         FILES_ARGS+=("$tmp")
         INDICES_TO_RUN+=("$idx")
-        echo "  idx=$idx: PT cache MISS -> queued for pipeline"
+        echo "  idx=$idx: CLMatching .pt not found, running the full algorithm"
     fi
 done
 echo "batch: ${#INDICES_TO_RUN[@]} indices need pipeline run; ${#INDICES[@]} total."
@@ -152,14 +152,43 @@ for idx in "${INDICES[@]}"; do
     pt_f="${IDX_PT[$idx]}"
     flow_d="${IDX_FLOW_D[$idx]}"
     fill_src="${IDX_TMP[$idx]:-}"
+    was_hit=0
     if [[ -z "$fill_src" ]]; then
         # cache-hit index: we didn't cp earlier. Copy input now for fill.
         fill_src="$BATCH_WORKDIR/${onm}.FLOW.hdf5"
         cp "${IDX_IN[$idx]}" "$fill_src"
+        was_hit=1
     fi
+    if [[ "$was_hit" == "1" ]]; then
+        echo "  idx=$idx: CLMatching .pt exists, filling the flow files at $flow_d"
+    else
+        echo "  idx=$idx: CLMatching .pt completed at $pt_f, filling the flow files at $flow_d"
+    fi
+    applier_summary="$BATCH_WORKDIR/idx${idx}_applier_summary.json"
     "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/apply_pt_to_hdf5.py" \
         --pt "$pt_f" --hdf5 "$fill_src" \
-        --summary-json "$BATCH_WORKDIR/idx${idx}_applier_summary.json"
+        --summary-json "$applier_summary"
+    "$PY" - "$applier_summary" "$pt_f" "$idx" <<'PY'
+import json, sys
+sp, ptp, idx = sys.argv[1], sys.argv[2], sys.argv[3]
+d = json.load(open(sp))
+res = d.get("result", {})
+skipped, wrote = [], []
+for section in ("prompt", "final"):
+    sec = res.get(section, {}) or {}
+    for f, why in (sec.get("skipped_fields") or {}).items():
+        skipped.append(f"{section}.{f} ({why})")
+    for f in (sec.get("wrote_fields") or []):
+        wrote.append(f"{section}.{f}")
+if skipped:
+    print(f"  idx={idx}: flow file does not contain the required field(s):")
+    for s in skipped:
+        print(f"    - {s}")
+    if wrote:
+        print(f"    (some fields were filled OK: {', '.join(wrote)})")
+    else:
+        print(f"    skipping the fill-in stage. .pt file completed at {ptp}")
+PY
     mv "$fill_src" "$flow_d/${onm}.FLOW.hdf5"
     MOVED=$((MOVED + 1))
 done

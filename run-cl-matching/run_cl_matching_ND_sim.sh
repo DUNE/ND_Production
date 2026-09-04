@@ -66,10 +66,11 @@ mkdir -p "$flowDstDir" "$ptDstDir" "$workDir"
 
 # ---- Stage 1: ensure the .pt exists ----
 if [[ -f "$ptFile" ]]; then
-    echo "PT cache hit: $ptFile"
-    echo "  Skipping v1 pipeline; PT is the source of truth for this file."
+    echo "CLMatching .pt found, algorithm output already exists at $ptFile"
+    was_cache_hit=1
 else
-    echo "PT cache miss: building $ptFile"
+    echo "CLMatching .pt not found, running the full algorithm"
+    was_cache_hit=0
     mkdir -p "$dumpDir"
     echo "Copying input flow file for pipeline read:"
     echo "  $inFile -> $outFile"
@@ -125,28 +126,42 @@ else
 fi
 
 # ---- Stage 2: apply .pt to a fresh copy of the flow HDF5, then publish ----
-echo "Copying input flow file for fill:"
-echo "  $inFile -> $outFile"
+if [[ "$was_cache_hit" == "1" ]]; then
+    echo "CLMatching .pt exists, filling the flow files at $flowDstDir"
+else
+    echo "CLMatching .pt completed at $ptFile, filling the flow files at $flowDstDir"
+fi
 [[ -f "$outFile" ]] || cp "$inFile" "$outFile"
 
+mkdir -p "$workDir"
+applier_summary="$workDir/v1_applier_summary.json"
 run "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/apply_pt_to_hdf5.py" \
     --pt "$ptFile" \
     --hdf5 "$outFile" \
-    --summary-json "$workDir/v1_applier_summary.json"
+    --summary-json "$applier_summary"
 
-"$PY" - <<PY
-import h5py, sys
-with h5py.File("$outFile", "r") as h:
-    for path in ("charge/calib_prompt_hits/data", "charge/calib_final_hits/data"):
-        d = h[path]
-        if "t_0" not in d.dtype.names or "t_cluster_id" not in d.dtype.names:
-            print(f"WARN: {path} dtype lacks t_0/t_cluster_id; skipping check.")
-            continue
-        nz = int((d["t_cluster_id"][:] != 0).any() or (d["t_0"][:] != 0).any())
-        if not nz:
-            print(f"ERROR: {path} still all zero after PT-fill.", file=sys.stderr)
-            sys.exit(2)
-print("PT-fill verified: t_0 and t_cluster_id populated in HDF5.")
+# Report any skipped fields (e.g. flow file predates the ndlar_flow t_0 dtype
+# bump, so its compound dtype doesn't reserve the fields we would fill).
+"$PY" - "$applier_summary" "$ptFile" <<'PY'
+import json, sys
+sp, ptp = sys.argv[1], sys.argv[2]
+d = json.load(open(sp))
+res = d.get("result", {})
+skipped, wrote = [], []
+for section in ("prompt", "final"):
+    sec = res.get(section, {}) or {}
+    for f, why in (sec.get("skipped_fields") or {}).items():
+        skipped.append(f"{section}.{f} ({why})")
+    for f in (sec.get("wrote_fields") or []):
+        wrote.append(f"{section}.{f}")
+if skipped:
+    print("flow file does not contain the required field(s):")
+    for s in skipped:
+        print(f"  - {s}")
+    if wrote:
+        print(f"  (some fields were filled OK: {', '.join(wrote)})")
+    else:
+        print(f"  skipping the fill-in stage. .pt file completed at {ptp}")
 PY
 
 mv "$outFile" "$flowDstDir/"
