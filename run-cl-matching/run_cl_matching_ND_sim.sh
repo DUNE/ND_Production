@@ -20,6 +20,14 @@
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
+# ND_Production's util/prelude.inc.sh setup_cuda() loads python/3.11 which
+# clobbers PYTHONUSERBASE for Python 3.12 -- CLMatching v1 uses the NERSC
+# pytorch env (Python 3.12) and needs to reach the python/3.13 module's user
+# site-packages (where plotly and other deps live). Force it back.
+if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
+    module load python/3.13-26.8.0 2>/dev/null || true
+fi
+
 CLMATCH_V1=${ND_PRODUCTION_CLMATCH_V1_REPO:-"$ND_PRODUCTION_INSTALL_DIR/CLMatching_v1"}
 FRONTEND=${ND_PRODUCTION_CLMATCH_FRONTEND:-"$ND_PRODUCTION_INSTALL_DIR/clmatching-frontend"}
 SMALL_CKPT=${ND_PRODUCTION_CLMATCH_SMALL_CKPT:-/global/cfs/cdirs/dune/users/yuxuan/NDLAr-full/NewMLSection/runs/ndfull_small4x/best_model_arch.pt}

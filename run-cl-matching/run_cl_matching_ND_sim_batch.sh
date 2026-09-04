@@ -22,6 +22,13 @@
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
+# See run_cl_matching_ND_sim.sh for the rationale; keeping the wrappers
+# consistent: force python/3.13 back so the pytorch env's user-site (with
+# plotly and other v1 deps) is reachable.
+if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
+    module load python/3.13-26.8.0 2>/dev/null || true
+fi
+
 CLMATCH_V1=${ND_PRODUCTION_CLMATCH_V1_REPO:-"$ND_PRODUCTION_INSTALL_DIR/CLMatching_v1"}
 FRONTEND=${ND_PRODUCTION_CLMATCH_FRONTEND:-"$ND_PRODUCTION_INSTALL_DIR/clmatching-frontend"}
 SMALL_CKPT=${ND_PRODUCTION_CLMATCH_SMALL_CKPT:-/global/cfs/cdirs/dune/users/yuxuan/NDLAr-full/NewMLSection/runs/ndfull_small4x/best_model_arch.pt}
