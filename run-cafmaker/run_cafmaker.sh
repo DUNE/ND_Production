@@ -4,11 +4,9 @@ export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:l
 
 source ../util/reload_in_container.inc.sh
 
-cd install/ND_CAFMaker
 set +o errexit
-source ndcaf_setup.sh
+source install/ND_CAFMaker/install/bin/ndcaf_setup.sh prof
 set -o errexit
-cd ../..
 
 # Must go after ndcaf_setup.sh
 source ../util/init.inc.sh
@@ -37,6 +35,7 @@ args_gen_cafmaker_cfg=( \
 [ -n "${ND_PRODUCTION_TMSRECO_NAME}" ] && args_gen_cafmaker_cfg+=( --tmsreco-name "$ND_PRODUCTION_TMSRECO_NAME" )
 [ -n "${ND_PRODUCTION_HADD_FACTOR}" ] && args_gen_cafmaker_cfg+=( --hadd-factor "$ND_PRODUCTION_HADD_FACTOR" )
 [ -n "${ND_PRODUCTION_EXTRA_LINES}" ] && args_gen_cafmaker_cfg+=( --extra-lines "$ND_PRODUCTION_EXTRA_LINES" )
+[ -n "${ND_PRODUCTION_INDEX_OFFSET}" ] && args_gen_cafmaker_cfg+=( --index-offset "$ND_PRODUCTION_INDEX_OFFSET" )
 [ "${ND_PRODUCTION_REUSE_ROCK}" == 1 ] && args_gen_cafmaker_cfg+=( --reuse-rock )
 
 ./gen_cafmaker_cfg.py "${args_gen_cafmaker_cfg[@]}"

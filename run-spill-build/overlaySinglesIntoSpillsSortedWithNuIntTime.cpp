@@ -223,6 +223,20 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   }
   gRooTracker genie_evts_B_data(genie_evts_B);
 
+  // Seed from the fiducial input's RunId rather than a caller-provided value.
+  // This keeps a run reproducible across productions and makes the seed
+  // independent of any reused sample-B input.
+  TChain* seed_tree = have_nu_sampleA ? edep_evts_A : edep_evts_B;
+  if (seed_tree->GetEntries() == 0) {
+    throw std::runtime_error("Cannot seed spill builder from an empty input tree");
+  }
+  TG4Event* seed_event = nullptr;
+  seed_tree->SetBranchAddress("Event", &seed_event);
+  seed_tree->GetEntry(0);
+  const unsigned int randomSeed = static_cast<unsigned int>(seed_event->RunId) + 1;
+  gRandom->SetSeed(randomSeed);
+  std::cout << "Random seed (RunId " << seed_event->RunId << "): " << randomSeed << std::endl;
+
   // Dump some useful information about the running mode.
   if(have_nu_sampleA && !have_nu_sampleB){
     std::cout << "sampleB-nu file POT stated to be zero, spills will be sampleA-nu only" << std::endl;
