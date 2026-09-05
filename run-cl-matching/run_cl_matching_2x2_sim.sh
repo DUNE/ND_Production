@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
 #
-# 2x2 charge-light matching (simulation) -- .PT-FIRST, IDENTICAL logic to ND.
+# 2x2 charge-light matching (simulation) -- .PT-FIRST, IN-PLACE FLOW EDIT.
+# Identical logic to run_cl_matching_ND_sim.sh.
 #
-# Input  : run-ndlar-flow/<IN_NAME>/FLOW/<subDir>/<inName>.FLOW.hdf5
-#          (a 2x2-configured flow file)
-# Output : run-cl-matching/<OUT_NAME>/PT/<subDir>/<outName>.qlmatch2x2.pt   (source of truth)
-#          run-cl-matching/<OUT_NAME>/FLOW/<subDir>/<outName>.FLOW.hdf5     (HDF5 filled from the .pt)
+# Input : run-ndlar-flow/<IN_NAME>/FLOW/<subDir>/<inName>.FLOW.hdf5
+#         (a 2x2-configured flow file; opened r+ and modified in place)
+# Output: run-cl-matching/<OUT_NAME>/PT/<subDir>/<outName>.qlmatch2x2.pt
+#         (the ONLY new artifact under this step's output dir; no FLOW/ subdir
+#          is created -- CL matching only fills the reserved t_0 /
+#          t_cluster_id / t_confidence fields in the input flow file)
 #
-# Workflow (per file, matches run_cl_matching_ND_sim.sh):
-#   1. Check if the .pt exists at the canonical PT/<subDir>/<outName>.qlmatch2x2.pt.
-#      If yes -> skip the pipeline entirely; the .pt is the source of truth.
-#      If no  -> run the pipeline, produce the .pt, move to that path.
-#   2. Always fill a fresh copy of the flow HDF5 from the .pt (writing t_0,
+# Workflow (per file):
+#   1. Check if the .pt exists at <outDir>/PT/<subDir>/<outName>.qlmatch2x2.pt.
+#      If yes -> skip the pipeline entirely (the .pt is the source of truth).
+#      If no  -> run the pipeline reading the input flow file directly, then
+#                move the produced .pt to that canonical path.
+#   2. Apply the .pt into the INPUT flow file in place (writing t_0,
 #      t_cluster_id, t_confidence into charge/calib_prompt_hits AND
-#      calib_final_hits) and move it to outDir/FLOW/<subDir>/.
+#      calib_final_hits).
 #
 # NOTE: for 2x2 sim files that PRE-DATE the ndlar_flow t_0-f4 dtype bump, the
 # HDF5 has no reserved fields to fill; apply_pt_to_hdf5.py silently skips each
@@ -45,26 +49,23 @@ inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/$ND_PRODUCTION_IN_NAME
 inName=$ND_PRODUCTION_IN_NAME.$globalIdx
 inFile=$(realpath $inDir/FLOW/$subDir/${inName}.FLOW.hdf5)
 
-flowDstDir=$outDir/FLOW/$subDir
 ptDstDir=$outDir/PT/$subDir
 ptName=${outName}.qlmatch2x2.pt
 ptFile=$ptDstDir/$ptName
-outFile=$tmpOutDir/${outName}.FLOW.hdf5
 workDir=$tmpOutDir/${outName}_work
-rm -f "$outFile"
 rm -rf "$workDir"
 
 set -o errexit
-mkdir -p "$flowDstDir" "$ptDstDir" "$workDir"
+mkdir -p "$ptDstDir" "$workDir"
 
 # ---- Stage 1: ensure the .pt exists ----
 if [[ -f "$ptFile" ]]; then
     echo "CLMatching .pt found, algorithm output already exists at $ptFile"
-    was_cache_hit=1
 else
     echo "CLMatching .pt not found, running the full algorithm"
-    was_cache_hit=0
     cd "$CLMATCH_REPO"
+    # 2x2 pipeline reads $inFile read-only; the aggregator emits the .pt at
+    # $workDir/pt_outputs/<inFile basename>.qlmatch2x2.pt.
     run env FILE="$inFile" \
         VERSION="$VERSION" \
         OUT_DIR="$workDir" \
@@ -85,18 +86,13 @@ else
     mv "$producedPt" "$ptFile"
 fi
 
-# ---- Stage 2: apply .pt to a fresh copy of the flow HDF5, then publish ----
-if [[ "$was_cache_hit" == "1" ]]; then
-    echo "CLMatching .pt exists, filling the flow files at $flowDstDir"
-else
-    echo "CLMatching .pt completed at $ptFile, filling the flow files at $flowDstDir"
-fi
-cp "$inFile" "$outFile"
+# ---- Stage 2: apply .pt into the INPUT flow file, in place ----
+echo "CLMatching .pt at $ptFile, filling the flow file in place at $inFile"
 
 applier_summary="$workDir/qlmatch2x2_applier_summary.json"
 run "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/apply_pt_to_hdf5.py" \
     --pt "$ptFile" \
-    --hdf5 "$outFile" \
+    --hdf5 "$inFile" \
     --summary-json "$applier_summary"
 
 "$PY" - "$applier_summary" "$ptFile" <<'PY'
@@ -120,8 +116,6 @@ if skipped:
     else:
         print(f"  skipping the fill-in stage. .pt file completed at {ptp}")
 PY
-
-mv "$outFile" "$flowDstDir/"
 
 # preserve worker logs / applier summary; drop bulky shards.
 mkdir -p "$logDir"

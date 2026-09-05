@@ -1,21 +1,28 @@
 #!/usr/bin/env bash
 #
-# ND-LAr charge-light matching (simulation) -- v1.0 pipeline, .PT-FIRST.
+# ND-LAr charge-light matching (simulation) -- v1.0 pipeline, .PT-FIRST,
+# IN-PLACE FLOW EDIT.
 #
-# Input  : run-ndlar-flow/<IN_NAME>/FLOW/<subDir>/<inName>.FLOW.hdf5
-# Output : run-cl-matching/<OUT_NAME>/FLOW/<subDir>/<outName>.FLOW.hdf5     (HDF5, fields filled)
-#          run-cl-matching/<OUT_NAME>/PT/<subDir>/<outName>.qlmatchND_v1.pt (source of truth)
+# Input : run-ndlar-flow/<IN_NAME>/FLOW/<subDir>/<inName>.FLOW.hdf5
+#         (opened r+ and MODIFIED IN PLACE -- the CL matching results are
+#          written back into the reserved t_0 / t_cluster_id / t_confidence
+#          fields that ndlar_flow left as placeholders)
+# Output: run-cl-matching/<OUT_NAME>/PT/<subDir>/<outName>.qlmatchND_v1.pt
+#         (the ONLY new artifact under this step's output dir; no FLOW/ subdir
+#          is created -- CL matching does not duplicate the flow file)
 #
 # Workflow (per file):
-#   1. Check if the .pt already exists at the canonical PT/<subDir>/<outName>.qlmatchND_v1.pt.
-#   2. If yes  -> skip the v1 pipeline entirely; the .pt is the source of truth.
-#      If no   -> copy input flow file to tmp; run the v1 pipeline; aggregate NPZs into .pt.
-#   3. Regardless: apply the .pt into a fresh copy of the flow HDF5 and move it
-#      to the canonical FLOW/<subDir>/ output.
+#   1. Check if the .pt exists at <outDir>/PT/<subDir>/<outName>.qlmatchND_v1.pt.
+#      If yes -> skip the v1 pipeline (the .pt is the source of truth).
+#      If no  -> run the pipeline reading the input flow file directly,
+#                aggregate NPZ shards into the canonical .pt.
+#   2. Apply the .pt into the INPUT flow file in place, overwriting whatever
+#      values the reserved fields (t_0, t_cluster_id, t_confidence) held --
+#      those fields are placeholders reserved by ndlar_flow for us to fill.
 #
-# The .pt ALWAYS exists on disk after a successful run. Re-running against the
-# same OUT_NAME is idempotent -- and free from the pipeline's perspective if
-# the .pt is already there.
+# Re-runs against the same OUT_NAME are idempotent: the .pt is cached, and
+# re-applying it produces the same field values (with a warn about the now
+# non-default entries, which is expected on the 2nd+ run).
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
@@ -52,29 +59,21 @@ inDir=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/$ND_PRODUCTION_IN_NAME
 inName=$ND_PRODUCTION_IN_NAME.$globalIdx
 inFile=$(realpath $inDir/FLOW/$subDir/${inName}.FLOW.hdf5)
 
-flowDstDir=$outDir/FLOW/$subDir
 ptDstDir=$outDir/PT/$subDir
 ptFile=$ptDstDir/${outName}.qlmatchND_v1.pt
-outFile=$tmpOutDir/${outName}.FLOW.hdf5
 workDir=$tmpOutDir/${outName}_work
 dumpDir=$workDir/dump
-rm -f "$outFile"
 rm -rf "$workDir"
 
 set -o errexit
-mkdir -p "$flowDstDir" "$ptDstDir" "$workDir"
+mkdir -p "$ptDstDir" "$workDir"
 
 # ---- Stage 1: ensure the .pt exists ----
 if [[ -f "$ptFile" ]]; then
     echo "CLMatching .pt found, algorithm output already exists at $ptFile"
-    was_cache_hit=1
 else
     echo "CLMatching .pt not found, running the full algorithm"
-    was_cache_hit=0
     mkdir -p "$dumpDir"
-    echo "Copying input flow file for pipeline read:"
-    echo "  $inFile -> $outFile"
-    cp "$inFile" "$outFile"
 
     V1_ARGS=(--backbone stack2 --merge-p2 --sigma-mode poisson --max-clip-ticks 4
              --police locked --merge-vertex --skip-baseline --phase3 joint
@@ -89,13 +88,15 @@ else
     echo "Launching $N_WORKERS workers on $N_GPUS GPUs..."
     nvidia-smi -L 2>&1 | head -8 || echo "no nvidia-smi"
 
+    # Pipeline reads $inFile directly (read-only): it dumps NPZ shards into
+    # dumpDir and never mutates the input HDF5.
     PIDS=()
     for w in $(seq 0 $((N_WORKERS - 1))); do
         g=$((w % N_GPUS))
         log="$workDir/worker${w}_gpu${g}.log"
         (
             CUDA_VISIBLE_DEVICES="$g" "$PY" testing/overflow_rescue_pipeline.py \
-                --files "$outFile" \
+                --files "$inFile" \
                 --out "$workDir/groups_worker${w}.jsonl" \
                 --dump-dir "$dumpDir" \
                 --event-stride "$N_WORKERS" --event-offset "$w" \
@@ -115,7 +116,7 @@ else
 
     run "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/aggregate_v1_to_pt.py" \
         --dump-dir "$dumpDir" \
-        --src-file "$outFile" \
+        --src-file "$inFile" \
         --out "$ptFile" \
         --summary-json "$workDir/v1_aggregator_summary.json"
 
@@ -125,23 +126,18 @@ else
     fi
 fi
 
-# ---- Stage 2: apply .pt to a fresh copy of the flow HDF5, then publish ----
-if [[ "$was_cache_hit" == "1" ]]; then
-    echo "CLMatching .pt exists, filling the flow files at $flowDstDir"
-else
-    echo "CLMatching .pt completed at $ptFile, filling the flow files at $flowDstDir"
-fi
-[[ -f "$outFile" ]] || cp "$inFile" "$outFile"
+# ---- Stage 2: apply .pt into the INPUT flow file, in place ----
+echo "CLMatching .pt at $ptFile, filling the flow file in place at $inFile"
 
-mkdir -p "$workDir"
 applier_summary="$workDir/v1_applier_summary.json"
 run "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/apply_pt_to_hdf5.py" \
     --pt "$ptFile" \
-    --hdf5 "$outFile" \
+    --hdf5 "$inFile" \
     --summary-json "$applier_summary"
 
 # Report any skipped fields (e.g. flow file predates the ndlar_flow t_0 dtype
-# bump, so its compound dtype doesn't reserve the fields we would fill).
+# bump, so its compound dtype doesn't reserve the fields we would fill, or the
+# HDF5 was not writable).
 "$PY" - "$applier_summary" "$ptFile" <<'PY'
 import json, sys
 sp, ptp = sys.argv[1], sys.argv[2]
@@ -163,8 +159,6 @@ if skipped:
     else:
         print(f"  skipping the fill-in stage. .pt file completed at {ptp}")
 PY
-
-mv "$outFile" "$flowDstDir/"
 
 # preserve logs, drop bulky shards
 mkdir -p "$logDir"

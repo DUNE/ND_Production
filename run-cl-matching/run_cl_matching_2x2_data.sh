@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
-# 2x2 charge-light matching (real DATA) -- .PT-FIRST, IDENTICAL logic to ND.
+# 2x2 charge-light matching (real DATA) -- .PT-FIRST, IN-PLACE FLOW EDIT.
+# Identical logic to run_cl_matching_ND_sim.sh and run_cl_matching_2x2_sim.sh.
 #
 # Real 2x2 DAQ flow files are NOT produced by ND_Production's run-ndlar-flow
 # step; they live on the dune cfs area (or wherever the user points us). The
@@ -10,15 +11,12 @@
 # Input  : $ND_PRODUCTION_CLMATCH_DATA_FILE (absolute path to a 2x2 reflow file)
 #          default = /global/cfs/cdirs/dune/www/data/2x2/reflows/v10/flow/beam/
 #                    july10_2024/nominal_hv/packet-0050018-2024_07_10_09_36_12_CDT.FLOW.hdf5
-# Output : run-cl-matching/<OUT_NAME>/PT/<subDir>/<outName>.qlmatch2x2.pt   (source of truth)
-#          run-cl-matching/<OUT_NAME>/FLOW/<subDir>/<outName>.FLOW.hdf5     (HDF5 filled from the .pt)
-#
-# Workflow (per file, matches run_cl_matching_ND_sim.sh):
-#   1. Check if the .pt exists at the canonical PT/<subDir>/<outName>.qlmatch2x2.pt.
-#      If yes -> skip the pipeline entirely; the .pt is the source of truth.
-#      If no  -> run the pipeline, produce the .pt, move to that path.
-#   2. Always fill a fresh copy of the flow HDF5 from the .pt and move it to
-#      outDir/FLOW/<subDir>/.
+#          Opened r+ and modified IN PLACE if writable. If the reflow is
+#          read-only, apply_pt_to_hdf5.py reports a per-field skip reason
+#          ("HDF5 not writable"); the .pt is still produced and is the
+#          authoritative output.
+# Output : run-cl-matching/<OUT_NAME>/PT/<subDir>/<outName>.qlmatch2x2.pt
+#          (the ONLY new artifact under this step's output dir)
 #
 # NOTE: 2x2 DAQ reflow files were built with the old ndlar_flow and don't have
 # t_0/t_cluster_id/t_confidence in the compound dtype yet. apply_pt_to_hdf5.py
@@ -55,25 +53,20 @@ if [[ ! -f "$inFile" ]]; then
     exit 2
 fi
 
-flowDstDir=$outDir/FLOW/$subDir
 ptDstDir=$outDir/PT/$subDir
 ptName=${outName}.qlmatch2x2.pt
 ptFile=$ptDstDir/$ptName
-outFile=$tmpOutDir/${outName}.FLOW.hdf5
 workDir=$tmpOutDir/${outName}_work
-rm -f "$outFile"
 rm -rf "$workDir"
 
 set -o errexit
-mkdir -p "$flowDstDir" "$ptDstDir" "$workDir"
+mkdir -p "$ptDstDir" "$workDir"
 
 # ---- Stage 1: ensure the .pt exists ----
 if [[ -f "$ptFile" ]]; then
     echo "CLMatching .pt found, algorithm output already exists at $ptFile"
-    was_cache_hit=1
 else
     echo "CLMatching .pt not found, running the full algorithm"
-    was_cache_hit=0
     cd "$CLMATCH_REPO"
     run env FILE="$inFile" \
         VERSION="$VERSION" \
@@ -93,18 +86,13 @@ else
     mv "$producedPt" "$ptFile"
 fi
 
-# ---- Stage 2: apply .pt to a fresh copy of the flow HDF5, then publish ----
-if [[ "$was_cache_hit" == "1" ]]; then
-    echo "CLMatching .pt exists, filling the flow files at $flowDstDir"
-else
-    echo "CLMatching .pt completed at $ptFile, filling the flow files at $flowDstDir"
-fi
-cp "$inFile" "$outFile"
+# ---- Stage 2: apply .pt into the INPUT flow file, in place (if writable) ----
+echo "CLMatching .pt at $ptFile, filling the flow file in place at $inFile"
 
 applier_summary="$workDir/qlmatch2x2_applier_summary.json"
 run "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/apply_pt_to_hdf5.py" \
     --pt "$ptFile" \
-    --hdf5 "$outFile" \
+    --hdf5 "$inFile" \
     --summary-json "$applier_summary"
 
 "$PY" - "$applier_summary" "$ptFile" <<'PY'
@@ -128,8 +116,6 @@ if skipped:
     else:
         print(f"  skipping the fill-in stage. .pt file completed at {ptp}")
 PY
-
-mv "$outFile" "$flowDstDir/"
 
 mkdir -p "$logDir"
 if compgen -G "$workDir/logs/worker*.log" > /dev/null; then

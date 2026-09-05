@@ -74,7 +74,21 @@ def apply_one(pt_path: Path, hdf5_path: Path, *, verbose: bool = True) -> dict:
                    "prewrite_nondefault": {}, "size_mismatch": None},
     }
 
-    with h5py.File(hdf5_path, "r+") as h:
+    # In-place edit: if the flow file isn't writable (e.g. a shared read-only
+    # 2x2 reflow on cfs), don't hard-error -- the .pt is still the source of
+    # truth. Record the reason per field so the wrapper reports it cleanly.
+    try:
+        h = h5py.File(hdf5_path, "r+")
+    except (PermissionError, OSError) as exc:
+        reason = f"HDF5 not writable ({type(exc).__name__}: {exc})"
+        if verbose:
+            print(f"  {hdf5_path}: {reason}; skipping in-place fill", flush=True)
+        for section in ("prompt", "final"):
+            for f in FIELDS:
+                info[section]["skipped_fields"][f] = reason
+        return info
+
+    with h:
         for key, dset_path in (("calib_prompt_hits", PROMPT_DSET),
                                 ("calib_final_hits", FINAL_DSET)):
             info_key = "prompt" if key == "calib_prompt_hits" else "final"

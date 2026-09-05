@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 #
-# ND-LAr charge-light matching (simulation) -- v1.0 pipeline, BATCH .PT-FIRST.
+# ND-LAr charge-light matching (simulation) -- v1.0 pipeline, BATCH .PT-FIRST,
+# IN-PLACE FLOW EDIT.
 #
 # Processes MULTIPLE indices on ONE node in a single pipeline invocation.
 # Per index:
 #   * If <outDir>/PT/<subDir>/<outName>.qlmatchND_v1.pt already exists,
 #     the pipeline is skipped for that index -- only the fill step runs.
-#   * Otherwise the input flow file is copied to tmp and included in the
-#     pipeline's --files list, then the .pt is built afterwards.
+#   * Otherwise the input flow file is added to the pipeline's --files list,
+#     then the .pt is built afterwards from the NPZ shards.
 #
 # Every index ALWAYS ends with a .pt on disk (either pre-existing or newly
-# built) AND an HDF5 in outDir/FLOW/<subDir>/ with fields filled from the .pt.
+# built) AND its INPUT flow file modified in place to have the t_0 /
+# t_cluster_id / t_confidence fields filled from that .pt. No FLOW/ subdir is
+# created under this step's output dir.
 #
 # Usage:
 #   ND_PRODUCTION_IN_NAME=... ND_PRODUCTION_OUT_NAME=... \
@@ -60,10 +63,8 @@ mkdir -p "$BATCH_WORKDIR" "$DUMP_DIR"
 set -o errexit
 
 # ---- Stage 1: enumerate indices; decide which need pipeline (missing PT) ----
-declare -A IDX_IN     # index -> upstream flow path
-declare -A IDX_TMP    # index -> tmp copy path (only for pipeline-needed ones)
+declare -A IDX_IN     # index -> upstream flow path (in-place edit target)
 declare -A IDX_PT     # index -> canonical PT path
-declare -A IDX_FLOW_D # index -> canonical FLOW dir
 declare -A IDX_ONAME  # index -> "<OUT_NAME>.<NNNNNNN>"
 
 INDICES_TO_RUN=()
@@ -74,23 +75,18 @@ for idx in "${INDICES[@]}"; do
     inName=$ND_PRODUCTION_IN_NAME.$gidx
     inFile=$(realpath "$inDir/FLOW/$sdir/${inName}.FLOW.hdf5")
     onm=$ND_PRODUCTION_OUT_NAME.$gidx
-    flow_d="$ND_PRODUCTION_OUTDIR_BASE/$stepname/$ND_PRODUCTION_OUT_NAME/FLOW/$sdir"
     pt_d="$ND_PRODUCTION_OUTDIR_BASE/$stepname/$ND_PRODUCTION_OUT_NAME/PT/$sdir"
     pt_f="$pt_d/${onm}.qlmatchND_v1.pt"
-    mkdir -p "$flow_d" "$pt_d"
+    mkdir -p "$pt_d"
 
     IDX_IN[$idx]=$inFile
     IDX_PT[$idx]=$pt_f
-    IDX_FLOW_D[$idx]=$flow_d
     IDX_ONAME[$idx]=$onm
 
     if [[ -f "$pt_f" ]]; then
         echo "  idx=$idx: CLMatching .pt found, algorithm output already exists at $pt_f"
     else
-        tmp="$BATCH_WORKDIR/${onm}.FLOW.hdf5"
-        cp "$inFile" "$tmp"
-        IDX_TMP[$idx]=$tmp
-        FILES_ARGS+=("$tmp")
+        FILES_ARGS+=("$inFile")
         INDICES_TO_RUN+=("$idx")
         echo "  idx=$idx: CLMatching .pt not found, running the full algorithm"
     fi
@@ -98,6 +94,8 @@ done
 echo "batch: ${#INDICES_TO_RUN[@]} indices need pipeline run; ${#INDICES[@]} total."
 
 # ---- Stage 2: pipeline for the queued indices (if any) ----
+# Pipeline reads input HDF5s read-only and writes NPZ shards to $DUMP_DIR;
+# the flow files themselves are never mutated by the pipeline.
 if [[ ${#FILES_ARGS[@]} -gt 0 ]]; then
     V1_ARGS=(--backbone stack2 --merge-p2 --sigma-mode poisson --max-clip-ticks 4
              --police locked --merge-vertex --skip-baseline --phase3 joint
@@ -134,39 +132,27 @@ if [[ ${#FILES_ARGS[@]} -gt 0 ]]; then
 
     # Aggregate per source file into per-index .pt at the canonical PT paths.
     for idx in "${INDICES_TO_RUN[@]}"; do
-        tmp="${IDX_TMP[$idx]}"
+        in_f="${IDX_IN[$idx]}"
         pt_f="${IDX_PT[$idx]}"
         run "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/aggregate_v1_to_pt.py" \
             --dump-dir "$DUMP_DIR" \
-            --src-file "$tmp" \
+            --src-file "$in_f" \
             --out "$pt_f" \
             --summary-json "$BATCH_WORKDIR/idx${idx}_aggregator_summary.json"
         [[ -f "$pt_f" ]] || { echo "ERROR idx=$idx: aggregator did not produce $pt_f" >&2; exit 4; }
     done
 fi
 
-# ---- Stage 3: apply .pt to a fresh HDF5 copy per index, move to canonical ----
-MOVED=0
+# ---- Stage 3: apply .pt into each INPUT flow file in place ----
+FILLED=0
 for idx in "${INDICES[@]}"; do
     onm="${IDX_ONAME[$idx]}"
     pt_f="${IDX_PT[$idx]}"
-    flow_d="${IDX_FLOW_D[$idx]}"
-    fill_src="${IDX_TMP[$idx]:-}"
-    was_hit=0
-    if [[ -z "$fill_src" ]]; then
-        # cache-hit index: we didn't cp earlier. Copy input now for fill.
-        fill_src="$BATCH_WORKDIR/${onm}.FLOW.hdf5"
-        cp "${IDX_IN[$idx]}" "$fill_src"
-        was_hit=1
-    fi
-    if [[ "$was_hit" == "1" ]]; then
-        echo "  idx=$idx: CLMatching .pt exists, filling the flow files at $flow_d"
-    else
-        echo "  idx=$idx: CLMatching .pt completed at $pt_f, filling the flow files at $flow_d"
-    fi
+    in_f="${IDX_IN[$idx]}"
+    echo "  idx=$idx: CLMatching .pt at $pt_f, filling the flow file in place at $in_f"
     applier_summary="$BATCH_WORKDIR/idx${idx}_applier_summary.json"
     "$PY" "$ND_PRODUCTION_DIR/run-cl-matching/apply_pt_to_hdf5.py" \
-        --pt "$pt_f" --hdf5 "$fill_src" \
+        --pt "$pt_f" --hdf5 "$in_f" \
         --summary-json "$applier_summary"
     "$PY" - "$applier_summary" "$pt_f" "$idx" <<'PY'
 import json, sys
@@ -189,10 +175,9 @@ if skipped:
     else:
         print(f"    skipping the fill-in stage. .pt file completed at {ptp}")
 PY
-    mv "$fill_src" "$flow_d/${onm}.FLOW.hdf5"
-    MOVED=$((MOVED + 1))
+    FILLED=$((FILLED + 1))
 done
-echo "batch: moved $MOVED / ${#INDICES[@]} results into canonical outDirs."
+echo "batch: filled $FILLED / ${#INDICES[@]} input flow files in place."
 
 if [[ -n "${logDir:-}" ]]; then
     mkdir -p "$logDir/${outName}_batch_logs"
@@ -200,4 +185,4 @@ if [[ -n "${logDir:-}" ]]; then
     cp "$BATCH_WORKDIR"/idx*_summary.json "$logDir/" 2>/dev/null || true
 fi
 rm -rf "$BATCH_WORKDIR"
-[[ "$MOVED" -eq "${#INDICES[@]}" ]] || exit 3
+[[ "$FILLED" -eq "${#INDICES[@]}" ]] || exit 3
