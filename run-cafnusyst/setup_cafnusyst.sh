@@ -9,8 +9,8 @@ echo "# . /cvmfs/dune.opensciencegrid.org/spack/v1.1.1/setup-env.sh"
 #spack load /wrkusgq        # gcc
 #spack load /64q3lof        # cmake
 
-echo "# . subspack_base_v1.1.1/setup-env.sh"
-. /home/workspace/subspack_base_v1.1.1/setup-env.sh
+echo "# . subspack_env/setup-env.sh"
+. /home/workspace/subspack_env/setup-env.sh
 
 echo "# spack env activate build_genie_v03_04_02"
 spack env activate build_genie_v03_04_02
@@ -22,10 +22,11 @@ spack load pythia6
 export PYTHIA6=$(spack location -i pythia6)/lib
 spack load eigen
 spack load yaml-cpp
-spack load duneanaobj@03.15.00
+spack load duneanaobj
 spack load py-srproxy
 export CPLUS_INCLUDE_PATH="$(spack location -i py-srproxy)/include:$CPLUS_INCLUDE_PATH"
 
+export CAFNUSYST_WORKSPACE=/home/workspace
 echo "# source ${CAFNUSYST_WORKSPACE}/systematicstools-build/Linux/bin/setup.systematicstools.sh"
 source ${CAFNUSYST_WORKSPACE}/systematicstools-install/bin/setup.systematicstools.sh
 

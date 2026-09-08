@@ -19,7 +19,13 @@ echo "# Extracting Spack environment from CVMFS..."
 # is not a stable location for production use. This needs to be replaced
 # with a properly versioned/published cafnusyst build (e.g. on CVMFS) before
 # this jobscript is used for real production running.
-TAR_PATH=${ND_PRODUCTION_CAFNUSYST_TARBALL:-/cvmfs/fifeuser2.opensciencegrid.org/sw/dune/a2116fdebdb748ef9329dde4e51c46ae4a89f275/my_grid_env.tar.gz}
+TAR_PATH=${ND_PRODUCTION_CAFNUSYST_TARBALL:-/cvmfs/fifeuser3.opensciencegrid.org/sw/dune/229a4b6b331c1f923d4a56478c5760c51c3e2c02/my_grid_env.tar.gz}
 tar -xzf "$TAR_PATH"
+
+echo "# Cloning nusyst_data"
+git clone https://github.com/NuSystematics/nusyst_data.git nusyst_data-src
+cd nusyst_data-src
+scripts/download_data.sh
+cd ..
 
 cd ../..

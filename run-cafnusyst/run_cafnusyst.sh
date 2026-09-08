@@ -27,7 +27,9 @@ fi
 inDir=${ND_PRODUCTION_OUTDIR_BASE}/${ND_PRODUCTION_IN_STAGE}/${ND_PRODUCTION_IN_NAME}
 inName=$ND_PRODUCTION_IN_NAME.$globalIdx
 inputCafFile=${inDir}/CAF/${subDir}/${inName}.CAF.root
-outFile=${tmpOutDir}/${outName}.${ND_PRODUCTION_OUTPUT_SUFFIX}.CAF.root
+
+outFile=${tmpOutDir}/${outName} # cafnusyst adds the .root itself
+rm -f $outFile
 echo "outFile is $outFile"
 
 # UpdateReweight takes a text file listing its input file(s), not the CAF
@@ -35,16 +37,15 @@ echo "outFile is $outFile"
 inputList=$(mktemp)
 echo "$inputCafFile" > "$inputList"
 
-run UpdateReweight -c "$configFile" -i "$inputList" -o "$outFile"
+run UpdateReweight -c "$configFile" -i "$inputList" -o "$outFile" --make_nested
 
 rm -f "$inputList"
 
-if [[ ! -f "$outFile" ]]; then
-    echo "FATAL: UpdateReweight did not produce the expected output file $outFile" >&2
-    exit 1
-fi
-
-mkdir -p $outDir/NUSYST/$subDir
-mv "$outFile" $outDir/NUSYST/$subDir
+cafOutDir=$outDir/CAF/$subDir
+flatOutDir=$outDir/CAF.flat/$subDir
+mkdir -p $cafOutDir $flatOutDir
+mv "$outFile".cafnusyst.nested.root "$cafOutDir"
+mv "$outFile".cafnusyst.flat.root "$flatOutDir"
 
 echo "run_cafnusyst.sh finished: $outFile"
+
