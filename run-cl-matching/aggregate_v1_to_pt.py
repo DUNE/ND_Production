@@ -26,8 +26,8 @@ Schema of the .pt (torch.save of a dict):
     "n_prompt_assigned":        int,   # count of prompt hits with t_0 != UNASSIGNED
     "n_final_assigned":         int,
     "n_events":                 int,   # number of shards aggregated
-    "t0_units":                 "ns",  # units of the t_0 field (nanoseconds)
-    "ticks_per_ns":             16,    # LArPix clock: 1 tick = 16 ns
+    "t0_units":                 "ns",  # units of the t_0 field (nanoseconds;
+                                       # applier refuses any other value)
     "cluster_id_overflow":      int,   # count of labels outside int16 range
     "unassigned_sentinel":      -10000,# uniform sentinel across all three fields
 
@@ -96,21 +96,41 @@ def _ticks_to_ns_f4(arr_ticks: np.ndarray) -> np.ndarray:
 
 
 def _clip_int_to_i2(arr: np.ndarray) -> tuple[np.ndarray, int]:
+    """Cast per-hit cluster labels to int16 (the HDF5 target dtype).
+
+    Labels are per-event cluster indices (max ~hundreds in practice), so this
+    should never overflow int16 in a healthy pipeline run. If it does, that
+    signals a real bug (e.g. globally-numbered labels leaking in) rather than
+    valid data -- emit a stderr WARN so it surfaces loudly instead of being
+    silently masked by the clip.
+    """
     lo, hi = np.iinfo(np.int16).min, np.iinfo(np.int16).max
     n_over = int(((arr > hi) | (arr < lo)).sum())
+    if n_over > 0:
+        print(f"WARN: _clip_int_to_i2: {n_over} cluster label(s) outside int16 "
+              f"range [{lo}, {hi}] were clipped -- labels are per-event and "
+              f"should never overflow; likely a pipeline bug.", file=sys.stderr)
     return np.clip(arr, lo, hi).astype(np.int16), n_over
 
 
 def _calib_final_to_prompt_indices(h: h5py.File) -> np.ndarray:
+    """Return an int64 array of length n_final mapping final -> prompt row index.
+
+    Reads the [prompt_id, final_id] pair dataset and scatters by final_id, so
+    the mapping is correct regardless of row order in the ref dataset. Finals
+    with no resolvable prompt land at -1; downstream code filters those out.
+    """
     final = h[FINAL_DSET]
     n_final = int(final.shape[0])
-    if FINAL_TO_PROMPT_REF in h and int(h[FINAL_TO_PROMPT_REF].shape[0]) == n_final:
-        return np.asarray(h[FINAL_TO_PROMPT_REF][:, 0], dtype=np.int64)
-    if "id" in final.dtype.names:
-        return np.asarray(final["id"], dtype=np.int64)
-    raise RuntimeError(
-        f"cannot derive final->prompt mapping: neither {FINAL_TO_PROMPT_REF} nor 'id'."
-    )
+    if FINAL_TO_PROMPT_REF not in h:
+        raise RuntimeError(
+            f"cannot derive final->prompt mapping: {FINAL_TO_PROMPT_REF} missing."
+        )
+    ref = np.asarray(h[FINAL_TO_PROMPT_REF][:], dtype=np.int64)
+    assert ref.shape[0] == n_final, (ref.shape[0], n_final)
+    fp = np.full(n_final, -1, dtype=np.int64)
+    fp[ref[:, 1]] = ref[:, 0]
+    return fp
 
 
 def _gather_shards(shard_dir: Path) -> list[Path]:
@@ -151,7 +171,7 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
     prompt_lab_i = np.full(n_prompt, CLUSTER_SENTINEL_I2, dtype=np.int64)
     prompt_conf_f = np.full(n_prompt, np.nan, dtype=np.float32)
 
-    n_events, n_assigned = 0, 0
+    n_events = 0
     for sh in shards:
         refs, ts, lb, cf = sh["hit_refs"], sh["ts_final"], sh["labels"], sh["hit_conf93"]
         if refs.size != ts.size or refs.size != lb.size:
@@ -161,10 +181,9 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
         good = valid & np.isfinite(ts) & (ts >= 0)
         prompt_t0_f[refs[good]] = ts[good]
         prompt_lab_i[refs[valid]] = lb[valid]
-        if cf is not None and cf.size == refs.size:
+        if cf is not None:
             prompt_conf_f[refs[valid]] = cf[valid]
         n_events += 1
-        n_assigned += int(good.sum())
 
     p_t0_ns = _ticks_to_ns_f4(prompt_t0_f)
     p_cl_i2, cl_over = _clip_int_to_i2(prompt_lab_i)
@@ -193,7 +212,6 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
         "n_final_assigned": n_f_assigned,
         "n_events": n_events,
         "t0_units": "ns",
-        "ticks_per_ns": NS_PER_TICK,
         "unassigned_sentinel": UNASSIGNED,
         "cluster_id_overflow": cl_over,
         "calib_prompt_hits": {
@@ -257,10 +275,6 @@ def main(argv: list[str] | None = None) -> int:
         print("ERROR: pass one of --out (single source) or --out-dir (per-source).",
               file=sys.stderr)
         return 2
-    if args.out is not None and args.src_file is None:
-        # Enforce that --out is used only when the destination file is unambiguous.
-        # We accept it if a single source is found downstream.
-        pass
 
     shard_paths = _gather_shards(args.dump_dir)
     if not shard_paths:
