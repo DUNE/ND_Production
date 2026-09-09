@@ -15,6 +15,8 @@ echo "# . subspack_env/setup-env.sh"
 echo "# spack env activate build_genie_v03_04_02"
 spack env activate build_genie_v03_04_02
 
+# Setting up dependencies contained in the spack environment we just activated
+# Only a single version of each package is contained in the subspack environment
 echo "# Loading gcc, genie, genie-xsec, pythia6, eigen, yaml-cpp, duneanaobj, py-srproxy, cmake"
 spack load genie
 spack load genie-xsec
