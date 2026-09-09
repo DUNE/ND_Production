@@ -102,6 +102,20 @@ void overlaySinglesIntoSpillsSorted(std::string inFileName1,
   }
   gRooTracker genie_evts_2_data(genie_evts_2);
 
+  // Seed from the fiducial input's RunId rather than a caller-provided value.
+  // This keeps a run reproducible across productions and makes the seed
+  // independent of any reused rock input.
+  TChain* seed_tree = have_nu_lar ? edep_evts_1 : edep_evts_2;
+  if (seed_tree->GetEntries() == 0) {
+    throw std::runtime_error("Cannot seed spill builder from an empty input tree");
+  }
+  TG4Event* seed_event = NULL;
+  seed_tree->SetBranchAddress("Event", &seed_event);
+  seed_tree->GetEntry(0);
+  const unsigned int randomSeed = static_cast<unsigned int>(seed_event->RunId) + 1;
+  gRandom->SetSeed(randomSeed);
+  std::cout << "Random seed (RunId " << seed_event->RunId << "): " << randomSeed << std::endl;
+
   // Dump some useful information about the running mode.
   if(have_nu_lar && !have_nu_rock){
     std::cout << "nu-rock file POT stated to be zero, spills will be LAr only" << std::endl;

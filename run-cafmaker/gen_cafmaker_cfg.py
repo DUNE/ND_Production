@@ -51,6 +51,7 @@ def main():
     ap.add_argument('--file-id', required=True, type=int)
     ap.add_argument('--hadd-factor', required=False, default=10, type=int)
     ap.add_argument('--extra-lines', required=False, type=str, help="A semi-colon seperated list of arbitrary extra line to be appended to the fhicl.")
+    ap.add_argument('--index-offset', required=False, default=0, type=int)
     ap.add_argument('--reuse-rock', action='store_true', help="Was rock reuse switched on in the spill building step?")
     args = ap.parse_args()
 
@@ -76,6 +77,7 @@ def main():
                 hadd_rock_dir = f'{args.base_dir}/run-hadd/{args.hadd_rock_name}/EDEPSIM'
                 n_hadd_rock_files = sum(len(files) for _, _, files in os.walk(hadd_rock_dir))
                 rock_file_id = args.file_id % n_hadd_rock_files
+                rock_file_id += args.index_offset
             write_ghep_files(outf, args.base_dir, args.ghep_rock_name, args.hadd_factor, rock_file_id,
                              no_final_comma=True)
         outf.write(']\n\n')
