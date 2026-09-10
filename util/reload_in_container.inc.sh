@@ -12,7 +12,11 @@ if [[ "$ND_PRODUCTION_RUNTIME" == "SHIFTER" ]]; then
     # Reload in Shifter
     if [[ "$SHIFTER_IMAGEREQUEST" != "$ND_PRODUCTION_CONTAINER" ]]; then
         setup_cuda
-        shifter --image=$ND_PRODUCTION_CONTAINER --module=cvmfs,gpu -- "$0" "$@"
+        if [[ -n "$SHIFTER_BIND_DIR" ]]; then
+            shifter --image=$ND_PRODUCTION_CONTAINER --module=cvmfs,gpu  --volume=${SHIFTER_BIND_DIR} -- "$0" "$@"
+        else
+            shifter --image=$ND_PRODUCTION_CONTAINER --module=cvmfs,gpu -- "$0" "$@"
+        fi
         exit
     fi
 
