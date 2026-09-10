@@ -35,9 +35,11 @@ mkdir -p $ND_PRODUCTION_PANDORA_INSTALL
 
 # First checkout LArRecoND (Pandora ND reco)
 cd $ND_PRODUCTION_PANDORA_INSTALL
-git clone https://github.com/PandoraPFA/LArRecoND.git
+# git clone https://github.com/PandoraPFA/LArRecoND.git
+git clone https://github.com/GianfrancoIngratta/LArRecoND.git
 cd LArRecoND
-git checkout $ND_PRODUCTION_PANDORA_LAR_RECO_ND_VERSION
+# git checkout $ND_PRODUCTION_PANDORA_LAR_RECO_ND_VERSION
+git checkout feature/2x2_workshop_sept2026_v01_05_00
 
 # Setup Alma9 environment with required external packages (ROOT, Eigen & PyTorch)
 echo "Setting up Alma9 environment"
