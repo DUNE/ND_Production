@@ -188,12 +188,18 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   TChain* ghep_evts_A = new TChain("gtree");
   TChain* edep_evts_A = new TChain("EDepSimEvents");
   TChain* genie_evts_A = new TChain("DetSimPassThru/gRooTracker");
+  std::vector<int> ghepOffsets_A;
+  int total_A = 0;
   if(inFileAPOT > 0.) {
     auto ghepFilesA = getGHEPfiles(prodBaseDir.c_str(), ghepNameA.c_str(), hadd_factor, spillFileId);
     edep_evts_A->Add(inFileNameA.c_str());
     genie_evts_A->Add(inFileNameA.c_str());
     std::for_each(ghepFilesA.begin(), ghepFilesA.end(), [&](std::string const& fname){
       ghep_evts_A->Add(fname.c_str());
+      TFile *ghep_file = TFile::Open(fname.c_str(), "READ");
+      TTree* tree = ghep_file->Get<TTree>("gtree");
+      ghepOffsets_A.push_back(total_A);
+      total_A += tree->GetEntries();
     });
     have_nu_sampleA = true;
     if(spillPOT <= (double)n_int_max) is_n_int_mode = true;
@@ -204,6 +210,8 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   TChain* ghep_evts_B = new TChain("gtree");
   TChain* edep_evts_B = new TChain("EDepSimEvents");
   TChain* genie_evts_B = new TChain("DetSimPassThru/gRooTracker");
+  std::vector<int> ghepOffsets_B;
+  int total_B = 0;
   if(inFileBPOT > 0.) {
     int sampleBFileId = spillFileId;
     if (reuse_sampleB){
@@ -211,13 +219,18 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       int n_hadd_sampleB_files = 0;
       auto pipe = std::unique_ptr<FILE, decltype(&pclose)>{popen(("find " + hadd_sampleB_dir + " -type f | wc -l").c_str(), "r"), pclose};
       fscanf(pipe.get(), "%d", &n_hadd_sampleB_files);
-      int sampleBFileId = spillFileId % n_hadd_sampleB_files;
+      sampleBFileId = spillFileId % n_hadd_sampleB_files;
     }
     auto ghepFilesB = getGHEPfiles(prodBaseDir.c_str(), ghepNameB.c_str(), hadd_factor, sampleBFileId);
     edep_evts_B->Add(inFileNameB.c_str());
     genie_evts_B->Add(inFileNameB.c_str());
     std::for_each(ghepFilesB.begin(), ghepFilesB.end(), [&](std::string const& fname){
       ghep_evts_B->Add(fname.c_str());
+
+      TFile *ghep_file = TFile::Open(fname.c_str(), "READ");
+      TTree* tree = ghep_file->Get<TTree>("gtree");
+      ghepOffsets_B.push_back(total_B);
+      total_B += tree->GetEntries();
     });
     have_nu_sampleB = true;
   }
@@ -356,12 +369,15 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
 
       TTree* in_tree = is_sampleA ? edep_evts_A : edep_evts_B;
       TTree* gn_tree = is_sampleA ? genie_evts_A : genie_evts_B;
-      TTree* ghep_tree = is_sampleA ? ghep_evts_A : ghep_evts_B;
+      TChain* ghep_chain = is_sampleA ? ghep_evts_A : ghep_evts_B;
 
       auto entry = is_sampleA ? evt_it + i : evt_it_B_sequence.at(evt_it + i - Nevts_this_spill_A);
       in_tree->GetEntry(entry);
       gn_tree->GetEntry(entry);
-      ghep_tree->GetEntry(edep_evt->EventId);
+
+      auto ghepOffsets = is_sampleA ? ghepOffsets_A : ghepOffsets_B;
+      auto ghep_entry = ghepOffsets[edep_evt->RunId % static_cast<int>(1E9)] + edep_evt->EventId;
+      ghep_chain->GetEntry(ghep_entry);
 
       gRooTracker& genie_evt = is_sampleA ? genie_evts_A_data : genie_evts_B_data;
 
