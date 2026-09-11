@@ -43,6 +43,7 @@ elif [[ "$ND_PRODUCTION_RUNTIME" == "PODMAN-HPC" ]]; then
 
 elif [[ "$ND_PRODUCTION_RUNTIME" == "NONE" ]]; then
     echo "\$ND_PRODUCTION_RUNTIME is NONE; running in host environment"
+    setup_cuda     # see prelude.inc.sh
     return
 
 else
