@@ -116,9 +116,19 @@ def _clip_int_to_i2(arr: np.ndarray) -> tuple[np.ndarray, int]:
 def _calib_final_to_prompt_indices(h: h5py.File) -> np.ndarray:
     """Return an int64 array of length n_final mapping final -> prompt row index.
 
-    Reads the [prompt_id, final_id] pair dataset and scatters by final_id, so
-    the mapping is correct regardless of row order in the ref dataset. Finals
-    with no resolvable prompt land at -1; downstream code filters those out.
+    Primary path: read the [prompt_id, final_id] pair dataset and scatter by
+    final_id, so the mapping is correct regardless of row order in the ref
+    dataset. Finals with no resolvable prompt land at -1; downstream code
+    filters those out.
+
+    Compatibility fallback: flow files produced BEFORE the ndlar_flow
+    prompt->final reference fix (DUNE/ndlar_flow filter_hits_ref_fix) have a
+    buggy final_id column -- each event's final_ids restart at 0 instead of
+    being globally offset, so the scatter would only cover a fraction of the
+    finals (and mislabel those). Such files are detected by their duplicated
+    final_ids, and the mapping falls back to calib_final_hits' "id" field,
+    which in the filtered-hits case (all existing old files) stores the source
+    prompt row index directly.
     """
     final = h[FINAL_DSET]
     n_final = int(final.shape[0])
@@ -128,6 +138,15 @@ def _calib_final_to_prompt_indices(h: h5py.File) -> np.ndarray:
         )
     ref = np.asarray(h[FINAL_TO_PROMPT_REF][:], dtype=np.int64)
     assert ref.shape[0] == n_final, (ref.shape[0], n_final)
+    n_unique_final_ids = int(np.unique(ref[:, 1]).size)
+    if n_unique_final_ids < n_final and "id" in final.dtype.names:
+        # Old buggy ref (pre filter_hits_ref_fix): duplicated final_ids.
+        # Fall back to the "id" field for compatibility with existing files.
+        print(f"WARN: {FINAL_TO_PROMPT_REF} has only {n_unique_final_ids} "
+              f"unique final_ids for {n_final} finals (flow file predates the "
+              f"ndlar_flow prompt->final ref fix); falling back to "
+              f"calib_final_hits['id'] for the mapping.", file=sys.stderr)
+        return np.asarray(final["id"], dtype=np.int64)
     fp = np.full(n_final, -1, dtype=np.int64)
     fp[ref[:, 1]] = ref[:, 0]
     return fp
