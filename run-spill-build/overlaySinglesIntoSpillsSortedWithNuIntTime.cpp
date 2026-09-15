@@ -94,15 +94,22 @@ double getLBNFProtonTime() {
 // - The time origin is defined as the moment when the parent beam proton crosses z = -360 cm.
 //
 // Therefore, this function computes the neutrino's creation time with respect to that time origin.
+// NOTE: This doesn't work with "light" dk2nu files, where ancestor variable is set to -999999
 long double getNuCreationTime(const bsim::Dk2Nu& dk2nu_event){
-  auto nu = dk2nu_event.ancestor[dk2nu_event.ancestor.size()-1];
+  auto nu = dk2nu_event.ancestor.back();
+  if (nu.startt == -999999) {
+        throw std::runtime_error(
+            "getNuCreationTime: nu start time not set (ancestor startt = -999999) — "
+            "invalid or incomplete dk2nu entry"
+        );
+  } 
   return static_cast<long double>(nu.startt);
 }
 
 // This function returns the neutrino time of flight
 long double getNuTOF(const bsim::Dk2Nu& dk2nu_event, const gRooTracker& genie_event, const genie::flux::GDk2NuFlux& flux){ 
   
-  auto nu_orig = dk2nu_event.ancestor[dk2nu_event.ancestor.size()-1];
+  auto nu_orig = dk2nu_event.ancestor.back();
   auto nu_int = genie_event.EvtVtx;
 
   // Neutrino origin in beam coordinates
