@@ -72,7 +72,7 @@ pip install .
 cd ..
 
 
-git clone -b develop https://github.com/DeepLearnPhysics/flow2supera.git
+git clone -b v5.0.1 https://github.com/DeepLearnPhysics/flow2supera.git
 ## Don't pip install because e.g. config files are expected to live near
 ## __file__
 # cd flow2supera
