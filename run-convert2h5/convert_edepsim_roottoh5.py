@@ -5,6 +5,7 @@ Converts ROOT file created by edep-sim into HDF5 format
 
 from math import sqrt
 import os
+import re
 import numpy as np
 import fire
 import h5py
@@ -48,7 +49,9 @@ genie_stack_dtype = np.dtype([("event_id", "u4"), ("vertex_id", "u8"), ("traj_id
 
 genie_hdr_dtype = np.dtype([("event_id", "u4"), ("vertex_id", "u8"),
                             ("x_vert","f4"), ("y_vert","f4"), ("z_vert","f4"),
-                            ("t_vert","f8"), ("target", "u4"), ("reaction", "i4"),
+                            ("t_vert","f8"), ("target", "u4"),
+                            ("target_pdg", "i4"), ("hit_nucleon_pdg", "i4"),
+                            ("hit_quark_pdg", "i4"), ("reaction", "i4"),
                             ("isCC", "?"), ("isQES", "?"), ("isMEC", "?"),
                             ("isRES", "?"), ("isDIS", "?"), ("isCOH", "?"),
                             ("Enu", "f4"), ("nu_4mom", "f4", (4,)), ("nu_pdg", "i4"),
@@ -220,6 +223,31 @@ def getReactionCode(genie_str):
             continue
 
     return reaction
+
+
+def getInteractionPdgCode(genie_str, field):
+    """Extract a PDG code from a GENIE interaction summary field.
+
+    GENIE interaction summaries use fields such as ``tgt:1000180400``,
+    ``N:2112`` and ``q:-1(s)``. A value of zero denotes a field which is not
+    present for the interaction; unlike ``-1``, it cannot be a valid quark PDG
+    code.
+    """
+    match = re.search(rf"(?:^|;){re.escape(field)}:(-?\d+)", genie_str)
+    return int(match.group(1)) if match else 0
+
+
+def getTargetAtomicNumber(target_pdg):
+    """Return atomic Z for a GENIE nuclear or free-nucleon target."""
+    target_pdg = abs(target_pdg)
+    if target_pdg == 2212:
+        return 1
+    if target_pdg == 2112:
+        return 0
+    if target_pdg > 1000000000:
+        return (target_pdg // 10000) % 1000
+    return 0
+
 
 # Prep HDF5 file for writing
 def initHDF5File(output_file):
@@ -637,7 +665,7 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
                                             genieTree.StdHepP4[p*4 + 3]*gev2mev])
                         lep_pdg = genieTree.StdHepPdg[p]
 
-                    #Get the struck nucleus pdg code
+                    # Preserve a fallback for inputs with an incomplete EvtCode.
                     if genieTree.StdHepStatus[p] == 0 and np.abs(genieTree.StdHepPdg[p]) not in [12, 14, 16]:
                         target_pdg = genieTree.StdHepPdg[p]
 
@@ -649,6 +677,11 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
 
             #Fun fact: EvtCode is a TObjString. Use GetString and Data methods to get Python string
             genie_str = genieTree.EvtCode.GetString().Data()
+            event_code_target_pdg = getInteractionPdgCode(genie_str, "tgt")
+            if event_code_target_pdg:
+                target_pdg = event_code_target_pdg
+            hit_nucleon_pdg = getInteractionPdgCode(genie_str, "N")
+            hit_quark_pdg = getInteractionPdgCode(genie_str, "q")
 
             #Create GENIE header/summary dataset
             genie_hdr = np.empty(1, dtype=genie_hdr_dtype)
@@ -665,7 +698,10 @@ def dump(input_file, output_file, is_cosmic_sim=False, is_mpvmpr=False, keep_all
             genie_hdr["y_vert"] = genieTree.EvtVtx[1]*meter2cm
             genie_hdr["z_vert"] = genieTree.EvtVtx[2]*meter2cm
             genie_hdr["t_vert"] = genieTree.EvtVtx[3]*edep2us
-            genie_hdr["target"] = int((target_pdg % 10000000) / 10000) #Extract Z value from PDG code
+            genie_hdr["target"] = getTargetAtomicNumber(target_pdg)
+            genie_hdr["target_pdg"] = target_pdg
+            genie_hdr["hit_nucleon_pdg"] = hit_nucleon_pdg
+            genie_hdr["hit_quark_pdg"] = hit_quark_pdg
             genie_hdr["Enu"] = nu_4mom[3]
             genie_hdr["nu_4mom"] = nu_4mom
             genie_hdr["nu_pdg"] = nu_pdg

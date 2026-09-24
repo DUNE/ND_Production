@@ -28,7 +28,7 @@ export ND_PRODUCTION_PANDORA_SDK_VERSION=v04-01-00
 export ND_PRODUCTION_PANDORA_MONITORING_VERSION=v04-00-03
 export ND_PRODUCTION_PANDORA_LAR_CONTENT_VERSION=v04_19_02
 export ND_PRODUCTION_PANDORA_LAR_MLDATA_VERSION=v04-19-03
-export ND_PRODUCTION_PANDORA_LAR_RECO_ND_VERSION=v01-04-01
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_VERSION=v01-04-03
 
 # Relative path used by Pandora packages
 export MY_TEST_AREA=${ND_PRODUCTION_PANDORA_INSTALL}
@@ -59,10 +59,10 @@ fi
 export ND_PRODUCTION_PANDORA_INPUT_FORMAT=SPMC
 
 # Set LArRecoND Pandora workflow settings xml files for the reconstruction & outerface (track/shower PID).
-# ND-LAr cheated workflows require the SPMC format since they need the MC truth info
-export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/settings/PandoraSettings_LArRecoND_ThreeD_PartialCheated.xml
-# Nominal 3D reco settings without cheating (for 2x2)
-#export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/settings/PandoraSettings_LArRecoND_ThreeD.xml
+# Default setting is for Nominal 3D reco settings without cheating
+# Running with cheated or partially cheated workflows (which require SPMC format to use MC truth info) requires variable to be defined externally
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML_NAME=${ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML_NAME:-PandoraSettings_LArRecoND_ThreeD.xml}
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/settings/${ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML_NAME}
 # Pandora Outerface
 export ND_PRODUCTION_PANDORA_OUTERFACE_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/settings/PandoraSettings_Outerface_Voxelize.xml
 

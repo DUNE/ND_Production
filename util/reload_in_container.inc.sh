@@ -12,7 +12,11 @@ if [[ "$ND_PRODUCTION_RUNTIME" == "SHIFTER" ]]; then
     # Reload in Shifter
     if [[ "$SHIFTER_IMAGEREQUEST" != "$ND_PRODUCTION_CONTAINER" ]]; then
         setup_cuda
-        shifter --image=$ND_PRODUCTION_CONTAINER --module=cvmfs,gpu -- "$0" "$@"
+        if [[ -n "$SHIFTER_BIND_DIR" ]]; then
+            shifter --image=$ND_PRODUCTION_CONTAINER --module=cvmfs,gpu  --volume=${SHIFTER_BIND_DIR} -- "$0" "$@"
+        else
+            shifter --image=$ND_PRODUCTION_CONTAINER --module=cvmfs,gpu -- "$0" "$@"
+        fi
         exit
     fi
 
@@ -43,6 +47,7 @@ elif [[ "$ND_PRODUCTION_RUNTIME" == "PODMAN-HPC" ]]; then
 
 elif [[ "$ND_PRODUCTION_RUNTIME" == "NONE" ]]; then
     echo "\$ND_PRODUCTION_RUNTIME is NONE; running in host environment"
+    setup_cuda     # see prelude.inc.sh
     return
 
 else
