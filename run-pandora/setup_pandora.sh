@@ -54,7 +54,7 @@ export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArR
 export ND_PRODUCTION_PANDORA_OUTERFACE_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/settings/PandoraSettings_Outerface_Voxelize.xml
 
 # Set LArRecoND run option: AllHitsSliceNu (recommended), AllHitsSliceCR, Full, AllHitsCR, AllHitsNu, CRRemHitsSliceCR, CRRemHitsSliceNu
-export ND_PRODUCTION_PANDORA_LAR_RECO_ND_RUN_OPTION=AllHitsSliceNu
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_RUN_OPTION=${ND_PRODUCTION_PANDORA_LAR_RECO_ND_RUN_OPTION:-AllHitsSliceNu}
 
 # Set LArRecoND view option: both (recommended), 3d, lartpc
 export ND_PRODUCTION_PANDORA_LAR_RECO_ND_VIEW_OPTION=both
