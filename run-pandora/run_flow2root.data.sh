@@ -24,9 +24,6 @@ inFile=${ND_PRODUCTION_FLOW_DIR_BASE}/${relDir}/${inName}
 rm -f "$outFile"
 
 isData=1
-# Switch on whether to use prompt, final or merged hits (defaults to merged)
-# 0 = prompt, 1 = final, 2 = merged
-isFinal=${ND_PRODUCTION_USE_FINAL_HITS:-2}
 
 # Select legacy mode (0 = no legacy, 1 = samples before MiniRun6, 2 = samples from MiniRun6 but no usec time)
 legacyMode=0

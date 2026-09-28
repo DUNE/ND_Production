@@ -28,9 +28,6 @@ inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/${ND_PRODUCTION_IN_NAME}/FLOW
 isData=1
 [ "${ND_PRODUCTION_PANDORA_INPUT_FORMAT}" ==  "SPMC" ] && isData=0
 
-# Switch on whether to use prompt, final or merged hits (defaults to merged)
-# 0 = prompt, 1 = final, 2 = merged
-isFinal=${ND_PRODUCTION_USE_FINAL_HITS:-2}
 
 # Select legacy mode (0 = no legacy, 1 = samples before MiniRun6, 2 = samples from MiniRun6 but no usec time)
 legacyMode=0
