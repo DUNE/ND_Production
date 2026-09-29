@@ -43,7 +43,7 @@ fi
 if [[ -n "$ND_PRODUCTION_MINERVA_FILES" ]]; then
     # The runs DB (used by match_minerva.cpp) uses the original binary filename
     # whereas ND_PRODUCTION_CHARGE_FILE is the packet file
-    binaryChargeFile=$(basename $ND_PRODUCTION_CHARGE_FILE | sed 's/^packet-/binary-/')
+    binaryChargeFile=$(basename ${ND_PRODUCTION_CHARGE_FILES[0]} | sed 's/^packet-/binary-/')
     run root -l -q "match_minerva.cpp+(\"$binaryChargeFile\", \"$tmpDir\")"
     minervaPath=$(ls $tmpDir/minerva_*.root)
     if [[ ! -e "$minervaPath" ]]; then
