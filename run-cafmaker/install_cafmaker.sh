@@ -21,11 +21,14 @@ cd install
 git clone -b 130-create-a-branch-filler-for-sandreco-experimental https://github.com/DUNE/ND_CAFMaker.git
 cd ND_CAFMaker
 
+# I need to comment this beacuse I'm running ND_CAFMaker from branch 130, which doesn't have the CMake installation
 #./build_deps.sh
-source ndcaf_setup_deps.sh prof
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${PWD}/install
-cmake --build build --target install
-cd ../..
+# source ndcaf_setup_deps.sh prof
+# cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${PWD}/install
+# cmake --build build --target install
+# cd ../..
+source ndcaf_setup.sh
+make -j8
 
 # Pre-compile
 export ROOT_INCLUDE_PATH=$SQLITE_INC:$ROOT_INCLUDE_PATH

@@ -5,7 +5,8 @@ export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:l
 source ../util/reload_in_container.inc.sh
 
 set +o errexit
-source install/ND_CAFMaker/install/bin/ndcaf_setup.sh prof
+# source install/ND_CAFMaker/install/bin/ndcaf_setup.sh prof
+source install/ND_CAFMaker/ndcaf_setup.sh prof
 set -o errexit
 
 # Must go after ndcaf_setup.sh
