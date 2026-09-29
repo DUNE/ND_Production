@@ -4,34 +4,37 @@ export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:l
 
 source ../util/reload_in_container.inc.sh
 
-cd install/ND_CAFMaker
 set +o errexit
-source ndcaf_setup.sh
+source install/ND_CAFMaker/install/bin/ndcaf_setup.sh prof
 set -o errexit
-cd ../..
 
 # Must go after ndcaf_setup.sh
-source ../util/init.data.inc.sh
+source ../util/init.inc.sh
 # Prevent excessive memory use
 export OMP_NUM_THREADS=1
-outName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5)
+
 outFile=${tmpOutDir}/${outName}.CAF.root
 flatOutFile=${tmpOutDir}/${outName}.CAF.flat.root
+cfgFile=$(mktemp --suffix .cfg)
 
 tmpDir=$(mktemp -d)
-
-cfgFile="$tmpDir/cafmaker.cfg"
-
-spinePath=${ND_PRODUCTION_SPINE_DIR_BASE}/${relDir}/$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).MLRECO_SPINE.hdf5
-pandoraPath=${ND_PRODUCTION_PANDORA_DIR_BASE}/${relDir}/LAR_RECO_ND/$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).LAR_RECO_ND.root
 
 # Compulsory arguments regardless of use case.
 args_gen_cafmaker_cfg=( \
     --caf-path "$outFile" \
-    --cfg-file "$cfgFile" \
-    --spine-path "$spinePath" \
-    --pandora-path "$pandoraPath" \
+    --cfg-file "$cfgFile"
     )
+
+
+if [[ -n "$ND_PRODUCTION_SPINE_NAME" ]]; then
+    spinePath=${ND_PRODUCTION_OUTDIR_BASE}/run-mlreco/${ND_PRODUCTION_SPINE_NAME}/MLRECO_SPINE/${subDir}/${ND_PRODUCTION_SPINE_NAME}.${fileId}.MLRECO_SPINE.hdf5
+    args_gen_cafmaker_cfg+=( --spine-path "$spinePath" )
+fi
+
+if [[ -n "$ND_PRODUCTION_PANDORA_NAME" ]]; then
+    pandoraPath=${ND_PRODUCTION_OUTDIR_BASE}/run-pandora/${ND_PRODUCTION_PANDORA_NAME}/LAR_RECO_ND/${subDir}/${ND_PRODUCTION_PANDORA_NAME}.${fileId}.LAR_RECO_ND.root
+    args_gen_cafmaker_cfg+=( --pandora-path "$pandoraPath" )
+fi
 
 if [[ "$ND_PRODUCTION_CAFMAKER_DISABLE_IFBEAM" == "1" ]]; then
     args_gen_cafmaker_cfg+=( --disable-ifbeam )
@@ -67,4 +70,5 @@ mkdir -p "$cafOutDir" "$flatCafOutDir"
 mv "$outFile" "$cafOutDir"
 mv "$flatOutFile" "$flatCafOutDir"
 
+rm "$cfgFile"
 rm -rf "$tmpDir"
