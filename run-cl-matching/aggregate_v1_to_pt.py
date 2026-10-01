@@ -34,7 +34,7 @@ Schema of the .pt (torch.save of a dict):
     # Per-prompt-hit arrays, size = n_calib_prompt_hits, matching the ndlar_flow
     # HDF5 field dtypes. Uniform sentinel -10000 for unassigned / unavailable
     # (unphysical for all three fields).
-    #   t_0            float32 nanoseconds (v1's ts_filtered ticks * 16.0);
+    #   t_0            float32 nanoseconds (v1's ts_final ticks * 16.0);
     #                  -10000.0 = unassigned.
     #   t_cluster_id   int16    -10000 = unassigned.
     #   t_confidence   float32  -10000.0 = unavailable.
@@ -83,7 +83,7 @@ FILTERED_TO_PROMPT_REF = "charge/calib_prompt_hits/ref/charge/calib_filtered_hit
 
 
 def _ticks_to_ns_f4(arr_ticks: np.ndarray) -> np.ndarray:
-    """Convert per-hit ts_filtered (ticks) into per-hit t_0 (ns, float32).
+    """Convert per-hit ts_final (ticks) into per-hit t_0 (ns, float32).
 
     Non-finite (NaN/inf) and unassigned entries land at the -10000 sentinel
     (unphysical for real drift ns). We do NOT clip -- t_0 is now stored as
@@ -162,7 +162,7 @@ def _load_shard(npz_path: Path) -> dict[str, Any] | None:
     except Exception as exc:
         print(f"  SKIP unreadable shard {npz_path.name}: {exc}", file=sys.stderr)
         return None
-    for req in ("hit_refs", "ts_filtered", "labels"):
+    for req in ("hit_refs", "ts_final", "labels"):
         if req not in d.files:
             print(f"  SKIP shard {npz_path.name}: missing field '{req}'", file=sys.stderr)
             return None
@@ -170,7 +170,7 @@ def _load_shard(npz_path: Path) -> dict[str, Any] | None:
         "path": npz_path,
         "src_file": str(d.get("src_file", "")) if "src_file" in d.files else "",
         "hit_refs": np.asarray(d["hit_refs"], dtype=np.int64),
-        "ts_filtered": np.asarray(d["ts_filtered"], dtype=np.float64),
+        "ts_final": np.asarray(d["ts_final"], dtype=np.float64),
         "labels": np.asarray(d["labels"], dtype=np.int64),
         "hit_conf93": (np.asarray(d["hit_conf93"], dtype=np.float32)
                        if "hit_conf93" in d.files else None),
@@ -192,7 +192,7 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
 
     n_events = 0
     for sh in shards:
-        refs, ts, lb, cf = sh["hit_refs"], sh["ts_filtered"], sh["labels"], sh["hit_conf93"]
+        refs, ts, lb, cf = sh["hit_refs"], sh["ts_final"], sh["labels"], sh["hit_conf93"]
         if refs.size != ts.size or refs.size != lb.size:
             print(f"  SKIP {sh['path'].name}: shape mismatch", file=sys.stderr)
             continue
