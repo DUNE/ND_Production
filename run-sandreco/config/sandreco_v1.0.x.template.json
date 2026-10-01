@@ -25,10 +25,59 @@
   },
   "run": [
     {
-      "sand::fake_reco": {},
+      "sand::common::truth_filler": {},
       "reqs": {},
       "prods": {
-        "output_caf": "produced_caf"
+        "out_truth_branch": "produced_truth"
+      }
+    },
+    {
+      "sand::common::fast_reco": {},
+      "reqs": {
+        "in_truth": "produced_truth"
+      },
+      "prods":{
+        "out_common": "produced_common",
+        "out_nd": "produced_nd"
+      }
+    },
+    {
+      "sand::test::fast_reco_test": {},
+      "reqs": {
+        "in_truth": "produced_truth",
+        "in_common": "produced_common",
+        "in_nd": "produced_nd"
+      },
+      "prods": {}
+    },
+    {
+      "sand::common::gauss_smearing": {
+        "energy_resolution": 0.057,
+        "momentum_resolution": 0.05,
+        "x_resolution": 200e-3,
+        "y_resolution": 200e-3,
+        "z_resolution": 200e-3
+      },
+      "reqs": {
+        "in_common": "produced_common"
+      },
+      "prods": {
+        "out_common": "produced_common_smeared"
+      }
+    },
+    {
+      "sand::common::gluckstern_smearing": {
+        "intrinsic_pos_res_t" : 200e-3,
+        "intrinsic_pos_res_l" : 2,
+        "hit_energy_thr" : 250e-6,
+        "b_field_magnitude" : 0.6
+      },
+      "reqs": {
+        "in_nd": "produced_nd",
+        "in_truth": "produced_truth"
+      },
+      "prods": {
+        "out_nd": "produced_nd_smeared"
       }
     },
     {
@@ -36,9 +85,7 @@
         "uri": "",
         "tree": "cafTree"
       },
-      "write": [
-        "produced_caf"
-      ]
+      "write": ["produced_truth", "produced_common", "produced_nd"]
     }
   ]
 }
