@@ -48,7 +48,7 @@ config_sandreco['globals']['sand::root_tgeomanager']['geometry'] = f"{relative_o
 config_sandreco['contexts']['keys'] = nr_input_spills
 config_sandreco['contexts']['locals']['sand::edep_reader']['uri'] = f"{relative_out_dir_path}/run-convert2edepsim-spill-format/{nd_prod_in_name}/OVERLAY/{sub_dir}/{in_file_name}.OVERLAY.root"
 config_sandreco['contexts']['locals']['sand::genie_reader']['uri'] = f"{relative_out_dir_path}/run-convert2edepsim-spill-format/{nd_prod_in_name}/OVERLAY/{sub_dir}/{in_file_name}.OVERLAY.root"
-config_sandreco['run'][1]['sand::caf::caf_streamer']['uri'] = f"{relative_out_dir_path}/tmp/run-sandreco/{nd_prod_out_name}/{out_file_name}.SANDRECO.root"
+config_sandreco['run'][5]['sand::caf::caf_streamer']['uri'] = f"{relative_out_dir_path}/tmp/run-sandreco/{nd_prod_out_name}/{out_file_name}.SANDRECO.root"
 
 
 with open(f"{cfg_json_file}", mode="w", encoding="utf-8") as write_file:
