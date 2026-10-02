@@ -24,13 +24,12 @@ source $ND_PRODUCTION_DIR/util/init.inc.sh
 inName=${ND_PRODUCTION_IN_NAME}.${globalIdx}
 inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/${ND_PRODUCTION_IN_NAME}/FLOW/${subDir}/${inName}.FLOW.hdf5
 
-# Prompt or filtered hits? Merged or not?
-hitsConfig=${ND_PRODUCTION_PANDORA_HITS_CONFIG:-0}
-
 # Is this data or MC?
 isData=1
 [ "${ND_PRODUCTION_PANDORA_INPUT_FORMAT}" ==  "SPMC" ] && isData=0
 
+# Prompt or filtered hits? Merged or not?
+hitsConfig=${ND_PRODUCTION_PANDORA_HITS_CONFIG:-0}
 
 # Select legacy mode (0 = no legacy, 1 = samples before MiniRun6, 2 = samples from MiniRun6 but no usec time)
 legacyMode=0

@@ -21,12 +21,12 @@ outFile=${tmpOutDir}/${outName}
 inName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).FLOW.hdf5
 inFile=${ND_PRODUCTION_FLOW_DIR_BASE}/${relDir}/${inName}
 
-# Prompt or filtered hits? Merged or not?
-hitsConfig=${ND_PRODUCTION_PANDORA_HITS_CONFIG:-0}
-
 rm -f "$outFile"
 
 isData=1
+
+# Prompt or filtered hits? Merged or not?
+hitsConfig=${ND_PRODUCTION_PANDORA_HITS_CONFIG:-0}
 
 # Select legacy mode (0 = no legacy, 1 = samples before MiniRun6, 2 = samples from MiniRun6 but no usec time)
 legacyMode=0
