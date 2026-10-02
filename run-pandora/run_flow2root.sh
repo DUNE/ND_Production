@@ -24,6 +24,9 @@ source $ND_PRODUCTION_DIR/util/init.inc.sh
 inName=${ND_PRODUCTION_IN_NAME}.${globalIdx}
 inFile=${ND_PRODUCTION_OUTDIR_BASE}/run-ndlar-flow/${ND_PRODUCTION_IN_NAME}/FLOW/${subDir}/${inName}.FLOW.hdf5
 
+# Prompt or filtered hits? Merged or not?
+hitsConfig=${ND_PRODUCTION_PANDORA_HITS_CONFIG:-0}
+
 # Is this data or MC?
 isData=1
 [ "${ND_PRODUCTION_PANDORA_INPUT_FORMAT}" ==  "SPMC" ] && isData=0
@@ -34,7 +37,7 @@ legacyMode=0
 
 # Convert input HDF5 file to ROOT
 source $ND_PRODUCTION_PANDORA_INSTALL/pandora.venv/bin/activate
-python3 $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile $isData $isFinal $legacyMode ${tmpOutDir}/${inName}.tmp.root
+python3 $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile $isData $hitsConfig $legacyMode ${tmpOutDir}/${inName}.tmp.root
 run root -l -q $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/rootToRootConversion.C+\(true,\"${tmpOutDir}/${inName}.tmp.root\",\"${tmpOutDir}/${inName}.FLOW.hdf5_hits.root\"\)
 deactivate
 

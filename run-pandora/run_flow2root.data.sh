@@ -21,6 +21,9 @@ outFile=${tmpOutDir}/${outName}
 inName=$(basename "$ND_PRODUCTION_CHARGE_FILE" .h5).FLOW.hdf5
 inFile=${ND_PRODUCTION_FLOW_DIR_BASE}/${relDir}/${inName}
 
+# Prompt or filtered hits? Merged or not?
+hitsConfig=${ND_PRODUCTION_PANDORA_HITS_CONFIG:-0}
+
 rm -f "$outFile"
 
 isData=1
@@ -29,7 +32,7 @@ isData=1
 legacyMode=0
 
 source $ND_PRODUCTION_PANDORA_INSTALL/pandora.venv/bin/activate
-run python3 $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile $isData $isFinal $legacyMode ${outFile}.firstStep.root
+run python3 $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/h5_to_root_ndlarflow.py $inFile $isData $hitsConfig $legacyMode ${outFile}.firstStep.root
 run root -l -q $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/rootToRootConversion.C+\(false,\"${outFile}.firstStep.root\",\"${outFile}\"\)
 rm ${outFile}.firstStep.root
 deactivate
