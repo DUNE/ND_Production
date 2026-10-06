@@ -58,6 +58,22 @@ std::vector<std::string> getGHEPfiles(std::string const& base_outdir,  std::stri
   return ghep_files;
 }
 
+void getGHEPoffsets(std::string const& fname, std::map<int, int>& runId_ghepOffset_map, 
+                      int hadd_factor, int file_id, int run_id, int& total_offset, std::optional<int> sampleB_offset = std::nullopt) {
+  
+  TFile *ghep_file = TFile::Open(fname.c_str(), "READ");
+  TTree* gtree = ghep_file->Get<TTree>("gtree");
+  
+  // For sampleB, there is an offset that we need to consider
+  if (sampleB_offset){
+      run_id += sampleB_offset.value();
+  }
+  runId_ghepOffset_map[run_id] = total_offset;
+  total_offset += gtree->GetEntries();
+
+  ghep_file->Close();
+  delete ghep_file;
+}
 
 // Get neutrino interaction time, with the following 4 methods:
 
@@ -195,18 +211,19 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   TChain* ghep_evts_A = new TChain("gtree");
   TChain* edep_evts_A = new TChain("EDepSimEvents");
   TChain* genie_evts_A = new TChain("DetSimPassThru/gRooTracker");
-  std::vector<int> ghepOffsets_A;
-  int total_A = 0;
+  // this is the FIRST run_id of the edepsim file, within the for_each we loop over it
+  // to get all the run_ids belonging to the input file
+  int run_id_A = spillFileId * hadd_factor;    
+  int total_ghepOffset_A = 0;
+  std::map<int, int> runId_ghepOffset_A;
   if(inFileAPOT > 0.) {
     auto ghepFilesA = getGHEPfiles(prodBaseDir.c_str(), ghepNameA.c_str(), hadd_factor, spillFileId);
     edep_evts_A->Add(inFileNameA.c_str());
     genie_evts_A->Add(inFileNameA.c_str());
     std::for_each(ghepFilesA.begin(), ghepFilesA.end(), [&](std::string const& fname){
       ghep_evts_A->Add(fname.c_str());
-      TFile *ghep_file = TFile::Open(fname.c_str(), "READ");
-      TTree* tree = ghep_file->Get<TTree>("gtree");
-      ghepOffsets_A.push_back(total_A);
-      total_A += tree->GetEntries();
+      getGHEPoffsets(fname, runId_ghepOffset_A, hadd_factor, spillFileId, run_id_A, total_ghepOffset_A);
+      ++run_id_A;
     });
     have_nu_sampleA = true;
     if(spillPOT <= (double)n_int_max) is_n_int_mode = true;
@@ -217,12 +234,18 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   TChain* ghep_evts_B = new TChain("gtree");
   TChain* edep_evts_B = new TChain("EDepSimEvents");
   TChain* genie_evts_B = new TChain("DetSimPassThru/gRooTracker");
-  std::vector<int> ghepOffsets_B;
-  int total_B = 0;
+  int run_id_B = spillFileId * hadd_factor;    
+  std::map<int, int> runId_ghepOffset_B;
+  int total_ghepOffset_B = 0;
+  std::optional<int> sampleB_offset = 1.E9;
   if(inFileBPOT > 0.) {
     int sampleBFileId = spillFileId;
     if (reuse_sampleB){
-      std::string hadd_sampleB_dir = prodBaseDir + "/run-hadd/" + ghepNameB + "/EDEPSIM";
+      std::string key = "run-hadd/";
+      size_t start = inFileNameB.find(key) + key.size();
+      size_t end   = inFileNameB.find('/', start);
+      auto haddNameB = inFileNameB.substr(start, end - start);
+      std::string hadd_sampleB_dir = prodBaseDir + "/run-hadd/" + haddNameB + "/EDEPSIM";
       int n_hadd_sampleB_files = 0;
       auto pipe = std::unique_ptr<FILE, decltype(&pclose)>{popen(("find " + hadd_sampleB_dir + " -type f | wc -l").c_str(), "r"), pclose};
       fscanf(pipe.get(), "%d", &n_hadd_sampleB_files);
@@ -233,11 +256,8 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
     genie_evts_B->Add(inFileNameB.c_str());
     std::for_each(ghepFilesB.begin(), ghepFilesB.end(), [&](std::string const& fname){
       ghep_evts_B->Add(fname.c_str());
-
-      TFile *ghep_file = TFile::Open(fname.c_str(), "READ");
-      TTree* tree = ghep_file->Get<TTree>("gtree");
-      ghepOffsets_B.push_back(total_B);
-      total_B += tree->GetEntries();
+      getGHEPoffsets(fname, runId_ghepOffset_B, hadd_factor, spillFileId, run_id_B, total_ghepOffset_B, sampleB_offset);
+      ++run_id_B;
     });
     have_nu_sampleB = true;
   }
@@ -382,8 +402,9 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       in_tree->GetEntry(entry);
       gn_tree->GetEntry(entry);
 
-      auto ghepOffsets = is_sampleA ? ghepOffsets_A : ghepOffsets_B;
-      auto ghep_entry = ghepOffsets[edep_evt->RunId % static_cast<int>(1E9)] + edep_evt->EventId;
+      auto runId_ghepOffset = is_sampleA ? runId_ghepOffset_A : runId_ghepOffset_B;
+
+      auto ghep_entry = runId_ghepOffset.at(edep_evt->RunId) + edep_evt->EventId;
       ghep_chain->GetEntry(ghep_entry);
 
       gRooTracker& genie_evt = is_sampleA ? genie_evts_A_data : genie_evts_B_data;
