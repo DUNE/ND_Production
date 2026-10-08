@@ -20,8 +20,9 @@ if { [ -z "$ND_PRODUCTION_GEOM" ] || [ -z "$ND_PRODUCTION_PANDORA_GEOM" ]; } && 
 fi
 
 
+# Alma9 FNAL container
 export ND_PRODUCTION_RUNTIME=SHIFTER
-export ND_PRODUCTION_CONTAINER=fermilab/fnal-wn-sl7:latest
+export ND_PRODUCTION_CONTAINER=fermilab/fnal-wn-el9:latest
 export ND_PRODUCTION_DIR=$(realpath "$PWD"/..)
 
 source $ND_PRODUCTION_DIR/util/reload_in_container.inc.sh
@@ -32,69 +33,20 @@ source setup_pandora.sh
 cd $ND_PRODUCTION_DIR
 mkdir -p $ND_PRODUCTION_PANDORA_INSTALL
 
-# PandoraPFA (cmake files)
-cd $ND_PRODUCTION_PANDORA_INSTALL
-git clone https://github.com/PandoraPFA/PandoraPFA.git
-cd PandoraPFA
-git checkout $ND_PRODUCTION_PANDORA_PFA_VERSION
-
-# PandoraSDK (Abstract interface and software development kit)
-cd $ND_PRODUCTION_PANDORA_INSTALL
-git clone https://github.com/PandoraPFA/PandoraSDK.git
-cd PandoraSDK
-git checkout $ND_PRODUCTION_PANDORA_SDK_VERSION
-mkdir build
-cd build
-cmake -DCMAKE_MODULE_PATH=$ND_PRODUCTION_PANDORA_INSTALL/PandoraPFA/cmakemodules ..
-make -j4 install
-
-# PandoraMonitoring (ROOT event displays and output)
-cd $ND_PRODUCTION_PANDORA_INSTALL
-git clone https://github.com/PandoraPFA/PandoraMonitoring.git
-cd PandoraMonitoring
-git checkout $ND_PRODUCTION_PANDORA_MONITORING_VERSION
-mkdir build
-cd build
-cmake -DCMAKE_MODULE_PATH="$ND_PRODUCTION_PANDORA_INSTALL/PandoraPFA/cmakemodules;$ROOTSYS/etc/cmake" \
--DPandoraSDK_DIR=$ND_PRODUCTION_PANDORA_INSTALL/PandoraSDK ..
-make -j4 install
-
-# LArContent (algorithms) without LibTorch (no Deep Learning Vertexing)
-cd $ND_PRODUCTION_PANDORA_INSTALL
-git clone https://github.com/PandoraPFA/LArContent.git
-cd LArContent
-git checkout $ND_PRODUCTION_PANDORA_LAR_CONTENT_VERSION
-mkdir build
-cd build
-cmake -DCMAKE_MODULE_PATH="$ND_PRODUCTION_PANDORA_INSTALL/PandoraPFA/cmakemodules;$ROOTSYS/etc/cmake" \
--DPANDORA_MONITORING=ON -DPandoraSDK_DIR=$ND_PRODUCTION_PANDORA_INSTALL/PandoraSDK \
--DPandoraMonitoring_DIR=$ND_PRODUCTION_PANDORA_INSTALL/PandoraMonitoring \
--DEigen3_DIR=$EIGEN_DIR/Eigen3/share/eigen3/cmake/ ..
-make -j4 install
-
-# LArRecoND (DUNE ND reco)
+# First checkout LArRecoND (Pandora ND reco)
 cd $ND_PRODUCTION_PANDORA_INSTALL
 git clone https://github.com/PandoraPFA/LArRecoND.git
 cd LArRecoND
 git checkout $ND_PRODUCTION_PANDORA_LAR_RECO_ND_VERSION
-mkdir build
-cd build
-cmake -DCMAKE_MODULE_PATH="$ND_PRODUCTION_PANDORA_INSTALL/PandoraPFA/cmakemodules;$ROOTSYS/etc/cmake" \
--DPANDORA_MONITORING=ON -DPandoraSDK_DIR=$ND_PRODUCTION_PANDORA_INSTALL/PandoraSDK/ \
--DPandoraMonitoring_DIR=$ND_PRODUCTION_PANDORA_INSTALL/PandoraMonitoring/ \
--DLArContent_DIR=$ND_PRODUCTION_PANDORA_INSTALL/LArContent ..
-make -j4 install
 
-# LArMachineLearningData (BDT, MVA & Deep Learning training files)
-cd $ND_PRODUCTION_PANDORA_INSTALL
-git clone https://github.com/PandoraPFA/LArMachineLearningData.git
-cd LArMachineLearningData
-git checkout $ND_PRODUCTION_PANDORA_LAR_MLDATA_VERSION
-# Download MLData files from CERNBox:
-source download.sh dunend
-source download.sh dune lbl
-source download.sh uboone
-#cp -r /global/cfs/cdirs/dune/www/data/pandora/LArMachineLearningData/* .
+# Setup Alma9 environment with required external packages (ROOT, Eigen & PyTorch)
+echo "Setting up Alma9 environment"
+source $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/scripts/setup/Alma9_FNAL.sh
+
+# Build Pandora packages, including LArRecoND
+echo "Building required Pandora packages & LArRecoND"
+export PANDORA_PROJECT_DIR=${ND_PRODUCTION_PANDORA_INSTALL}
+$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/scripts/build/build_al9.sh
 
 # Install h5flow for converting HDF5 input files to ROOT for LArRecoND
 cd $ND_PRODUCTION_PANDORA_INSTALL
@@ -108,8 +60,10 @@ pip3 install uproot
 deactivate
 
 # Convert GDML geometry file to ROOT for LArRecoND (using cm length units)
+echo "Converting GDML geometry file to ROOT"
 root -l -b -q -e "TGeoManager::LockDefaultUnits(kFALSE); TGeoManager::SetDefaultUnits(TGeoManager::kRootUnits); TGeoManager::Import(\"${ND_PRODUCTION_GEOM}\"); gGeoManager->Export(\"${ND_PRODUCTION_PANDORA_GEOM}\");"
 
 # Pre-compile the conversion macro
+echo "Pre-compiling flow ROOT conversion macro"
 cd $ND_PRODUCTION_PANDORA_BASEDIR
 root -l -b -q -e ".L $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/ndlarflow/rootToRootConversion.C+"

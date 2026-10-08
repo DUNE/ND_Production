@@ -2,7 +2,7 @@
 
 # Example run environment setup
 #export ND_PRODUCTION_RUNTIME=SHIFTER
-#export ND_PRODUCTION_CONTAINER=fermilab/fnal-wn-sl7:latest
+#export ND_PRODUCTION_CONTAINER=fermilab/fnal-wn-el9:latest
 #export ND_PRODUCTION_DIR=$(realpath "$PWD"/..)
 #export ND_PRODUCTION_IN_NAME=Tutorial.flow2root
 #export ND_PRODUCTION_OUT_NAME=Tutorial.pandora
@@ -11,13 +11,17 @@
 #export ND_PRODUCTION_PANDORA_GEOM=LArRecoND/nd_hall_with_lar_tms_sand_TDR_Production_geometry_v_1.0.3.root
 
 export ND_PRODUCTION_DIR=${ND_PRODUCTION_DIR:-$(realpath "$PWD"/..)}
-export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:latest}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-el9:latest}
 
 # Container
 source $ND_PRODUCTION_DIR/util/reload_in_container.inc.sh
 
-# Setup Pandora environment
+# Setup Pandora environment variables
 source $ND_PRODUCTION_DIR/run-pandora/setup_pandora.sh
+
+# Setup Alma9 environment with required external packages (ROOT, Eigen & PyTorch)
+echo "Setting up Alma9 environment"
+source $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/scripts/setup/Alma9_FNAL.sh
 
 # Set other environment variables: globalIdx, ND_PRODUCTION_OUTDIR_BASE, subDir, tmpOutDir, outDir
 source $ND_PRODUCTION_DIR/util/init.inc.sh
@@ -34,7 +38,7 @@ cd $tmpRunDir
 ln -sf $inFile LArRecoNDInput.root
 
 # Run LArRecoND Pandora program over all events, which creates the initial LArRecoND.root (hierarchy analysis) output file
-run ${ND_PRODUCTION_PANDORA_INSTALL}/LArRecoND/bin/PandoraInterface -i ${ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML} \
+run ${ND_PRODUCTION_PANDORA_INSTALL}/LArRecoND/build/PandoraInterface -i ${ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML} \
     -r ${ND_PRODUCTION_PANDORA_LAR_RECO_ND_RUN_OPTION} -f ${ND_PRODUCTION_PANDORA_INPUT_FORMAT} \
     -g ${ND_PRODUCTION_PANDORA_GEOM} -e $inFile -j ${ND_PRODUCTION_PANDORA_LAR_RECO_ND_VIEW_OPTION} -M -N
 
@@ -45,7 +49,7 @@ mv "${tmpHierarchyOut}" "${tmpOuterfaceIn}"
 
 # Run the Pandora outerface (track/shower & PID reco) to create the final LArRecoND.root file for the CAFs
 tmpOuterfaceOut=${tmpRunDir}/LArRecoND.root
-run ${ND_PRODUCTION_PANDORA_INSTALL}/LArRecoND/bin/PandoraOuterface -f ${tmpOuterfaceIn} \
+run ${ND_PRODUCTION_PANDORA_INSTALL}/LArRecoND/build/PandoraOuterface -f ${tmpOuterfaceIn} \
     -x ${ND_PRODUCTION_PANDORA_OUTERFACE_XML} -o ${tmpOuterfaceOut} -g ${ND_PRODUCTION_PANDORA_GEOM}
 
 # Move LArRecoND output files to output dir
