@@ -15,7 +15,7 @@ export ND_PRODUCTION_PANDORA_BASEDIR=${ND_PRODUCTION_DIR}/run-pandora
 export ND_PRODUCTION_PANDORA_INSTALL=${ND_PRODUCTION_PANDORA_BASEDIR}/install
 
 # Set the LArRecoND version, which will also set the other required Pandora packages
-export ND_PRODUCTION_PANDORA_LAR_RECO_ND_VERSION=v01-05-00
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_VERSION=v01-06-00
 
 # Relative path used by Pandora packages
 export MY_TEST_AREA=${ND_PRODUCTION_PANDORA_INSTALL}
@@ -42,19 +42,22 @@ else
   export ND_PRODUCTION_PANDORA_GEOM=${ND_PRODUCTION_PANDORA_INSTALL}/LArRecoND/${GDMLName}.root
 fi
 
-# Set LArRecoND input data format: SP (SpacePoint data) or SPMC (SpacePoint MC)
+# Set LArRecoND input data format: SP (SpacePoint data) or SPMC (SpacePoint MC).
+# Running with cheated or partially cheated workflows requires the SPMC format for the MC truth info
 export ND_PRODUCTION_PANDORA_INPUT_FORMAT=SPMC
 
 # Set LArRecoND Pandora workflow settings xml files for the reconstruction & outerface (track/shower PID).
-# Default setting is for Nominal 3D reco settings without cheating
-# Running with cheated or partially cheated workflows (which require SPMC format to use MC truth info) requires variable to be defined externally
-export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML_NAME=${ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML_NAME:-PandoraSettings_LArRecoND_ThreeD.xml}
+# Default setting is for 3D slicing & neutrino reco with rock muon tagging without cheating, with the CRRemHitsSliceNu reco option
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML_NAME=${ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML_NAME:-PandoraSettings_LArRecoND_ThreeD_RockMuTagging.xml}
+# For ND-LAr MC, recommended is cheated slicing with rock muon tagging & 3D neutrino reco (until the DL-trained slicing becomes available)
+#export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML_NAME=${ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML_NAME:-PandoraSettings_LArRecoND_ThreeD_CheatedSlicing_RockMuTagging.xml}
 export ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/settings/${ND_PRODUCTION_PANDORA_LAR_RECO_ND_XML_NAME}
+
 # Pandora Outerface
 export ND_PRODUCTION_PANDORA_OUTERFACE_XML=$ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/settings/PandoraSettings_Outerface_Voxelize.xml
 
-# Set LArRecoND run option: AllHitsSliceNu (recommended), AllHitsSliceCR, Full, AllHitsCR, AllHitsNu, CRRemHitsSliceCR, CRRemHitsSliceNu
-export ND_PRODUCTION_PANDORA_LAR_RECO_ND_RUN_OPTION=AllHitsSliceNu
+# Set LArRecoND run option: CRRemHitsSliceNu (recommended), AllHitsSliceNu, AllHitsSliceCR, Full, AllHitsCR, AllHitsNu, CRRemHitsSliceCR
+export ND_PRODUCTION_PANDORA_LAR_RECO_ND_RUN_OPTION=CRRemHitsSliceNu
 
 # Set LArRecoND view option: both (recommended), 3d, lartpc
 export ND_PRODUCTION_PANDORA_LAR_RECO_ND_VIEW_OPTION=both
