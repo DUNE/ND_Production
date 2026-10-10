@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 export ND_PRODUCTION_DIR=${ND_PRODUCTION_DIR:-$(realpath "$PWD"/..)}
-export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:latest}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-el9:latest}
 
 # Container
 source $ND_PRODUCTION_DIR/util/reload_in_container.inc.sh
