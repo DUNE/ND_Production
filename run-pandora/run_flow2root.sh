@@ -17,6 +17,10 @@ source $ND_PRODUCTION_DIR/util/reload_in_container.inc.sh
 # Setup Pandora environment
 source $ND_PRODUCTION_DIR/run-pandora/setup_pandora.sh
 
+# Setup Alma9 environment with required external packages (ROOT, Eigen & PyTorch)
+echo "Setting up Alma9 environment"
+source $ND_PRODUCTION_PANDORA_INSTALL/LArRecoND/scripts/setup/Alma9_FNAL.sh
+
 # Set other environment variables: globalIdx, ND_PRODUCTION_OUTDIR_BASE, tmpOutDir, outDir, outName, subDir
 source $ND_PRODUCTION_DIR/util/init.inc.sh
 
