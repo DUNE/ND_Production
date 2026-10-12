@@ -57,8 +57,6 @@ run ${ND_PRODUCTION_PANDORA_INSTALL}/LArRecoND/build/PandoraOuterface -f ${tmpOu
 
 # Move LArRecoND hierarchy analysis ROOT file to output dir
 tmpAnaOut=${tmpRunDir}/LArRecoND.root
-tmpMCHierOut=${tmpRunDir}/MCHierarchy.root
-tmpEvtHierOut=${tmpRunDir}/EventHierarchy.root
 
 anaOutDir=${outDir}/LAR_RECO_ND
 anaOutFile=${anaOutDir}/${outName}.LAR_RECO_ND.root
