@@ -52,15 +52,9 @@ tmpOuterfaceOut=${tmpRunDir}/LArRecoND.root
 run ${ND_PRODUCTION_PANDORA_INSTALL}/LArRecoND/build/PandoraOuterface -f ${tmpOuterfaceIn} \
     -x ${ND_PRODUCTION_PANDORA_OUTERFACE_XML} -o ${tmpOuterfaceOut} -g ${ND_PRODUCTION_PANDORA_GEOM}
 
-# Move LArRecoND output files to output dir
-tmpEvtHierOut=${tmpRunDir}/EventHierarchy.root
-
+# Move LArRecoND output file to output dir
 anaOutDir=${outDir}/LAR_RECO_ND/${subDir}
 anaOutFile=${anaOutDir}/${outName}.LAR_RECO_ND.root
-evtHierOutDir=${outDir}/EVT_HIER/${subDir}
-evtHierOutFile=${evtHierOutDir}/${outName}.EVT_HIER.root
 
 mkdir -p ${anaOutDir}
 mv "${tmpOuterfaceOut}" "${anaOutFile}"
-mkdir -p ${evtHierOutDir}
-mv "${tmpEvtHierOut}" "${evtHierOutFile}"
