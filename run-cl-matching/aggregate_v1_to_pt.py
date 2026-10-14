@@ -11,7 +11,7 @@ production workflow is:
      collapses them into the .pt. The .pt is the ONE thing every run must
      leave on disk.
   3. Fill the flow HDF5 by loading the .pt and writing its arrays into the
-     `charge/calib_prompt_hits` and `charge/calib_final_hits` compound
+     `charge/calib_prompt_hits` and `charge/calib_filtered_hits` compound
      datasets (t_0, t_cluster_id, t_confidence). That fill step lives in
      apply_pt_to_hdf5.py.
 
@@ -22,9 +22,9 @@ Schema of the .pt (torch.save of a dict):
     "input_file":               "<abs path to source FLOW.hdf5>",
     "src_basename":             "<basename of source>",
     "n_calib_prompt_hits":      int,
-    "n_calib_final_hits":       int,
+    "n_calib_filtered_hits":       int,
     "n_prompt_assigned":        int,   # count of prompt hits with t_0 != UNASSIGNED
-    "n_final_assigned":         int,
+    "n_filtered_assigned":         int,
     "n_events":                 int,   # number of shards aggregated
     "t0_units":                 "ns",  # units of the t_0 field (nanoseconds;
                                        # applier refuses any other value)
@@ -44,10 +44,10 @@ Schema of the .pt (torch.save of a dict):
       "t_confidence":   torch.float32 tensor,
     },
 
-    # Per-final-hit arrays, size = n_calib_final_hits. Derived by gathering
+    # Per-filtered-hit arrays, size = n_calib_filtered_hits. Derived by gathering
     # from the prompt arrays via the col-0 of
-    # charge/calib_prompt_hits/ref/charge/calib_final_hits/ref
-    "calib_final_hits": {
+    # charge/calib_prompt_hits/ref/charge/calib_filtered_hits/ref
+    "calib_filtered_hits": {
       "t_0":            torch.float32 tensor,
       "t_cluster_id":   torch.int16 tensor,
       "t_confidence":   torch.float32 tensor,
@@ -78,8 +78,8 @@ CONF_UNAVAILABLE_F4 = float(UNASSIGNED)     # float32
 NS_PER_TICK = 16.0                          # LArPix clock: 1 tick = 16 ns
 
 PROMPT_DSET = "charge/calib_prompt_hits/data"
-FINAL_DSET = "charge/calib_final_hits/data"
-FINAL_TO_PROMPT_REF = "charge/calib_prompt_hits/ref/charge/calib_final_hits/ref"
+FILTERED_DSET = "charge/calib_filtered_hits/data"
+FILTERED_TO_PROMPT_REF = "charge/calib_prompt_hits/ref/charge/calib_filtered_hits/ref"
 
 
 def _ticks_to_ns_f4(arr_ticks: np.ndarray) -> np.ndarray:
@@ -113,41 +113,41 @@ def _clip_int_to_i2(arr: np.ndarray) -> tuple[np.ndarray, int]:
     return np.clip(arr, lo, hi).astype(np.int16), n_over
 
 
-def _calib_final_to_prompt_indices(h: h5py.File) -> np.ndarray:
-    """Return an int64 array of length n_final mapping final -> prompt row index.
+def _calib_filtered_to_prompt_indices(h: h5py.File) -> np.ndarray:
+    """Return an int64 array of length n_filtered mapping filtered -> prompt row index.
 
-    Primary path: read the [prompt_id, final_id] pair dataset and scatter by
-    final_id, so the mapping is correct regardless of row order in the ref
+    Primary path: read the [prompt_id, filtered_id] pair dataset and scatter by
+    filtered_id, so the mapping is correct regardless of row order in the ref
     dataset. Finals with no resolvable prompt land at -1; downstream code
     filters those out.
 
     Compatibility fallback: flow files produced BEFORE the ndlar_flow
-    prompt->final reference fix (DUNE/ndlar_flow filter_hits_ref_fix) have a
-    buggy final_id column -- each event's final_ids restart at 0 instead of
+    prompt->filtered reference fix (DUNE/ndlar_flow filter_hits_ref_fix) have a
+    buggy filtered_id column -- each event's filtered_ids restart at 0 instead of
     being globally offset, so the scatter would only cover a fraction of the
-    finals (and mislabel those). Such files are detected by their duplicated
-    final_ids, and the mapping falls back to calib_final_hits' "id" field,
+    filtereds (and mislabel those). Such files are detected by their duplicated
+    filtered_ids, and the mapping falls back to calib_filtered_hits' "id" field,
     which in the filtered-hits case (all existing old files) stores the source
     prompt row index directly.
     """
-    final = h[FINAL_DSET]
-    n_final = int(final.shape[0])
-    if FINAL_TO_PROMPT_REF not in h:
+    filtered = h[FILTERED_DSET]
+    n_filtered = int(filtered.shape[0])
+    if FILTERED_TO_PROMPT_REF not in h:
         raise RuntimeError(
-            f"cannot derive final->prompt mapping: {FINAL_TO_PROMPT_REF} missing."
+            f"cannot derive filtered->prompt mapping: {FILTERED_TO_PROMPT_REF} missing."
         )
-    ref = np.asarray(h[FINAL_TO_PROMPT_REF][:], dtype=np.int64)
-    assert ref.shape[0] == n_final, (ref.shape[0], n_final)
-    n_unique_final_ids = int(np.unique(ref[:, 1]).size)
-    if n_unique_final_ids < n_final and "id" in final.dtype.names:
-        # Old buggy ref (pre filter_hits_ref_fix): duplicated final_ids.
+    ref = np.asarray(h[FILTERED_TO_PROMPT_REF][:], dtype=np.int64)
+    assert ref.shape[0] == n_filtered, (ref.shape[0], n_filtered)
+    n_unique_filtered_ids = int(np.unique(ref[:, 1]).size)
+    if n_unique_filtered_ids < n_filtered and "id" in filtered.dtype.names:
+        # Old buggy ref (pre filter_hits_ref_fix): duplicated filtered_ids.
         # Fall back to the "id" field for compatibility with existing files.
-        print(f"WARN: {FINAL_TO_PROMPT_REF} has only {n_unique_final_ids} "
-              f"unique final_ids for {n_final} finals (flow file predates the "
-              f"ndlar_flow prompt->final ref fix); falling back to "
-              f"calib_final_hits['id'] for the mapping.", file=sys.stderr)
-        return np.asarray(final["id"], dtype=np.int64)
-    fp = np.full(n_final, -1, dtype=np.int64)
+        print(f"WARN: {FILTERED_TO_PROMPT_REF} has only {n_unique_filtered_ids} "
+              f"unique filtered_ids for {n_filtered} filtereds (flow file predates the "
+              f"ndlar_flow prompt->filtered ref fix); falling back to "
+              f"calib_filtered_hits['id'] for the mapping.", file=sys.stderr)
+        return np.asarray(filtered["id"], dtype=np.int64)
+    fp = np.full(n_filtered, -1, dtype=np.int64)
     fp[ref[:, 1]] = ref[:, 0]
     return fp
 
@@ -182,9 +182,9 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
     ready for torch.save."""
     with h5py.File(src_file, "r") as h:
         n_prompt = int(h[PROMPT_DSET].shape[0])
-        n_final = int(h[FINAL_DSET].shape[0]) if FINAL_DSET in h else 0
-        final_to_prompt = (_calib_final_to_prompt_indices(h)
-                           if n_final else np.zeros(0, np.int64))
+        n_filtered = int(h[FILTERED_DSET].shape[0]) if FILTERED_DSET in h else 0
+        filtered_to_prompt = (_calib_filtered_to_prompt_indices(h)
+                           if n_filtered else np.zeros(0, np.int64))
 
     prompt_t0_f = np.full(n_prompt, np.nan, dtype=np.float64)
     prompt_lab_i = np.full(n_prompt, CLUSTER_SENTINEL_I2, dtype=np.int64)
@@ -209,26 +209,26 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
     p_conf_out = np.where(np.isnan(prompt_conf_f),
                           CONF_UNAVAILABLE_F4, prompt_conf_f).astype(np.float32)
 
-    f_t0_ns = np.full(n_final, T0_SENTINEL_F4, dtype=np.float32)
-    f_cl_i2 = np.full(n_final, CLUSTER_SENTINEL_I2, dtype=np.int16)
-    f_conf_out = np.full(n_final, CONF_UNAVAILABLE_F4, dtype=np.float32)
-    if n_final:
-        in_range = (final_to_prompt >= 0) & (final_to_prompt < n_prompt)
-        f_t0_ns[in_range] = p_t0_ns[final_to_prompt[in_range]]
-        f_cl_i2[in_range] = p_cl_i2[final_to_prompt[in_range]]
-        f_conf_out[in_range] = p_conf_out[final_to_prompt[in_range]]
+    f_t0_ns = np.full(n_filtered, T0_SENTINEL_F4, dtype=np.float32)
+    f_cl_i2 = np.full(n_filtered, CLUSTER_SENTINEL_I2, dtype=np.int16)
+    f_conf_out = np.full(n_filtered, CONF_UNAVAILABLE_F4, dtype=np.float32)
+    if n_filtered:
+        in_range = (filtered_to_prompt >= 0) & (filtered_to_prompt < n_prompt)
+        f_t0_ns[in_range] = p_t0_ns[filtered_to_prompt[in_range]]
+        f_cl_i2[in_range] = p_cl_i2[filtered_to_prompt[in_range]]
+        f_conf_out[in_range] = p_conf_out[filtered_to_prompt[in_range]]
 
     n_p_assigned = int((p_t0_ns != T0_SENTINEL_F4).sum())
-    n_f_assigned = int((f_t0_ns != T0_SENTINEL_F4).sum()) if n_final else 0
+    n_f_assigned = int((f_t0_ns != T0_SENTINEL_F4).sum()) if n_filtered else 0
 
     out = {
         "version": SCHEMA_VERSION,
         "input_file": str(Path(src_file).resolve()),
         "src_basename": Path(src_file).name,
         "n_calib_prompt_hits": n_prompt,
-        "n_calib_final_hits": n_final,
+        "n_calib_filtered_hits": n_filtered,
         "n_prompt_assigned": n_p_assigned,
-        "n_final_assigned": n_f_assigned,
+        "n_filtered_assigned": n_f_assigned,
         "n_events": n_events,
         "t0_units": "ns",
         "unassigned_sentinel": UNASSIGNED,
@@ -238,7 +238,7 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
             "t_cluster_id": torch.from_numpy(p_cl_i2),
             "t_confidence": torch.from_numpy(p_conf_out),
         },
-        "calib_final_hits": {
+        "calib_filtered_hits": {
             "t_0": torch.from_numpy(f_t0_ns),
             "t_cluster_id": torch.from_numpy(f_cl_i2),
             "t_confidence": torch.from_numpy(f_conf_out),
@@ -248,7 +248,7 @@ def build_pt_for_file(src_file: Path, shards: list[dict], *, verbose: bool = Tru
         print(f"  {out['src_basename']}: shards={len(shards)} events={n_events}  "
               f"prompt {n_p_assigned}/{n_prompt} "
               f"({100.0*n_p_assigned/max(n_prompt,1):.2f}%)  "
-              f"final {n_f_assigned}/{n_final}",
+              f"filtered {n_f_assigned}/{n_filtered}",
               flush=True)
     return out
 
@@ -327,8 +327,8 @@ def main(argv: list[str] | None = None) -> int:
                 "out_path": str(out_path),
                 "n_calib_prompt_hits": pt["n_calib_prompt_hits"],
                 "n_prompt_assigned": pt["n_prompt_assigned"],
-                "n_calib_final_hits": pt["n_calib_final_hits"],
-                "n_final_assigned": pt["n_final_assigned"],
+                "n_calib_filtered_hits": pt["n_calib_filtered_hits"],
+                "n_filtered_assigned": pt["n_filtered_assigned"],
                 "status": "ok",
             })
         except Exception as exc:

@@ -3,7 +3,7 @@
 
 Writes t_0 / t_cluster_id / t_confidence into
   charge/calib_prompt_hits/data   (size = pt["n_calib_prompt_hits"])
-  charge/calib_final_hits/data    (size = pt["n_calib_final_hits"])
+  charge/calib_filtered_hits/data    (size = pt["n_calib_filtered_hits"])
 
 Every run of the ND CL matching wrapper ends by calling this script -- whether
 the .pt was freshly built from a pipeline run or loaded from an existing cache.
@@ -28,7 +28,7 @@ import torch
 
 
 PROMPT_DSET = "charge/calib_prompt_hits/data"
-FINAL_DSET = "charge/calib_final_hits/data"
+FILTERED_DSET = "charge/calib_filtered_hits/data"
 FIELDS = ("t_0", "t_cluster_id", "t_confidence")
 
 # v1 emits t_0 as float32 nanoseconds. Upstream flow files must reserve the
@@ -70,7 +70,7 @@ def apply_one(pt_path: Path, hdf5_path: Path, *, verbose: bool = True) -> dict:
         "src_basename_expected": pt.get("src_basename"),
         "prompt": {"wrote_fields": [], "skipped_fields": {},
                    "prewrite_nondefault": {}, "size_mismatch": None},
-        "final":  {"wrote_fields": [], "skipped_fields": {},
+        "filtered":  {"wrote_fields": [], "skipped_fields": {},
                    "prewrite_nondefault": {}, "size_mismatch": None},
     }
 
@@ -83,15 +83,15 @@ def apply_one(pt_path: Path, hdf5_path: Path, *, verbose: bool = True) -> dict:
         reason = f"HDF5 not writable ({type(exc).__name__}: {exc})"
         if verbose:
             print(f"  {hdf5_path}: {reason}; skipping in-place fill", flush=True)
-        for section in ("prompt", "final"):
+        for section in ("prompt", "filtered"):
             for f in FIELDS:
                 info[section]["skipped_fields"][f] = reason
         return info
 
     with h:
         for key, dset_path in (("calib_prompt_hits", PROMPT_DSET),
-                                ("calib_final_hits", FINAL_DSET)):
-            info_key = "prompt" if key == "calib_prompt_hits" else "final"
+                                ("calib_filtered_hits", FILTERED_DSET)):
+            info_key = "prompt" if key == "calib_prompt_hits" else "filtered"
             if dset_path not in h:
                 reason = f"dataset {dset_path} missing from HDF5"
                 if verbose:
@@ -159,10 +159,10 @@ def apply_one(pt_path: Path, hdf5_path: Path, *, verbose: bool = True) -> dict:
     if verbose:
         p_a = int(np.asarray(fields_in_pt["t_0"]).__ne__(-1).sum()) if False else pt.get(
             "n_prompt_assigned", "?")
-        f_a = pt.get("n_final_assigned", "?")
+        f_a = pt.get("n_filtered_assigned", "?")
         print(f"  applied {pt_path.name} -> {hdf5_path.name}  "
               f"prompt={p_a}/{pt.get('n_calib_prompt_hits','?')}  "
-              f"final={f_a}/{pt.get('n_calib_final_hits','?')}", flush=True)
+              f"filtered={f_a}/{pt.get('n_calib_filtered_hits','?')}", flush=True)
     return info
 
 
