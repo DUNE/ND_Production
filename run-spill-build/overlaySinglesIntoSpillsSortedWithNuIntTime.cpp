@@ -58,8 +58,7 @@ std::vector<std::string> getGHEPfiles(std::string const& base_outdir,  std::stri
   return ghep_files;
 }
 
-void getGHEPoffsets(std::string const& fname, std::map<int, int>& runId_ghepOffset_map, 
-                      int hadd_factor, int file_id, int run_id, int& total_offset, std::optional<int> sampleB_offset = std::nullopt) {
+void getGHEPoffsets(std::string const& fname, std::map<int, int>& runId_ghepOffset_map, int run_id, int& total_offset, std::optional<int> sampleB_offset = std::nullopt) {
   
   TFile *ghep_file = TFile::Open(fname.c_str(), "READ");
   TTree* gtree = ghep_file->Get<TTree>("gtree");
@@ -403,7 +402,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       in_tree->GetEntry(entry);
       gn_tree->GetEntry(entry);
 
-      auto runId_ghepOffset = is_sampleA ? runId_ghepOffset_A : runId_ghepOffset_B;
+      const auto& runId_ghepOffset = is_sampleA ? runId_ghepOffset_A : runId_ghepOffset_B;
 
       auto ghep_entry = runId_ghepOffset.at(edep_evt->RunId) + edep_evt->EventId;
       ghep_chain->GetEntry(ghep_entry);
