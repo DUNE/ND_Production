@@ -251,6 +251,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
       fscanf(pipe.get(), "%d", &n_hadd_sampleB_files);
       sampleBFileId = spillFileId % n_hadd_sampleB_files;
     }
+    int run_id_B = sampleBFileId * hadd_factor;
     auto ghepFilesB = getGHEPfiles(prodBaseDir.c_str(), ghepNameB.c_str(), hadd_factor, sampleBFileId);
     edep_evts_B->Add(inFileNameB.c_str());
     genie_evts_B->Add(inFileNameB.c_str());
