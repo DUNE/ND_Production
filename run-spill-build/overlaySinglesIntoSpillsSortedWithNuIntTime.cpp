@@ -221,7 +221,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
     genie_evts_A->Add(inFileNameA.c_str());
     std::for_each(ghepFilesA.begin(), ghepFilesA.end(), [&](std::string const& fname){
       ghep_evts_A->Add(fname.c_str());
-      getGHEPoffsets(fname, runId_ghepOffset_A, hadd_factor, spillFileId, run_id_A, total_ghepOffset_A);
+      getGHEPoffsets(fname, runId_ghepOffset_A, run_id_A, total_ghepOffset_A);
       ++run_id_A;
     });
     have_nu_sampleA = true;
@@ -233,7 +233,6 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
   TChain* ghep_evts_B = new TChain("gtree");
   TChain* edep_evts_B = new TChain("EDepSimEvents");
   TChain* genie_evts_B = new TChain("DetSimPassThru/gRooTracker");
-  int run_id_B = spillFileId * hadd_factor;    
   std::map<int, int> runId_ghepOffset_B;
   int total_ghepOffset_B = 0;
   std::optional<int> sampleB_offset = 1.E9;
@@ -256,7 +255,7 @@ void overlaySinglesIntoSpillsSortedWithNuIntTime(
     genie_evts_B->Add(inFileNameB.c_str());
     std::for_each(ghepFilesB.begin(), ghepFilesB.end(), [&](std::string const& fname){
       ghep_evts_B->Add(fname.c_str());
-      getGHEPoffsets(fname, runId_ghepOffset_B, hadd_factor, spillFileId, run_id_B, total_ghepOffset_B, sampleB_offset);
+      getGHEPoffsets(fname, runId_ghepOffset_B, run_id_B, total_ghepOffset_B, sampleB_offset);
       ++run_id_B;
     });
     have_nu_sampleB = true;
