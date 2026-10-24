@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# ND-LAr charge-light matching (simulation) -- v1.0 pipeline, BATCH .PT-FIRST,
+# ND-LAr charge-light matching (simulation) -- v1.5 pipeline, BATCH .PT-FIRST,
 # IN-PLACE FLOW EDIT.
 #
 # Processes MULTIPLE indices on ONE node in a single pipeline invocation.
@@ -97,13 +97,19 @@ echo "batch: ${#INDICES_TO_RUN[@]} indices need pipeline run; ${#INDICES[@]} tot
 # Pipeline reads input HDF5s read-only and writes NPZ shards to $DUMP_DIR;
 # the flow files themselves are never mutated by the pipeline.
 if [[ ${#FILES_ARGS[@]} -gt 0 ]]; then
+    # = the V15 flag set of the chain's run_v15.sh
     V1_ARGS=(--backbone stack2 --merge-p2 --sigma-mode poisson --max-clip-ticks 4
-             --police locked --merge-vertex --skip-baseline --phase3 joint
-             --pass2-trade --pass2-light-nom --force-coverage --swap-fix
-             --swap-ratio-max 0.85 --p2-threshold 30 --predict-min-energy 1.5
-             --skip-v2 --gate-support --force-simple --isolate-cm 25 --fast-scan
-             --edge-penalty --subtick --conf-cluster
-             --light-ckpt "$SMALL_CKPT" --frontend-repo "$FRONTEND")
+             --police locked --merge-vertex --skip-baseline --phase3 joint --pass2-trade
+             --pass2-light-nom --force-coverage --swap-fix --swap-ratio-max 0.85
+             --p2-threshold 20 --predict-min-energy 0.5 --predict-min-energy-shower 1.5
+             --skip-v2 --gate-support --force-simple --isolate-cm 25 --fast-scan --edge-penalty
+             --pool-mode light --redecide --redecide-emin 20
+             --precision --precision-rounds 3 --precision-calib "$CLMATCH_V1/testing/v120_calib_lowi.json" --precision-pieces
+             --v200-min-e 20 --force-light-cm 20 --resid-fill
+             --michel-nd --mnd-host-extent-cm 20 --mnd-bragg-end-cm 20 --mnd-piece-max-mev 60 --mnd-delay-max 300 --mnd-batch 16
+             --mnd-tip-face-cm 5 --mnd-set band_dedx_max=5 max_frac=1.0 remainder_min_mev=10 mf_min=0.75 apc_max=-0.25 whole_mf_min=0.8 whole_apc_max=-0.5
+             --michel-flash
+             --subtick --conf-cluster --light-ckpt "$SMALL_CKPT" --frontend-repo "$FRONTEND")
 
     cd "$CLMATCH_V1"
     export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1

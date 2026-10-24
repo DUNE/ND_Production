@@ -6,7 +6,7 @@
 #   ./install_cl_matching.sh /some/dir    # into /some/dir/
 #
 # What this installs:
-#   * clmatching-chain      @ tag CLMatching_v1.0  (--recurse-submodules brings
+#   * clmatching-chain      @ tag CLMatching_v1.5.1 (--recurse-submodules brings
 #                                                    CLMatching_AlphaRelease in
 #                                                    as its `CLMatching_AlphaRelease/`
 #                                                    submodule)  -> ND sim workflow
@@ -30,7 +30,7 @@ source ../util/prelude.inc.sh
 
 installDir=${1:-.}
 V1_URL=https://github.com/MadivB/clmatching-chain.git
-V1_TAG=${ND_PRODUCTION_CLMATCH_V1_TAG:-CLMatching_v1.0}
+V1_TAG=${ND_PRODUCTION_CLMATCH_V1_TAG:-CLMatching_v1.5.1}
 FRONTEND_URL=https://github.com/MadivB/clmatching-frontend.git
 FRONTEND_BRANCH=${ND_PRODUCTION_CLMATCH_FRONTEND_BRANCH:-main}
 ALPHA_URL=https://github.com/MadivB/CLMatching_AlphaRelease.git
