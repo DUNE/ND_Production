@@ -7,14 +7,14 @@ export ND_PRODUCTION_SPACK_VERSION=${ND_PRODUCTION_SPACK_VERSION:-v1.2.2}
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
-if [[ "$ND_PRODUCTION_CONTAINER" == "fermilab/fnal-wn-el9:"* ]]; then
-    source /cvmfs/dune.opensciencegrid.org/spack/${ND_PRODUCTION_SPACK_VERSION}/share/spack/setup-env.sh
+if [[ "$ND_PRODUCTION_CONTAINER" == *"fnal-wn-el9"* ]]; then
+    source /cvmfs/dune.opensciencegrid.org/spack/"${ND_PRODUCTION_SPACK_VERSION}"/share/spack/setup-env.sh
 
     if [[ -n "$ND_PRODUCTION_SPACK_USER_CACHE_PATH" ]]; then
-        export SPACK_USER_CACHE_PATH=$ND_PRODUCTION_SPACK_USER_CACHE_PATH
+        export SPACK_USER_CACHE_PATH="$ND_PRODUCTION_SPACK_USER_CACHE_PATH"
     fi
 
-    spack env activate ${ND_PRODUCTION_SPACK_ENVIRONMENT}
+    spack env activate "${ND_PRODUCTION_SPACK_ENVIRONMENT}"
 fi
 
 dk2nuAll=("$ND_PRODUCTION_DK2NU_DIR"/*.dk2nu*)
