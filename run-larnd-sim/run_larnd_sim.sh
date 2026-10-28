@@ -25,6 +25,10 @@ fi
 
 cd "$ND_PRODUCTION_INSTALL_DIR"
 
+if [[ "$ND_PRODUCTION_DISABLE_CUPY_MEMPOOL" == "1" ]]; then
+    export LARNDSIM_DISABLE_CUPY_MEMPOOL=1
+fi
+
 if [[ -n "$ND_PRODUCTION_LARNDSIM_CONFIG" ]]; then
     run simulate_pixels.py "$ND_PRODUCTION_LARNDSIM_CONFIG" \
         --input_filename "$inFile" \
