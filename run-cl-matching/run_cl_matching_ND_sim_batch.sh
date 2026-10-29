@@ -160,7 +160,7 @@ sp, ptp, idx = sys.argv[1], sys.argv[2], sys.argv[3]
 d = json.load(open(sp))
 res = d.get("result", {})
 skipped, wrote = [], []
-for section in ("prompt", "final"):
+for section in ("prompt", "filtered"):
     sec = res.get(section, {}) or {}
     for f, why in (sec.get("skipped_fields") or {}).items():
         skipped.append(f"{section}.{f} ({why})")

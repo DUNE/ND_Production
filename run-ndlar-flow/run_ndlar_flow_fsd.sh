@@ -34,7 +34,7 @@ workflow1='yamls/fsd_flow/workflows/charge/charge_event_building_mc.yaml'
 workflow2='yamls/fsd_flow/workflows/charge/charge_event_reconstruction_mc.yaml'
 workflow3='yamls/fsd_flow/workflows/combined/combined_reconstruction_mc.yaml'
 workflow4='yamls/fsd_flow/workflows/charge/prompt_calibration_mc.yaml'
-workflow5='yamls/fsd_flow/workflows/charge/final_calibration_mc.yaml'
+workflow5='yamls/fsd_flow/workflows/charge/filtered_calibration_mc.yaml'
 
 # light workflows
 workflow6='yamls/fsd_flow/workflows/light/light_event_building_mc.yaml'
