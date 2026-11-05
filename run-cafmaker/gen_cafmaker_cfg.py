@@ -112,7 +112,7 @@ def main():
         if args.sandreco_name:
             sandreco_path = get_path(args.base_dir, 'run-sandreco', args.sandreco_name,
                                     'SANDRECO', 'root', args.file_id)
-            outf.write(f'nd_cafmaker.CAFMakerSettings.SANDRecoExperimentalFile: "{sandreco_path}"\n')
+            outf.write(f'nd_cafmaker.CAFMakerSettings.SANDRecoFile: "{sandreco_path}"\n')
 
         edepsim_path = get_path(args.base_dir, 'run-spill-build', args.edepsim_name,
                                 'EDEPSIM_SPILLS','root',args.file_id) 

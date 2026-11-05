@@ -5,8 +5,7 @@ export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-fermilab/fnal-wn-sl7:l
 source ../util/reload_in_container.inc.sh
 
 set +o errexit
-# source install/ND_CAFMaker/install/bin/ndcaf_setup.sh prof
-source install/ND_CAFMaker/ndcaf_setup.sh prof
+source install/ND_CAFMaker/install/bin/ndcaf_setup.sh prof
 set -o errexit
 
 # Must go after ndcaf_setup.sh
@@ -21,8 +20,8 @@ cfgFile=$(mktemp --suffix .cfg)
 # Compulsory arguments regardless of use case.
 args_gen_cafmaker_cfg=( \
     --base-dir "$ND_PRODUCTION_OUTDIR_BASE" \
-    # --spine-name "$ND_PRODUCTION_SPINE_NAME" \
-    # --pandora-name "$ND_PRODUCTION_PANDORA_NAME" \
+    --spine-name "$ND_PRODUCTION_SPINE_NAME" \
+    --pandora-name "$ND_PRODUCTION_PANDORA_NAME" \
     --caf-path "$outFile" \
     --cfg-file "$cfgFile" \
     --file-id "$ND_PRODUCTION_INDEX" \
