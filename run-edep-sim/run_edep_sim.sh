@@ -1,9 +1,23 @@
 #!/usr/bin/env bash
 
 export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-mjkramer/sim2x2:ndlar011}
+export ND_PRODUCTION_SPACK_ENVIRONMENT=${ND_PRODUCTION_SPACK_ENVIRONMENT:-/exp/dune/app/users/abooth/Postdoc/nd-sim-reco/abooth-nd-run-edep-sim-ndlar012}
+export ND_PRODUCTION_SPACK_VERSION=${ND_PRODUCTION_SPACK_VERSION:-v1.2.2}
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
+
+if [[ "$ND_PRODUCTION_CONTAINER" == *"fnal-wn-el9"* ]]; then
+    #source /cvmfs/dune.opensciencegrid.org/spack/"${ND_PRODUCTION_SPACK_VERSION}"/share/spack/setup-env.sh
+    source /exp/dune/app/users/abooth/Postdoc/nd-sim-reco/spack_build_instance_261105/share/spack/setup-env.sh
+
+    if [[ -n "$ND_PRODUCTION_SPACK_USER_CACHE_PATH" ]]; then
+        export SPACK_USER_CACHE_PATH="$ND_PRODUCTION_SPACK_USER_CACHE_PATH"
+    fi
+
+    #spack env activate "${ND_PRODUCTION_SPACK_ENVIRONMENT}"
+    spack env activate -d "${ND_PRODUCTION_SPACK_ENVIRONMENT}"
+fi
 
 simulation=${ND_PRODUCTION_SIM:-GENIE}
 inputFile=""
