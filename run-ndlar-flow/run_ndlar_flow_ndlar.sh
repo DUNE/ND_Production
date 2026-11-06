@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 
+export ND_PRODUCTION_SPACK_ENVIRONMENT=${ND_PRODUCTION_SPACK_ENVIRONMENT:-/exp/dune/app/users/abooth/Postdoc/nd-sim-reco/abooth-nd-run-ndlar-flow-lock}
+export ND_PRODUCTION_SPACK_VERSION=${ND_PRODUCTION_SPACK_VERSION:-v1.2.2}
+
+if [[ "$ND_PRODUCTION_CONTAINER" == *"fnal-wn-el9"* ]]; then
+    #source /cvmfs/dune.opensciencegrid.org/spack/"${ND_PRODUCTION_SPACK_VERSION}"/share/spack/setup-env.sh
+    source /exp/dune/app/users/abooth/Postdoc/nd-sim-reco/spack_build_instance_261106/share/spack/setup-env.sh
+
+    if [[ -n "$ND_PRODUCTION_SPACK_USER_CACHE_PATH" ]]; then
+        export SPACK_USER_CACHE_PATH="$ND_PRODUCTION_SPACK_USER_CACHE_PATH"
+    fi
+
+    #spack env activate "${ND_PRODUCTION_SPACK_ENVIRONMENT}"
+    spack env activate -d "${ND_PRODUCTION_SPACK_ENVIRONMENT}"
+fi
+
 # By default (i.e. if ND_PRODUCTION_RUNTIME isn't set), run on the host
 if [[ -z "$ND_PRODUCTION_RUNTIME" || "$ND_PRODUCTION_RUNTIME" == "NONE" ]]; then
     if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
