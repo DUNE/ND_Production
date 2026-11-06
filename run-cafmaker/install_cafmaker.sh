@@ -18,7 +18,7 @@ fi
 mkdir install
 cd install
 
-git clone https://github.com/DUNE/ND_CAFMaker.git
+git clone -b v5.3.0 https://github.com/DUNE/ND_CAFMaker.git
 cd ND_CAFMaker
 
 #./build_deps.sh
