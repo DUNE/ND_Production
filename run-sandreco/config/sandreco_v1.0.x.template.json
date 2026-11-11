@@ -52,11 +52,11 @@
     },
     {
       "sand::common::gauss_smearing": {
-        "energy_resolution": 0.057,
-        "momentum_resolution": 0.05,
-        "x_resolution": 200e-3,
-        "y_resolution": 200e-3,
-        "z_resolution": 200e-3
+        "energy_resolution": 1,
+        "momentum_resolution": 1,
+        "x_resolution": 1,
+        "y_resolution": 1,
+        "z_resolution": 1
       },
       "reqs": {
         "in_common": "produced_common"
@@ -67,10 +67,10 @@
     },
     {
       "sand::common::gluckstern_smearing": {
-        "intrinsic_pos_res_t" : 200e-3,
-        "intrinsic_pos_res_l" : 2,
-        "hit_energy_thr" : 250e-6,
-        "b_field_magnitude" : 0.6
+        "intrinsic_pos_res_t" : 1,
+        "intrinsic_pos_res_l" : 1,
+        "hit_energy_thr" : 1,
+        "b_field_magnitude" : 1
       },
       "reqs": {
         "in_nd": "produced_nd",
@@ -85,7 +85,7 @@
         "uri": "",
         "tree": "cafTree"
       },
-      "write": ["produced_truth", "produced_common", "produced_nd"]
+      "write": ["produced_truth", "produced_common_smeared", "produced_nd_smeared"]
     }
   ]
 }
