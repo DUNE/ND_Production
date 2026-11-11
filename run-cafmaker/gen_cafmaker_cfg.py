@@ -44,6 +44,7 @@ def main():
     ap.add_argument('--spine-name', required=False)
     ap.add_argument('--pandora-name', required=False)
     ap.add_argument('--tmsreco-name', required=False)
+    ap.add_argument('--sandreco-name', required=False)
     ap.add_argument('--minerva-name', required=False)
     ap.add_argument('--edepsim-name', required=False)
     ap.add_argument('--caf-path', required=True)
@@ -107,6 +108,11 @@ def main():
             tmsreco_path = get_path(args.base_dir, 'run-tms-reco', args.tmsreco_name,
                                     'TMSRECO', 'root', args.file_id)
             outf.write(f'nd_cafmaker.CAFMakerSettings.TMSRecoFile: "{tmsreco_path}"\n')
+
+        if args.sandreco_name:
+            sandreco_path = get_path(args.base_dir, 'run-sandreco', args.sandreco_name,
+                                    'SANDRECO', 'root', args.file_id)
+            outf.write(f'nd_cafmaker.CAFMakerSettings.SANDRecoFile: "{sandreco_path}"\n')
 
         edepsim_path = get_path(args.base_dir, 'run-spill-build', args.edepsim_name,
                                 'EDEPSIM_SPILLS','root',args.file_id) 
