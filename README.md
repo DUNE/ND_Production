@@ -2,6 +2,8 @@
 This repository contains auxiliary files for ND simulation production. It is meant as a centralized place for collecting input files to be used for official production passes for the ND software group.
 Examples: geometry gdml files, flux window definitions, macros
 
+For details of **AL9/Spack for ND**, please see the [wiki](https://github.com/DUNE/ND_Production/wiki/AL9-Spack-for-ND-Production).
+
 For details of **ND Production samples**, please see the [wiki](https://github.com/DUNE/ND_Production/wiki/Production-Samples).
 
 **To interact with CAF files in a visual way through Jupyter notebook** there is a NDLAr event display available [here](https://github.com/DUNE/dune-nd-ana/tree/develop/ndlar-caf-display).
