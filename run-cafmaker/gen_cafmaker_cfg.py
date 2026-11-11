@@ -59,7 +59,7 @@ def main():
     if not args.ghep_nu_name and not args.ghep_rock_name:
         raise ValueError("One or both of ghep-nu-name and ghep-rock-name must be specified")
 
-    # if not args.spine_name and not args.pandora_name:
+    if not args.spine_name and not args.pandora_name:
         raise ValueError("One or both of spine-name and pandora-name must be specified")
 
     if args.reuse_rock and not args.hadd_rock_name:
