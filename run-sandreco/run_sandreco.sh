@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-docker:baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.0.2}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-docker:baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.1.0}
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
@@ -31,6 +31,11 @@ export CONFIG_JSON_FILE="$cfgFile"
 
 # configure json file
 python3 config/config_json.py
+
+echo ===================
+cat "$cfgFile"
+echo ""
+echo ===================
 
 run ufwrun "$cfgFile"
 
