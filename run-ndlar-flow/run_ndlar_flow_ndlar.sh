@@ -4,7 +4,7 @@
 if [[ -z "$ND_PRODUCTION_RUNTIME" || "$ND_PRODUCTION_RUNTIME" == "NONE" ]]; then
     if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
         module unload python 2>/dev/null
-        module load python/3.11
+        module load python/3.14-26.11.0
     fi
     source ../util/init.inc.sh
     source "$ND_PRODUCTION_INSTALL_DIR/flow.venv/bin/activate"
