@@ -25,8 +25,12 @@ elif [[ "$ND_PRODUCTION_RUNTIME" == "SINGULARITY" ]]; then
     export PATH=/cvmfs/oasis.opensciencegrid.org/mis/apptainer/current/bin:$PATH
     export APPTAINER_CACHEDIR=${ND_PRODUCTION_APPTAINER_CACHEDIR:-"/tmp/apptainer.$USER"}
     export APPTAINER_TMPDIR=${ND_PRODUCTION_APPTAINER_TMPDIR:-"/tmp/apptainer.$USER"}
+    extra_binds=/cvmfs
+    if [[ "$LMOD_SYSTEM_NAME" == "perlmutter" ]]; then
+        extra_binds=$extra_binds,/dvs_ro/cfs
+    fi
     if [[ "$SINGULARITY_NAME" != "$ND_PRODUCTION_CONTAINER" ]]; then
-        singularity exec --bind /cvmfs,$ND_PRODUCTION_DIR,$ND_PRODUCTION_OUTDIR_BASE,$ND_PRODUCTION_LOGDIR_BASE $ND_PRODUCTION_CONTAINER_DIR/$ND_PRODUCTION_CONTAINER /bin/bash "$0" "$@"
+        singularity exec --bind $extra_binds,$ND_PRODUCTION_DIR,$ND_PRODUCTION_OUTDIR_BASE,$ND_PRODUCTION_LOGDIR_BASE $ND_PRODUCTION_CONTAINER_DIR/$ND_PRODUCTION_CONTAINER /bin/bash "$0" "$@"
         exit
     fi
 
