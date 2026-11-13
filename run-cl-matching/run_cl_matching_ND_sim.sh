@@ -27,7 +27,7 @@
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
-# ND_Production's util/prelude.inc.sh setup_cuda() loads python/3.11 which
+# ND_Production's util/prelude.inc.sh setup_cuda() loads python/3.14-26.11.0 which
 # clobbers PYTHONUSERBASE for Python 3.12 -- CLMatching v1 uses the NERSC
 # pytorch env (Python 3.12) and needs to reach the python/3.13 module's user
 # site-packages (where plotly and other deps live). Force it back.
