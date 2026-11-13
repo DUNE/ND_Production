@@ -8,7 +8,7 @@ source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
 
 if [[ "$ND_PRODUCTION_RUNTIME" == "NONE" ]]; then
-    module load python/3.11
+    module load python/3.14-26.11.0
     source validation.venv/bin/activate
 fi
 
