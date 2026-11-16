@@ -1,6 +1,23 @@
 #!/usr/bin/env bash
 
-export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-docker:baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.1.0}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-docker:baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.2.0}
+
+export APPLY_GAUSS_SMEARING="${APPLY_GAUSS_SMEARING:-"0"}"
+export APPLY_GLUCK_SMEARING="${APPLY_GLUCK_SMEARING:-"0"}"
+
+# Gauss smearing
+if [ "$APPLY_GAUSS_SMEARING" -eq 1 ]; then
+    export ENERGY_RESOLUTION="${ENERGY_RESOLUTION:-"0.057"}"      # energy resolution for gauss smearing
+    export MOMENTUM_RESOLUTION="${MOMENTUM_RESOLUTION:-"0.05"}"   # momentum resolution for gauss smearing
+    export POS_RESOLUTION="${POS_RESOLUTION:-"200e-3"}"           # position resolution for gauss smearing
+fi          
+
+# Gluckstern smearing
+if [ "$APPLY_GLUCK_SMEARING" -eq 1 ]; then
+    export POS_RES_TRANSVERSE_GLUCKSTERN="${POS_RES_TRANSVERSE_GLUCKSTERN:-"200e-3"}"   # transverse position resolution
+    export POS_RES_LONGITUDINAL_GLUCKSTERN="${POS_RES_LONGITUDINAL_GLUCKSTERN:-"2"}"    # longitudinal position resolution
+    export HIT_ENERGY_THRESHOLD="${HIT_ENERGY_THRESHOLD:-"250e-6"}"                     # hit energy threshold 
+fi                         
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
