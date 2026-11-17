@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-docker:baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.2.0}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-docker:baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.2.1}
 
 export APPLY_GAUSS_SMEARING="${APPLY_GAUSS_SMEARING:-"0"}"
 export APPLY_GLUCK_SMEARING="${APPLY_GLUCK_SMEARING:-"0"}"
