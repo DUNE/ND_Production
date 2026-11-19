@@ -30,6 +30,13 @@ void convert2edepsim_spill_format(std::string const& inFileName, std::string con
         out_genie_tree = in_genie_tree->CloneTree(-1, "fast");
     }
 
+    // output tree to keep the matching between spillId and the corresponding runId and eventId
+    auto spillTree = new TTree("spill_to_run_event", "spill_to_run_event");
+    std::vector<int> RunId{};
+    std::vector<int> EventId{};
+    spillTree->Branch("RunId", &RunId);
+    spillTree->Branch("EventId", &EventId);
+
     auto* input_map = static_cast<TMap*>(inFile->Get("event_spill_map"));
 
     // Create a map to match the eventIds with the corresponding spillId
@@ -112,6 +119,8 @@ void convert2edepsim_spill_format(std::string const& inFileName, std::string con
             if (!edep_evt->Primaries.empty()) {
                 auto& v = edep_evt->Primaries[0];
                 spill->Primaries.push_back(v);
+                RunId.push_back(edep_evt->RunId);
+                EventId.push_back(edep_evt->EventId);
                 for (auto& p : spill->Primaries.back().Particles) {
                     updateTrackId(p.TrackId);
                 }
@@ -148,11 +157,15 @@ void convert2edepsim_spill_format(std::string const& inFileName, std::string con
         spill->SegmentDetectors = std::vector<std::pair<std::string, std::vector<TG4HitSegment>>>(
             SegmentDetectors.begin(), SegmentDetectors.end());
         outTree->Fill();
+        spillTree->Fill();
+        RunId.clear();
+        EventId.clear();
         delete spill;
     }
 
     outFile->cd();
     outTree->Write();
+    spillTree->Write();
     geom->Write();
 
     outFile->mkdir("DetSimPassThru");
