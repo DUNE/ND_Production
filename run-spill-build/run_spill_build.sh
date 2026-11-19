@@ -103,11 +103,14 @@ LIBGENIE_DIR=$(echo "$LD_LIBRARY_PATH" | tr ':' '\n' | grep -i genie | head -n 1
 : "${ND_PRODUCTION_USE_NU_TOF:=1}"
 
 if [[ "$ND_PRODUCTION_USE_NU_TOF" == "0" ]]; then
+  echo "before root"
   run root -l -b -q \
       -e "gSystem->AddDynamicPath(\"$LIBTG4EVENT_DIR\"); \
           gSystem->Load(\"libTG4Event.so\")" \
       "overlaySinglesIntoSpillsSorted.C(\"$sampleAInFile\", \"$sampleBInFile\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_REUSE_SAMPLE_B)"
 elif [[ "$ND_PRODUCTION_USE_NU_TOF" == "1" ]]; then
+  export ND_PRODUCTION_SAMPLE_A_GHEPNAME="${ND_PRODUCTION_SAMPLE_A_NAME/.hadd./.genie.}"
+  export ND_PRODUCTION_SAMPLE_B_GHEPNAME="${ND_PRODUCTION_SAMPLE_B_NAME/.hadd./.genie.}"
   run root -l -b -q \
       -e  "gSystem->AddDynamicPath(\"$LIBTG4EVENT_DIR\"); \
             gSystem->AddDynamicPath(\"$LIBGENIE_DIR\"); \
@@ -120,7 +123,7 @@ elif [[ "$ND_PRODUCTION_USE_NU_TOF" == "1" ]]; then
             gSystem->Load(\"libGFwAlg.so\"); \
             gSystem->Load(\"libGFwUtl.so\"); " \
       "/opt/generators/dk2nu/scripts/load_dk2nu.C(true,true)" \
-      "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$sampleAInFile\", \"$sampleBInFile\", \"$ND_PRODUCTION_SAMPLE_A_NAME\", \"$ND_PRODUCTION_SAMPLE_B_NAME\", \"$ND_PRODUCTION_OUTDIR_BASE\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR, $ND_PRODUCTION_REUSE_SAMPLE_B, \"$ND_PRODUCTION_DET_LOCATION\")"
+      "overlaySinglesIntoSpillsSortedWithNuIntTime.cpp(\"$sampleAInFile\", \"$sampleBInFile\", \"$ND_PRODUCTION_SAMPLE_A_GHEPNAME\", \"$ND_PRODUCTION_SAMPLE_B_GHEPNAME\", \"$ND_PRODUCTION_OUTDIR_BASE\", \"$spillFile\", $ND_PRODUCTION_INDEX, $ND_PRODUCTION_SAMPLE_A_POT, $ND_PRODUCTION_SAMPLE_B_POT, $ND_PRODUCTION_SPILL_POT, $ND_PRODUCTION_SPILL_PERIOD, $ND_PRODUCTION_HADD_FACTOR, $ND_PRODUCTION_REUSE_SAMPLE_B, \"$ND_PRODUCTION_DET_LOCATION\")"
 fi
 
 mkdir -p "$outDir/EDEPSIM_SPILLS/$subDir"
