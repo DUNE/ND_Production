@@ -1,0 +1,174 @@
+{
+  "ufw": {
+    "ufw-loglevel": "debug",
+    "ufw-basepath": "",
+    "ufw-ldpath": [
+      "/usr/local/lib64"
+    ],
+    "ufw-env": {}
+  },
+  "globals": {
+    "sand::root_tgeomanager": {
+      "geometry": ""
+    },
+    "sand::geoinfo" : { "grain" : { "inner_geometry" : "gdml-masks" } },
+    "sand::grain::geant_run_manager" : {},
+    "sand::grain::geant_gdml_parser" : {
+      "gdml-masks" : { "path" : "/usr/local/share/sandreco/data/geometries/grain/grain-masks_3mm_32x32/main.gdml" }
+    }
+  },
+  "contexts": {
+    "keys": 1,
+    "locals": {
+      "sand::edep_reader": {
+        "uri": ""
+      },
+      "sand::genie_reader": {
+        "uri": ""
+      },
+      "sand::spill_maps": {}
+    }
+  },
+  "run": [
+    {
+      "sand::common::truth_filler": {},
+      "reqs": {},
+      "prods": {
+        "out_truth_branch": "produced_truth"
+      }
+    },
+    {
+      "sand::fast::tracker::reco": {
+        "min_energy_deposit": 0,
+        "b_field_magnitude": 0.6
+      },
+      "reqs": {
+        "in_truth": "produced_truth"
+      },
+      "prods":{
+        "out_tracker": "produced_tracker"
+      }
+    },
+    {
+      "sand::fast::grain::reco": {
+        "min_energy_deposit": 0,
+        "b_field_magnitude": 0.6
+      },
+      "reqs": {
+        "in_truth": "produced_truth"
+      },
+      "prods": {
+        "out_grain": "produced_grain"
+      }
+    },
+    {
+      "sand::fast::ecal::reco": {
+        "min_energy_deposit": 0
+      },
+      "reqs": {
+        "in_truth": "produced_truth"
+      },
+      "prods": {
+        "out_ecal": "produced_ecal"
+      }
+    },
+    {
+      "sand::fast::matching": {},
+      "reqs": {
+        "in_grain": "produced_grain",
+        "in_tracker": "produced_tracker",
+        "in_ecal": "produced_ecal"
+      },
+      "prods": {
+        "out_assns": "produced_assns"
+      }
+    },
+    {
+      "sand::fast::vertexing": {},
+      "reqs": {
+        "in_truth": "produced_truth",
+        "in_assns": "produced_assns",
+        "in_grain": "produced_grain",
+        "in_tracker": "produced_tracker",
+        "in_ecal": "produced_ecal"
+      },
+      "prods": {
+        "out_common": "produced_common_vtx",
+        "out_nd": "produced_nd_vtx"
+      }
+    },
+    {
+      "sand::fast::pid": {},
+      "reqs": {
+        "in_truth": "produced_truth",
+        "in_common": "produced_common_vtx",
+        "in_nd": "produced_nd_vtx"
+      },
+      "prods": {
+        "out_common": "produced_common_pid",
+        "out_nd": "produced_nd"
+      }
+    },
+    {
+      "sand::fast::neutrino": {},
+      "reqs": {
+        "in_truth": "produced_truth",
+        "in_common": "produced_common_pid"
+      },
+      "prods": {
+        "out_common": "produced_common"
+      }
+    },
+    {
+      "sand::test::fast_reco_test": {
+        "tracker_min_energy_deposit": 0,
+        "grain_min_energy_deposit": 0,
+        "ecal_min_energy_deposit": 0,
+        "b_field_magnitude": 0.6
+      },
+      "reqs": {
+        "in_truth": "produced_truth",
+        "in_common": "produced_common",
+        "in_nd": "produced_nd"
+      },
+      "prods": {}
+    },
+    {
+      "sand::common::gauss_smearing": {
+        "energy_resolution": 0,
+        "momentum_resolution": 0,
+        "x_resolution": 0,
+        "y_resolution": 0,
+        "z_resolution": 0
+      },
+      "reqs": {
+        "in_common": "produced_common"
+      },
+      "prods": {
+        "out_common": "produced_common_smeared"
+      }
+    },
+    {
+      "sand::common::gluckstern_smearing": {
+        "intrinsic_pos_res_t" : 0,
+        "intrinsic_pos_res_l" : 0,
+        "hit_energy_thr" : 0,
+        "b_field_magnitude" : 0.6
+      },
+      "reqs": {
+        "in_nd": "produced_nd",
+        "in_truth": "produced_truth"
+      },
+      "prods": {
+        "out_nd": "produced_nd_smeared"
+      }
+    },
+    {
+      "sand::caf::caf_streamer": {
+        "uri": "",
+        "tree": "cafTree"
+      },
+      "write": ["produced_truth", "produced_common_smeared", "produced_nd_smeared"]
+    }
+  ]
+}

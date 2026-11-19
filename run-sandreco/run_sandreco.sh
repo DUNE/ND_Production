@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-docker:baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.0.2}
+export ND_PRODUCTION_CONTAINER=${ND_PRODUCTION_CONTAINER:-docker:baltig.infn.it:4567/dune/sand-ci/sand-prod-cpu:v1.2.1}                    
 
 source ../util/reload_in_container.inc.sh
 source ../util/init.inc.sh
+
+# set physics parameters for sandreco
+source $ND_PRODUCTION_DIR/run-sandreco/setup-sandreco-pars.sh
 
 # set useful input path
 overlayName=$ND_PRODUCTION_IN_NAME.$globalIdx
@@ -31,6 +34,11 @@ export CONFIG_JSON_FILE="$cfgFile"
 
 # configure json file
 python3 config/config_json.py
+
+echo ===================
+cat "$cfgFile"
+echo ""
+echo ===================
 
 run ufwrun "$cfgFile"
 
