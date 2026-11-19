@@ -103,7 +103,6 @@ LIBGENIE_DIR=$(echo "$LD_LIBRARY_PATH" | tr ':' '\n' | grep -i genie | head -n 1
 : "${ND_PRODUCTION_USE_NU_TOF:=1}"
 
 if [[ "$ND_PRODUCTION_USE_NU_TOF" == "0" ]]; then
-  echo "before root"
   run root -l -b -q \
       -e "gSystem->AddDynamicPath(\"$LIBTG4EVENT_DIR\"); \
           gSystem->Load(\"libTG4Event.so\")" \

@@ -3,7 +3,7 @@
     "ufw-loglevel": "debug",
     "ufw-basepath": "",
     "ufw-ldpath": [
-      "/storage/gpfs_data/neutrino/users/gsantoni/ND_Production_main/ND_Production/run-sandreco/sandreco/install_sandreco/lib64"
+      "/usr/local/lib64"
     ],
     "ufw-env": {}
   },
