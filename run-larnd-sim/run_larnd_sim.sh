@@ -40,7 +40,7 @@ run_logGpuMem() {
 }
 
 if [[ -n "$ND_PRODUCTION_LARNDSIM_CONFIG" ]]; then
-    run_logGpuMem simulate_pixels.py "$ND_PRODUCTION_LARNDSIM_CONFIG" \
+    run_logGpuMem python3 larnd-sim/cli/simulate_pixels.py "$ND_PRODUCTION_LARNDSIM_CONFIG" \
         --input_filename "$inFile" \
         --output_filename "$outFile" \
         --rand_seed "$seed" \
@@ -53,7 +53,7 @@ else
     [ -z "$ND_PRODUCTION_LARNDSIM_LIGHT_DET_NOISE_FILENAME" ] && export ND_PRODUCTION_LARNDSIM_LIGHT_DET_NOISE_FILENAME="larnd-sim/larndsim/bin/light_noise_2x2_4mod_July2023.npy"
     [ -z "$ND_PRODUCTION_LARNDSIM_SIMULATION_PROPERTIES" ] && export ND_PRODUCTION_LARNDSIM_SIMULATION_PROPERTIES="larnd-sim/larndsim/simulation_properties/2x2_NuMI_sim.yaml"
 
-    run_logGpuMem simulate_pixels.py --input_filename "$inFile" \
+    run_logGpuMem python3 larnd-sim/cli/simulate_pixels.py --input_filename "$inFile" \
         --output_filename "$outFile" \
         --detector_properties "$ND_PRODUCTION_LARNDSIM_DETECTOR_PROPERTIES" \
         --pixel_layout "$ND_PRODUCTION_LARNDSIM_PIXEL_LAYOUT" \
