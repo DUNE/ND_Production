@@ -12,6 +12,13 @@
 # https://github.com/DUNE/2x2_sim/issues/20
 /edep/hitSeparation volTPCActive -1 mm
 
+# Force additional truth point saving for muons at the boundaries 
+# of active detector regions in NDLAr and TMS. Analogous lines 
+# for SAND will be added at a later date.
+/edep/db/set/trajectoryBoundary :mu[+-]:charged:volTPCActive.*
+/edep/db/set/trajectoryBoundary :mu[+-]:charged:scinBox.*
+
+
 /edep/update
 
 /generator/kinematics/set rooTracker
