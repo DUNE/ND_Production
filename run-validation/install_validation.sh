@@ -3,7 +3,7 @@
 set -o errexit
 
 module unload python 2>/dev/null
-module load python/3.11
+module load python/3.14-26.11.0
 
 python -m venv validation.venv
 source validation.venv/bin/activate
