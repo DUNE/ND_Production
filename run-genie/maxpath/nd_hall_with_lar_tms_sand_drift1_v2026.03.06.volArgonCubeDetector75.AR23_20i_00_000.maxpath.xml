@@ -24,7 +24,7 @@
    <path_length pdgc="1000260560">    50751.8 </path_length> <!-- [ Fe56] -->
    <path_length pdgc="1000280590">    5718.92 </path_length> <!-- [ Ni59] -->
    <path_length pdgc="1000290640">          0 </path_length> <!-- [ Cu64] -->
-   <path_length pdgc="1000300650">    894.598 </path_length> <!-- [ Zn65] -->
+   <path_length pdgc="1000300640">    894.598 </path_length> <!-- [ Zn64] -->
    <path_length pdgc="1000791970">          0 </path_length> <!-- [Au197] -->
    <path_length pdgc="1000822070">          0 </path_length> <!-- [Pb207] -->
 
